@@ -1,0 +1,16 @@
+
+.date-chooser{
+    padding-top: 20px;
+    padding-right: 35px;
+}
+.date-chooser .paginate_button {
+    font-size: 14px;
+    font-weight: 600 !important;
+}
+.date-chooser .next {
+    margin-left:0px;
+}
+
+.logs-header-right {
+    text-align: right;
+}

@@ -1,0 +1,68 @@
+table.dataTable {
+  margin: 0 !important;
+}
+
+.DTFC_LeftBodyWrapper,
+.DTFC_RightBodyWrapper {
+  background-color: #fff;
+}
+
+#timeline .form-group {
+  margin-bottom: 0;
+}
+.dt-button.buttons-collection.buttons-colvis {
+  border: hidden;
+}
+.dt-button.buttons-columnVisibility.active {
+  border: hidden;
+}
+
+/* Sidebar Navmenu  */
+.sidebar-navmenu .close-sidebar-navmenu {
+  position: absolute;
+  top: 5px;
+  z-index: 9;
+  right: 8px;
+  cursor: pointer;
+}
+.sidebar-navmenu .close-sidebar-navmenu:hover i {
+  color: #26c6da;
+}
+.sidebar-navmenu {
+  position: fixed;
+  right: -260px;
+  left: auto;
+  top: 0px;
+  max-width: 260px;
+  width: 100%;
+  transition: 0.3s all;
+  z-index: 9999;
+  bottom: 0;
+  overflow-y: scroll;
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  background: #fff;
+}
+.sidebar-navmenu.show {
+  right: 0;
+}
+.sidebar-navmenu .card-primary {
+  border-color: #26c6da !important;
+}
+.sidebar-navmenu .wgz-employee-menu .nav-pills .nav-link:not(.active):hover {
+  background-color: #26c6da;
+}
+
+@media (max-width: 767px) {
+  .dashboard-options .dashboard-option i {
+    font-size: 48px;
+  }
+}
+@media (max-width: 414px) {
+  .dashboard-options .dashboard-option {
+    margin-bottom: 1rem;
+  }
+  .dashboard-options .dashboard-option .option-icon {
+    padding: 20px 0px;
+  }
+}

@@ -1,0 +1,238 @@
+.attendance-logs .outstanding_anomalies_heading{
+    padding-left:22px;
+}
+@media (min-width: 320px) and (max-width: 480px) {
+  .date-range-text {
+     float:left;
+     margin-bottom: 10px;
+     margin-top:10px;
+  }
+  #employeeAttendanceTable_test_wrapper{
+     overflow-x: scroll;
+  }
+  #employeeAttendanceTable_test thead tr th{
+        border-right: 1px solid #ddd !important;
+  }
+  #employeeAttendanceTable_test_wrapper thead tr th:nth-child(8) {
+     width: 318px;
+ }
+  #employeeAttendanceTable_test_wrapper tbody tr td:nth-child(8){
+    width:322px;
+  }
+  .mBottom-10{
+    margin-bottom:10px;
+  }
+  .date-ranges{
+     display: inline-block;
+     white-space: nowrap;
+     float:left;
+     width: 300px;
+  }
+  .attendance-logs-section .date-selector-daily{
+    width:100px;
+  }
+   .date-picker-daily {
+        display: inline-block;
+        white-space: nowrap;
+        width: 100%;
+    }
+    .whiteSpace{
+        white-space:nowrap;
+    }
+
+    .show-date-wrap{
+        display:none;
+    }
+    #employeeAttendanceTable_test_paginate{
+        width: 330px;
+        left: 30%;
+
+    }
+    .timeline-container {
+        margin-bottom: 30px;
+    }
+
+}
+/*
+  ##Device = Low Resolution Tablets, Mobiles (Landscape)
+  ##Screen = B/w 481px to 767px
+*/
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .mobile_view_font{
+    font-size:15px;
+    white-space: nowrap;
+  }
+  .date-range-text{
+    float: left;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+  .error_message{
+        position: relative;
+        top: 0px;
+        padding-left:14px;
+        padding-top: 6px;
+  }
+  #employeeAttendanceTable_test_wrapper{
+     overflow-x: scroll;
+  }
+  #employeeAttendanceTable_test thead tr th{
+        border-right: 1px solid #ddd !important;
+  }
+  #employeeAttendanceTable_test_wrapper thead tr th:nth-child(8) {
+     width: 318px;
+ }
+  #employeeAttendanceTable_test_wrapper tbody tr td:nth-child(8){
+    width:314px;
+  }
+  .mBottom-10{
+    margin-bottom:10px;
+  }
+  .date-ranges{
+     display: inline-block;
+     white-space: nowrap;
+     float:left;
+     width: 300px;
+  }
+  .attendance-logs-section .date-selector-daily{
+    width:100px;
+  }
+   .date-picker-daily {
+        display: inline-block;
+        white-space: nowrap;
+        width: 100%;
+    }
+    .whiteSpace{
+        white-space:nowrap;
+    }
+
+    .show-date-wrap{
+        display:none;
+    }
+    #employeeAttendanceTable_test_paginate{
+        float:right;
+    }
+    .for_mobile_view_right-headSec_ul{
+        display: inline-block;
+        white-space: nowrap;
+        float: right;
+    }
+    .timeline-container {
+        margin-bottom: 30px;
+    }
+}
+/*
+  ##Device = Tablets, Ipads (portrait)
+  ##Screen = B/w 768px to 1024px
+*/
+
+@media (min-width: 768px) and (max-width: 1024px) {
+      #employeeAttendanceTable_test_wrapper{
+         overflow-x: scroll;
+      }
+      #employeeAttendanceTable_test thead tr th{
+           border-right: 1px solid #ddd !important;
+      }
+      #employeeAttendanceTable_test_wrapper thead tr th:nth-child(8) {
+          width: 318px;
+      }
+      #employeeAttendanceTable_test_wrapper tbody tr td:nth-child(8){
+         width:318px;
+      }
+      .attendance-logs-section .logs-header-right{
+        margin-top:0px !important;
+      }
+      .mobile_view_font{
+        white-space:nowrap;
+      }
+      .error_message{
+        position: relative;
+        top: 26px;
+        padding-left:14px;
+        padding-top: 6px;
+  }
+
+
+}
+
+@media (min-width: 1025px) and (max-width: 1199px) {
+
+  .date-ranges{
+       float:right !important;
+  }
+  #employeeAttendanceTable_test_wrapper{
+   overflow-x:auto;
+  }
+  #employeeAttendanceTable_test{
+    width:1082px !important;
+  }
+  .logs-header-right{
+       text-align:right !important;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1280px) {
+    .date-ranges{
+        float:right !important;
+    }
+    .logs-header-right{
+        text-align:right !important;
+    }
+    #employeeAttendanceTable_test_wrapper{
+        overflow:auto;
+    }
+}
+ @media screen and (max-width: 768px){
+    .attendance-logs .attendance_log_heading{
+        display: none;
+    }
+    .attendance-logs .outstanding_anomalies_heading{
+        padding-left:0px;
+    }
+    .attendance-logs .header_tab{
+        margin-top:10px;
+    }
+    .user-details{
+        display:none;
+    }
+    .attendance-logs-section .logs-header-right{
+        margin-top: 0px;
+    }
+ }
+  @media screen and (max-width: 767px){
+    .monthly_log_header{
+        margin-top:10px;
+        margin-bottom:10px;
+    }
+ }
+   @media screen and (max-width: 490px){
+    .monthly_log_header .reset-filter-button{
+         position: absolute;
+        right: 25px;
+        top: 10px;
+        z-index: 2;
+    }
+    .monthly_log_header{
+        margin-top:0px;
+        margin-bottom:5px;
+    }
+
+ }
+ @media screen and (max-width: 360px){
+    .date-range-picker{
+       width: 80px !important;
+    }
+    .date-ranges{
+        width:270px;
+    }
+    .date-ranges span:nth-child(2){
+        right:10px;
+    }
+ }
+
+
+
+
+
+

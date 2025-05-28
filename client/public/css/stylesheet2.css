@@ -1,0 +1,72 @@
+.font-weight-500{
+    font-weight: 500;
+}
+.btn-reverse:hover{
+    background-color: #fff !important;
+    color:#26c6da !important;
+}
+.justify-content-end{
+    justify-content: flex-end;
+}
+
+.salary-month textarea.select2-search__field{
+    border: none !important;
+}
+.salary-month .selection li.select2-selection__choice {
+    color: #000 !important;
+}
+.salary-month .selection li.select2-selection__choice button.select2-selection__choice__remove {
+    padding: 0 2px 0 0px !important;
+}
+
+a.download-btn {
+    display: inline-block;
+    padding: 0 5px;
+    margin-right: 15px;    
+}
+a.download-btn i{
+    color: #26c6da;
+}
+a.download-btn:hover i{
+    color: var(--dark-blue) !important;
+}
+.border-collapse,
+#example1_wrapper table.border-collapse{
+    border-collapse: collapse !important;
+}
+
+.wg_salaryslip{
+    width: 100% !important;
+}
+
+.btn-outer a{
+    margin:5px 5px !important;
+}
+
+#wgz_users_table_wrapper .dt-button{
+    display: none;
+}
+
+/* Section Card */
+.card-sec .card-title {
+    font-size: 1.24rem;
+    line-height: 26px;
+}
+.error {
+    color: #f00;
+    font-size: 12px;
+    font-weight: 500 !important;
+}
+
+@media screen and (max-width: 479px){
+    .salary-month .select2-container {
+        width: 100% !important;
+        margin-bottom: 5px;
+    }
+    .salary-slip-header {
+        flex-direction: column;
+    }    
+    .salary-slip-header .card-title {
+        margin-bottom: 5px;
+    }
+}

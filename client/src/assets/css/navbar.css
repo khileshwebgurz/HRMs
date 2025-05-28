@@ -1,0 +1,175 @@
+
+.navbar-nav {
+	align-items: center;
+}
+
+.clockInRed {
+	background-color: #ff002a;
+}
+
+.clockInOrange {
+	background-color: #525252 !important;
+	color: #fff !important;
+}
+
+#clockInBtn, #clockInDD {
+	margin: 0;
+	padding: 6px 10px;
+	font-size: 14px;
+}
+
+#clockInBtn {
+	/* height: 38px; */
+	width: 100%;
+	/* border-top-right-radius: 0;
+    border-bottom-right-radius: 0; */
+}
+
+#clockInDD {
+	padding: 10px 7px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+/* #clockInWrapper {
+    margin-top: 18px;
+    padding-bottom: 10px;
+} */
+#clockInDate, .clockInDropdown, .clockedOutTitle {
+	font-size: 13px;
+}
+
+.clockInClock {
+	font-size: 16px;
+}
+
+.clockInSmall, .clockedOutData {
+	font-size: 12px;
+}
+
+#clockInDate, #period, .clockedOutTitle {
+	font-weight: bold;
+}
+
+.clockInAction {
+	margin-top: 4px;
+	justify-content: end;
+}
+
+#clockInWrapper.clockInUser {
+	align-items: center;
+	align-content: center;
+}
+
+#clockInWrapper.clockInUser .clockInAction {
+	margin-top: 0;
+}
+
+.clockInActive #clockInBtn {
+	min-width: 100%;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+	background: #f85797;
+	/* height: 38px; */
+}
+
+.clockInActive.firstTime #clockInBtn:hover {
+	background: #525252 !important;
+}
+
+.clockInAction.clockedOut {
+	flex-direction: column;
+	margin-top: 0;
+}
+
+#clockInBtn .inTime, #clockInBtn .outLabel, .clockInActive #clockInDD,
+	.clockInActive #clockInBtn .inLabel, .clockInAction .clockedOutData,
+	.clockInAction.clockedOut #clockInBtn, .clockInAction.clockedOut #clockInDD,
+	#clockInBtn .clockedInLabel {
+	display: none;
+}
+
+.clockInActive #clockInBtn .inTime, .clockInAction.clockedOut .clockedOutTitle,
+	.clockInAction.clockedOut .clockedOutData, .clockInActive #clockInBtn .clockedInLabel
+	{
+	display: block;
+}
+
+.clockedOutTitle, .clockedOutData {
+	white-space: nowrap;
+}
+
+.clockedOutData {
+	font-size: 14px;
+	display: block;
+}
+
+/* .inTime {
+    position: relative;
+    top: 5px;
+    font-size: 14px;
+    white-space: nowrap
+} */
+.clockedInLabel {
+	position: absolute;
+	top: 3px;
+	left: 4px;
+	font-size: 10px;
+}
+
+.new-main-header .global-container .clock-in-container #clockInWrapper {
+	margin: 0;
+	padding-bottom: 0;
+}
+
+#clockInWrapper.clockInUser {
+	align-items: center;
+	align-content: center;
+}
+
+
+
+
+/* hamburger csss */
+
+
+
+button.hamburger {
+	background: none;
+	padding: 0;
+	border: 0;
+	cursor: pointer;
+	margin: 0 16px;
+}
+button.hamburger:focus{
+	outline: none;
+}
+
+button.hamburger span {
+	background: #fff;
+	height: 3px;
+	width: 25px;
+	position: relative;
+	display: inline-block;
+	top: -3px;        
+}
+
+button.hamburger:hover span,
+button.hamburger:focus span {
+	background: #26c6da !important;
+}
+
+button.hamburger span:before,
+button.hamburger span:after {
+	content: '';
+	position: absolute;
+	top: -8px;
+	left: 0;
+	right: 0;
+	background: inherit;
+	height: inherit;
+}
+
+button.hamburger span:after {
+	top: 8px;
+}

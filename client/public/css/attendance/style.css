@@ -1,0 +1,17 @@
+
+.main-wrapper {
+  margin-top: 170px;
+}
+
+.datePicker {
+  background: #fff url(../images/date.svg) no-repeat right 0.2rem center;
+  transition: none !important;
+}
+/*.content-wrapper {
+  min-height: 610px;
+}
+
+.bold {
+  font-weight: 700;
+}
+*/

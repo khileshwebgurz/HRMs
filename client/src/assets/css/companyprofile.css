@@ -1,0 +1,143 @@
+body {
+  color: #6a6c6f;
+  background-color: #f1f3f6;
+  margin-top: 30px;
+}
+
+.container {
+  max-width: 960px;
+}
+
+.panel-default > .panel-heading {
+  color: #333;
+  background-color: #fff;
+  border-color: #e4e5e7;
+  padding: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.panel-default > .panel-heading a {
+  display: block;
+  padding: 10px 15px;
+}
+
+.panel-default > .panel-heading a:after {
+  content: "";
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: "Glyphicons Halflings";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: transform 0.25s linear;
+  -webkit-transition: -webkit-transform 0.25s linear;
+}
+
+.panel-default > .panel-heading a[aria-expanded="true"] {
+  background-color: #eee;
+}
+
+.panel-default > .panel-heading a[aria-expanded="true"]:after {
+  content: "\2212";
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.panel-default > .panel-heading a[aria-expanded="false"]:after {
+  content: "\002b";
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.accordion-option {
+  width: 100%;
+  float: left;
+  clear: both;
+  margin: 15px 0;
+}
+
+.accordion-option .title {
+  font-size: 20px;
+  font-weight: bold;
+  float: left;
+  padding: 0;
+  margin: 0;
+}
+
+.accordion-option .toggle-accordion {
+  float: right;
+  font-size: 16px;
+  color: #6a6c6f;
+}
+
+.accordion-option .toggle-accordion:before {
+  content: "Expand All";
+}
+
+.accordion-option .toggle-accordion.active:before {
+  content: "Collapse All";
+}
+
+.panel-body {
+  height: 197px;
+  overflow-x: scroll;
+  overflow-y: scroll;
+}
+.sidebar-navmenu .close-sidebar-navmenu {
+  position: absolute;
+  top: 5px;
+  z-index: 9;
+  right: 8px;
+  cursor: pointer;
+}
+.sidebar-navmenu .close-sidebar-navmenu:hover i {
+  color: #26c6da;
+}
+.sidebar-navmenu {
+  position: fixed;
+  right: -260px;
+  left: auto;
+  top: 0px;
+  max-width: 260px;
+  width: 100%;
+  transition: 0.3s all;
+  z-index: 9999;
+  bottom: 0;
+  overflow-y: scroll;
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  background: #fff;
+}
+.sidebar-navmenu.show {
+  right: 0;
+}
+.sidebar-navmenu .card-primary {
+  border-color: #26c6da !important;
+}
+.sidebar-navmenu .wgz-employee-menu .nav-pills .nav-link:not(.active):hover {
+  background-color: #26c6da;
+}
+
+@media (max-width: 767px) {
+  .dashboard-options .dashboard-option i {
+    font-size: 48px;
+  }
+}
+@media (max-width: 414px) {
+  .dashboard-options .dashboard-option {
+    margin-bottom: 1rem;
+  }
+  .dashboard-options .dashboard-option .option-icon {
+    padding: 20px 0px;
+  }
+}
+
+
+/* this is the new css 0 */
+

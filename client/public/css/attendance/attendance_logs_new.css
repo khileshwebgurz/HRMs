@@ -1,0 +1,618 @@
+/*
+.ff-14-bold {
+  font-size: 14px;
+  font-weight: 600; 
+}*/
+.attendance-logs-section .section-title {
+  font-size: 24px;
+  font-weight: 600; 
+}
+.attendance-logs-section .section-nav {
+  margin: 0 0 15px 0; 
+}
+.attendance-logs-section .section-nav__list {
+  display: inline-block;
+  vertical-align: middle; 
+}
+.attendance-logs-section .section-nav__list:last-child .section-nav__item::after {
+  content: none; 
+}
+.attendance-logs-section .section-nav__item {
+  letter-spacing: 0.1px;
+  color: #007fff;
+  text-decoration: none;
+  display: inline-block;
+  vertical-align: middle; 
+}
+.attendance-logs-section .section-nav__item::after {
+  content: ">";
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 5px; 
+}
+.attendance-logs-section .logs-table-container {
+  padding: 20px 30px 0px 20px; 
+}
+.attendance-logs-section .logs-table-container.bg-white {
+  background: white; 
+}
+.attendance-logs-section .logs-table-wrapper {
+  background: #ffffff;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16); 
+}
+.attendance-logs-section .logs-header {
+  position: relative;
+  z-index: 1;
+  padding-right: 30px;
+  border-bottom: 1px solid #0092ff; 
+}
+.attendance-logs-section .logs-header .export-btn-section {
+  text-align: right;
+  padding: 8px 0; 
+}
+.attendance-logs-section .logs-header .export-txt {
+  letter-spacing: 0.1px;
+  color: #283655;
+  margin-right: 10px; 
+}
+.attendance-logs-section .logs-header .export-icon {
+  font-size: 18px;
+  line-height: 30px; 
+}
+.attendance-logs-section .logs-header-right {
+  text-align: right; 
+}
+.attendance-logs-section .logs-header-secondary {
+  margin-bottom: 20px; 
+}
+
+.attendance-logs-section .logs-nav {
+  white-space: nowrap; 
+}
+.attendance-logs-section .logs-nav__list {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #283655;
+  padding: 14px 25px;
+  cursor: pointer; 
+}
+.attendance-logs-section .logs-nav__list.active {
+  background: #0092ff;
+  color: #ffffff; 
+}
+.attendance-logs-section .logs-table-container {
+  background-color: #fafafa; 
+}
+.attendance-logs-section .date-range-text {
+  color: #273556;
+  margin-right: 20px; 
+}
+.attendance-logs-section .date-range-to-txt {
+  color: rgba(40, 54, 85, 0.5);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.17; 
+}
+.attendance-logs-section .date-range-selector {
+  border-radius: 3px;
+  border: solid 0.5px #bec3d2;
+  background-color: #ffffff; 
+}
+.date-range-picker {
+  width: 110px !important;
+  border: none !important;
+  background: transparent url("../../images/attendance/event.svg") left 5px center no-repeat;
+  outline: none;
+  color: #48484a;
+  font-size: 13px !important;
+  font-weight: 600;
+  line-height: 1.08;
+  padding: 0px 10px 0px 30px;
+}
+.attendance-logs-section .date-picker-daily .previous-date-txt, .attendance-logs-section .date-picker-daily .next-date-txt {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.08;
+  color: #f95697;
+  cursor: pointer; 
+}
+.attendance-logs-section .date-selector-daily {
+  width: 150px;
+  border-radius: 3px;
+  border: solid 0.5px #bec3d2;
+  background: transparent url("../../images/attendance/event_note.svg") right 12px center no-repeat;
+  outline: none;
+  color: #8590af;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.08;
+  padding: 0px 30px 0px 12px;
+}
+.attendance-logs-section .date-selector-daily:focus {
+	border: 0.5px solid #0093ff; 
+}
+.attendance-logs-section .table-section .show-date {
+  font-size: 12px;
+  line-height: 1.17;
+  color: #1f73f1;
+  cursor: pointer; 
+}
+.attendance-logs-section .table-section .show-date-wrap {
+  padding: 20px 0; 
+}
+.attendance-logs-section .table-section .show-date-txt {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.08;
+  color: #3f454b; 
+}
+.attendance-logs-section .table-section .table-wrapper {
+  margin-bottom: 1px; 
+}
+.attendance-logs-section .table-section .table-wrapper tr {
+  background: #f7f7f7; 
+}
+.attendance-logs-section .table-section .table-wrapper tbody tr:nth-child(odd) {
+  background: white; 
+}
+.attendance-logs-section .table-section .table-wrapper th, .attendance-logs-section .table-section .table-wrapper td {
+  padding: 15px;
+  border: 1px solid #ddd; 
+}
+.attendance-logs-section .table-section .table-wrapper th:nth-child(2), .attendance-logs-section .table-section .table-wrapper td:nth-child(2) {
+  text-align: center; 
+}
+.attendance-logs-section .table-section .table-wrapper th {
+  font-size: 14px;
+  font-weight: bold;
+  color: #283655; 
+}
+.attendance-logs-section .table-section .table-wrapper td {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3f454b; 
+}
+.attendance-logs-section .view-txt {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.38;
+  color: #0093ff !important;
+  padding: 10px 0;
+  position: relative;
+  cursor: pointer; 
+}
+.attendance-logs-section .view-txt::after {
+  position: absolute;
+  content: "";
+  display: inline-block;
+  margin-left: 5px;
+  width: 100%;
+  height: 100%;
+  background: url("../../images/attendance/key_down.svg") no-repeat; 
+}
+.attendance-logs-section .view-txt--less::after {
+  background: url("../../images/attendance/key_up.svg") no-repeat; 
+}
+.attendance-logs-section .table-pagination {
+  background: #ffffff;
+  padding: 15px 20px;
+  box-shadow: 0 -3px 6px 0 rgba(0, 0, 0, 0.16);
+  margin: 15px -30px 0 -20px; 
+}
+.attendance-logs-section .table-pagination__right {
+  text-align: right; 
+}
+.attendance-logs-section .table-pagination .flex-grow-1 {
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1; 
+}
+.attendance-logs-section .table-pagination .select-wrap .show-txt {
+  color: #283655;
+  margin-right: 10px; 
+}
+.attendance-logs-section .table-pagination .select-wrap .custom-selector {
+  border: none;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 25px;
+  background: white url("../../images/attendance/selec_arrow.svg") right center no-repeat;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.36;
+  letter-spacing: 0.1px;
+  color: #2094ff;
+  cursor: pointer; 
+}
+.attendance-logs-section .table-pagination .pag-nav-txt {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.08;
+  color: #2094ff;
+  cursor: pointer; 
+}
+.attendance-logs-section .table-pagination .pag-nav-txt.disabled {
+  pointer-events: none;
+  color: #b7b9bf; 
+}
+.attendance-logs-section .table-pagination .pag-nav .page-no {
+  color: #283655;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  line-height: 20px;
+  text-align: center; 
+}
+.attendance-logs-section .table-pagination .pag-nav .page-no.active {
+  background: #283655;
+  border-radius: 2px;
+  color: white; 
+}
+.attendance-logs-section .timeline-section {
+  margin: 0 -30px 0 -20px; 
+}
+.attendance-logs-section .timeline-chart {
+  padding: 0 30px;
+  position: relative; 
+}
+.timeline-bar-cont,.timeline-bar-contFor24 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between; 
+}
+.attendance-logs-section .timeline-anomalies, .attendance-logs-section .timeline-summary {
+  position: absolute;
+  top: 10px; 
+}
+.attendance-logs-section .timeline-anomalies .title, .attendance-logs-section .timeline-summary .title {
+  font-size: 12px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.42;
+  letter-spacing: 0.1px;
+  color: #031732; 
+}
+.attendance-logs-section .timeline-anomalies .label, .attendance-logs-section .timeline-summary .label {
+  font-size: 10px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+  text-align: center;
+  color: #424656;
+  margin-bottom: 10px; 
+}
+.attendance-logs-section .timeline-anomalies .value, .attendance-logs-section .timeline-summary .value {
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+  text-align: center;
+  color: #141f2b; 
+}
+.attendance-logs-section .timeline-anomalies {
+  left: 50px; 
+}
+.attendance-logs-section .timeline-anomalies .anomalies-list {
+  width: 212px;
+  padding: 15px 10px;
+  border-radius: 5px;
+  border: #f9e0ea;
+  background-color: #f9e0ea; 
+}
+.attendance-logs-section .timeline-anomalies .anomalies-item {
+  padding: 5px 10px;
+  border-radius: 20px;
+  box-shadow: -1px 2px 3px 0 rgba(63, 69, 75, 0.1);
+  background-color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+  text-align: center;
+  color: #424656;
+  display: inline-block;
+  margin-bottom: 5px;
+  margin-left:5px;
+}
+.attendance-logs-section .timeline-summary {
+  right: 50px; 
+}
+.attendance-logs-section .timeline-summary .summary-wrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 10px 17px 15px 17px;
+  border-radius: 5px;
+  border: solid 1px #f9e0ea;
+  background-color: #f9e0ea; 
+}
+.attendance-logs-section .timeline-summary .summary-items {
+  margin-right: 25px; 
+}
+.attendance-logs-section .timeline-summary .summary-items:last-child {
+  margin-right: 0; 
+}
+.attendance-logs-section .timeline-legend {
+  position: absolute;
+  right: 50px;
+  bottom: 50px; 
+}
+.attendance-logs-section .timeline-legend .legend-item .box {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  background: #007fff;
+  vertical-align: middle; 
+}
+.attendance-logs-section .timeline-legend .legend-item .txt {
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 5px; 
+}
+.attendance-logs-section .timeline-legend .legend-item.ip-error .box {
+  background: #fe2448; 
+}
+.attendance-logs-section .timeline-legend .legend-item.auto-logout .box {
+  background: #ff8a19; 
+}
+.timeline-bar,.timeline-bar-contFor24 .timeline-bar{
+  height: 250px;
+  width: 3px;
+  border-right: 1px dashed #ddd; 
+}
+.attendance-logs-section .timeline-tracker {
+  background: #f7f7f7;
+  height: 40px;
+  padding: 0 30px; 
+}
+.working-time {
+  width: 30px;
+  height: 5px;
+  background:#f95697;
+  position: relative;
+  top: -38px;
+  width: calc(100%);
+  z-index: 1; 
+}
+.attendance-logs-section .timeline-tracker .working-time::before, .attendance-logs-section .timeline-tracker .working-time::after {
+  content: "";
+  height: 15px;
+  width: 3px;
+  background: #0092ff;
+  position: absolute;
+  top: -5px;
+  border-radius: 5px; 
+}
+.attendance-logs-section .timeline-tracker .working-time::before {
+  left: 0; 
+}
+.attendance-logs-section .timeline-tracker .working-time::after {
+  right: 0; 
+}
+.attendance-logs-section  .employee-worked {
+  height: 15px;
+  position: absolute;
+  top: -47px;
+  background: #e5f0ff url("../../images/attendance/Mask Group 3.png");
+  cursor: pointer; 
+}
+
+
+
+.attendance-logs-section .outColorBlue .timeline-tracker .employee-worked.logout-error::after{
+    background-color: blue !important;
+}
+
+
+.attendance-logs-section  .employee-worked::before {
+  left: 0; 
+}
+.attendance-logs-section .employee-worked::after {
+  right: 0; 
+}
+
+.attendance-logs-section .employee-worked.auto-logout::after {
+  background: #ff8a19; 
+}
+.employee-worked:hover .timeline-popup {
+  opacity: 1;
+  visibility: visible; 
+}
+.attendance-logs-section .employee-worked {
+    height: 15px;
+    position: absolute;
+    top: -47px;
+    background: #f9e0ea ;
+    cursor: pointer;
+}
+.timeline-marker-wrap{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  border-top: 5px solid rgba(112, 112, 112, 0.16);
+  padding-top: 10px;
+  position: relative; 
+}
+.timeline-marker-wraps{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  padding-top: 10px;
+  position: relative;
+}
+.markers{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  border-top: 2px solid rgba(112, 112, 112, 0.16);
+  padding-top: 10px;
+  position: relative;
+}
+.timeline-marker {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #3a444d;
+
+}
+.timeline-marker::first-child{
+    position:absolute;
+}
+.attendance-logs-section .timeline-popup {
+  opacity: 0;
+  visibility: hidden;
+  width: 350px;
+  position: absolute;
+  bottom: 35px;
+  left: -30px;
+  background: white;
+  padding: 15px;
+  box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 5px;
+  transition: all 0.3s ease; 
+}
+.attendance-logs-section .timeline-popup::before {
+  content: "";
+  bottom: -27px;
+  position: absolute;
+  border: 13px solid transparent;
+  border-top: 13px solid rgba(0, 0, 0, 0.06);
+  border-radius: 5px; 
+}
+.attendance-logs-section .timeline-popup::after {
+  content: "";
+  bottom: -25px;
+  position: absolute;
+  border: 13px solid transparent;
+  border-top: 13px solid #fff;
+  border-radius: 5px; 
+}
+.attendance-logs-section .timeline-popup .popup-item:not(:last-child) {
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0eeee; 
+}
+.attendance-logs-section .timeline-popup .popup-item:not(:first-child) {
+  padding-top: 10px; 
+}
+.attendance-logs-section .timeline-popup .popup-item__top {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 5px; 
+}
+.attendance-logs-section .timeline-popup .popup-item__top .popup-left {
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1; 
+}
+.attendance-logs-section .timeline-popup .popup-item.error .time, .attendance-logs-section .timeline-popup .popup-item.error .login-location {
+  color: #fe2448; 
+}
+.attendance-logs-section .timeline-popup .popup-item.auto .time, .attendance-logs-section .timeline-popup .popup-item.auto .login-location {
+  color: #fe2448; 
+}
+.attendance-logs-section .timeline-popup .popup-item.auto .title {
+  color: #ff8a19; 
+}
+.attendance-logs-section .timeline-popup .popup-item.auto .title::before {
+  content: "(Auto)";
+  margin-right: 5px; 
+}
+.attendance-logs-section .timeline-popup .login-location {
+  font-size: 13px;
+  color: #007fff;
+  line-height: 20px; 
+}
+.attendance-logs-section .timeline-popup .title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #48484a; 
+}
+.attendance-logs-section .timeline-popup .ip-address {
+  font-size: 13px; 
+}
+.attendance-logs-section .timeline-popup .time {
+  font-size: 13px;
+  font-weight: bold;
+  color: #007fff; 
+}
+.mbottom-20{
+    margin-bottom:20px;
+}
+
+.attendance-logs-section.outColorBlue .timeline-tracker .hide-after::after{
+    content:none;
+}
+.overflowScroll{
+    height: 175px;
+    display: block;
+    overflow-y: auto;
+}
+.attendance-logs-section.inColorBlue .timeline-tracker .employee-worked::before, .attendance-logs-section .timeline-tracker .employee-worked::before {
+    content: "";
+    height: 15px;
+    width: 12px;
+    position: absolute;
+    top: 0;
+    background-color:#f95697;
+}
+.attendance-logs-section.outColorBlue .timeline-tracker .employee-worked::after {
+    content: "";
+    height: 15px;
+    width: 12px;
+    position: absolute;
+    top: 0;
+    background-color:#f95697;
+}
+.attendance-logs-section .timeline-tracker .working-time::before, .attendance-logs-section .timeline-tracker .working-time::after {
+    content: "";
+    height: 15px;
+    width: 3px;
+    background: #f95697;
+    position: absolute;
+    top: -5px;
+    border-radius: 5px;
+}
+@media screen and (max-width: 768px) {
+  .attendance-logs-section .timeline-section {
+    overflow: scroll; 
+  }
+  .attendance-logs-section .timeline-container {
+    min-width: 800px; 
+  }
+  .attendance-logs-section .table-wrapper {
+    overflow: scroll; 
+  }
+  .attendance-logs-section .login-table {
+    min-width: 850px; 
+  }
+  .attendance-logs-section .logs-header-right {
+    text-align: left;
+    margin-top: 15px; 
+  }
+
+
+}

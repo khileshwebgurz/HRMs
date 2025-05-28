@@ -1,0 +1,49 @@
+.login-page {
+    background: url("/dist/img/2021/login-bg-5-blur.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    justify-content: center !important;
+    align-items: flex-end !important;
+    z-index: 1;
+} 
+
+.login-page::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: #26c6da;
+    opacity: .3;
+    z-index: -1;
+}
+.login-box {
+    width: 478px !important;
+    margin-right: 6%;
+}
+.login-box .card{
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgb(0 0 0 / 20%);
+}
+.login-box .card-outline {
+    border-color: #26c6da !important;        
+}    
+.login-box button.btn-primary {
+    background-color: #26c6da;
+    border-color: #26c6da;
+    font-weight: bold;
+}
+.login-box button.btn-primary:hover,
+.login-box button.btn-primary:focus{
+    background-color: #001e36;
+    border-color: #001e36;
+}
+@media only screen and (max-width: 576px) {
+    .login-box {
+        width: 95% !important;
+           margin: 0 auto;
+    }
+}
