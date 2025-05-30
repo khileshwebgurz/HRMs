@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Roles;
 use App\Models\Permissions;
 use App\Http\Controllers\Employee\EmployeeController;
+use App\Http\Controllers\Employee\LeavesController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -33,5 +34,6 @@ Route::middleware('auth:api')->group(function () {
      /* emp-routes */
      Route::get('/employees', [EmployeeController::class, 'directory']);
      Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
-    //  Route::get('/employee/profile/view/{tab}', [ProfileController:class, 'viewprofile'])
+     Route::get('/employee/leaves',[LeavesController::class,'index']);
+    
 });

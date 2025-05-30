@@ -26,7 +26,7 @@ const CompanyProfile = () => {
   if (!field) return <p>No data available</p>;
 
   const { company, hr_policy, leave_policy, travel_policy } = field;
-  console.log('my fields are >>>>',field)
+
 
   return (
     <section className="content mt-4 company-page">
