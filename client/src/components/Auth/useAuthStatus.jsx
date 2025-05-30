@@ -1,8 +1,8 @@
-// hooks/useAuthStatus.js
+// // hooks/useAuthStatus.js
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export const useAuthStatus = () => {
+const useAuthStatus = () => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -23,3 +23,5 @@ export const useAuthStatus = () => {
 
   return { loading, authenticated, user };
 };
+
+export default useAuthStatus

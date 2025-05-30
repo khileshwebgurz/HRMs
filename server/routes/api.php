@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Models\Roles;
 use App\Models\Permissions;
+use App\Http\Controllers\Employee\EmployeeController;
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
@@ -24,4 +26,12 @@ Route::middleware('auth:api')->group(function () {
             'permissions' => $permissionSlugs
         ]);
     });
+
+    /* common route*/
+    Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
+
+     /* emp-routes */
+     Route::get('/employees', [EmployeeController::class, 'directory']);
+     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
+    //  Route::get('/employee/profile/view/{tab}', [ProfileController:class, 'viewprofile'])
 });

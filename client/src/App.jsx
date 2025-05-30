@@ -4,7 +4,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import Login from "./components/Login";
+
 import Dashboard from "./components/Dashboard";
 import Directory from "./DashboardComponent/Directory";
 import Attendance from "./DashboardComponent/Attendance";
@@ -18,13 +18,13 @@ import SupportTicket from "./DashboardComponent/SupportTicket";
 import HelpDesk from "./DashboardComponent/HelpDesk";
 import Layout from "./components/Layout";
 import RightSidebar from "./components/RightSidebar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import CustomLoginRoute from './components/CustomLoginRoute'
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import LoginRoute from "./components/Auth/CustomLoginRoute";
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<CustomLoginRoute />} />
+        <Route path="/login" element={<LoginRoute />} />
         <Route
           path="/"
           element={

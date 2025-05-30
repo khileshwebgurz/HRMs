@@ -1,12 +1,11 @@
-import React from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import axios from 'axios';
-import { UserContext } from '../context/UserContext';
-import {useAuthStatus} from '../components/useAuthStatus'
+import React  from 'react';
+import useAuthStatus from './useAuthStatus';
+import { Navigate } from 'react-router-dom';
+import { UserContext } from '../../context/UserContext';
 const ProtectedRoute = ({ children }) => {
   const { loading, authenticated, user } = useAuthStatus();
 
-  if (loading) return <div>Loading authentication...</div>;
+  if (loading) return <div></div>;
 
   if (!authenticated) return <Navigate to="/login" />;
 

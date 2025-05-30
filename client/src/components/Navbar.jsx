@@ -19,7 +19,7 @@ const Navbar = () => {
     })
     navigate('/login')
   }
-// SELECT email, password FROM employees WHERE email = 'khilesh@yopmail.com';
+
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
   };
@@ -28,7 +28,7 @@ const Navbar = () => {
       <div className="wrapper" id="menu_button">
         <nav className="main-header navbar navbar-expand-md navbar-light navbar-dark dark-header">
           <div className="container">
-            <Link to="/dashboard" className="brand-link wgz_main_logo">
+            <Link to="/employee/dashboard" className="brand-link wgz_main_logo">
               <img
                 src={webgurzLogo}
                 alt="AdminLTE Logo"

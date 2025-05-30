@@ -1,10 +1,9 @@
 import React from "react";
 import { useState } from "react";
-import axios from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
-import "../assets/css/logincss.css";
+import "../../assets/css/logincss.css";
 import { Link } from "react-router-dom";
-
+import axios from "axios";
 const Login = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState("");
@@ -16,18 +15,16 @@ const Login = () => {
     e.preventDefault();
 
     try {
-
       // Send login request
-      await axios
-        .post(
-          "http://localhost:8000/api/login",
-          { email, password },
-          {
-            withCredentials: true,
-          }
-        );
+      await axios.post(
+        "http://localhost:8000/api/login",
+        { email, password },
+        {
+          withCredentials: true,
+        }
+      );
 
-      navigate("/dashboard");
+      navigate("/employee/dashboard");
     } catch (error) {
       console.error("Login Error:", error.response?.data || error.message);
       setErrors(error.response?.data || error.message);
