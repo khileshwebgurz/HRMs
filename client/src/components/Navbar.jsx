@@ -17,7 +17,7 @@ const Navbar = () => {
   useEffect(()=>{
 
     const fetchNotification = async()=>{
-      const Notify = await axios.get('http://localhost:8000/api/employee/notification',{withCredentials:true});
+      const Notify = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/notification`,{withCredentials:true});
       setNotification(Notify.data.data);
     }
     fetchNotification();
@@ -25,7 +25,7 @@ const Navbar = () => {
   console.log('my notification are >>>>', notification);
 
   const handleLogout = async()=>{
-    await axios.post("http://localhost:8000/api/logout",{},{
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/logout`,{},{
      withCredentials: true
     })
     navigate('/login')

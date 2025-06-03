@@ -10,13 +10,13 @@ const MyProfile = () => {
   const [employee, setEmployee] = useState([]);
   const [activeTab, setActiveTab] = useState("personal");
 
-  console.log('my user is >>>>',user)
+
   // Fetch employee data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/employee/profile/${user.id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${user.id}`,
           { withCredentials: true }
         );
         setEmployee(response.data);

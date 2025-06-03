@@ -15,7 +15,7 @@ const Directory = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/employees', { withCredentials: true })
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employees`, { withCredentials: true })
         setEmployee(response.data)
       } catch (error) {
         console.error("Error fetching employee data:", error)

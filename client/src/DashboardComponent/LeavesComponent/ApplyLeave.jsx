@@ -34,7 +34,7 @@ const ApplyLeave = ({
 
     try {
       const leaveSubmit = await axios.post(
-        "http://localhost:8000/api/employee/leaves/applyLeave",
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/applyLeave`,
         formData,
         { withCredentials: true }
       );

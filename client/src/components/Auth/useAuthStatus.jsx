@@ -9,7 +9,7 @@ const useAuthStatus = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8000/api/employee/user', { withCredentials: true })
+      .get(`${import.meta.env.VITE_API_BASE_URL}/employee/user`, { withCredentials: true })
       .then((res) => {
         setUser(res.data);
         setAuthenticated(true);

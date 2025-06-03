@@ -14,8 +14,8 @@ const Leaves = () => {
 
   useEffect(()=>{
     const MyLeaveData = async()=>{
-      const Logdata = await axios.get('http://localhost:8000/api/employee/leaves',{withCredentials:true});
-      const DetailData = await axios.get('http://localhost:8000/api/employee/leaves/details',{withCredentials:true})
+      const Logdata = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/leaves`,{withCredentials:true});
+      const DetailData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`,{withCredentials:true})
 
       setLeaveData(Logdata.data);
       setLeavedetailData(DetailData.data);

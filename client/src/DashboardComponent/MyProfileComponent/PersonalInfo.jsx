@@ -75,7 +75,7 @@ const PersonalInfo = ({employeedata}) => {
     e.preventDefault();
     try {
       await axios.post(
-        `http://localhost:8000/api/employee/profile/${user.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${user.id}`,
         employee,
         { withCredentials: true }
       );

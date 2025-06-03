@@ -9,7 +9,7 @@ const CompanyProfile = () => {
   useEffect(() => {
     const mydata = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8000/api/company-profile", {
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/company-profile`, {
           withCredentials: true,
         });
         setField(data);
