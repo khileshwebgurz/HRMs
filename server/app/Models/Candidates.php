@@ -92,7 +92,7 @@ class Candidates extends Model
 
     public function candidate_status()
     {
-        return $this->hasOne('App\CandidateStatus', 'id', 'status');
+        return $this->hasOne('App\Models\CandidateStatus', 'id', 'status');
     }
 
     public function getGenderNameAttribute($value)
@@ -102,41 +102,41 @@ class Candidates extends Model
 
     public function assessments()
     {
-        return $this->hasMany('App\CandidateAssessments', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateAssessments', 'candidate_id');
     }
 
     public function assessment_section()
     {
-        return $this->hasMany('App\CandidateAssessmentSections', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateAssessmentSections', 'candidate_id');
     }
 
     public function educations()
     {
-        return $this->hasMany('App\CandidateEducations', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateEducations', 'candidate_id');
     }
 
     public function employments()
     {
-        return $this->hasMany('App\CandidateEmployments', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateEmployments', 'candidate_id');
     }
 
     public function families()
     {
-        return $this->hasMany('App\CandidateFamilies', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateFamilies', 'candidate_id');
     }
 
     public function languages()
     {
-        return $this->hasMany('App\CandidateLanguages', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateLanguages', 'candidate_id');
     }
 
     public function other_informations()
     {
-        return $this->hasMany('App\CandidateOtherInformations', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateOtherInformations', 'candidate_id');
     }
 
     public function skills_section()
     {
-        return $this->hasMany('App\CandidateSkills', 'candidate_id');
+        return $this->hasMany('App\Models\CandidateSkills', 'candidate_id');
     }
 }

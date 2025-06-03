@@ -6,13 +6,69 @@ import { useState } from "react";
 import axios from "axios";
 const Leaves = () => {
   const [ leavedata, setLeaveData] = useState([]);
+  const [ leavedetailData, setLeavedetailData] = useState([]);
+
+  const [totalAppliedLeaves, setTotalAppliedLeaves] = useState([]);
+  const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
+  const [dateOfJoining, setDateOfJoining] = useState('');
+
   useEffect(()=>{
     const MyLeaveData = async()=>{
-      const data = await axios.get('http://localhost:8000/api/employee/leaves',{withCredentials:true});
-      setLeaveData(data.data);
+      const Logdata = await axios.get('http://localhost:8000/api/employee/leaves',{withCredentials:true});
+      const DetailData = await axios.get('http://localhost:8000/api/employee/leaves/details',{withCredentials:true})
+
+      setLeaveData(Logdata.data);
+      setLeavedetailData(DetailData.data);
+
     }
     MyLeaveData();
   },[])
+
+
+
+    useEffect(() => {
+      if (!leavedetailData) return;
+  
+      const byMonthLeaves = leavedetailData?.byMonthLeaves || {};
+      const doj = new Date(leavedetailData?.user?.date_of_joining);
+      const dojMonth = doj.getMonth(); // 0-indexed
+      const dojYear = doj.getFullYear();
+  
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // 1-indexed
+      const currentYear = currentDate.getFullYear();
+  
+      const applied = [];
+      const credit = [];
+  
+      for (let m = 1; m <= 12; m++) {
+        const monthKey = m < 10 ? `0${m}` : `${m}`;
+        const total = byMonthLeaves[monthKey] || 0;
+  
+        let crleave = 0;
+        if (m <= currentMonth) {
+          if (dojYear === currentYear) {
+            crleave = m - 1 >= dojMonth ? 1 : 0;
+          } else {
+            crleave = 1;
+          }
+        }
+  
+        applied.push(total);
+        credit.push(crleave);
+      }
+  
+      setDateOfJoining(leavedetailData?.user?.date_of_joining || '');
+      setTotalAppliedLeaves(applied);
+      setTotalCreditLeaves(credit);
+    }, [leavedetailData]);
+  
+    const totalApplied = totalAppliedLeaves.reduce((a, b) => a + b, 0);
+    const totalCredit = totalCreditLeaves.reduce((a, b) => a + b, 0);
+    const penalty = totalApplied > totalCredit ? totalApplied - totalCredit : 0;
+
+
+
   const [activeTab, setActiveTab] = useState("applyleave");
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -47,7 +103,8 @@ const Leaves = () => {
                           </li>
                         </ul>
 
-                        {activeTab === "applyleave" && <ApplyLeave />}
+                        {activeTab === "applyleave" && <ApplyLeave totalCreditLeaves={totalCreditLeaves} totalAppliedLeaves={totalAppliedLeaves}
+                        totalCredit={totalCredit} totalApplied={totalApplied} penalty={penalty}/>}
                         {activeTab === "leave" && <LeaveLogs myLeaves={leavedata.data} />}
                       </section>
                     </div>

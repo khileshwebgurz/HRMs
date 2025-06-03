@@ -12,7 +12,7 @@ class Employees extends Authenticatable
     protected $guard = 'employee';
        public function obCandidates()
     {
-        return $this->hasOne('App\ObCandidates', 'id', 'employee_id');
+        return $this->hasOne('App\Models\ObCandidates', 'id', 'employee_id');
     }
 
 

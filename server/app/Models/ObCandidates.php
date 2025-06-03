@@ -8,15 +8,15 @@ class ObCandidates extends Model
 {
     public function candidate()
     {
-        return $this->hasOne('App\Candidates', 'id', 'candidate_id');
+        return $this->hasOne('App\Models\Candidates', 'id', 'candidate_id');
     }
      public function attendanceRule()
     {
-        return $this->hasOne('App\AttendanceRules', 'id', 'attendance_rule_id');
+        return $this->hasOne('App\Models\AttendanceRules', 'id', 'attendance_rule_id');
     }
       public function employees()
     {
-        return $this->hasOne('App\Employees', 'office_employee_id', 'id');
+        return $this->hasOne('App\Models\Employees', 'office_employee_id', 'id');
     }
     
 }

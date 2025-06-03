@@ -10,7 +10,7 @@ class EmployeeLeaveLogs extends Model
 
     public function employee()
     {
-        return $this->hasOne('App\Employees', 'id', 'employee_id');
+        return $this->hasOne('App\Models\Employees', 'id', 'employee_id');
     }
     
     

@@ -8,6 +8,6 @@ class ObTabFieldOptions extends Model
 
     public function fielddata()
     {
-        return $this->hasOne('App\ObTabFieldData', 'field_id', 'id');
+        return $this->hasOne('App\Models\ObTabFieldData', 'field_id', 'id');
     }
 }

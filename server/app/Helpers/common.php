@@ -4,6 +4,7 @@
 
 use App\Models\ObTabFieldOptions;
 use App\Models\ObTabFieldData;
+use App\Models\Employees;
 // echo send_message();exit;
 function getEmployeeProgress($id)
 {
@@ -56,3 +57,12 @@ function getEmployeeProgress($id)
 
     return round($progress);
 }
+
+
+
+function getTeamListByManagerId($manager_id)
+{
+    $employees = Employees::where('manager_id', $manager_id)->get();
+    return $employees;
+}
+

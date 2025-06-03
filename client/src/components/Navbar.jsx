@@ -1,6 +1,6 @@
 import React from "react";
 import "../assets/css/navbar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import '../../public/css/admin-panel.css'
 import { Link } from "react-router-dom";
 import webgurzLogo from "/dist/img/webguruz-logo-blue.png";
@@ -12,6 +12,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const user = useUser();
   const [showSidebar, setShowSidebar] = useState(false);
+  const [notification, setNotification] = useState([]);
+
+  useEffect(()=>{
+
+    const fetchNotification = async()=>{
+      const Notify = await axios.get('http://localhost:8000/api/employee/notification',{withCredentials:true});
+      setNotification(Notify.data.data);
+    }
+    fetchNotification();
+  },[])
+  console.log('my notification are >>>>', notification);
 
   const handleLogout = async()=>{
     await axios.post("http://localhost:8000/api/logout",{},{
