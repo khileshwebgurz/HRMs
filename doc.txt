@@ -1,0 +1,18 @@
+run frontend -> npm run dev
+run backend -> php artisans serve
+
+To create a boilerplate for any new react file -> rafce
+
+To work with frontend:
+start from src folder , App.jsx is the main file of execution. And other files in their respective folders.
+
+Queries for Pgadmin:
+1) sort data in descending order -> SELECT * FROM public.employees
+ORDER BY id DESC 
+
+2) to get particular user row from employee table based on email -> SELECT * FROM public.employees where email='khilesh@yopmail.com';
+
+3) to get particular user row from employee table where manager_id is 679 -> SELECT * FROM public.employees where manager_id = 679;
+
+4) to get all data whose employee is not null -> SELECT * FROM public.employees where manager_id is Not null;
+

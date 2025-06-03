@@ -44,18 +44,18 @@ class NotificationController extends Controller
         {
             
             $notifications = Notifications::where('notify_status', '1')->where('notify_to', $loginuser->id)
-        //   ->where('notify_type','3')
+        //   ->where('notify_type','3') , this is also commented by us to see the notification of leave to the manager.
             ->orderBy('id', 'DESC')
             ->get();
-            Log::info('Notifications array:', $notifications->toArray());
+          
             if ($notifications) {
                 $messages = [];
                 foreach ($notifications as $notify) {
-                    $notify->notify_status = 2;
+                    // $notify->notify_status = 2;  this part was uncommented due to this when i refresh page the notification is vanished bcz it's changing the status of notification as seen/read.
                     $notify->save();
                     $messages[] = $notify->message;
                 }
-                Log::info('Messages array:', $messages);
+               
                 return response()->json([
                     'status' => 200,
                     'data' => $messages
@@ -78,34 +78,7 @@ class NotificationController extends Controller
     }
 
 
-    // public function notifications(Request $request)
-    // {
-    //     // Mark all unseen notifications as seen
-    //     Notifications::where('notify_to', Auth::id())
-    //         ->where('is_seen', '0')
-    //         ->update(['is_seen' => '1']);
-    
-    //     // Fetch today's notifications for logged-in user
-    //     $notifications = Notifications::where('notify_to', Auth::id())
-    //         ->whereDate('created_at', Carbon::today())
-    //         ->orderByDesc('created_at')
-    //         ->get();
-    
-    //     // Add link to each notification using getLink() method
-    //     $notifications = $notifications->map(function ($notification) {
-    //         return [
-    //             'id' => $notification->id,
-    //             'message' => $notification->message,
-    //             'created_at' => $notification->created_at->toDateTimeString(),
-    //             'link' => $notification->getLink(),
-    //         ];
-    //     });
-    
-    //     return response()->json([
-    //         'status' => 200,
-    //         'notifications' => $notifications,
-    //     ]);
-    // }
+   
   
 
 }

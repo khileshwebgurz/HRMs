@@ -8,28 +8,40 @@ import RightSidebar from "./RightSidebar";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 const Navbar = () => {
   const navigate = useNavigate();
   const user = useUser();
   const [showSidebar, setShowSidebar] = useState(false);
   const [notification, setNotification] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  useEffect(()=>{
+  const toggleDropdown = () => {
+    setShowDropdown((prev) => !prev);
+  };
 
-    const fetchNotification = async()=>{
-      const Notify = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/notification`,{withCredentials:true});
+  useEffect(() => {
+    const fetchNotification = async () => {
+      const Notify = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/notification`,
+        { withCredentials: true }
+      );
       setNotification(Notify.data.data);
-    }
+    };
     fetchNotification();
-  },[])
-  console.log('my notification are >>>>', notification);
+  }, []);
+  // console.log("my notification are >>>>", notification);
 
-  const handleLogout = async()=>{
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/logout`,{},{
-     withCredentials: true
-    })
-    navigate('/login')
-  }
+  const handleLogout = async () => {
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+    navigate("/login");
+  };
 
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
@@ -51,6 +63,40 @@ const Navbar = () => {
                 <Link to="/dashboard" className="nav-link">
                   <i className="fas fa-home"></i>
                 </Link>
+              </li>
+
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link"
+                  data-toggle="dropdown"
+                  onClick={toggleDropdown}
+                  title="Notifications"
+                >
+                  {" "}
+                  <i className="far fa-bell"></i>{" "}
+                  <span className="badge badge-warning navbar-badge">
+                    {notification.length}
+                  </span>
+                </a>
+
+                {showDropdown && (
+                  <div
+                    className="dropdown-menu dropdown-menu-lg dropdown-menu-right show"
+                    style={{ right: 0, left: "auto" }}
+                  >
+                    {notification.length === 0 ? (
+                      <span className="dropdown-item text-center text-muted">
+                        No notifications
+                      </span>
+                    ) : (
+                      notification.map((note, index) => (
+                        <a key={index} className="dropdown-item">
+                          {note}
+                        </a>
+                      ))
+                    )}
+                  </div>
+                )}
               </li>
 
               <li className="nav-item dropdown" style={{ display: "" }}>
@@ -113,11 +159,10 @@ const Navbar = () => {
                 href="{{ route('em-logout') }}"
               >
                 &nbsp;
-                
-                {/* <i
+                <i
                   className="fas fa-power-off"
                   style={{ verticalAlign: "text-top" }}
-                ></i> */}
+                ></i>
               </a>
               <button onClick={handleLogout}>Logout</button>
             </ul>

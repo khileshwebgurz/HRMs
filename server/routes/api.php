@@ -8,6 +8,7 @@ use App\Models\Permissions;
 use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\LeavesController;
 use App\Http\Controllers\Employee\NotificationController;
+use App\Http\Controllers\Employee\TeamController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -48,5 +49,5 @@ Route::middleware('auth:api')->group(function () {
     // Route::get('/employee/candidate-test/{test_id}', 'UserController@viewCandidateTest')->name('viewCandidateTest');
     Route::get('/employee/notification',[NotificationController::class,'realTimeNotificationByCurrentUser']);
 
-    Route::get('/employee/notifications', [NotificationController::class,'notifications'])->name('em-notifications');
+   Route::get('/employee/getTeamTree',[TeamController::class,'getTeamTree']);
 });
