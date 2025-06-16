@@ -12,6 +12,8 @@ const Leaves = () => {
   const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
   const [dateOfJoining, setDateOfJoining] = useState('');
 
+
+
   useEffect(()=>{
     const MyLeaveData = async()=>{
       const Logdata = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/leaves`,{withCredentials:true});
@@ -25,7 +27,7 @@ const Leaves = () => {
   },[])
 
 
-
+  // unnecesaary useeffect 
     useEffect(() => {
       if (!leavedetailData) return;
   

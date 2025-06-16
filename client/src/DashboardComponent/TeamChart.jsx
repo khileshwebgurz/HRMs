@@ -15,7 +15,7 @@ const TeamChart = () => {
     };
     fetchingTeam();
   },[]);
-  console.log('my fetched team is >>>',teamData);
+
 
   // optimised jsx
   const renderNode = (node) => {

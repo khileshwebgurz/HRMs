@@ -96,12 +96,12 @@ const PersonalInfo = ({employeedata}) => {
   };
 
   // Delete row from dynamic sections
-  const deleteRow = (section, index) => {
-    setEmployee((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((_, i) => i !== index),
-    }));
-  };
+  // const deleteRow = (section, index) => {
+  //   setEmployee((prev) => ({
+  //     ...prev,
+  //     [section]: prev[section].filter((_, i) => i !== index),
+  //   }));
+  // };
 
 
       // Render section with edit/save functionality

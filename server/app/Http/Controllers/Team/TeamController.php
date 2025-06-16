@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Employee;
+namespace App\Http\Controllers\Team;
 
 use App\Models\ObCandidates;
 use Illuminate\Support\Facades\Auth;

@@ -6,7 +6,7 @@ import BasicInfo from "./MyProfileComponent/BasicInfo";
 import AppraisalInfo from "./MyProfileComponent/AppraisalInfo";
 
 const MyProfile = () => {
-  const user = useUser(); // Assuming useUser provides { id, ...otherProps }
+  const user = useUser(); 
   const [employee, setEmployee] = useState([]);
   const [activeTab, setActiveTab] = useState("personal");
 

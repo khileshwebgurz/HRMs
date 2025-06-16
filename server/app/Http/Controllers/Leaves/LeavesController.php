@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Employee;
+namespace App\Http\Controllers\Leaves;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -68,46 +68,97 @@ class LeavesController extends Controller
         return response()->json(['status' => 200, 'message' => 'Leave Type updated']);
     }
 
+
+
+
+
+
     public function logs(Request $request)
     {
+        
         $user = auth('api')->user();
+        Log::info('my datas are :', ['datas' => $user]);
         $role = Roles::find($user->user_role);
+    
         $data = collect();
+        
 
-        if ($role->view == 2) {
-            $data = EmployeeLeaveLogs::where('employee_id', $user->id)->latest()->get();
-        } elseif ($role->view == 3) {
-            $empIds = Employees::where('manager_id', $user->id)->pluck('id');
-            $data = EmployeeLeaveLogs::whereIn('employee_id', $empIds)->latest()->get();
-        } elseif ($role->view == 4) {
-            $empIds = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id');
-            $data = EmployeeLeaveLogs::whereIn('employee_id', $empIds)->latest()->get();
-        } elseif ($role->view == 5) {
-            $data = EmployeeLeaveLogs::latest()->get();
+        if ($role->view == '2') {
+            $data = EmployeeLeaveLogs::where('employee_id', $user->id)->orderBy('created_at', 'desc')->get();
+        } elseif ($role->view == '3') {
+            $employeeIds = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+            $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+        } elseif ($role->view == '4') {
+            $employeeIds = Employees::where('manager_id', $user->id)
+                ->orWhere('id', $user->id)
+                ->pluck('id')->toArray();
+            $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+        } elseif ($role->view == '5') {
+            $data = EmployeeLeaveLogs::orderBy('created_at', 'desc')->get();
         }
-
+    
+        // Filter by date range if provided
+        if (!empty($request->startdate) || !empty($request->enddate)) {
+            $data = $data->filter(function ($item) use ($request) {
+                return $item->created_at >= $request->startdate && $item->created_at <= $request->enddate;
+            });
+        }
+    
+        // Transform data
+        $transformed = $data->map(function ($row) {
+            $leave = LeaveRules::find($row->leave_type);
+            $start_half = $row->start_half == 2 ? 'Second Half' : 'First Half';
+            $end_half = $row->end_half == 2 ? 'Second Half' : 'First Half';
+    
+            if ($row->status == 2) {
+                $status_label = 'Approved';
+            } elseif ($row->status == 3) {
+                $status_label = 'Declined';
+            } elseif ($row->status == 4) {
+                $status_label = 'Deleted';
+            } else {
+                $status_label = 'Pending';
+            }
+    
+            $actions = 'view'; 
+    
+            return [
+                'id' => $row->id,
+                'employee_name' => $row->employee->name ?? '',
+                'leave_type' => $leave->rule_name ?? '',
+                'start_date' => [
+                    'date' => date('d-m-Y', strtotime($row->start_date)),
+                    'half' => $start_half
+                ],
+                'end_date' => [
+                    'date' => date('d-m-Y', strtotime($row->end_date)),
+                    'half' => $end_half
+                ],
+                'status' => $row->status,
+                'status_label' => $status_label,
+                'approve_status' => $row->approve_status,
+                'reason' => $row->reason,
+                'actions' => $actions
+            ];
+        });
+    
         return response()->json([
             'status' => 200,
-            'data' => $data->map(function ($row) {
-                return [
-                    'id' => $row->id,
-                    'employee' => $row->employee->name ?? '',
-                    'leave_type' => LeaveRules::find($row->leave_type)->rule_name ?? '',
-                    'start_date' => $row->start_date,
-                    'end_date' => $row->end_date,
-                    'status_label' => $this->getStatusLabel($row->status),
-                    'actions' => $this->getActions($row),
-                ];
-            })
+            'data' => $transformed
         ]);
     }
 
+
+
     public function decline(Request $request)
     {
+        Log::info('My decline request is >>>>', ['role' => $request->get_approval_id]);
         $validator = Validator::make($request->all(), [
             'notes' => 'required',
             'get_approval_id' => 'required|exists:employee_leave_logs,id'
         ]);
+
+        Log::info('My validator request is >>>>', ['validator' => $validator]);
 
         if ($validator->fails()) {
             return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
@@ -121,27 +172,27 @@ class LeavesController extends Controller
             'manager_reason' => $request->notes
         ]);
 
-        $employee = Employees::find($log->employee_id);
-        $approver = Employees::find(auth('api')->id());
+        // $employee = Employees::find($log->employee_id);
+        // $approver = Employees::find(auth('api')->id());
 
-        Mail::send('emails.leave-rejected-mail', [
-            'to_name' => $employee->name,
-            'employee' => $approver->name,
-            'leave_type' => $log->leave_type,
-            'start_date' => $log->start_date,
-            'end_date' => $log->end_date,
-            'total_applied_leaves' => $log->total_applied_leaves,
-            'reason' => $log->manager_reason
-        ], function ($message) use ($employee) {
-            $message->to($employee->email)->subject('Leave Application Rejected');
-        });
+        // Mail::send('emails.leave-rejected-mail', [
+        //     'to_name' => $employee->name,
+        //     'employee' => $approver->name,
+        //     'leave_type' => $log->leave_type,
+        //     'start_date' => $log->start_date,
+        //     'end_date' => $log->end_date,
+        //     'total_applied_leaves' => $log->total_applied_leaves,
+        //     'reason' => $log->manager_reason
+        // ], function ($message) use ($employee) {
+        //     $message->to($employee->email)->subject('Leave Application Rejected');
+        // });
 
-        Notifications::create([
-            'type_id' => 'attendance_approval_request',
-            'message' => $employee->name . "'s leave request has been rejected.",
-            'page_id' => $log->id,
-            'notify_to' => $log->employee_id
-        ]);
+        // Notifications::create([
+        //     'type_id' => 'attendance_approval_request',
+        //     'message' => $employee->name . "'s leave request has been rejected.",
+        //     'page_id' => $log->id,
+        //     'notify_to' => $log->employee_id
+        // ]);
 
         return response()->json(['status' => 200, 'message' => 'Leave declined and notification sent.']);
     }
@@ -488,6 +539,54 @@ class LeavesController extends Controller
             }
         }
     }
+
+
+
+    public function approveRequest(Request $request)
+    {
+        $loginuser = Auth::user();
+
+        foreach ($request->rows_ids as $row_id) {
+            $empdb = EmployeeLeaveLogs::where('id', $row_id)->first();
+            $employee =Employees::where('id', $empdb->employee_id)->first();
+            // $approved =Employees::where('id',$loginuser->id)->first();
+            if ($empdb) {
+                $empdb->status = 2;
+                $empdb->approved_by = $loginuser->id;
+                if ($empdb->save()) {
+                    //   $to_name = $employee->name;
+                        // $to_email =$employee->email;
+                        // $data = array(
+                        //     'to_name' =>$to_name,
+                        //     'employee' =>$approved->name,
+                        //     'leave_type' =>$empdb->leave_type,
+                        //     'start_date' =>$empdb->start_date,
+                        //     'end_date' =>$empdb->end_date,
+                        //     'reason'=>$empdb->reason,
+                        //     'total_applied_leaves' =>$empdb->total_applied_leaves
+                        // );
+                        // Mail::send('emails.leave-approved-mail', $data, function ($message) use ($to_name, $to_email) {
+                        //     $message->from('noreply@webguruz.in','noreply')
+                        //     ->to($to_email)
+                        //     ->subject('Leave application status');
+                        // });
+                    // Notification for admin
+                    $noti = new Notifications();
+                    $noti->type_id = 'attendacne_approval_request';
+                    $noti->message =  $employee->name."'s leave has been approved" ;
+                    $noti->page_id = $empdb->id;
+                    $noti->notify_to = $empdb->employee_id;
+                    $noti->save();
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Successfully updated."
+        ]);
+    }
+
 
 
 

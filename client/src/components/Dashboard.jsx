@@ -1,11 +1,11 @@
 import React from "react";
-import { useUser } from '../context/UserContext';
-import '../assets/css/dashboard.css'
+import { useUser } from "../context/UserContext";
+import "../assets/css/dashboard.css";
 // import '../../public/css/admin-panel.css'
 import { Link } from "react-router-dom";
 const Dashboard = () => {
   const user = useUser();
-
+  console.log(user);
 
   return (
     <section className="content mt-4">
@@ -30,10 +30,10 @@ const Dashboard = () => {
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-1">
                         <Link to="/directory">
-                        {/* <a href="{{route('em-directory-view')}}"> */}
+                        
                           <div className="option-icon">
                             <i className="far fa-address-book"></i>
-                            <svg
+                            {/* <svg
                               id="line_Icons"
                               height="80"
                               viewBox="0 0 74 74"
@@ -50,40 +50,40 @@ const Dashboard = () => {
                               <path d="m34.722 50.615h24.283v2h-24.283z" />
                               <path d="m34.722 57.729h15.971v2h-15.971z" />
                               <path d="m25.127 3h2v68h-2z" />
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Directory</h6>
-                        {/* </a> */}
+                     
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-2">
                         <Link to="/attendance">
-                        {/* <a href="{{ route('em-attendance') }}"> */}
+                       
                           <div className="option-icon">
                             <i className="far fa-calendar-alt"></i>
-                            <svg
+                            {/* <svg
                               height="80"
                               viewBox="0 0 512.00082 512"
                               width="80"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path d="m512 120v142c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-142c0-22.054688-17.945312-40-40-40h-26v20c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-20h-91v20c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-20h-90v20c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-20h-25c-22.054688 0-40 17.945312-40 40v312c0 22.054688 17.945312 40 40 40h168c11.046875 0 20 8.953125 20 20s-8.953125 20-20 20h-168c-44.113281 0-80-35.886719-80-80v-312c0-44.113281 35.886719-80 80-80h25v-20c0-11.046875 8.953125-20 20-20s20 8.953125 20 20v20h90v-20c0-11.046875 8.953125-20 20-20s20 8.953125 20 20v20h91v-20c0-11.046875 8.953125-20 20-20s20 8.953125 20 20v20h26c44.109375 0 80 35.886719 80 80zm-367 90c0-11.046875-8.953125-20-20-20s-20 8.953125-20 20 8.953125 20 20 20 20-8.953125 20-20zm154 20c11.046875 0 20-8.953125 20-20s-8.953125-20-20-20-20 8.953125-20 20 8.953125 20 20 20zm87 0c11.046875 0 20-8.953125 20-20s-8.953125-20-20-20-20 8.953125-20 20 8.953125 20 20 20zm-241 67c0-11.046875-8.953125-20-20-20s-20 8.953125-20 20 8.953125 20 20 20 20-8.957031 20-20zm-20 67c-11.046875 0-20 8.953125-20 20s8.953125 20 20 20 20-8.953125 20-20-8.953125-20-20-20zm107-154c0-11.046875-8.953125-20-20-20s-20 8.953125-20 20 8.953125 20 20 20 20-8.953125 20-20zm0 87c0-11.046875-8.953125-20-20-20s-20 8.953125-20 20 8.953125 20 20 20 20-8.957031 20-20zm-20 67c-11.046875 0-20 8.953125-20 20s8.953125 20 20 20 20-8.953125 20-20-8.953125-20-20-20zm67-67c0 11.046875 8.953125 20 20 20s20-8.953125 20-20-8.953125-20-20-20-20 8.953125-20 20zm87 0c0 11.046875 8.953125 20 20 20s20-8.953125 20-20-8.953125-20-20-20-20 8.953125-20 20zm137.640625 28.738281c-8.980469-6.429687-21.472656-4.363281-27.902344 4.621094l-98.582031 137.699219c-2.691406 3.121094-6.066406 3.792968-7.871094 3.914062-1.859375.125-5.425781-.109375-8.566406-3.054687l-63.710938-62.175781c-7.90625-7.714844-20.570312-7.5625-28.285156.34375-7.710937 7.90625-7.558594 20.570312.347656 28.285156l63.820313 62.28125c.058594.054687.121094.113281.179687.171875 9.570313 9.105469 22.339844 14.171875 35.480469 14.171875 1.128907 0 2.261719-.035156 3.394531-.113282 14.3125-.953124 27.675782-7.914062 36.664063-19.097656.230469-.289062.457031-.582031.671875-.882812l98.980469-138.261719c6.429687-8.980469 4.359375-21.472656-4.621094-27.902344zm0 0" />
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Attendance</h6>
-                        {/* </a> */}
+                       
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-3">
-                        <Link to='/companyProfile'>
-                        {/* <a href="{{route('em-company-profile-view')}}"> */}
+                        <Link to="/companyProfile">
+                       
                           <div className="option-icon">
                             <i className="far fa-building"></i>
-                            <svg
+                            {/* <svg
                               id="Layer_1"
                               enableBackground="new 0 0 496 496"
                               height="80"
@@ -92,20 +92,20 @@ const Dashboard = () => {
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path d="m434 464h-32v-392c0-8.836-7.163-16-16-16h-120v-40c0-8.836-7.163-16-16-16h-111c-8.836 0-16 7.164-16 16v40h-13c-8.836 0-16 7.164-16 16v392h-32c-8.836 0-16 7.164-16 16s7.164 16 16 16h372c8.837 0 16-7.164 16-16s-7.163-16-16-16zm-279-432h79v24h-79zm61 432v-68h64v68zm96 0v-68h7c8.837 0 16-7.164 16-16s-7.163-16-16-16c-55.654 0-90.452 0-142 0-8.836 0-16 7.164-16 16s7.164 16 16 16h7v68h-58v-376h244v376zm-87-329c0 8.836-7.164 16-16 16h-18c-8.836 0-16-7.164-16-16s7.164-16 16-16h18c8.836 0 16 7.164 16 16zm95 0c0 8.836-7.163 16-16 16h-18c-8.837 0-16-7.164-16-16s7.163-16 16-16h18c8.837 0 16 7.164 16 16zm-95 60c0 8.836-7.164 16-16 16h-18c-8.836 0-16-7.164-16-16s7.164-16 16-16h18c8.836 0 16 7.164 16 16zm95 0c0 8.836-7.163 16-16 16h-18c-8.837 0-16-7.164-16-16s7.163-16 16-16h18c8.837 0 16 7.164 16 16zm-95 60c0 8.836-7.164 16-16 16h-18c-8.836 0-16-7.164-16-16s7.164-16 16-16h18c8.836 0 16 7.164 16 16zm95 0c0 8.836-7.163 16-16 16h-18c-8.837 0-16-7.164-16-16s7.163-16 16-16h18c8.837 0 16 7.164 16 16zm-95 60c0 8.836-7.164 16-16 16h-18c-8.836 0-16-7.164-16-16s7.164-16 16-16h18c8.836 0 16 7.164 16 16zm95 0c0 8.836-7.163 16-16 16h-18c-8.837 0-16-7.164-16-16s7.163-16 16-16h18c8.837 0 16 7.164 16 16z" />
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Company Profile</h6>
-                        {/* </a> */}
+                       
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-4">
-                        <Link to='/importantdates'>
-                        {/* <a href="{{ route('em-calender') }}"> */}
+                        <Link to="/importantdates">
+                        
                           <div className="option-icon">
                             <i className="far fa-clock"></i>
-                            <svg
+                            {/* <svg
                               id="Outline"
                               height="80"
                               viewBox="0 0 512 512"
@@ -124,27 +124,23 @@ const Dashboard = () => {
                               <path d="m440 296h-32a8 8 0 0 0 -8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8v-32a8 8 0 0 0 -8-8zm-8 32h-16v-16h16z" />
                               <path d="m440 376h-32a8 8 0 0 0 -8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8v-32a8 8 0 0 0 -8-8zm-8 32h-16v-16h16z" />
                               <path d="m360 376h-32a8 8 0 0 0 -8 8v32a8 8 0 0 0 8 8h32a8 8 0 0 0 8-8v-32a8 8 0 0 0 -8-8zm-8 32h-16v-16h16z" />
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">
                             Event &amp; Important Dates
                           </h6>
-                        {/* </a> */}
+                        
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-5">
-                        <Link to='/myprofile'>
-                        {/* <a
-                          href="{{ route('em-viewEmployee',['personal']) }}"
-                          data-tab1="{{ route('em-viewEmployee',['official']) }}"
-                          data-tab2="{{ route('em-viewEmployee',['appraisal']) }}"
-                        > */}
+                        <Link to="/myprofile">
+                        
                           <div className="option-icon">
                             <i className="far fa-id-badge"></i>
 
-                            <svg
+                            {/* <svg
                               version="1.1"
                               id="Capa_1"
                               xmlns="http://www.w3.org/2000/svg"
@@ -240,20 +236,20 @@ const Dashboard = () => {
                                   />
                                 </g>
                               </g>
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">My Profile</h6>
-                        {/* </a> */}
+                      
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-6">
                         <Link to="/leaves">
-                        {/* <a href="{{ route('em-leaves') }}"> */}
+                         
                           <div className="option-icon">
                             <i className="far fa-file-alt"></i>
-                            <svg
+                            {/* <svg
                               id="Capa_1"
                               enableBackground="new 0 0 512 512"
                               height="80"
@@ -270,21 +266,21 @@ const Dashboard = () => {
                                 <circle cx="136" cy="317" r="15" />
                                 <circle cx="136" cy="377" r="15" />
                               </g>
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Leaves</h6>
-                        {/* </a> */}
+                    
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-7">
                         <Link to="/teamchart">
-                        {/* <a href="{{route('employeeOrganizationChart')}}"> */}
+                      
                           <div className="option-icon">
                             <i className="fas fa-sitemap"></i>
 
-                            <svg
+                            {/* <svg
                               version="1.1"
                               id="Capa_1"
                               xmlns="http://www.w3.org/2000/svg"
@@ -402,20 +398,20 @@ const Dashboard = () => {
                                   />
                                 </g>
                               </g>
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Team Chart</h6>
-                        {/* </a> */}
+                        
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-8">
-                        <Link to='/spiritclub'>
-                        {/* <a href="{{ route('em-spiritclub') }}"> */}
+                        <Link to="/spiritclub">
+                        
                           <div className="option-icon">
                             <i className="fas fa-users"></i>
-                            <svg
+                            {/* <svg
                               id="Layer_1"
                               enableBackground="new 0 0 509.979 509.979"
                               height="80"
@@ -435,15 +431,15 @@ const Dashboard = () => {
                                 />
                                 <path d="m254.989 180c49.626 0 90-40.374 90-90s-40.374-90-90-90-90 40.374-90 90 40.374 90 90 90zm0-150c33.084 0 60 26.916 60 60s-26.916 60-60 60-60-26.916-60-60 26.916-60 60-60z" />
                               </g>
-                            </svg>
+                            </svg> */}
                           </div>
                           <h6 className="option-name">Spirit Club</h6>
-                        {/* </a> */}
+                        
                         </Link>
                       </div>
                     </div>
-                    {/* @if(Auth::user()->user_role == 3 ) */}
-
+                  
+                    {user.role_id === 3 ? (
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-9">
                         <a href="{{ route('em-ticket-system', 'alltickets') }}">
@@ -451,7 +447,7 @@ const Dashboard = () => {
                             {/* <?php $open_c = App\Tickets::where('status', '1')->count(); $progress_c = App\Tickets::where('status', '3')->count(); $open_count = $open_c + $progress_c;?> */}
                             <i className="fas fa-users"></i>
 
-                            <svg
+                            {/* <svg
                               width="90"
                               height="86"
                               viewBox="0 0 400 396"
@@ -491,7 +487,7 @@ const Dashboard = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                               />
-                            </svg>
+                            </svg> */}
 
                             {/* <span className="badge badge-pill badge-danger">{{$open_count }}</span> */}
                           </div>
@@ -499,17 +495,16 @@ const Dashboard = () => {
                         </a>
                       </div>
                     </div>
-                    {/* @else
-                                  @if(Auth::user()->id == '1')
-                                  @else */}
+                    ): user.id !== 1 ? (
+                 
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option supportTicket">
-                        <Link to='/supportticket'>
-                        {/* <a href="{{ route('em-support-ticket', 'mytickets') }}"> */}
+                        <Link to="/supportticket">
+                        
                           <div className="option-icon">
                             {/* <?php $emp_open = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '1')->count(); $emp_progress = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '3')->count(); $emp_count = $emp_open + $emp_progress;?> */}
                             <i className="fas fa-users"></i>
-                            <svg
+                            {/* <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="83"
                               height="92"
@@ -522,21 +517,21 @@ const Dashboard = () => {
                                 d="M41.8006 0.312866C19.2837 0.312866 0.96582 18.6308 0.96582 41.1476V61.3635C0.96582 64.1584 3.23894 66.4316 6.03385 66.4316H7.20203C7.40792 69.0388 9.59486 71.0968 12.2542 71.0968H15.3643C18.1592 71.0968 20.4323 68.8237 20.4323 66.0288V47.3678C20.4323 44.5729 18.1592 42.2998 15.3643 42.2998H12.2542C9.59487 42.2998 7.40792 44.3578 7.20203 46.965H4.8815V41.1475C4.8815 20.7907 21.4437 4.22837 41.8006 4.22837C62.1575 4.22837 78.7197 20.7906 78.7197 41.1475V46.965H76.3993C76.1934 44.3578 74.0065 42.2998 71.3471 42.2998H68.237C65.4421 42.2998 63.169 44.5729 63.169 47.3678V66.0288C63.169 68.8237 65.4421 71.0968 68.237 71.0968H71.3471C72.7473 71.0968 74.0165 70.5263 74.9346 69.6055C72.796 77.5728 65.8017 83.5735 57.3335 84.2265C56.5527 82.4345 54.7653 81.1768 52.6862 81.1768H48.021C46.0833 81.1768 44.5081 82.7523 44.5081 84.6897V87.7998C44.5081 89.7374 46.0835 91.3127 48.021 91.3127H52.6862C54.8087 91.3127 56.6274 90.0018 57.3812 88.1498C69.2059 87.3661 78.6888 77.8834 79.4723 66.0587C81.3244 65.3046 82.6353 63.4861 82.6353 61.3635V41.1476C82.6353 18.6308 64.3174 0.312866 41.8006 0.312866ZM67.0845 47.3678C67.0845 46.7329 67.6019 46.2155 68.2369 46.2155H71.347C71.9819 46.2155 72.4993 46.7329 72.4993 47.3678V66.0288C72.4993 66.6637 71.9819 67.1811 71.347 67.1811H68.2369C67.6019 67.1811 67.0845 66.6637 67.0845 66.0288V47.3678ZM11.1019 47.368C11.1019 46.7331 11.6193 46.2157 12.2542 46.2157H15.3643C15.9993 46.2157 16.5167 46.7331 16.5167 47.368V66.0289C16.5167 66.6639 15.9992 67.1813 15.3643 67.1813H12.2542C11.6193 67.1813 11.1019 66.6639 11.1019 66.0289V47.368ZM4.8815 61.3635V50.8809H7.18619V62.5159H6.03385C5.39892 62.5159 4.8815 61.9985 4.8815 61.3635ZM76.415 62.5159V50.8809H78.7195V61.3635C78.7196 61.9986 78.2023 62.5159 77.5673 62.5159H76.415ZM48.4238 87.3972V85.0927H52.6862C53.3211 85.0927 53.8385 85.6101 53.8385 86.245C53.8385 86.8799 53.3212 87.3972 52.6862 87.3972H48.4238ZM51.1311 53.1855C49.1936 53.1855 47.6182 54.761 47.6182 56.6984C47.6182 58.6359 49.1934 60.2113 51.1311 60.2113C53.0687 60.2113 54.6439 58.6357 54.6439 56.6984C54.6439 54.7612 53.0685 53.1855 51.1311 53.1855ZM41.8006 53.1854C39.863 53.1854 38.2877 54.7609 38.2877 56.6983C38.2877 58.6358 39.8632 60.2112 41.8006 60.2112C43.7381 60.2112 45.3135 58.6356 45.3135 56.6983C45.3135 54.7611 43.7383 53.1854 41.8006 53.1854ZM29.36 40.7446C25.7077 40.7446 22.7369 43.7152 22.7369 47.3678V66.0287C22.7369 69.6811 25.7077 72.6519 29.36 72.6519H42.9529V75.8161C42.9529 77.0549 43.6939 78.1636 44.8384 78.6378C45.2174 78.7946 45.6152 78.8712 46.0093 78.8712C46.8032 78.8712 47.5814 78.5604 48.1663 77.9753L53.4899 72.6519H54.2412C57.8935 72.6519 60.8643 69.6813 60.8643 66.0287V47.3678C60.8643 43.7154 57.8935 40.7446 54.2412 40.7446H29.36ZM26.6527 47.368C26.6527 45.8756 27.8676 44.6607 29.36 44.6607H54.2412C55.7336 44.6607 56.9485 45.8756 56.9485 47.368V66.0289C56.9485 67.5213 55.7336 68.7362 54.2412 68.7362H52.6788C52.1595 68.7362 51.6615 68.9426 51.2944 69.3099L46.8686 73.7357V70.6941C46.8686 69.613 45.9921 68.7362 44.9107 68.7362H29.36C27.8676 68.7362 26.6527 67.5213 26.6527 66.0289V47.368ZM32.4701 53.1854C30.5325 53.1854 28.9572 54.7609 28.9572 56.6983C28.9572 58.6358 30.5327 60.2112 32.4701 60.2112C34.4076 60.2112 35.983 58.6358 35.983 56.6983C35.983 54.7609 34.4077 53.1854 32.4701 53.1854Z"
                                 fill="#FF3E3E"
                               />
-                            </svg>
+                            </svg> */}
 
                             {/* <span className="badge badge-pill badge-danger">{{$emp_count }}</span> */}
                           </div>
                           <h6 className="option-name">Support Ticket</h6>
-                        {/* </a> */}
+                        
                         </Link>
                       </div>
                     </div>
-                    {/* @endif
-                                  @endif */}
+                    ): null}
+                 
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-10">
-                        <Link to='/helpdesk'>
-                        {/* <a href="{{ route('em-helpdesk-search') }}"> */}
+                        <Link to="/helpdesk">
+                       
                           <div className="option-icon">
                             <svg
                               version="1.1"
@@ -604,7 +599,7 @@ const Dashboard = () => {
                             </svg>
                           </div>
                           <h6 className="option-name">Help Desk</h6>
-                        {/* </a> */}
+                         
                         </Link>
                       </div>
                     </div>

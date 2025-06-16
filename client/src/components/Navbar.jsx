@@ -16,9 +16,12 @@ const Navbar = () => {
   const [notification, setNotification] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  
+
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
+
 
   useEffect(() => {
     const fetchNotification = async () => {
@@ -30,7 +33,7 @@ const Navbar = () => {
     };
     fetchNotification();
   }, []);
-  // console.log("my notification are >>>>", notification);
+  console.log("my notification are >>>>", notification);
 
   const handleLogout = async () => {
     await axios.post(
@@ -90,9 +93,13 @@ const Navbar = () => {
                       </span>
                     ) : (
                       notification.map((note, index) => (
-                        <a key={index} className="dropdown-item">
-                          {note}
-                        </a>
+                        <Link
+                        key={index}
+                        to={note.link || '#'}
+                        className="dropdown-item"
+                      >
+                        {note.message}
+                      </Link>
                       ))
                     )}
                   </div>
@@ -135,7 +142,7 @@ const Navbar = () => {
               <li className="nav-item dropdown">
                 <div className="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                   <a
-                    href="{{route('em-notifications')}}"
+                    // href="{{route('em-notifications')}}"
                     className="dropdown-item dropdown-footer"
                   >
                     See All Notifications
@@ -156,7 +163,8 @@ const Navbar = () => {
               <a
                 className="nav-link user-profile"
                 style={{ fontSize: "20px" }}
-                href="{{ route('em-logout') }}"
+                onClick={handleLogout}
+                // href="{{ route('em-logout') }}"
               >
                 &nbsp;
                 <i
@@ -164,7 +172,7 @@ const Navbar = () => {
                   style={{ verticalAlign: "text-top" }}
                 ></i>
               </a>
-              <button onClick={handleLogout}>Logout</button>
+              {/* <button >Logout</button> */}
             </ul>
 
             <button

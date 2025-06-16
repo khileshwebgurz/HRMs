@@ -20,6 +20,7 @@ import Layout from "./components/Layout";
 import RightSidebar from "./components/RightSidebar";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import LoginRoute from "./components/Auth/CustomLoginRoute";
+import LeaveLogs from "./components/Admin/LeaveLogs";
 function App() {
   return (
     <Router>
@@ -64,6 +65,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <CompanyProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/leaves/leave-logs"
+            element={
+              <ProtectedRoute>
+                <LeaveLogs />
               </ProtectedRoute>
             }
           />

@@ -42,7 +42,20 @@ class AuthController extends Controller
 
         $token = $employee->createToken('AccessToken')->accessToken;
 
+        // Log::info('My user role  is >>>>', ['role' => $employee->user_role]);
 
+
+        $str =  str_replace(['[',']'], "", $permissionIds);
+                $arr=[];
+                foreach ($str as $permission)
+                {
+                     $all_permissions =Permissions::where('id',$permission)->first();
+                     $slug = $all_permissions->slug;
+                     $arr[] = $slug;
+                }
+        Session::push('permission',$arr);
+
+        Log::info('My permission data from login  is >>>>', ['permission' => Session::get('permission')]);
 
         // Send token in secure HttpOnly cookie and user data in response
         return response()->json([
@@ -52,6 +65,8 @@ class AuthController extends Controller
                 'email' => $employee->email,
                 'name' => $employee->name,
                 'role' => $role->name ?? null,
+                'role_id' => $role->id ?? null,
+                'user_role' => $employee->user_role,
                 'permissions' => $permissionSlugs
             ]
         ])->cookie(

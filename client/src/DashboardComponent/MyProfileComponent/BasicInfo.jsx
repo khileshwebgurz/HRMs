@@ -34,21 +34,7 @@ const BasicInfo = ({ employeeData }) => {
   };
 
   // Handle form submission
-  // const handleSubmit = async (e, sectionId) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post(
-  //       `http://localhost:8000/api/employee/update/${employeeData.id}`,
-  //       { ...formData, updated_form: `${sectionId} updated`, updated_by: "hr-emp" },
-  //       { withCredentials: true }
-  //     );
-  //     alert(`${sectionId} updated successfully!`);
-  //     toggleEditMode(sectionId); // Exit edit mode
-  //   } catch (error) {
-  //     console.error(`Error updating ${sectionId}:`, error);
-  //     alert(`Failed to update ${sectionId}`);
-  //   }
-  // };
+
 
   // Render section with edit/save functionality
   const renderSection = (sectionId, title, content) => (

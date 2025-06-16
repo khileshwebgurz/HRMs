@@ -1,6 +1,19 @@
 import React from "react";
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 const ImportantEvents = () => {
+  const [calendarData, setCalendarData] = useState([]);
+
+  useEffect(() => {
+    const fetchingCalendar = async () => {
+      const data = await axios(`${import.meta.env.VITE_API_BASE_URL}/calender`,{ withCredentials: true });
+      setCalendarData(data.data);
+    };
+    fetchingCalendar();
+  }, []);
+
+  console.log('my calendar data is >>>',calendarData);
+
   return (
     <>
       <section className="content mt-4 calendar-page">

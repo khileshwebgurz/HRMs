@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Employee;
-use Carbon\Carbon;
+namespace App\Http\Controllers\Notification;
+// use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\CandidateTest;
 use App\Models\Employees;
@@ -9,7 +9,9 @@ use App\Models\ReadinessAnswer;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notifications;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
+
+
+// use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     public function viewCandidateTest($test_id)
@@ -27,9 +29,9 @@ class NotificationController extends Controller
     public function viewReadinessTest($test_id)
     {
         $last = ReadinessAnswer::where('employee_id', $test_id)->latest()->first();
-        $employee =Employees::where('id', $test_id)->first();
+        $employee = Employees::where('id', $test_id)->first();
         if ($last) {
-            return view('users.candidates.readiness.view', compact('last','employee'));
+            return view('users.candidates.readiness.view', compact('last', 'employee'));
         } else {
             abort(404);
         }
@@ -40,22 +42,31 @@ class NotificationController extends Controller
     {
         //sdfs
         $loginuser = Auth::user();
-        if($loginuser)
-        {
-            
+        if ($loginuser) {
+
             $notifications = Notifications::where('notify_status', '1')->where('notify_to', $loginuser->id)
-        //   ->where('notify_type','3') , this is also commented by us to see the notification of leave to the manager.
-            ->orderBy('id', 'DESC')
-            ->get();
-          
+                 // ->where('notify_type','3') //, this is also commented by us to see the notification of leave to the manager.
+                ->orderBy('id', 'DESC')
+                ->get();
+
             if ($notifications) {
                 $messages = [];
                 foreach ($notifications as $notify) {
+                    Log::info('Notification:', ['notify' => $notify]);
                     // $notify->notify_status = 2;  this part was uncommented due to this when i refresh page the notification is vanished bcz it's changing the status of notification as seen/read.
                     $notify->save();
-                    $messages[] = $notify->message;
+                   
+                    $messages[] = [
+                        'id' => $notify->id,
+                        'message' => $notify->message,
+                        'link' => getReactLink($notify), //we are passing links from this inside helper as like getLink()
+                       
+                    ];
+
+                    Log::info('Notification:', ['notify' => $notify]);
+                    
                 }
-               
+
                 return response()->json([
                     'status' => 200,
                     'data' => $messages
@@ -66,19 +77,11 @@ class NotificationController extends Controller
                     'message' => "Email send to selected users email address."
                 ]);
             }
-        }
-        else
-        {
+        } else {
             return response()->json([
-                    'status' => 419,
-                    'message' => "Page expired"
-                ]);
+                'status' => 419,
+                'message' => "Page expired"
+            ]);
         }
-        
     }
-
-
-   
-  
-
 }
