@@ -1,7 +1,7 @@
 import React from "react";
 
 const LeaveLogs = ({ myLeaves }) => {
-  console.log("my leave logs is >>>", myLeaves);
+
   return (
     <>
       <div

@@ -33,6 +33,10 @@ class LeavesController extends Controller
     public function index()
     {
         $data = LeaveTypes::all();
+        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+        Log::info('my permission is :', ['datas' => $permission_role]);
+        Log::info('my permission role  are :', ['datas' => $permission_role->view]);
+       
         return response()->json(['status' => 200, 'data' => $data]);
     }
 

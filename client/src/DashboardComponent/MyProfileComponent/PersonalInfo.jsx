@@ -62,7 +62,7 @@ const PersonalInfo = ({employeedata}) => {
     } else {
       setEmployee((prev) => ({ ...prev, [name]: value }));
     }
-    console.log("Input changed:", name, value);
+   
   };
 
   // Toggle edit mode for a section

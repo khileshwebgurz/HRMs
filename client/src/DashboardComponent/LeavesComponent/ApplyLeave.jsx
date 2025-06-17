@@ -33,12 +33,12 @@ const ApplyLeave = ({
     e.preventDefault();
 
     try {
-      const leaveSubmit = await axios.post(
+     await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/applyLeave`,
         formData,
         { withCredentials: true }
       );
-      console.log("Leave submitted:", leaveSubmit.data);
+    
     } catch (error) {
       console.error("Leave submission failed:", error);
     }

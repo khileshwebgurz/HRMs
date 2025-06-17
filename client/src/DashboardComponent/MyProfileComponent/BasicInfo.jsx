@@ -25,7 +25,7 @@ const BasicInfo = ({ employeeData }) => {
   const handleInput = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log("Input changed:", name, value);
+   
   };
 
   // Toggle edit mode for a section

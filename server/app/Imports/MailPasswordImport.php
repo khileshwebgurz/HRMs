@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Imports;
-use App\Employees;
-use App\ObCandidates;
+use App\Models\Employees;
+use App\Models\ObCandidates;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Validator;
+// use Validator;
+use Illuminate\Support\Facades\Validator;
 class MailPasswordImport implements ToModel, WithHeadingRow
 {
    private $total_rows = 0;
@@ -31,8 +32,8 @@ class MailPasswordImport implements ToModel, WithHeadingRow
         }
     }
 
-
-    // private $csvData = array();
+// this was the commented part , so i uncommented to avoid the issue of csvData undefined.
+    private $csvData = array();
 
     /**
      *

@@ -5,7 +5,9 @@ import PersonalInfo from "./MyProfileComponent/PersonalInfo";
 import BasicInfo from "./MyProfileComponent/BasicInfo";
 import AppraisalInfo from "./MyProfileComponent/AppraisalInfo";
 
+import { useNavigate } from "react-router-dom";
 const MyProfile = () => {
+  const navigate = useNavigate();
   const user = useUser(); 
   const [employee, setEmployee] = useState([]);
   const [activeTab, setActiveTab] = useState("personal");
@@ -50,6 +52,8 @@ const MyProfile = () => {
           Appraisal Info
         </button>
       </div>
+
+      
 
       {/* Tab Content */}
       <div>

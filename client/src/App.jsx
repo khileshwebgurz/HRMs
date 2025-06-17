@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
 import NotFound from "./DashboardComponent/NotFound";
+
 function App() {
   return (
     <Router>

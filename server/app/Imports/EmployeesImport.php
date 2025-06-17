@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Imports;
-use App\Employees;
-use App\ObCandidates;
+use App\Models\Employees;
+use App\Models\ObCandidates;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -14,7 +14,7 @@ class EmployeesImport implements ToModel, WithHeadingRow
 
    private $fail = 0;
 
-    // private $csvData = array();
+    private $csvData = array();
 
     /**
      *

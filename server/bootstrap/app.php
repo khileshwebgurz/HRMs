@@ -16,10 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\CheckPassportCookie::class,
         ]);
 
-         // ✅ Route middleware (like Kernel.php $routeMiddleware)
-        // $middleware->alias([
-        //     'role' => \App\Http\Middleware\RoleMiddleware::class,
-        // ]);
+         // Route middleware (like Kernel.php $routeMiddleware)
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

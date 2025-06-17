@@ -31,6 +31,7 @@ const Leaves = () => {
     MyLeaveData();
   }, []);
 
+
   // unnecesaary useeffect
   useEffect(() => {
     if (!leavedetailData) return;
@@ -78,11 +79,7 @@ const Leaves = () => {
     setActiveTab(tab);
   };
 
-  // useEffect(() => {
-  //   window.location.href = "http://localhost:8000/api/get-excel";
-  // }, []);
 
-  //console.log('my exxcell >>',excel)
 
   return (
     <>

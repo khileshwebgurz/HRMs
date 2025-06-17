@@ -6,7 +6,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Candidates;
-use App\User;
+use App\Models\User;
 use App\CandidateAssessments;
 use App\CandidateAssessmentSections;
 use App\CandidateEducations;
@@ -19,15 +19,17 @@ use App\CandidateSkills;
 use App\CandidateStatus;
 use App\CandidateTest;
 use App\CandidateTestOptions;
-use App\Roles;
+use App\Models\Roles;
 use DataTables;
-use Validator;
+// use Validator;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UserCsvExport;
 use App\Exports\CandidateCsvExport;
 use Illuminate\Support\Facades\Mail;
 use App\Questions;
 use App\Notifications;
+use Illuminate\Support\Facades\Hash;
 
 class UserCsvImport implements ToModel, WithHeadingRow
 {
@@ -72,7 +74,7 @@ class UserCsvImport implements ToModel, WithHeadingRow
             return new User([
                 'name' => $row["name"],
                 'email' => $row["email"],
-                'password' => \Hash::make($row['password']),
+                'password' => Hash::make($row['password']),
                 // 'gender' => $row["gender"],
                 'phone' => $row["phone"],
                 'user_role' => $user_role,
@@ -81,7 +83,7 @@ class UserCsvImport implements ToModel, WithHeadingRow
             // $this->rows++;
             // }
         } else {
-            \Log::info('User Validate: ' . $validator->errors()->first() . "\n Data: " . json_encode($row));
+            // \Log::info('User Validate: ' . $validator->errors()->first() . "\n Data: " . json_encode($row));
             // $this->csvData[] = $validator->errors()->first();
             ++ $this->fail; /* Fail rows increment */
         }

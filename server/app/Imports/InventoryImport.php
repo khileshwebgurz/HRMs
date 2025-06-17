@@ -3,7 +3,7 @@ namespace App\Imports;
 
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use App\InventoryItems;
+use App\Models\InventoryItems;
 use Validator;
 
 class InventoryImport implements ToModel, WithHeadingRow
@@ -15,7 +15,7 @@ class InventoryImport implements ToModel, WithHeadingRow
 
    private $fail = 0;
 
-    // private $csvData = array();
+    private $csvData = array();
 
     /**
      *

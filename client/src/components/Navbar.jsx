@@ -33,7 +33,7 @@ const Navbar = () => {
     };
     fetchNotification();
   }, []);
-  console.log("my notification are >>>>", notification);
+
 
   const handleLogout = async () => {
     await axios.post(
@@ -183,7 +183,7 @@ const Navbar = () => {
               <span></span>
             </button>
 
-            <RightSidebar isOpen={showSidebar} toggleSidebar={toggleSidebar} />
+            <RightSidebar isOpen={showSidebar} toggleSidebar={toggleSidebar} user={user} />
           </div>
         </nav>
       </div>

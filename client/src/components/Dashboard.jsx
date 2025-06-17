@@ -5,8 +5,8 @@ import "../assets/css/dashboard.css";
 import { Link } from "react-router-dom";
 const Dashboard = () => {
   const user = useUser();
-  console.log(user);
 
+ 
   return (
     <section className="content mt-4">
       <div className="container-fluid">
@@ -73,10 +73,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Attendance</h6>
+                        
                        
                         </Link>
                       </div>
                     </div>
+                   
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-3">
                         <Link to="/companyProfile">

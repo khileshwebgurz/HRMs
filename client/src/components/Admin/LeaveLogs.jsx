@@ -2,19 +2,30 @@ import React from "react";
 import { useState, useEffect } from "react";
 import "../../assets/css/LeaveLog.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const LeaveLogs = () => {
+  const navigate = useNavigate();
   const [leaveData, setleaveData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchingLogs = async () => {
-      const data = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/leave-logs`,
-        {
-          withCredentials: true,
+      try {
+        const data = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/leave-logs`,
+          {
+            withCredentials: true,
+          }
+        );
+        setleaveData(data.data);
+      } catch (error) {
+        if (error.response?.status === 403) {
+          console.warn("Forbidden access — redirecting to 404");
+          navigate("/404"); 
+        } else {
+          console.error("Unexpected error:", error);
         }
-      );
-      setleaveData(data.data);
+      }
     };
     fetchingLogs();
   }, []);
@@ -220,7 +231,7 @@ const LeaveLogs = () => {
 
       {showModal && (
         <div
-        //   className="modal fade leave-modal"
+          //   className="modal fade leave-modal"
           id="approvalModal"
           tabIndex="-1"
           role="dialog"
