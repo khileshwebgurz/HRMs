@@ -21,6 +21,7 @@ import RightSidebar from "./components/RightSidebar";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
+import NotFound from "./DashboardComponent/NotFound";
 function App() {
   return (
     <Router>
@@ -34,6 +35,7 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route path="*" element={<NotFound />} />
           <Route
             path="/employee/dashboard"
             element={

@@ -30,6 +30,7 @@ const Login = () => {
       setErrors(error.response?.data || error.message);
     }
   };
+  
   return (
     <div className="login-page">
       <div className="login-box">
