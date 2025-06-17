@@ -2,57 +2,60 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Candidates;
-use App\User;
-use App\Employees;
-use App\CandidateAssessments;
-use App\CandidateAssessmentSections;
-use App\CandidateEducations;
-use App\CandidateEmployments;
-use App\CandidateFamilies;
-use App\CandidateLanguages;
-use App\CandidateOtherInformations;
-use App\CandidateQuestions;
-use App\CandidateSkills;
-use App\CandidateStatus;
-use App\CandidateTest;
-use App\CandidateTestOptions;
-use App\ObCandidates;
+use App\Models\Candidates;
+use App\Models\User;
+use App\Models\Employees;
+use App\Models\CandidateAssessments;
+use App\Models\CandidateAssessmentSections;
+use App\Models\CandidateEducations;
+use App\Models\CandidateEmployments;
+use App\Models\CandidateFamilies;
+use App\Models\CandidateLanguages;
+use App\Models\CandidateOtherInformations;
+use App\Models\CandidateQuestions;
+use App\Models\CandidateSkills;
+use App\Models\CandidateStatus;
+use App\Models\CandidateTest;
+use App\Models\CandidateTestOptions;
+use App\Models\ObCandidates;
 use Yajra\DataTables\Facades\DataTables;
-use Validator;
-use App\ObTabFieldRelations;
-use App\Country;
-use App\State;
-use App\EmployeeExit;
-use App\City;
+//use Validator;
+use Illuminate\Support\Facades\Validator;
+use App\Models\ObTabFieldRelations;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\EmployeeExit;
+use App\Models\City;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
+//use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UserCsvExport;
 use App\Exports\CandidateCsvExport;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use App\Questions;
-use App\Notifications;
-use App\ReadinessAnswer;
-use App\CandidateInterviews;
-use App\CandidateInterviewRounds;
+use App\Models\Questions;
+use App\Models\Notifications;
+use App\Models\ReadinessAnswer;
+use App\Models\CandidateInterviews;
+use App\Models\CandidateInterviewRounds;
 use App\Settings;
-use App\LeaveRules;
-use App\AttendanceRules;
-use App\EmployeeLeaveRules;
-use App\Roles;
-use App\ObTabFieldData;
-use App\ObTabFieldOptions;
-use App\InventoryRooms;
-use App\OnboardRequests;
-use App\Employee_manager_team;
+use App\Models\LeaveRules;
+use App\Models\AttendanceRules;
+use App\Models\EmployeeLeaveRules;
+use App\Models\Roles;
+use App\Models\ObTabFieldData;
+use App\Models\ObTabFieldOptions;
+use App\Models\InventoryRooms;
+use App\Models\OnboardRequests;
+use App\Models\Employee_manager_team;
 use Spatie\GoogleCalendar\Event;
 use App\Imports\EmployeesImport;
 use App\Exports\ExportEmployees;
 use Illuminate\Support\Facades\Input;
 use App\Imports\MailPasswordImport;
 use Carbon\Carbon;
-use Session;
+//use Session;
+use Illuminate\Support\Facades\Session;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class UserController extends Controller
@@ -2138,7 +2141,13 @@ class UserController extends Controller
 
     public function exportCandidates()
     {
-        return Excel::download(new CandidateCsvExport(), 'candidates-' . time() . '.xlsx');
+       // return Excel::download(new CandidateCsvExport(), 'candidates-' . time() . '.xlsx');  // old functionality
+        $candidates = Candidates::where('status', '!=', 0)->get()->toArray();
+
+        return Excel::download(new CandidateCsvExport($candidates), 'candidates-' . time() . '.xlsx');
+
+      
+
     }
 
     public function allCandidateTest(Request $request)

@@ -1,27 +1,30 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Models\Roles;
 use App\Models\Permissions;
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Leaves\LeavesController;
 use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Team\TeamController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\UserController;
 
-
+//  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
+
+//  Protected (Authenticated) Routes
+Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();
-
-
         $role = Roles::find($user->user_role);
+
         $permissionIds = explode(',', trim($role->permissions, '[]'));
         $permissionSlugs = Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
 
@@ -36,38 +39,40 @@ Route::middleware('auth:api')->group(function () {
         ]);
     });
 
-    /* common route*/
-    Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
-
-    /* emp-routes */
+    // ✅ Shared routes for all authenticated users
+   
     Route::get('/employees', [EmployeeController::class, 'directory']);
     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
     Route::get('/employee/leaves', [LeavesController::class, 'index']);
-
     Route::get('/employee/leaves/details', [LeavesController::class, 'leavesDetailAllEmp']);
     Route::post('/employee/leaves/applyLeave', [LeavesController::class, 'applyLeave']);
-    Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
-    Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
-    Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
-
-    // for notifications
-    Route::get('/employee/leaves', [LeavesController::class, 'leavesDetailAllEmp'])->name('em-leaves');
-    // Route::get('/employee/candidate-test/{test_id}', 'UserController@viewCandidateTest')->name('viewCandidateTest');
-    Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
-   
-
-    // team chart route
     Route::get('/employee/getTeamTree', [TeamController::class, 'getTeamTree']);
-
-    //    for leave logs to the manager
-    Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
-    Route::post('/get-decline-request', [LeavesController::class, 'decline'])->name('decline');
-    Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
-    
-
-    //    attendance log
     Route::get('/attendance-logs', [AttendanceController::class, 'attendanceLog']);
+    Route::get('/calender', [AccountController::class, 'calender']);
+    Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
+    Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
 
-    // calendar log
-    Route::get('/calender', [AccountController::class,'calender']);
+    //  Admin-only routes
+    Route::middleware('role:1')->group(function () {
+        Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
+        Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
+        Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
+
+        
+        Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
+        Route::post('/get-decline-request', [LeavesController::class, 'decline'])->name('decline');
+        Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
+
+        Route::get('/get-excel', [UserController::class, 'exportCandidates']);
+    });
+
+    //  Employee-only routes (for future)
+    Route::middleware('role:2')->group(function () {
+        // Add employee-specific routes if needed
+    });
+
+    // IT support
+    Route::middleware('role:3')->group(function () {
+        
+    });
 });

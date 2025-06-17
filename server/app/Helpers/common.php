@@ -1,7 +1,7 @@
 <?php
 
 
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\ObTabFieldOptions;
 use App\Models\ObTabFieldData;
 use App\Models\Employees;
@@ -310,4 +310,20 @@ function get_options($key = null)
         }
     }
     return Settings::get();
+}
+
+function loginUserRole()
+{
+    if(Auth::user()){
+          return Auth::user()->user_role;
+    }
+    else{
+        return "";
+    }
+  
+}
+
+function noofworkingdays()
+{
+    return '21';
 }

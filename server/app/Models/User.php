@@ -14,6 +14,13 @@ class User extends Authenticatable
     protected $guard = 'employee';
     protected $table = 'employees';
 
+    const ROLE_ADMIN = 1;
+
+    const ROLE_RECRUITER = 2;
+
+    const ROLE_HR = 3;
+
+ 
     protected $fillable = [
         'name',
         'email',

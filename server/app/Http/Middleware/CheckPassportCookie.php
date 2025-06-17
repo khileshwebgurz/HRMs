@@ -18,4 +18,5 @@ class CheckPassportCookie
 
         return $next($request);
     }
+    
 }

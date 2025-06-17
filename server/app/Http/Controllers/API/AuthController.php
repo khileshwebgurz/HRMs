@@ -23,6 +23,8 @@ class AuthController extends Controller
         ]);
 
         $employee = Employees::where('email', $request->email)->first();
+        
+        Log::info('My user emp  is >>>>', ['employee' => $employee]);
 
         if (!$employee || !Hash::check($request->password, $employee->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
@@ -42,7 +44,7 @@ class AuthController extends Controller
 
         $token = $employee->createToken('AccessToken')->accessToken;
 
-        // Log::info('My user role  is >>>>', ['role' => $employee->user_role]);
+        Log::info('My user role  is >>>>', ['role' => $employee->user_role]);
 
 
         $str =  str_replace(['[',']'], "", $permissionIds);
@@ -55,7 +57,7 @@ class AuthController extends Controller
                 }
         Session::push('permission',$arr);
 
-        Log::info('My permission data from login  is >>>>', ['permission' => Session::get('permission')]);
+        // Log::info('My permission data from login  is >>>>', ['permission' => Session::get('permission')]);
 
         // Send token in secure HttpOnly cookie and user data in response
         return response()->json([
