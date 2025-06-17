@@ -39,7 +39,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
         }}
       >
         <div className="card-body box-profile">
-          <i onClick={toggleSidebar} class="fas fa-times"></i>
+          <i onClick={toggleSidebar} className="fas fa-times"></i>
           <div className="text-center">
             {user?.profile_pic === "" || !user?.profile_pic ? (
               <img
