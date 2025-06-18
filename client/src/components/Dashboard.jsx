@@ -5,8 +5,8 @@ import "../assets/css/dashboard.css";
 import { Link } from "react-router-dom";
 const Dashboard = () => {
   const user = useUser();
+  console.log("my user is >>>", user);
 
- 
   return (
     <section className="content mt-4">
       <div className="container-fluid">
@@ -30,7 +30,6 @@ const Dashboard = () => {
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-1">
                         <Link to="/directory">
-                        
                           <div className="option-icon">
                             <i className="far fa-address-book"></i>
                             {/* <svg
@@ -53,14 +52,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Directory</h6>
-                     
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-2">
                         <Link to="/attendance">
-                       
                           <div className="option-icon">
                             <i className="far fa-calendar-alt"></i>
                             {/* <svg
@@ -73,16 +70,13 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Attendance</h6>
-                        
-                       
                         </Link>
                       </div>
                     </div>
-                   
+
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-3">
                         <Link to="/companyProfile">
-                       
                           <div className="option-icon">
                             <i className="far fa-building"></i>
                             {/* <svg
@@ -97,14 +91,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Company Profile</h6>
-                       
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-4">
                         <Link to="/importantdates">
-                        
                           <div className="option-icon">
                             <i className="far fa-clock"></i>
                             {/* <svg
@@ -131,14 +123,12 @@ const Dashboard = () => {
                           <h6 className="option-name">
                             Event &amp; Important Dates
                           </h6>
-                        
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-5">
                         <Link to="/myprofile">
-                        
                           <div className="option-icon">
                             <i className="far fa-id-badge"></i>
 
@@ -241,14 +231,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">My Profile</h6>
-                      
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-6">
                         <Link to="/leaves">
-                         
                           <div className="option-icon">
                             <i className="far fa-file-alt"></i>
                             {/* <svg
@@ -271,14 +259,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Leaves</h6>
-                    
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-7">
                         <Link to="/teamchart">
-                      
                           <div className="option-icon">
                             <i className="fas fa-sitemap"></i>
 
@@ -403,14 +389,12 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Team Chart</h6>
-                        
                         </Link>
                       </div>
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-8">
                         <Link to="/spiritclub">
-                        
                           <div className="option-icon">
                             <i className="fas fa-users"></i>
                             {/* <svg
@@ -436,20 +420,19 @@ const Dashboard = () => {
                             </svg> */}
                           </div>
                           <h6 className="option-name">Spirit Club</h6>
-                        
                         </Link>
                       </div>
                     </div>
-                  
-                    {user.role_id === 3 ? (
-                    <div className="col-md-3 col-6">
-                      <div className="dashboard-option option-9">
-                        <a href="{{ route('em-ticket-system', 'alltickets') }}">
-                          <div className="option-icon">
-                            {/* <?php $open_c = App\Tickets::where('status', '1')->count(); $progress_c = App\Tickets::where('status', '3')->count(); $open_count = $open_c + $progress_c;?> */}
-                            <i className="fas fa-users"></i>
 
-                            {/* <svg
+                    {user.role_id === 3 ? (
+                      <div className="col-md-3 col-6">
+                        <div className="dashboard-option option-9">
+                          <a href="{{ route('em-ticket-system', 'alltickets') }}">
+                            <div className="option-icon">
+                              {/* <?php $open_c = App\Tickets::where('status', '1')->count(); $progress_c = App\Tickets::where('status', '3')->count(); $open_count = $open_c + $progress_c;?> */}
+                              <i className="fas fa-users"></i>
+
+                              {/* <svg
                               width="90"
                               height="86"
                               viewBox="0 0 400 396"
@@ -491,22 +474,20 @@ const Dashboard = () => {
                               />
                             </svg> */}
 
-                            {/* <span className="badge badge-pill badge-danger">{{$open_count }}</span> */}
-                          </div>
-                          <h6 className="option-name">WIMS</h6>
-                        </a>
+                              {/* <span className="badge badge-pill badge-danger">{{$open_count }}</span> */}
+                            </div>
+                            <h6 className="option-name">WIMS</h6>
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                    ): user.id !== 1 ? (
-                 
-                    <div className="col-md-3 col-6">
-                      <div className="dashboard-option supportTicket">
-                        <Link to="/supportticket">
-                        
-                          <div className="option-icon">
-                            {/* <?php $emp_open = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '1')->count(); $emp_progress = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '3')->count(); $emp_count = $emp_open + $emp_progress;?> */}
-                            <i className="fas fa-users"></i>
-                            {/* <svg
+                    ) : user.id !== 1 ? (
+                      <div className="col-md-3 col-6">
+                        <div className="dashboard-option supportTicket">
+                          <Link to="/supportticket">
+                            <div className="option-icon">
+                              {/* <?php $emp_open = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '1')->count(); $emp_progress = App\Tickets::where('employee_id', Auth::user()->id)->where('status', '3')->count(); $emp_count = $emp_open + $emp_progress;?> */}
+                              <i className="fas fa-users"></i>
+                              {/* <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="83"
                               height="92"
@@ -521,19 +502,17 @@ const Dashboard = () => {
                               />
                             </svg> */}
 
-                            {/* <span className="badge badge-pill badge-danger">{{$emp_count }}</span> */}
-                          </div>
-                          <h6 className="option-name">Support Ticket</h6>
-                        
-                        </Link>
+                              {/* <span className="badge badge-pill badge-danger">{{$emp_count }}</span> */}
+                            </div>
+                            <h6 className="option-name">Support Ticket</h6>
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                    ): null}
-                 
+                    ) : null}
+
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-10">
                         <Link to="/helpdesk">
-                       
                           <div className="option-icon">
                             <svg
                               version="1.1"
@@ -601,7 +580,6 @@ const Dashboard = () => {
                             </svg>
                           </div>
                           <h6 className="option-name">Help Desk</h6>
-                         
                         </Link>
                       </div>
                     </div>

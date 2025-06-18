@@ -52,6 +52,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/calender', [AccountController::class, 'calender']);
     Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
+    Route::post('/change-password', [AccountController:: class ,'editProfile'])->name('em-edit-profile');
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
@@ -74,6 +75,7 @@ Route::middleware(['auth:api'])->group(function () {
     //  Employee-only routes (for future)
     Route::middleware('role:2')->group(function () {
         // Add employee-specific routes if needed
+        
     });
 
     // IT support

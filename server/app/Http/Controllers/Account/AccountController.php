@@ -1,16 +1,21 @@
 <?php
 
 namespace App\Http\Controllers\Account;
+
 use App\Http\Controllers\Controller;
 use App\Models\Employees;
 use App\Models\ObCandidates;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\MatchOldPassword;
 
-class AccountController extends Controller{
+class AccountController extends Controller
+{
 
-    
+
     // public function calender()
     // {
     //     $todayMonth = date('m');
@@ -19,9 +24,9 @@ class AccountController extends Controller{
     //     $ab =Employees::where('status', '1')->pluck('id')->toArray();
     //     $employees = ObCandidates::whereIn('office_employee_id', $ab)->get();
     //     $employeesBirthday = ObCandidates::whereMonth('dob', $todayMonth)->whereDay('dob', $todayDay)->get();
-       
+
     //     $employeesAnni = ObCandidates::whereMonth('date_of_joining', $todayMonth)->whereDay('date_of_joining', $todayDay)->get();
-      
+
     //     return response()->json([
     //         'employees' => $employees,
     //         'birthdays' => $employeesBirthday,
@@ -63,5 +68,41 @@ class AccountController extends Controller{
         }
 
         return response()->json($events);
+    }
+
+
+    // for changing the password of user
+    public function editProfile(Request $request)
+    {
+
+        $loginuser = Auth::user();
+        $user_id = $loginuser->id;
+        $candidate = ObCandidates::where('office_employee_id', $user_id)->first();
+        $user = Employees::where('id', $candidate->office_employee_id)->first();
+        $validator = Validator::make($request->all(), [
+            'current_password' => ['required', new MatchOldPassword],
+            'password' => 'required|min:6|confirmed'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
+            ]);
+        }
+        $user->password = bcrypt($request->password);
+
+        if ($user->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => "Password updated"
+            ]);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
     }
 }

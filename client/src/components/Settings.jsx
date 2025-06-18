@@ -1,10 +1,4 @@
-
-
 function Settings() {
-
-
-
-
   return (
     <div>
       <h2>Setting Page</h2>

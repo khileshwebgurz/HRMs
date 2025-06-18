@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
 import NotFound from "./DashboardComponent/NotFound";
+import ChangePassword from "./components/Auth/ChangePassword";
 
 function App() {
   return (
@@ -44,6 +45,11 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             }
+          />
+
+          <Route path="/change-password" element={<ProtectedRoute>
+            <ChangePassword/>
+          </ProtectedRoute>}
           />
 
           <Route

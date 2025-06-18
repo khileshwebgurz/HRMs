@@ -8,7 +8,6 @@ const Leaves = () => {
   const [leavedata, setLeaveData] = useState([]);
   const [leavedetailData, setLeavedetailData] = useState([]);
 
-  const [excel, setExcel] = useState([]);
 
   const [totalAppliedLeaves, setTotalAppliedLeaves] = useState([]);
   const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
