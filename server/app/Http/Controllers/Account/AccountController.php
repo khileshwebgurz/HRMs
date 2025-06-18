@@ -105,4 +105,28 @@ class AccountController extends Controller
             ]);
         }
     }
+
+     public function attendance()
+    {
+        $res = getWorkingHoursByDate('2021-01-15', 1);
+
+        $loginuser = Auth::user();
+        $currentDate = date('Y-m-d');
+
+        $user_id = $loginuser->id;
+
+        $totalAnomalies = EmployeeAttendance::where('employee_id', $user_id)->where('status', 'AN')
+            ->where('clock_date', '!=', $currentDate)
+            ->count();
+
+        // Today Attendance
+        $todayAttendance = AttendanceLog::where('employee_id', $loginuser->id)->where('clock_date', $currentDate)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+             return response()->json([
+                'totalAnomalies' => $totalAnomalies,
+                'todayAttendance' => $todayAttendance
+            ]);
+    }
 }
