@@ -62,7 +62,7 @@ function App() {
           />
           <Route path="/" element={<Navigate to="/employee/dashboard" />} />
           <Route
-            path="/attendance"
+            path="/employee/attendance"
             element={
               <ProtectedRoute>
                 <Attendance />

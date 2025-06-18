@@ -11,7 +11,7 @@ const Attendance = () => {
   useEffect(() => {
     const getAttendance = async () => {
       const data = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/attendance-logs`,
+        `${import.meta.env.VITE_API_BASE_URL}/employee/attendance`,
         { withCredentials: true }
       );
       setAttendance(data.data.data);
@@ -19,6 +19,7 @@ const Attendance = () => {
     getAttendance();
   }, []);
 
+  console.log(attendance, 'attendance log')
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);

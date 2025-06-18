@@ -9,7 +9,7 @@ const ChangePassword = () => {
   const handleBtnUpdate = async (e) => {
     e.preventDefault();
     const updatingPassword = await axios.post(
-      "http://localhost:8000/api/change-password", {
+       `${import.meta.env.VITE_API_BASE_URL}/change-password`, {
         current_password: oldpassword,
         password: newpassword,
         password_confirmation: confirmnewpassword,

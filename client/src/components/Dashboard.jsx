@@ -57,7 +57,7 @@ const Dashboard = () => {
                     </div>
                     <div className="col-md-3 col-6">
                       <div className="dashboard-option option-2">
-                        <Link to="/attendance">
+                        <Link to="/employee/attendance">
                           <div className="option-icon">
                             <i className="far fa-calendar-alt"></i>
                             {/* <svg
