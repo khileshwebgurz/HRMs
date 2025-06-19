@@ -90,11 +90,12 @@ function getReactLink($notification)
             break;
 
         case 'attendacne_approval_request':
-            $link = '/leaves'; 
+          //  $link = '/leaves'; 
+           $link = '/leaves/leave-logs';
             break;
 
         case 'leave_request':
-            $link = '/employee/leaves';
+            $link = '/employee/leaves/';
             break;
 
         case 'salary_slip':
