@@ -76,7 +76,7 @@ class LeavesController extends Controller
 
 
 
-
+        // leavelog function in same controller
     public function logs(Request $request)
     {
         
@@ -86,7 +86,7 @@ class LeavesController extends Controller
     
         $data = collect();
         
-
+           Log::info('my lkkklk are :', ['datas' => $role]);
         if ($role->view == '2') {
             $data = EmployeeLeaveLogs::where('employee_id', $user->id)->orderBy('created_at', 'desc')->get();
         } elseif ($role->view == '3') {
@@ -225,7 +225,7 @@ class LeavesController extends Controller
         ];
     }
 
-
+     // account function
     public function leavesDetailAllEmp(Request $request)
     {
         $loginUser = Auth::user();
@@ -276,9 +276,7 @@ class LeavesController extends Controller
         ]);
     }
 
-
-   // App\Http\Controllers\YourController.php
-
+         // account function
     public function employeeLogs(Request $request)
     {
         $loginUser = Auth::user();
@@ -320,6 +318,8 @@ class LeavesController extends Controller
         ]);
     }
 
+
+     // account function
     public function deleteLeave(Request $request)
     {
         $leave = EmployeeLeaveLogs::find($request->leave_id);
@@ -339,7 +339,7 @@ class LeavesController extends Controller
         return response()->json(['message' => 'Leave marked as deleted successfully']);
     }
 
-
+     // account function
     public function deleteLeavePost(Request $request)
     {
         $leave_id = $request->leave_id;
