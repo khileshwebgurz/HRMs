@@ -5,36 +5,33 @@ import LeaveLogs from "./LeavesComponent/LeaveLogs";
 import { useState } from "react";
 import axios from "axios";
 const Leaves = () => {
-  const [leavedata, setLeaveData] = useState([]);
   const [leavedetailData, setLeavedetailData] = useState([]);
   const [empDataLog, setempDataLog] = useState([]);
 
-
   const [totalAppliedLeaves, setTotalAppliedLeaves] = useState([]);
   const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
-  const [dateOfJoining, setDateOfJoining] = useState("");
+  // const [dateOfJoining, setDateOfJoining] = useState("");
 
+  // this useffect for etching leaves and leaves detail on component mount
   useEffect(() => {
     const MyLeaveData = async () => {
-      const Logdata = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves`,
-        { withCredentials: true }
-      );
       const DetailData = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`,
         { withCredentials: true }
       );
 
-      setLeaveData(Logdata.data);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
+        { withCredentials: true }
+      );
+      setempDataLog(response.data.data);
+
       setLeavedetailData(DetailData.data);
     };
     MyLeaveData();
   }, []);
 
-
-    //console.log(leavedata, 'leavedata aaa');
-   // console.log(leavedetailData, 'leavedetailData aaa');
-  // unnecesaary useeffect
+  //useeffect for when leavedetaildata changes
   useEffect(() => {
     if (!leavedetailData) return;
 
@@ -67,48 +64,10 @@ const Leaves = () => {
       credit.push(crleave);
     }
 
-    setDateOfJoining(leavedetailData?.user?.date_of_joining || "");
+    // setDateOfJoining(leavedetailData?.user?.date_of_joining || "");
     setTotalAppliedLeaves(applied);
     setTotalCreditLeaves(credit);
   }, [leavedetailData]);
-
-  
-useEffect(() => {
-  const fetchLeaveLogs = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
-        { withCredentials: true }
-      );
-      setempDataLog(response.data.data); // ← This is the array of logs
-    } catch (error) {
-      console.error("Error fetching leave logs:", error);
-    }
-  };
-
-  fetchLeaveLogs();
-}, []);
-
-//console.log(empDataLog, 'emp leave log');
-
-useEffect(() => {
-  const handleDeleteClick = (e) => {
-    const target = e.target.closest(".deleteLeave");
-    if (target) {
-      const leaveId = target.dataset.leaveid;
-      if (leaveId && confirm("Are you sure you want to delete this leave?")) {
-        console.log("Deleting leave ID:", leaveId);
-
-        // 🔁 Call delete API here
-        // await axios.post(`/employee/leaves/delete/${leaveId}`)
-      }
-    }
-  };
-
-  document.addEventListener("click", handleDeleteClick);
-  return () => document.removeEventListener("click", handleDeleteClick);
-}, []);
-
 
   const totalApplied = totalAppliedLeaves.reduce((a, b) => a + b, 0);
   const totalCredit = totalCreditLeaves.reduce((a, b) => a + b, 0);
@@ -118,8 +77,6 @@ useEffect(() => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
-
-
 
   return (
     <>

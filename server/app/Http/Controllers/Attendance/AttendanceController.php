@@ -10,6 +10,8 @@ use App\Models\ObCandidates;
 use App\Models\AttendanceRules;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Models\AttendanceLog;
 // use Yajra\DataTables\Facades\DataTables;
 
 class AttendanceController extends Controller
@@ -122,5 +124,26 @@ class AttendanceController extends Controller
             'status' => 200,
             'data' => $result
         ]);
+    }
+
+    public function attendance()
+    {
+        $res = getWorkingHoursByDate('2021-01-15', 1);
+
+        $loginuser = Auth::user();
+        $currentDate = date('Y-m-d');
+
+        $user_id = $loginuser->id;
+
+        $totalAnomalies = EmployeeAttendance::where('employee_id', $user_id)->where('status', 'AN')
+            ->where('clock_date', '!=', $currentDate)
+            ->count();
+
+        // Today Attendance
+        $todayAttendance = AttendanceLog::where('employee_id', $loginuser->id)->where('clock_date', $currentDate)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        return view('employees.account.attendance', compact('todayAttendance', 'totalAnomalies'));
     }
 }
