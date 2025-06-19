@@ -5,7 +5,7 @@ import "../assets/css/dashboard.css";
 import { Link } from "react-router-dom";
 const Dashboard = () => {
   const user = useUser();
-  console.log("my user is >>>", user);
+  // console.log("my user is >>>", user);
 
   return (
     <section className="content mt-4">

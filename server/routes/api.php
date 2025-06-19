@@ -41,7 +41,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     // Shared routes for all authenticated users
-   
+    Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
     Route::get('/employees', [EmployeeController::class, 'directory']);
     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
     Route::get('/employee/leaves', [LeavesController::class, 'index']);
@@ -66,7 +66,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
         Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
         Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
-        Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
+        
         Route::post('/get-decline-request', [LeavesController::class, 'decline'])->name('decline');
         Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
 

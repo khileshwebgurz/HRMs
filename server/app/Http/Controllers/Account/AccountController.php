@@ -300,7 +300,8 @@ class AccountController extends Controller
             ? explode("-", get_options('day_shift_timing'))
             : explode("-", get_options('night_shift_timing'));
         
-       
+        Log::info('This is shiftTime', ['shiftTime' => $shiftTime]);
+
         $shift_start = $shiftTime[0];
         $shift_end = $shiftTime[1];
     
@@ -324,8 +325,7 @@ class AccountController extends Controller
             $clock_in = $row->clock_in . ($row->late_reason ? "<br><span style='color:red;'>{$row->late_reason}</span>" : '');
             $after_shift_reason = "<span style='color:red;'>{$row->after_shift_clockin_reason}</span>";
     
-            Log::info('This is clock_in', ['records' => $clock_in]);
-            Log::info('This is after_shift_reason', ['records' => $after_shift_reason]);
+           
             // Work Duration
             $work_duration = '-';
             if ($row->clock_date != $today && !empty($row->work_duration)) {
@@ -336,11 +336,11 @@ class AccountController extends Controller
     
             // Break Duration
             $break_duration = $row->break_duration ?: "0 Hours 0 Mins";
-            Log::info('This is break_duration', ['records' => $break_duration]);
+           
             // Overtime
             $overtime = '-';
             if ($row->clock_date != $today && $row->overtime != '00:00') {
-                Log::info('This is another inside');
+              
                 // $od = explode(":", $row->overtime);
                 // $overtime = "{$od[0]} Hours {$od[1]} Mins";
             }

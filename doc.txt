@@ -16,3 +16,6 @@ ORDER BY id DESC
 
 4) to get all data whose employee is not null -> SELECT * FROM public.employees where manager_id is Not null;
 
+
+To avoid the issue of duplicate index : We just increase the id 
+SELECT setval('notifications_id_seq', (SELECT MAX(id) FROM notifications));
