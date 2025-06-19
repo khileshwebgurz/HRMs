@@ -4,6 +4,7 @@ import "../../assets/css/LeaveLog.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
+
 const LeaveLogs = () => {
   const navigate = useNavigate();
   const [leaveData, setleaveData] = useState([]);
@@ -31,6 +32,10 @@ const LeaveLogs = () => {
     };
     fetchingLogs();
   }, []);
+
+  const handleGoBack = ()=> {
+    navigate('/leaves')
+  }
 
   console.log("my user leave logs >>>", user.user_role);
 
@@ -87,11 +92,12 @@ const LeaveLogs = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>All Leave Logs</h1>
+              <h1>All Leave Logs Empolyees </h1>
             </div>
           </div>
         </div>
       </section>
+      <button onClick={handleGoBack}>Back My Leaves Log</button>
 
       <div className="container-fluid">
         <div className="card">
