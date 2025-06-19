@@ -14,7 +14,6 @@ const Attendance = () => {
         `${import.meta.env.VITE_API_BASE_URL}/employee/attendance`,
         { withCredentials: true }
       );
-        console.log(data, 'data log')
       setAttendance(data.data);
     };
     getAttendance();

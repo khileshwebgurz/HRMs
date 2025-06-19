@@ -4,41 +4,37 @@ import LeaveLogs from "./LeavesComponent/LeaveLogs";
 import axios from "axios";
 
 const Leaves = () => {
-  const [empDataLog, setEmpDataLog] = useState([]);
+  const [leavedata, setLeaveData] = useState([]);
   const [leavedetailData, setLeavedetailData] = useState([]);
+  const [empDataLog, setempDataLog] = useState([]);
+
+
   const [totalAppliedLeaves, setTotalAppliedLeaves] = useState([]);
   const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
-  const [activeTab, setActiveTab] = useState("applyleave");
-
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedLeaveId, setSelectedLeaveId] = useState(null);
-  const [reason, setReason] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const fetchLeaveLogs = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
-        { withCredentials: true }
-      );
-      setEmpDataLog(response.data.data);
-    } catch (error) {
-      console.error("Error fetching leave logs:", error);
-    }
-  };
+  const [dateOfJoining, setDateOfJoining] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      const details = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`, {
-        withCredentials: true,
-      });
-      setLeavedetailData(details.data);
-      fetchLeaveLogs();
+    const MyLeaveData = async () => {
+      const Logdata = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves`,
+        { withCredentials: true }
+      );
+      const DetailData = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`,
+        { withCredentials: true }
+      );
+
+      setLeaveData(Logdata.data);
+      setLeavedetailData(DetailData.data);
     };
 
     fetchData();
   }, []);
 
+
+    //console.log(leavedata, 'leavedata aaa');
+   // console.log(leavedetailData, 'leavedetailData aaa');
+  // unnecesaary useeffect
   useEffect(() => {
     if (!leavedetailData) return;
 
@@ -66,44 +62,59 @@ const Leaves = () => {
       credit.push(crleave);
     }
 
+    setDateOfJoining(leavedetailData?.user?.date_of_joining || "");
     setTotalAppliedLeaves(applied);
     setTotalCreditLeaves(credit);
   }, [leavedetailData]);
 
-  const handleDelete = (leaveId) => {
-    setSelectedLeaveId(leaveId);
-    setShowDeleteModal(true);
-  };
-
-  const handleSubmitDelete = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
+  
+useEffect(() => {
+  const fetchLeaveLogs = async () => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/delete-post`,
-        {
-          leave_id: selectedLeaveId,
-          leave_delete_reason: reason,
-        },
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
         { withCredentials: true }
       );
-
-      alert(response.data.message);
-      setShowDeleteModal(false);
-      setReason("");
-      setSelectedLeaveId(null);
-      fetchLeaveLogs();
+      setempDataLog(response.data.data); // ← This is the array of logs
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+      console.error("Error fetching leave logs:", error);
     }
   };
+
+  fetchLeaveLogs();
+}, []);
+
+//console.log(empDataLog, 'emp leave log');
+
+useEffect(() => {
+  const handleDeleteClick = (e) => {
+    const target = e.target.closest(".deleteLeave");
+    if (target) {
+      const leaveId = target.dataset.leaveid;
+      if (leaveId && confirm("Are you sure you want to delete this leave?")) {
+        console.log("Deleting leave ID:", leaveId);
+
+        // 🔁 Call delete API here
+        // await axios.post(`/employee/leaves/delete/${leaveId}`)
+      }
+    }
+  };
+
+  document.addEventListener("click", handleDeleteClick);
+  return () => document.removeEventListener("click", handleDeleteClick);
+}, []);
+
 
   const totalApplied = totalAppliedLeaves.reduce((a, b) => a + b, 0);
   const totalCredit = totalCreditLeaves.reduce((a, b) => a + b, 0);
   const penalty = totalApplied > totalCredit ? totalApplied - totalCredit : 0;
+
+  const [activeTab, setActiveTab] = useState("applyleave");
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+  };
+
+
 
   return (
     <div className="container leave-page mt-4">
