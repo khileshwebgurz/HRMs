@@ -7,6 +7,7 @@ import axios from "axios";
 const Leaves = () => {
   const [leavedata, setLeaveData] = useState([]);
   const [leavedetailData, setLeavedetailData] = useState([]);
+  const [empDataLog, setempDataLog] = useState([]);
 
 
   const [totalAppliedLeaves, setTotalAppliedLeaves] = useState([]);
@@ -31,6 +32,8 @@ const Leaves = () => {
   }, []);
 
 
+    //console.log(leavedata, 'leavedata aaa');
+   // console.log(leavedetailData, 'leavedetailData aaa');
   // unnecesaary useeffect
   useEffect(() => {
     if (!leavedetailData) return;
@@ -68,6 +71,44 @@ const Leaves = () => {
     setTotalAppliedLeaves(applied);
     setTotalCreditLeaves(credit);
   }, [leavedetailData]);
+
+  
+useEffect(() => {
+  const fetchLeaveLogs = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
+        { withCredentials: true }
+      );
+      setempDataLog(response.data.data); // ← This is the array of logs
+    } catch (error) {
+      console.error("Error fetching leave logs:", error);
+    }
+  };
+
+  fetchLeaveLogs();
+}, []);
+
+//console.log(empDataLog, 'emp leave log');
+
+useEffect(() => {
+  const handleDeleteClick = (e) => {
+    const target = e.target.closest(".deleteLeave");
+    if (target) {
+      const leaveId = target.dataset.leaveid;
+      if (leaveId && confirm("Are you sure you want to delete this leave?")) {
+        console.log("Deleting leave ID:", leaveId);
+
+        // 🔁 Call delete API here
+        // await axios.post(`/employee/leaves/delete/${leaveId}`)
+      }
+    }
+  };
+
+  document.addEventListener("click", handleDeleteClick);
+  return () => document.removeEventListener("click", handleDeleteClick);
+}, []);
+
 
   const totalApplied = totalAppliedLeaves.reduce((a, b) => a + b, 0);
   const totalCredit = totalCreditLeaves.reduce((a, b) => a + b, 0);
@@ -119,7 +160,7 @@ const Leaves = () => {
                           />
                         )}
                         {activeTab === "leave" && (
-                          <LeaveLogs myLeaves={leavedata.data} />
+                          <LeaveLogs myLeaves={empDataLog} />
                         )}
                       </section>
                     </div>

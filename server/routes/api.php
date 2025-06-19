@@ -46,6 +46,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
     Route::get('/employee/leaves', [LeavesController::class, 'index']);
     Route::get('/employee/leaves/details', [LeavesController::class, 'leavesDetailAllEmp']);
+    
     Route::post('/employee/leaves/applyLeave', [LeavesController::class, 'applyLeave']);
     Route::get('/employee/getTeamTree', [TeamController::class, 'getTeamTree']);
     Route::get('/employee/attendance', [AccountController::class, 'attendance']);

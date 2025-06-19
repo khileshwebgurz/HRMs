@@ -276,6 +276,52 @@ class LeavesController extends Controller
         ]);
     }
 
+
+    public function employeeLogs(Request $request)
+    {
+        $loginUser = Auth::user();
+
+        $leaveLogs = EmployeeLeaveLogs::where('employee_id', $loginUser->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($log) {
+                $statusText = match ((int) $log->status) {
+                    2 => 'Approved',
+                    3 => 'Declined',
+                    4 => 'Deleted',
+                    default => 'Pending',
+                };
+
+                $leaveType = optional(LeaveRules::find($log->leave_type))->rule_name;
+
+                // Conditionally generate action HTML
+                $actionHtml = '-';
+                if ((int)$log->status === 1) { // 1 means Pending
+                    $actionHtml = '<div class="btn-group btn-group-sm">';
+                    $actionHtml .= '<a class="btn btn-danger deleteLeave" title="delete leave" data-leaveid="' . $log->id . '" href="javascript:void(0)"><i class="fas fa-trash-alt"></i></a>';
+                    $actionHtml .= '</div>';
+                }
+
+                return [
+                    'id' => $log->id,
+                    'leave_type' => $leaveType,
+                    'start_date' => $log->start_date,
+                    'end_date' => $log->end_date,
+                    'total_applied_leaves' => $log->total_applied_leaves,
+                    'created_at' => $log->created_at->format('Y-m-d'),
+                    'status' => $statusText,
+                    'action' => $actionHtml,
+                ];
+            });
+
+        return response()->json([
+            'data' => $leaveLogs,
+        ]);
+    }
+
+
+
+
     public function applyLeave(Request $request)
     {
         // $ldate = date('m/d/Y', strtotime("-1 week"));
