@@ -47,6 +47,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/leaves', [LeavesController::class, 'index']);
     Route::get('/employee/leaves/details', [LeavesController::class, 'leavesDetailAllEmp']);
     Route::get('/employee/leaves/empLeavelog', [LeavesController::class, 'employeeLogs']);
+    Route::post('/employee/leaves/delete', [LeavesController::class, 'deleteLeave']);
+    Route::post('/employee/leaves/delete-post', [LeavesController::class, 'deleteLeavePost'])->name('em-leave-delete-post');
 
     Route::post('/employee/leaves/applyLeave', [LeavesController::class, 'applyLeave']);
     Route::get('/employee/getTeamTree', [TeamController::class, 'getTeamTree']);

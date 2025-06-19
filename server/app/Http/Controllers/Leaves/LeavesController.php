@@ -277,6 +277,8 @@ class LeavesController extends Controller
     }
 
 
+   // App\Http\Controllers\YourController.php
+
     public function employeeLogs(Request $request)
     {
         $loginUser = Auth::user();
@@ -294,9 +296,8 @@ class LeavesController extends Controller
 
                 $leaveType = optional(LeaveRules::find($log->leave_type))->rule_name;
 
-                // Conditionally generate action HTML
                 $actionHtml = '-';
-                if ((int)$log->status === 1) { // 1 means Pending
+                if ((int)$log->status === 1) { // Pending
                     $actionHtml = '<div class="btn-group btn-group-sm">';
                     $actionHtml .= '<a class="btn btn-danger deleteLeave" title="delete leave" data-leaveid="' . $log->id . '" href="javascript:void(0)"><i class="fas fa-trash-alt"></i></a>';
                     $actionHtml .= '</div>';
@@ -319,7 +320,83 @@ class LeavesController extends Controller
         ]);
     }
 
+    public function deleteLeave(Request $request)
+    {
+        $leave = EmployeeLeaveLogs::find($request->leave_id);
 
+        if (!$leave) {
+            return response()->json(['message' => 'Leave not found'], 404);
+        }
+
+        if ((int)$leave->status !== 1) {
+            return response()->json(['message' => 'Only pending leaves can be deleted'], 403);
+        }
+
+        // ✅ Mark status as "Deleted"
+        $leave->status = 4;
+        $leave->save();
+
+        return response()->json(['message' => 'Leave marked as deleted successfully']);
+    }
+
+
+    public function deleteLeavePost(Request $request)
+    {
+        $leave_id = $request->leave_id;
+        $leave = EmployeeLeaveLogs::find($leave_id);
+
+        if (!$leave) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Leave not found.'
+            ]);
+        }
+
+        if ((int)$leave->status !== 1) { 
+            return response()->json([
+                'status' => 403,
+                'message' => 'Only pending leaves can be marked as deleted.'
+            ]);
+        }
+
+        $leave->status = 4; // 4 = Deleted
+        $leave->leave_delete_reason = $request->leave_delete_reason;
+
+        if ($leave->save()) {
+            // Notify HR and Manager via email
+            $employee = Employees::find($leave->employee_id);
+            $manager = Employees::find($leave->manager_id);
+
+            if ($employee && $manager) {
+                $to_emails = ['hr@webguruz.in', $manager->email];
+
+                $data = [
+                    'to_name' => $manager->name,
+                    'employee' => $employee->name,
+                    'leave_type' => $leave->leave_type,
+                    'start_date' => $leave->start_date,
+                    'end_date' => $leave->end_date,
+                    'leave_delete_reason' => $request->leave_delete_reason,
+                ];
+
+                // Mail::send('attendance.leave-delete', $data, function ($message) use ($to_emails, $employee) {
+                //     $message->from('noreply@webguruz.in', 'noreply')
+                //             ->to($to_emails)
+                //             ->subject('Leave Deletion Notice - ' . $employee->name);
+                // });
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => $employee->name . "'s leave has been marked as deleted."
+            ]);
+        }
+
+        return response()->json([
+            'status' => 500,
+            'message' => 'Something went wrong. Try again.'
+        ]);
+    }
 
 
     public function applyLeave(Request $request)
