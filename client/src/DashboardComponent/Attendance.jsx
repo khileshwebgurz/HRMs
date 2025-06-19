@@ -15,7 +15,7 @@ const Attendance = () => {
         { withCredentials: true }
       );
         console.log(data, 'data log')
-      setAttendance(data.data.data);
+      setAttendance(data.data);
     };
     getAttendance();
   }, []);

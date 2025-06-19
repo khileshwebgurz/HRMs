@@ -52,7 +52,7 @@ class NotificationController extends Controller
             if ($notifications) {
                 $messages = [];
                 foreach ($notifications as $notify) {
-                    Log::info('Notification:', ['notify' => $notify]);
+                    // Log::info('Notification:', ['notify' => $notify]);
                     // $notify->notify_status = 2;  this part was uncommented due to this when i refresh page the notification is vanished bcz it's changing the status of notification as seen/read.
                     $notify->save();
                    
@@ -63,7 +63,7 @@ class NotificationController extends Controller
                        
                     ];
 
-                    Log::info('Notification:', ['notify' => $notify]);
+                    // Log::info('Notification:', ['notify' => $notify]);
                     
                 }
 
