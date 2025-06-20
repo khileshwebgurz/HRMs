@@ -75,7 +75,7 @@ const MonthlyLog = ({ data }) => {
             <tbody>
               {data.map((log, index) => (
                 <tr key={index}>
-                  <td>{log.date}</td>
+                  <td>{log.clock_date}</td>
                   <td>{log.status}</td>
                   <td dangerouslySetInnerHTML={{ __html: log.clock_in}}/>
                   <td>{log.clock_out}</td>
