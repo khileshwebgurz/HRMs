@@ -14,13 +14,14 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\TicketController;
 
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+     Route::post('/logout', [AuthController::class, 'logout']);
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();
@@ -57,6 +58,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
     Route::post('/change-password', [AccountController:: class ,'editProfile'])->name('em-edit-profile');
+
+    // tickets
+    //Route::get('/tickets', [TicketController::class, 'ticketViewByEmployee']);
+    Route::get('/tickets', [TicketController::class, 'ticketViewByEmployee']);
+    Route::post('/ticket/add', [TicketController::class, 'addticket'])->name('api-ticket-add');
+
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');

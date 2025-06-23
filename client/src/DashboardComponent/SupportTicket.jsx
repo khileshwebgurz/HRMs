@@ -1,6 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
+import axios from "axios";
+import { useState } from "react";
 import "../assets/css/ticket.css";
 const SupportTicket = () => {
+const [ ticket, setTicket] = useState([])
+  useEffect(()=>{
+    const support = async()=>{
+      const data = await axios.get('http://localhost:8000/api/tickets', {withCredentials: true})
+
+setTicket(data.data)
+    }
+    support();
+  },[])
+  console.log(ticket, 'daraaa');
   return (
     <>
       <section className="content mt-4 support-ticket">

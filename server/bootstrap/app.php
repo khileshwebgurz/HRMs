@@ -19,7 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
          // Route middleware (like Kernel.php $routeMiddleware)
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+             'check.permission' => \App\Http\Middleware\RolePermissionMiddleware::class,
         ]);
+
+      
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
