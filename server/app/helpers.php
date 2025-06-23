@@ -3,8 +3,8 @@
 use App\Http\Middleware\RolePermissionMiddleware;
 
 if (!function_exists('hasPermission')) {
-    function hasPermission($slug)
+    function hasPermission($permissionId)
     {
-        return RolePermissionMiddleware::checkPermission($slug);
+        return RolePermissionMiddleware::checkPermissionById($permissionId);
     }
 }

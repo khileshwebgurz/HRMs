@@ -30,3 +30,4 @@ class Tickets extends Model
         return $this->hasOne(Employees::class, 'id', 'employee_id');
     }
 }
+

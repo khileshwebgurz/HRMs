@@ -3,44 +3,32 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Roles;
-use App\Models\Permissions;
-use Illuminate\Support\Facades\Log;
 
 class RolePermissionMiddleware
 {
-    // Route middleware (optional, not used here)
-    public function handle(Request $request, Closure $next, $permissionSlug)
-    {
-        if (!self::checkPermission($permissionSlug)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return $next($request);
-    }
-
-    // Static method for controller use
-    public static function checkPermission($permissionSlug)
+    public static function checkPermissionById($permissionId)
     {
         $user = Auth::guard('api')->user();
 
-        if (!$user) {
-            return false;
-        }
+        if (!$user) return false;
 
         $role = Roles::find($user->user_role);
 
-        if (!$role) {
-            return false;
+        if (!$role || empty($role->permissions)) return false;
+
+        $permissionIds = json_decode($role->permissions, true);
+
+        return is_array($permissionIds) && in_array($permissionId, $permissionIds);
+    }
+
+    public function handle($request, Closure $next, $permissionId)
+    {
+        if (!self::checkPermissionById($permissionId)) {
+            return response()->json(['message' => 'Permission denied'], 403);
         }
 
-        $permissionIds = json_decode($role->permissions ?? '[]', true);
-
-        $slugs = Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
-           
-
-        return in_array($permissionSlug, $slugs);
+        return $next($request);
     }
 }

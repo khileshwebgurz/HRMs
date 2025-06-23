@@ -63,36 +63,33 @@ Route::middleware(['auth:api'])->group(function () {
     //Route::get('/tickets', [TicketController::class, 'ticketViewByEmployee']);
     Route::get('/tickets', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/ticket/add', [TicketController::class, 'addticket'])->name('api-ticket-add');
+    Route::get('/tickets-get', [TicketController::class, 'getUserPermissions']);
 
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
    
     //  Admin-only routes
-    Route::middleware('role:1')->group(function () {
+    //Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
         Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
         Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
-        
         Route::post('/get-decline-request', [LeavesController::class, 'decline'])->name('decline');
         Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
-
         Route::get('/get-excel', [UserController::class, 'exportCandidates']);
-
-        // helpdesk search
         Route::get('/helpdesk-search', [SettingController::class,'helpdesk_search'])->name('em-helpdesk-search');
-    });
+    //});
 
     //  Employee-only routes (for future)
-    Route::middleware('role:2')->group(function () {
-        // Add employee-specific routes if needed
+    // Route::middleware('role:2')->group(function () {
+    //     // Add employee-specific routes if needed
         
-    });
+    // });
 
     // IT support
-    Route::middleware('role:3')->group(function () {
+    // Route::middleware('role:3')->group(function () {
         
-    });
+    // });
 
     
 });

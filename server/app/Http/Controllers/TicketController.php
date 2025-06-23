@@ -29,76 +29,104 @@ use App\Http\Middleware\RolePermissionMiddleware;
 class TicketController extends Controller
 {
 
-    private function extractUserPermissions()
+
+  private function extractUserPermissionIds()
     {
         $user = Auth::guard('api')->user();
-
-        if (!$user) {
-            return null;
-        }
+        if (!$user) return null;
 
         $role = Roles::find($user->user_role);
-        if (!$role) {
-            return null;
-        }
+        if (!$role) return null;
 
         $permissionIds = json_decode($role->permissions ?? '[]', true);
-        return Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
+        return is_array($permissionIds) ? $permissionIds : [];
+    }
+
+   private function checkUserPermissionById($permissionId)
+        {
+            $permissionIds = $this->extractUserPermissionIds();
+            if (is_null($permissionIds)) return false;
+
+            $permissionIds = array_map('intval', $permissionIds);
+
+            if (is_array($permissionId)) {
+                foreach ($permissionId as $id) {
+                    if (in_array((int)$id, $permissionIds)) {
+                        return true; 
+                    }
+                }
+                return false;
+            }
+
+            return in_array((int)$permissionId, $permissionIds);
+        }
+
+
+    private function permissionDeniedResponse($message = 'Permission not granted for this user')
+    {
+        return response()->json([
+            'status' => 403,
+            'message' => $message,
+            'error' => 'Access Denied'
+        ], 403);
     }
 
     public function getUserPermissions(Request $request)
     {
-        $slugs = $this->extractUserPermissions();
+        $permissionIds = $this->extractUserPermissionIds();
 
-        if (is_null($slugs)) {
+        if (is_null($permissionIds)) {
             return response()->json(['message' => 'Unauthenticated or Role not found'], 401);
         }
 
+        $permissions = Permissions::whereIn('id', $permissionIds)->get();
+
         return response()->json([
             'status' => 200,
-            'permissions' => $slugs,
+            'permission_ids' => $permissionIds,
+            'permissions' => $permissions
         ]);
     }
 
 
-    public function ticketViewByEmployee(Request $request)
+    
+    public function ticketViewByEmployee111(Request $request)
     {
+    
+        $permissionIds = $this->extractUserPermissionIds();
 
-
-      $slugs = $this->extractUserPermissions();
-
-        if (is_null($slugs)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        Log::info('Permission Check', [
-            'result' => $slugs
+        Log::info('Checking permission for permissionIds', [
+            'permissionIds' => $permissionIds
         ]);
 
-        // Use helper function
-        if (!hasPermission('all_users')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+    
+        if (is_null($permissionIds)) {
+            return response()->json(['message' => 'Unauthenticated or Role not found'], 401);
         }
 
-    
+        $permissionIdToCheck = [12];
+        $hasPermission = $this->checkUserPermissionById($permissionIdToCheck);
+
+        Log::info('Checking permission for ticketViewByEmployee', [
+            'checked_id' => $permissionIdToCheck,
+            'has_permission' => $hasPermission
+        ]);
+
+        if (!$hasPermission) {
+            return $this->permissionDeniedResponse();
+        }
+
+        Log::debug('User permission IDs', [
+            'ids' => $permissionIds
+        ]);
+
+
         $user = auth('api')->user();
         $id = $user->id;
 
-        
-         Log::info('user Check', [
-            'result' => $user,
-             'id' => $id
-        ]);
 
         $query = Tickets::where('employee_id', $id);
 
-            Log::info('My query SQL is >>>>', [
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings()
-            ]);
-
-
-        // Date filter
         if (!empty($request->datefilter)) {
             $dates = explode(" - ", $request->datefilter);
             $query->whereBetween('created_at', [
@@ -107,7 +135,89 @@ class TicketController extends Controller
             ]);
         }
 
-        // Status filter
+
+        if (!empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+
+        $tickets = $query->latest()->get();
+
+        Log::info('Tickets Retrieved', [
+            'count' => $tickets->count(),
+            'data' => $tickets
+        ]);
+
+    
+        $formatted = $tickets->map(function ($ticket) {
+            $issueTypes = ['1' => 'Hardware', '2' => 'Software', '3' => 'Server', '4' => 'Internet'];
+            $statusLabels = ['1' => 'Open', '2' => 'Closed', '3' => 'In Progress'];
+
+            $employee = Employees::find($ticket->employee_id);
+
+            return [
+                'id' => $ticket->id,
+                'issue_type' => $issueTypes[$ticket->issue_type] ?? '-',
+                'status' => $statusLabels[$ticket->status] ?? '-',
+                'description' => $ticket->description,
+                'created_at' => $ticket->created_at->toDateTimeString(),
+                'date_display' => $ticket->created_at->isToday()
+                    ? $ticket->created_at->format('h:i A')
+                    : $ticket->created_at->format('d M Y'),
+                'employee_name' => $employee->name ?? '-',
+                'employee_photo' => $employee && $employee->profile_pic
+                    ? asset('uploads/employees-photos/' . $employee->profile_pic)
+                    : asset('dist/img/employee_default_img.png'),
+            ];
+        });
+
+
+        return response()->json([
+            'status' => 200,
+            'tickets' => $formatted
+        ]);
+    }
+    public function ticketViewByEmployeeNEw(Request $request)
+    {
+       
+        $permissionIds = $this->extractUserPermissionIds();
+        Log::info('Checking permission for permissionIds', [
+                        'permissionIds' => $permissionIds
+                    ]);
+
+        if (is_null($permissionIds)) {
+            return response()->json(['message' => 'Unauthenticated or Role not found'], 401);
+        }
+
+        $permissions = Permissions::whereIn('id', $permissionIds)->get();
+
+         $hasPermission = $this->checkUserPermissionById($permissionIds);
+            Log::info('Checking permission for ticketViewByEmployee', [
+                'has_permission' => $hasPermission
+            ]);
+
+        if (!$this->checkUserPermissionById(12)) {
+            return $this->permissionDeniedResponse();
+        }
+
+        Log::debug('User permission IDs', [
+                'ids' => $this->extractUserPermissionIds()
+            ]);
+
+
+        $user = auth('api')->user();
+        $id = $user->id;
+
+        $query = Tickets::where('employee_id', $id);
+
+        if (!empty($request->datefilter)) {
+            $dates = explode(" - ", $request->datefilter);
+            $query->whereBetween('created_at', [
+                $dates[0] . ' 00:00:00',
+                $dates[1] . ' 23:59:59'
+            ]);
+        }
+
         if (!empty($request->status)) {
             $query->where('status', $request->status);
         }
@@ -148,68 +258,95 @@ class TicketController extends Controller
     }
 
 
-      public function ticketViewByEmployeeOLD(Request $request)
-        {
+    public function ticketViewByEmployee(Request $request)
+    {
 
-        
-            $user = auth('api')->user();
-            $id = $user->id;
-            $query = Tickets::where('employee_id', $id);
-           // Log::info('My query request is >>>>', ['query' => $query]);
-            // Filter by date range if provided
-            if (!empty($request->datefilter)) {
-                $dates = explode(" - ", $request->datefilter);
-                $query->whereBetween('created_at', [
-                    $dates[0] . ' 00:00:00',
-                    $dates[1] . ' 23:59:59'
-                ]);
-            }
+        $permissionIds = $this->extractUserPermissionIds();
 
-            // Filter by status if provided
-            if (!empty($request->status)) {
-                $query->where('status', $request->status);
-            }
+        Log::info('Checking permission for permissionIds', [
+            'permissionIds' => $permissionIds
+        ]);
 
-            $tickets = $query->latest()->get();
+    
+        if (is_null($permissionIds)) {
+            return response()->json(['message' => 'Unauthenticated or Role not found'], 401);
+        }
 
-            // Format for React consumption
-            $formatted = $tickets->map(function ($ticket) {
-                $issueTypes = [
-                    '1' => 'Hardware',
-                    '2' => 'Software',
-                    '3' => 'Server',
-                    '4' => 'Internet',
-                ];
+        $permissionIdToCheck = [12];
+        $hasPermission = $this->checkUserPermissionById($permissionIdToCheck);
 
-                $statusLabels = [
-                    '1' => 'Open',
-                    '2' => 'Closed',
-                    '3' => 'In Progress',
-                ];
+        Log::info('Checking permission for ticketViewByEmployee', [
+            'checked_id' => $permissionIdToCheck,
+            'has_permission' => $hasPermission
+        ]);
 
-                $employee = Employees::find($ticket->employee_id);
+        if (!$hasPermission) {
+            return $this->permissionDeniedResponse();
+        }
 
-                return [
-                    'id' => $ticket->id,
-                    'issue_type' => $issueTypes[$ticket->issue_type] ?? '-',
-                    'status' => $statusLabels[$ticket->status] ?? '-',
-                    'description' => $ticket->description,
-                    'created_at' => $ticket->created_at->toDateTimeString(),
-                    'date_display' => $ticket->created_at->isToday()
-                        ? $ticket->created_at->format('h:i A')
-                        : $ticket->created_at->format('d M Y'),
-                    'employee_name' => $employee->name ?? '-',
-                    'employee_photo' => $employee && $employee->profile_pic
-                        ? asset('uploads/employees-photos/' . $employee->profile_pic)
-                        : asset('dist/img/employee_default_img.png'),
-                ];
-            });
+        Log::debug('User permission IDs', [
+            'ids' => $permissionIds
+        ]);
 
-            return response()->json([
-                'status' => 200,
-                'tickets' => $formatted,
+
+        $user = auth('api')->user();
+        $id = $user->id;
+        $query = Tickets::where('employee_id', $id);
+        // Log::info('My query request is >>>>', ['query' => $query]);
+        // Filter by date range if provided
+        if (!empty($request->datefilter)) {
+            $dates = explode(" - ", $request->datefilter);
+            $query->whereBetween('created_at', [
+                $dates[0] . ' 00:00:00',
+                $dates[1] . ' 23:59:59'
             ]);
         }
+
+        // Filter by status if provided
+        if (!empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        $tickets = $query->latest()->get();
+
+        // Format for React consumption
+        $formatted = $tickets->map(function ($ticket) {
+            $issueTypes = [
+                '1' => 'Hardware',
+                '2' => 'Software',
+                '3' => 'Server',
+                '4' => 'Internet',
+            ];
+
+            $statusLabels = [
+                '1' => 'Open',
+                '2' => 'Closed',
+                '3' => 'In Progress',
+            ];
+
+            $employee = Employees::find($ticket->employee_id);
+
+            return [
+                'id' => $ticket->id,
+                'issue_type' => $issueTypes[$ticket->issue_type] ?? '-',
+                'status' => $statusLabels[$ticket->status] ?? '-',
+                'description' => $ticket->description,
+                'created_at' => $ticket->created_at->toDateTimeString(),
+                'date_display' => $ticket->created_at->isToday()
+                    ? $ticket->created_at->format('h:i A')
+                    : $ticket->created_at->format('d M Y'),
+                'employee_name' => $employee->name ?? '-',
+                'employee_photo' => $employee && $employee->profile_pic
+                    ? asset('uploads/employees-photos/' . $employee->profile_pic)
+                    : asset('dist/img/employee_default_img.png'),
+            ];
+        });
+
+        return response()->json([
+            'status' => 200,
+            'tickets' => $formatted,
+        ]);
+    }
 
     public function addticket(Request $request)
     {
