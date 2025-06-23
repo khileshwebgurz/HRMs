@@ -22,7 +22,7 @@ class AttendanceController extends Controller
         // Permission check
 
         $permissions = Session::get('permission');
-        Log::info('My permission data from attendance page is  >>>>', ['permission' => $permissions]);
+       
 
         // if (!is_array($permissions) || !isset($permissions[0]) || !in_array('anomalies_requests', $permissions[0])) {
         //     Log::info('Inside');

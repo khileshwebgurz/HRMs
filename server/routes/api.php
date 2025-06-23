@@ -14,6 +14,7 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\TicketController;
 
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -58,6 +59,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
     Route::post('/change-password', [AccountController:: class ,'editProfile'])->name('em-edit-profile');
 
+
+    // ticket
+    Route::get('/ticketViewByEmployee',[TicketController::class,'ticketViewByEmployee']);
+    Route::post('/addTicket',[TicketController::class,'addTicket']);
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
    

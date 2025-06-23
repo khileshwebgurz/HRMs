@@ -44,7 +44,7 @@ class AuthController extends Controller
 
         $token = $employee->createToken('AccessToken')->accessToken;
 
-        Log::info('My user role  is >>>>', ['role' => $employee->user_role]);
+       
 
 
         $str =  str_replace(['[',']'], "", $permissionIds);

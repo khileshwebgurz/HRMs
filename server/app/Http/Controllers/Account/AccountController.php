@@ -300,8 +300,7 @@ class AccountController extends Controller
             ? explode("-", get_options('day_shift_timing'))
             : explode("-", get_options('night_shift_timing'));
         
-        Log::info('This is shiftTime', ['shiftTime' => $shiftTime]);
-
+       
         $shift_start = $shiftTime[0];
         $shift_end = $shiftTime[1];
     
@@ -329,7 +328,7 @@ class AccountController extends Controller
             // Work Duration
             $work_duration = '-';
             if ($row->clock_date != $today && !empty($row->work_duration)) {
-                Log::info('This is inside');
+               
                 $wd = explode(":", $row->work_duration);
                 $work_duration = "{$wd[0]} Hours {$wd[1]} Mins";
             }

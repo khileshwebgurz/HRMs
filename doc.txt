@@ -19,3 +19,19 @@ ORDER BY id DESC
 
 To avoid the issue of duplicate index : We just increase the id 
 SELECT setval('notifications_id_seq', (SELECT MAX(id) FROM notifications));
+
+
+//////////////////////////////// Ticket Page Issue and its solution
+
+[previous exception] [object] (PDOException(code: 23502): SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column \"id\" of relation \"tickets\" violates not-null constraint
+DETAIL:  Failing row contains (null, 757, 1, 1, 30 to 60 minutes, dsd, null, 1, 2025-06-23 13:04:39, 2025-06-23 13:04:39). at /home/workspace/Videos/HRMs/server/vendor/laravel/framework/src/Illuminate/Database/Connection.php:409)
+[stacktrace]
+
+-- ✅ Step 1: Create a sequence if it doesn't exist
+CREATE SEQUENCE IF NOT EXISTS tickets_id_seq;
+
+-- ✅ Step 2: Attach the sequence to the id column so it's auto-incremented
+ALTER TABLE tickets ALTER COLUMN id SET DEFAULT nextval('tickets_id_seq');
+SELECT MAX(id) FROM tickets;
+SELECT setval('tickets_id_seq', 51, false);
+SELECT setval('tickets_id_seq', (SELECT MAX(id) FROM tickets));
