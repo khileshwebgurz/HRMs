@@ -16,6 +16,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Employee\AttendanceLogController;
+use App\Http\Controllers\RoleController;
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -67,7 +68,18 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
 
     // AttendanceLogController
-    Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
+    // Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
+
+    
+    //roles
+    Route::get('/permissions', [RoleController::class, 'getPermissions']);
+    Route::get('/roles/{id}', [RoleController::class, 'getRole']);
+    Route::get('/roles', [RoleController::class, 'allRoles']);
+    Route::post('/roles/add', [RoleController::class, 'addRolePost']);
+    Route::delete('/roles/{id}', [RoleController::class, 'deleteRole']);
+    Route::get('/roles/{id}', [RoleController::class, 'getRoleById']);
+    Route::put('/roles/{id}', [RoleController::class, 'updateRole']);
+    
    
      //  Admin-only routes
     Route::middleware('role:1')->group(function () {

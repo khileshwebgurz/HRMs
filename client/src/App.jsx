@@ -23,12 +23,24 @@ import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
 import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
+import RoleTable from './components/RoleTable';
+import CreateRoleForm from './components/CreateRoleForm';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
+         <Route path="/roles" element={
+           <ProtectedRoute>
+            <RoleTable />
+           </ProtectedRoute>
+          } />
+           <Route path="/roles/add" element={
+           <ProtectedRoute>
+            <CreateRoleForm />
+           </ProtectedRoute>
+          } />
         <Route
           path="/"
           element={
