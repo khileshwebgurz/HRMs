@@ -16,17 +16,14 @@ const SupportTicket = () => {
 
   useEffect(() => {
     const getTicket = async () => {
-      const data = await axios.get('http://localhost:8000/api/ticketViewByEmployee',{withCredentials:true});
+      const data = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,{withCredentials:true});
       setTicketdata(data.data);
 
     };
     getTicket();
   }, []);
 
-  const handleAddTicket = async()=>{
-    const data = await axios.post('http://localhost:8000/api/addTicket',)
-  }
-  console.log('my ticket data >>',ticketdata)
+
 
   return (
     <>

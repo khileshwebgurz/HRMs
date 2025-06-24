@@ -17,7 +17,7 @@ const AddTicketForm = ({ userRole, currentUserId }) => {
   useEffect(() => {
     if (userRole === "3" || currentUserId === 1) {
       axios
-        .get("http://localhost:8000/api/employees", { withCredentials: true })
+        .get(`${import.meta.env.VITE_API_BASE_URL}/employees`, { withCredentials: true })
         .then((res) => setEmployees(res.data))
         .catch((err) => console.error("Error loading employees", err));
     }
@@ -36,7 +36,7 @@ const AddTicketForm = ({ userRole, currentUserId }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/addTicket",
+        `${import.meta.env.VITE_API_BASE_URL}/addTicket`,
         formData,
         {
           withCredentials: true,
@@ -44,7 +44,7 @@ const AddTicketForm = ({ userRole, currentUserId }) => {
       );
 
       if (response.data.status === 200) {
-        alert("✅ Ticket submitted successfully!");
+        alert("Ticket submitted successfully!");
         // Clear form
         setFormData({
           user_role: userRole,
@@ -54,11 +54,11 @@ const AddTicketForm = ({ userRole, currentUserId }) => {
           description: "",
         });
       } else {
-        alert("❌ " + response.data.message);
+        alert(response.data.message);
       }
     } catch (error) {
       console.error("Error submitting ticket", error);
-      alert("❌ Something went wrong while submitting the ticket.");
+      alert("Something went wrong while submitting the ticket.");
     }
   };
   return (
