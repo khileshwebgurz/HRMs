@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import '../assets/css/CreateRoleForm.css';
 
 const CreateRoleForm = () => {
   const [roleName, setRoleName] = useState('');
@@ -119,7 +120,7 @@ const CreateRoleForm = () => {
 
       <div>
         <label>Permissions:</label>
-        <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+        <div className="permissions-list">
           {availablePermissions.map((perm) => (
             <div key={perm.id}>
               <label>
