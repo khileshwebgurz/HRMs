@@ -89,14 +89,11 @@ class TicketController extends Controller
         // Set employee_id
         if ($request->user_role == '3' && $request->filled('employee')) {
             $ticket->employee_id = $request->employee;
-                    Log::info('My >>>>', ['h1' => $ticket]);
         } else {
             $ticket->employee_id = $userId;
-                    Log::info('My >>>>', ['h1' => $ticket]);
         }
 
 
-       
         // Map issue type
         $issueTypes = [
             'Hardware' => '1',
@@ -130,14 +127,14 @@ class TicketController extends Controller
 
         $ticket->description = $request->description;
         Log::info('My >>>>', ['h1' => $ticket]);
-        $ticket->save();
-        // if (!$ticket->save()) {
-        //     Log::info('My high >>>>');
-        //     return response()->json([
-        //         'status' => 500,
-        //         'message' => 'Failed to create ticket.',
-        //     ]);
-        // }
+        // $ticket->save();
+        if (!$ticket->save()) {
+            Log::info('My high >>>>');
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to create ticket.',
+            ]);
+        }
 
         // Notify managers and admins
         $employees = Employees::where('user_role', '3')->where('status', '1')->get();
