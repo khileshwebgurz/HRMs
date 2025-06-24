@@ -96,6 +96,25 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
+               {user?.id === 1 && (
+                <li className="nav-item">
+                  <Link to="/roles" className="nav-link">
+                  <i className="nav-icon fas fa-clock"></i>
+                    Role List
+                  </Link>
+                </li>
+                
+              )}
+              {user?.id === 1 && (
+                <li className="nav-item">
+                  <Link to="/roles/add" className="nav-link">
+                  <i className="nav-icon fas fa-clock"></i>
+                   Add Role
+                  </Link>
+                </li>
+                
+              )}
+
               <li className="nav-item">
                 <Link href="/salary-slip" className="nav-link">
                   <i className="nav-icon fas fa-newspaper"></i>Salary Slip
@@ -155,8 +174,11 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     Webguruz Incident Management System
                   </Link>
                 </li>
+                
               )}
               {/* @endif */}
+
+             
 
               {/* @if(Auth::user()->user_role == '3') */}
               {user?.user_role === "3" && (
