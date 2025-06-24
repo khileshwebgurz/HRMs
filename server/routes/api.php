@@ -15,7 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TicketController;
-
+use App\Http\Controllers\Employee\AttendanceLogController;
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -59,14 +59,17 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
     Route::post('/change-password', [AccountController:: class ,'editProfile'])->name('em-edit-profile');
 
-
     // ticket
     Route::get('/ticketViewByEmployee',[TicketController::class,'ticketViewByEmployee']);
     Route::post('/addTicket',[TicketController::class,'addTicket']);
+
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
+
+    // AttendanceLogController
+    Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
    
-    //  Admin-only routes
+     //  Admin-only routes
     Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
         Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
