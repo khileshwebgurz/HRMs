@@ -27,9 +27,19 @@ class RoleController extends Controller
     
     public function allRoles(Request $request): JsonResponse
     {
+
+        $currentUser = Auth::user();
+
+        if (!$currentUser || $currentUser->user_role != 1) {
+            return response()->json([
+                'message' => 'Unauthorized access. Only Super Admin can view all roles.'
+            ], 403);
+
+        }
+
         $roles = Roles::all();
 
-        Log::info('roles Response', ['data' => $roles]);
+        //Log::info('roles Response', ['data' => $roles]);
 
         $dataTable = DataTables::of($roles)
             ->addIndexColumn()
@@ -44,7 +54,7 @@ class RoleController extends Controller
 
         $response = $dataTable->toArray();
 
-        Log::info('DataTables Response', ['data' => $response]);
+        //Log::info('DataTables Response', ['data' => $response]);
 
         return response()->json($response);
     }
@@ -118,11 +128,11 @@ class RoleController extends Controller
         $currentIcon = $icons[$value] ?? 'no-data.png';
 
         $html = '<div class="dropdown roles-dropdown">';
-        $html .= '<a title="' . $titles[$value] . '" href="#" role="button" data-toggle="dropdown"><img src="/hrm/public/dist/img/2021/icons/' . $currentIcon . '" alt="" /></a>';
+        $html .= '<a title="' . $titles[$value] . '" href="javascript:void(0)" role="button" data-toggle="dropdown"><img src="/hrm/public/dist/img/2021/icons/' . $currentIcon . '" alt="" /></a>';
         $html .= '<div class="dropdown-menu roles-list">';
 
         foreach ($icons as $id => $icon) {
-            $html .= '<a class="dropdown-item view" title="' . $titles[$id] . '" href="#" data-id="' . $row->id . '" id="' . $id . '" data-type="' . $type . '">
+            $html .= '<a class="dropdown-item view" title="' . $titles[$id] . '" href="javascript:void(0)" data-id="' . $row->id . '" id="' . $id . '" data-type="' . $type . '">
                 <img src="/hrm/public/dist/img/2021/icons/' . $icon . '" alt="" /></a>';
         }
 
@@ -137,7 +147,7 @@ class RoleController extends Controller
         $icon = $value == 1 ? 'tick-icon.png' : 'cross-icon.png';
         $title = $value == 1 ? 'yes' : 'no';
 
-        return '<a class="view" title="' . $title . '" href="#" data-id="' . $row->id . '" id="' . $value . '" data-type="' . $type . '">
+        return '<a class="view" title="' . $title . '" href="javascript:void(0)" data-id="' . $row->id . '" id="' . $value . '" data-type="' . $type . '">
             <img src="/hrm/public/dist/img/2021/icons/' . $icon . '" alt="" /></a>';
     }
 
@@ -145,11 +155,11 @@ class RoleController extends Controller
     {
         $currentUser = Auth::user();
 
-        // ✅ Show only for Super Admin (user_role == 1)
+        
         if ($currentUser && $currentUser->user_role == 1) {
-            $viewBtn = '<a href="#" class="btn btn-sm btn-info view-role" data-id="' . $row->id . '">View</a> ';
-            $editBtn = '<a href="#" class="btn btn-sm btn-primary edit-role" data-id="' . $row->id . '">Edit</a> ';
-            $deleteBtn = '<a href="#" class="btn btn-sm btn-danger delete-role" data-id="' . $row->id . '">Delete</a>';
+            $viewBtn = '<a href="javascript:void(0)" class="btn btn-sm btn-info view-role" data-id="' . $row->id . '">View</a> ';
+            $editBtn = '<a href="javascript:void(0)" class="btn btn-sm btn-primary edit-role" data-id="' . $row->id . '">Edit</a> ';
+            $deleteBtn = '<a href="javascript:void(0)" class="btn btn-sm btn-danger delete-role" data-id="' . $row->id . '">Delete</a>';
 
             return '<div class="btn-group">' . $viewBtn . $editBtn . $deleteBtn . '</div>';
         }
