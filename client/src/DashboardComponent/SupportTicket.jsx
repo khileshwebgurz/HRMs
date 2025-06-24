@@ -3,7 +3,7 @@ import "../assets/css/ticket.css";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {useUser} from "../context/UserContext";
+import { useUser } from "../context/UserContext";
 import AddTicketForm from "./TicketComponent/AddTicketForm";
 const SupportTicket = () => {
   const user = useUser();
@@ -15,15 +15,16 @@ const SupportTicket = () => {
   };
 
   useEffect(() => {
-    const getTicket = async () => {
-      const data = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,{withCredentials:true});
-      setTicketdata(data.data);
-
-    };
     getTicket();
   }, []);
 
-
+  const getTicket = async () => {
+    const data = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
+      { withCredentials: true }
+    );
+    setTicketdata(data.data);
+  };
 
   return (
     <>
@@ -87,7 +88,47 @@ const SupportTicket = () => {
                       </div>
                       <div className="card-body">
                         <div className="table-responsive mt-1">
-                          <table className="table m wg_allinterviews tickets-list"></table>
+                          <table className="table m wg_allinterviews tickets-list">
+                            <thead>
+                              <tr>
+                                <th>Ticket ID</th>
+                                <th>Created At</th>
+                                <th>Issue Type</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Employee</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {ticketdata?.data?.length > 0 ? (
+                                ticketdata.data.map((ticket, index) => (
+                                  <tr key={ticket.id}>
+                                    <td>{ticket.ticket_id}</td>
+                                    <td>{ticket.created_at}</td>
+                                    <td>{ticket.issue_type}</td>
+                                    <td>{ticket.description}</td>
+                                    <td>{ticket.status}</td>
+                                    <td className="d-flex align-items-center">
+                                      <img
+                                        src={ticket.employee_image}
+                                        alt="emp"
+                                        width="30"
+                                        height="30"
+                                        className="rounded-circle me-2"
+                                      />
+                                      {ticket.employee_name}
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan="6" className="text-center">
+                                    No tickets found
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
 
@@ -99,8 +140,7 @@ const SupportTicket = () => {
             )}
 
             {tab === "newticket" && (
-             <AddTicketForm userRole={user.role_id}
-             currentUserId={user.id}/>
+              <AddTicketForm userRole={user.role_id} currentUserId={user.id} refreshTickets={getTicket} />
             )}
           </div>
         </div>

@@ -13,13 +13,13 @@ use App\Models\AttendanceLog;
 use App\Models\AttendanceRules;
 use App\Models\EmployeeAttendance;
 use App\Models\Notifications;
-
+ 
 class AttendanceLogController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:api');
+    // }
 
     public function getAddress($latitude, $longitude)
     {
