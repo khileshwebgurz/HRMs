@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
   const navigate = useNavigate();
 
-
   const defaultProfile = `/dist/img/profile.png`;
   const profilePic = user?.profile_pic
     ? `/uploads/employees-photos/${user.profile_pic}`
@@ -39,7 +38,10 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
         }}
       >
         <div className="card-body box-profile">
-          <i onClick={toggleSidebar} className="fas fa-times"></i>
+          <span onClick={toggleSidebar} style={{ color: "white",  }}>
+            X
+          </span>
+
           <div className="text-center">
             {user?.profile_pic === "" || !user?.profile_pic ? (
               <img
@@ -96,23 +98,21 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-               {user?.id === 1 && (
+              {user?.id === 1 && (
                 <li className="nav-item">
                   <Link to="/roles" className="nav-link">
-                  <i className="nav-icon fas fa-clock"></i>
+                    <i className="nav-icon fas fa-clock"></i>
                     Role List
                   </Link>
                 </li>
-                
               )}
               {user?.id === 1 && (
                 <li className="nav-item">
                   <Link to="/roles/add" className="nav-link">
-                  <i className="nav-icon fas fa-clock"></i>
-                   Add Role
+                    <i className="nav-icon fas fa-clock"></i>
+                    Add Role
                   </Link>
                 </li>
-                
               )}
 
               <li className="nav-item">
@@ -174,11 +174,8 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     Webguruz Incident Management System
                   </Link>
                 </li>
-                
               )}
               {/* @endif */}
-
-             
 
               {/* @if(Auth::user()->user_role == '3') */}
               {user?.user_role === "3" && (
