@@ -1,5 +1,5 @@
-import React, { use } from "react";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import axios from "axios";
 const ChangePassword = () => {
   const [oldpassword, setOldpassword] = useState("");
@@ -8,7 +8,7 @@ const ChangePassword = () => {
 
   const handleBtnUpdate = async (e) => {
     e.preventDefault();
-    const updatingPassword = await axios.post(
+    await axios.post(
        `${import.meta.env.VITE_API_BASE_URL}/change-password`, {
         current_password: oldpassword,
         password: newpassword,
@@ -16,7 +16,7 @@ const ChangePassword = () => {
       },
       { withCredentials: true }
     );
-
+   
   };
   return (
     <section className="content mt-4">
