@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
   const navigate = useNavigate();
 
-  console.log("my user is >>>", user);
+
   const defaultProfile = `/dist/img/profile.png`;
   const profilePic = user?.profile_pic
     ? `/uploads/employees-photos/${user.profile_pic}`

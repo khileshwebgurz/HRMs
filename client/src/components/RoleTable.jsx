@@ -101,7 +101,7 @@ const [availablePermissions, setAvailablePermissions] = useState([]);
     { name: 'Actions', cell: row => <div dangerouslySetInnerHTML={{ __html: row.actions }} /> },
   ];
 
-  console.log(availablePermissions)
+
   return (
     <div>
       <h2>Roles</h2>

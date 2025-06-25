@@ -37,7 +37,7 @@ const LeaveLogs = () => {
     navigate('/leaves')
   }
 
-  console.log("my user leave logs >>>", user.user_role);
+
 
   const handleDeclineClick = async (leave) => {
     const declineRequest = await axios.post(

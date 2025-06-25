@@ -16,7 +16,7 @@ const ChangePassword = () => {
       },
       { withCredentials: true }
     );
-    console.log("my update password response>>>", updatingPassword);
+
   };
   return (
     <section className="content mt-4">

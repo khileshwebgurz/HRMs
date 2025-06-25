@@ -29,7 +29,7 @@ const SupportTicket = () => {
       `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
       { withCredentials: true }
     );
-    console.log("my status >>", ticketdata);
+
     setTicketdata(response.data.data);
     setFilteredTickets(response.data.data);
   };
@@ -52,7 +52,6 @@ const SupportTicket = () => {
     setFilteredTickets(filtered);
   }, [statusFilter, dateFilter, ticketdata]);
 
-  console.log('my ticketdata is >>>> ',ticketdata)
 
   return (
     <>

@@ -56,14 +56,14 @@ const CreateRoleForm = () => {
       };
 
       const response = await axios.post('http://localhost:8000/api/roles/add', payload, { withCredentials: true });
-      console.log('here',response);
+     
       setRoleName('');
       setPermissions([]);
       setFormFields({ view: 1, edit: 1, add: 1, delete: 1, import: 0, export: 0 });
       setError('');
       // onSuccess();
     } catch (err) {
-      console.log('getting inside')
+   
       setError(err.response?.data?.message || 'Error creating role');
     }
   };

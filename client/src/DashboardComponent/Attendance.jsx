@@ -19,7 +19,7 @@ const Attendance = () => {
     getAttendance();
   }, []);
 
-  console.log(attendance, 'attendance log')
+
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
