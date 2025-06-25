@@ -8,11 +8,18 @@ use App\Models\Tickets;
 use App\Models\Notifications;
 use App\Models\Employees;
 use Illuminate\Support\Facades\Log;
+use App\Traits\PermissionTrait;
 
 class TicketController extends Controller
 {
+   use PermissionTrait;
+
     public function ticketViewByEmployee(Request $request)
     {
+        if (!$this->userHasPermission([12])) {
+            return $this->permissionDeniedResponse();
+        }
+
         $id = Auth::id();
         $ticketQuery = Tickets::where('employee_id', $id);
 

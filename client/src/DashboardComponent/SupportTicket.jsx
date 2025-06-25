@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import AddTicketForm from "./TicketComponent/AddTicketForm";
-
-
+import { useNavigate } from "react-router-dom";
 
 const SupportTicket = () => {
   const user = useUser();
+  const navigate = useNavigate();
   const [tab, setTab] = useState("myticket");
   const [ticketdata, setTicketdata] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
@@ -25,13 +25,17 @@ const SupportTicket = () => {
   }, []);
 
   const getTicket = async () => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
-      { withCredentials: true }
-    );
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
+        { withCredentials: true }
+      );
 
-    setTicketdata(response.data.data);
-    setFilteredTickets(response.data.data);
+      setTicketdata(response.data.data);
+      setFilteredTickets(response.data.data);
+    } catch (error) {
+      navigate('/403')
+    }
   };
 
   useEffect(() => {
@@ -51,7 +55,6 @@ const SupportTicket = () => {
 
     setFilteredTickets(filtered);
   }, [statusFilter, dateFilter, ticketdata]);
-
 
   return (
     <>

@@ -79,8 +79,14 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/roles/{id}', [RoleController::class, 'deleteRole']);
     Route::get('/roles/{id}', [RoleController::class, 'getRoleById']);
     Route::put('/roles/{id}', [RoleController::class, 'updateRole']);
-    
-   
+
+    // Permissions
+
+    Route::get('/roles/{role_id}/permissions', [RoleController::class, 'getAssignedPermissions'])->name('api.roles.get_permissions');
+    Route::post('/roles/assign-permissions', [RoleController::class, 'assignPermissionPost'])->name('api.roles.assign_permissions');
+    Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
+    Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
+
      //  Admin-only routes
     Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
