@@ -31,7 +31,16 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
-         <Route path="/roles" element={
+        
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+           <Route path="/roles" element={
            <ProtectedRoute>
             <RoleTable />
            </ProtectedRoute>
@@ -41,14 +50,6 @@ function App() {
             <CreateRoleForm />
            </ProtectedRoute>
           } />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
           <Route path="*" element={<NotFound />} />
           <Route
             path="/employee/dashboard"
