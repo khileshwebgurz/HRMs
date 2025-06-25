@@ -5,11 +5,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import AddTicketForm from "./TicketComponent/AddTicketForm";
+
+
+
 const SupportTicket = () => {
   const user = useUser();
   const [tab, setTab] = useState("myticket");
-
   const [ticketdata, setTicketdata] = useState([]);
+  const [filteredTickets, setFilteredTickets] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
   const handleTabChange = (val) => {
     setTab(val);
   };
@@ -19,12 +25,34 @@ const SupportTicket = () => {
   }, []);
 
   const getTicket = async () => {
-    const data = await axios.get(
+    const response = await axios.get(
       `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
       { withCredentials: true }
     );
-    setTicketdata(data.data);
+    console.log("my status >>", ticketdata);
+    setTicketdata(response.data.data);
+    setFilteredTickets(response.data.data);
   };
+
+  useEffect(() => {
+    let filtered = [...ticketdata];
+
+    if (statusFilter) {
+      filtered = filtered.filter(
+        (ticket) => ticket.status.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    if (dateFilter) {
+      filtered = filtered.filter((ticket) =>
+        ticket.created_at.includes(dateFilter)
+      );
+    }
+
+    setFilteredTickets(filtered);
+  }, [statusFilter, dateFilter, ticketdata]);
+
+  console.log('my ticketdata is >>>> ',ticketdata)
 
   return (
     <>
@@ -70,19 +98,24 @@ const SupportTicket = () => {
                             id="filter"
                           >
                             <input
-                              type="text"
+                              type="date"
                               className="form-control"
-                              name="datefilter"
-                              // autocomplete="off"
-                              placeholder="Select Filter Date"
-                              // readonly
+                              placeholder="Filter by date (YYYY-MM-DD)"
+                              value={dateFilter}
+                              onChange={(e) => setDateFilter(e.target.value)}
                             />
                           </span>
 
-                          <select id="changestatus">
-                            {/* @foreach($filterdata as $key=> $data)
-                       <option value="{{$key}}">{{$data}}</option>
-                       @endforeach */}
+                          <select
+                            id="changestatus"
+                            className="form-control"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                          >
+                            <option value="">All Status</option>
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Closed">Closed</option>
                           </select>
                         </div>
                       </div>
@@ -100,8 +133,8 @@ const SupportTicket = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {ticketdata?.data?.length > 0 ? (
-                                ticketdata.data.map((ticket, index) => (
+                              {filteredTickets?.length > 0 ? (
+                                filteredTickets.map((ticket, index) => (
                                   <tr key={ticket.id}>
                                     <td>{ticket.ticket_id}</td>
                                     <td>{ticket.created_at}</td>
@@ -140,7 +173,11 @@ const SupportTicket = () => {
             )}
 
             {tab === "newticket" && (
-              <AddTicketForm userRole={user.role_id} currentUserId={user.id} refreshTickets={getTicket} />
+              <AddTicketForm
+                userRole={user.role_id}
+                currentUserId={user.id}
+                refreshTickets={getTicket}
+              />
             )}
           </div>
         </div>
