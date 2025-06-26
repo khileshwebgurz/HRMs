@@ -68,9 +68,35 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
+<<<<<<< Updated upstream
    
     //  Admin-only routes
     //Route::middleware('role:1')->group(function () {
+=======
+
+    // AttendanceLogController
+    // Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
+
+     // Roles
+    Route::get('/roles', [RoleController::class, 'allRoles']);
+    Route::post('/roles', [RoleController::class, 'addRolePost']);
+
+    // Role Permissions
+    Route::get('/roles/{role_id}/permissions', [RoleController::class, 'getRolePermissions']);
+    Route::post('/roles/assign-permissions', [RoleController::class, 'assignPermissionPost']);
+    Route::post('/roles/update-permission', [RoleController::class, 'updateRolePermission']);
+    
+    // Form Fields Permissions
+    Route::get('/roles/{role_id}/form-fields', [RoleController::class, 'getFormFieldsWithPermissions']);
+    Route::post('/roles/update-field-permission', [RoleController::class, 'updateFieldPermission']);
+    
+    // Module Permissions
+    Route::get('/roles/{role_id}/module-permissions', [RoleController::class, 'getAllPermissions']);
+    Route::post('/roles/update-module-permissions', [RoleController::class, 'updateModulePermissions']);
+
+
+   // Route::middleware('role:1')->group(function () {
+>>>>>>> Stashed changes
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
         Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
         Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
@@ -81,6 +107,7 @@ Route::middleware(['auth:api'])->group(function () {
     //});
 
     //  Employee-only routes (for future)
+<<<<<<< Updated upstream
     // Route::middleware('role:2')->group(function () {
     //     // Add employee-specific routes if needed
         
@@ -90,6 +117,17 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::middleware('role:3')->group(function () {
         
     // });
+=======
+    //Route::middleware('role:2')->group(function () {
+        // Add employee-specific routes if needed
+        
+    //});
+
+    // IT support
+    //Route::middleware('role:3')->group(function () {
+        
+    //});
+>>>>>>> Stashed changes
 
     
 });

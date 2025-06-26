@@ -23,6 +23,14 @@ import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
 import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
+<<<<<<< Updated upstream
+=======
+import RoleTable from './components/RoleTable';
+import CreateRoleForm from './components/CreateRoleForm';
+import RoleList from '../src/components/roles/RoleList';
+import AssignPermission from '../src/components/roles/AssignPermission';
+import FieldPermissions from '../src/components/roles/FieldPermissions';
+>>>>>>> Stashed changes
 
 function App() {
   return (
@@ -37,6 +45,38 @@ function App() {
             </ProtectedRoute>
           }
         >
+<<<<<<< Updated upstream
+=======
+           {/* <Route path="/roles" element={
+           <ProtectedRoute>
+            <RoleTable />
+           </ProtectedRoute>
+          } />
+           <Route path="/roles/add" element={
+           <ProtectedRoute>
+            <CreateRoleForm />
+           </ProtectedRoute>
+          } /> */}
+
+            {/* 26-jun-25 */}
+         {/* <Route path="/field-permissions" element={
+           <ProtectedRoute>
+            <FieldPermissionsTable />
+           </ProtectedRoute>
+          } /> */}
+          <Route path="/role-list" element={<RoleList/>} />
+
+          <Route 
+            path="/roles/module-permissions" 
+            element={<AssignPermission/>}
+          />
+          <Route 
+            path="/roles/field-permissions" 
+            element={<FieldPermissions/>}
+          
+          />
+          
+>>>>>>> Stashed changes
           <Route path="*" element={<NotFound />} />
           <Route
             path="/employee/dashboard"
