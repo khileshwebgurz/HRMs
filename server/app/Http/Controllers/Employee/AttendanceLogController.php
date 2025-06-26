@@ -13,7 +13,8 @@ use App\Models\AttendanceLog;
 use App\Models\AttendanceRules;
 use App\Models\EmployeeAttendance;
 use App\Models\Notifications;
- 
+use Illuminate\Support\Facades\Log;
+
 class AttendanceLogController extends Controller
 {
     // public function __construct()
@@ -69,11 +70,15 @@ class AttendanceLogController extends Controller
         $today = Carbon::now()->toDateString();
         $now = Carbon::now()->format('H:i:s');
 
+
+        Log::info('today', ['my today' => $today]);
+        Log::info('now', ['my now' => $now]);
         $existingLog = AttendanceLog::where('employee_id', $user->id)
-            ->where('clock_date', $today)
+            // ->where('clock_date', $today)
             ->latest('id')
             ->first();
 
+        Log::info('existingLog', ['my existingLog' => $existingLog]);
         $candidate = ObCandidates::where('office_employee_id', $user->id)->first();
         $rule = AttendanceRules::find($candidate->attendance_rule_id ?? null);
 

@@ -16,12 +16,18 @@ const Navbar = () => {
   const [notification, setNotification] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  
-
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
 
+  // const handleClockIN = async () => {
+  //   const fetchClockIn = await axios.post(
+  //     "http://localhost:8000/api/clock-in",
+  //     {},
+  //     { withCredentials: true }
+  //   );
+  //   console.log("my clock in response is >>>>", fetchClockIn.data);
+  // };
 
   useEffect(() => {
     const fetchNotification = async () => {
@@ -33,7 +39,6 @@ const Navbar = () => {
     };
     fetchNotification();
   }, []);
-
 
   const handleLogout = async () => {
     await axios.post(
@@ -94,12 +99,12 @@ const Navbar = () => {
                     ) : (
                       notification.map((note, index) => (
                         <Link
-                        key={index}
-                        to={note.link || '#'}
-                        className="dropdown-item"
-                      >
-                        {note.message}
-                      </Link>
+                          key={index}
+                          to={note.link || "#"}
+                          className="dropdown-item"
+                        >
+                          {note.message}
+                        </Link>
                       ))
                     )}
                   </div>
@@ -122,7 +127,11 @@ const Navbar = () => {
                         data-selfie="false"
                         className="clockInBtn btn custom-btn clockInBigAct waves-effect waves-light btn-danger clockInRed"
                       >
-                        <span className="inLabel" id="clock_in">
+                        <span
+                          // onClick={handleClockIN}
+                          className="inLabel"
+                          id="clock_in"
+                        >
                           CLOCK-IN
                         </span>{" "}
                         <span className="outLabel" style={{ display: "none" }}>
@@ -183,7 +192,11 @@ const Navbar = () => {
               <span></span>
             </button>
 
-            <RightSidebar isOpen={showSidebar} toggleSidebar={toggleSidebar} user={user} />
+            <RightSidebar
+              isOpen={showSidebar}
+              toggleSidebar={toggleSidebar}
+              user={user}
+            />
           </div>
         </nav>
       </div>

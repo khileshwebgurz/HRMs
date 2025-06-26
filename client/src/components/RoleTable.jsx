@@ -27,6 +27,8 @@ const RoleTable = () => {
     }
   };
 
+  console.log('my roles>>',roles)
+
   const fetchPermissions = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/permissions`, {
@@ -97,11 +99,11 @@ const RoleTable = () => {
     { name: "Role Name", selector: (row) => row.role_name, sortable: true },
     {
       name: "Import",
-      cell: (row) => <span>{row.import === "1" ? "Yes" : "No"}</span>,
+      cell: (row) => <span>{row.import === "yes" ? "Yes" : "No"}</span>,
     },
     {
       name: "Export",
-      cell: (row) => <span>{row.export === "1" ? "Yes" : "No"}</span>,
+      cell: (row) => <span>{row.export === "yes" ? "Yes" : "No"}</span>,
     },
     {
       name: "Actions",

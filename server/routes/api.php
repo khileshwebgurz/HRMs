@@ -110,7 +110,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     // IT support
     Route::middleware('role:3')->group(function () {
-        
+        Route::get('/helpdesk-search', [SettingController::class,'helpdesk_search'])->name('em-helpdesk-search');
     });
 
     

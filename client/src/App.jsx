@@ -23,15 +23,15 @@ import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
 import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
-import RoleTable from './components/RoleTable';
-import CreateRoleForm from './components/CreateRoleForm';
+import RoleTable from "./components/RoleTable";
+import CreateRoleForm from "./components/CreateRoleForm";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
-        
+
         <Route
           path="/"
           element={
@@ -40,129 +40,27 @@ function App() {
             </ProtectedRoute>
           }
         >
-           <Route path="/roles" element={
-           <ProtectedRoute>
-            <RoleTable />
-           </ProtectedRoute>
-          } />
-           <Route path="/roles/add" element={
-           <ProtectedRoute>
-            <CreateRoleForm />
-           </ProtectedRoute>
-          } />
+          
+          <Route index element={<Navigate to="/employee/dashboard" />} />
+          <Route path="/employee/dashboard" element={<Dashboard />} />
+          <Route path="/roles" element={<RoleTable />} />
+          <Route path="/roles/add" element={<CreateRoleForm />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/directory" element={<Directory />} />
+          <Route path="/employee/attendance" element={<Attendance />} />
+          <Route path="/companyProfile" element={<CompanyProfile />} />
+          <Route path="/leaves/leave-logs" element={<LeaveLogs />} />
+          <Route path="/importantdates" element={<ImportantEvents />} />
+          <Route path="/myprofile" element={<MyProfile />} />
+          <Route path="/leaves" element={<Leaves />} />
+          <Route path="/teamchart" element={<TeamChart />} />
+          <Route path="/spiritclub" element={<SpiritClub />} />
+          <Route path="/supportticket" element={<SupportTicket />} />
+          <Route path="/helpdesk" element={<HelpDesk />} />
+          <Route path="/sidebar" element={<RightSidebar />} />
+
+          
           <Route path="*" element={<NotFound />} />
-          <Route
-            path="/employee/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="/change-password" element={<ProtectedRoute>
-            <ChangePassword/>
-          </ProtectedRoute>}
-          />
-
-          <Route
-            path="/directory"
-            element={
-              <ProtectedRoute>
-                <Directory />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/employee/dashboard" />} />
-          <Route
-            path="/employee/attendance"
-            element={
-              <ProtectedRoute>
-                <Attendance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/companyProfile"
-            element={
-              <ProtectedRoute>
-                <CompanyProfile />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/leaves/leave-logs"
-            element={
-              <ProtectedRoute>
-                <LeaveLogs />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/importantdates"
-            element={
-              <ProtectedRoute>
-                <ImportantEvents />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/myprofile"
-            element={
-              <ProtectedRoute>
-                <MyProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/leaves"
-            element={
-              <ProtectedRoute>
-                <Leaves />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/teamchart"
-            element={
-              <ProtectedRoute>
-                <TeamChart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/spiritclub"
-            element={
-              <ProtectedRoute>
-                <SpiritClub />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/supportticket"
-            element={
-              <ProtectedRoute>
-                <SupportTicket />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/helpdesk"
-            element={
-              <ProtectedRoute>
-                <HelpDesk />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sidebar"
-            element={
-              <ProtectedRoute>
-                <RightSidebar />
-              </ProtectedRoute>
-            }
-          />
         </Route>
       </Routes>
     </Router>
