@@ -16,7 +16,7 @@ const RoleTable = () => {
 
   const fetchRoles = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/roles", {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/roles`, {
         withCredentials: true,
       });
       setRoles(res.data.data);
@@ -29,7 +29,7 @@ const RoleTable = () => {
 
   const fetchPermissions = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/permissions", {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/permissions`, {
         withCredentials: true,
       });
       setAvailablePermissions(res.data.data); // [{id: 1, name: "View Tickets"}, ...]
@@ -42,7 +42,7 @@ const RoleTable = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:8000/api/roles/${selectedRole.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/roles/${selectedRole.id}`,
         selectedRole,
         { withCredentials: true }
       );
@@ -60,7 +60,7 @@ const RoleTable = () => {
 
   const handleEditClick = async (id) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/roles/${id}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/roles/${id}`, {
         withCredentials: true,
       });
       const role = res.data.data;
@@ -75,7 +75,7 @@ const RoleTable = () => {
   const handleDeleteClick = async (id) => {
     if (window.confirm(`Are you sure you want to delete role ID: ${id}?`)) {
       try {
-        await axios.delete(`http://localhost:8000/api/roles/${id}`, {
+        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/roles/${id}`, {
           withCredentials: true,
         });
         alert("Role deleted!");

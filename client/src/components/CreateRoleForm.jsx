@@ -22,7 +22,7 @@ const CreateRoleForm = () => {
 
   const fetchPermissions = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/permissions', { withCredentials: true });
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/permissions`, { withCredentials: true });
       setAvailablePermissions(res.data.data);
     } catch (err) {
       console.error("Failed to load permissions", err);
@@ -55,7 +55,7 @@ const CreateRoleForm = () => {
         ...formFields,
       };
 
-      const response = await axios.post('http://localhost:8000/api/roles/add', payload, { withCredentials: true });
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/roles/add`, payload, { withCredentials: true });
      
       setRoleName('');
       setPermissions([]);
