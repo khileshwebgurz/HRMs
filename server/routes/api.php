@@ -17,12 +17,17 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Employee\AttendanceLogController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DashboardController;
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+  
+
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();

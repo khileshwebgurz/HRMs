@@ -1,7 +1,7 @@
-import React  from 'react';
-import useAuthStatus from './useAuthStatus';
-import { Navigate } from 'react-router-dom';
-import { UserContext } from '../../context/UserContext';
+import React from "react";
+import useAuthStatus from "./useAuthStatus";
+import { Navigate } from "react-router-dom";
+// import { UserContext } from "../../context/UserContext";
 const ProtectedRoute = ({ children }) => {
   const { loading, authenticated, user } = useAuthStatus();
 
@@ -9,11 +9,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (!authenticated) return <Navigate to="/login" />;
 
-  return (
-    <UserContext.Provider value={user}>
-      {children}
-    </UserContext.Provider>
-  );
+  return children;
 };
 
 export default ProtectedRoute;

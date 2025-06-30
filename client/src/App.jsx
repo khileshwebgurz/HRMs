@@ -25,8 +25,14 @@ import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
+import AdminDashboard from "./components/AdminDashboard";
+import { useUser } from "./context/UserContext";
 
 function App() {
+  const UserData = useUser();
+  const UserID = UserData.id;
+console.log(UserData);
+
   return (
     <Router>
       <Routes>
@@ -41,8 +47,11 @@ function App() {
           }
         >
           
+           <Route index element={<Navigate to="/admin/dashboard" />} />
+           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route index element={<Navigate to="/employee/dashboard" />} />
           <Route path="/employee/dashboard" element={<Dashboard />} />
+          
           <Route path="/roles" element={<RoleTable />} />
           <Route path="/roles/add" element={<CreateRoleForm />} />
           <Route path="/change-password" element={<ChangePassword />} />
