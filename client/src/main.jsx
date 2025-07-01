@@ -1,22 +1,11 @@
 // import { StrictMode } from 'react'
-import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
-import { UserContext } from "./context/UserContext.jsx";
-import useAuthStatus from "./components/Auth/useAuthStatus.jsx";
-import { Navigate } from "react-router-dom";
+import { createRoot } from 'react-dom/client'
 
-const RootWrapper = () => {
-  const { loading, authenticated, user } = useAuthStatus();
 
-  if (loading) return <div>Loading...</div>;
+import App from './App.jsx'
 
-  if (!authenticated) return  <Navigate to="/login" />;
+createRoot(document.getElementById('root')).render(
 
-  return (
-    <UserContext.Provider value={user}>
-      <App />
-    </UserContext.Provider>
-  );
-};
+    <App />
 
-createRoot(document.getElementById("root")).render(<RootWrapper />);
+)

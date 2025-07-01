@@ -18,6 +18,8 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Employee\AttendanceLogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TrackerController;
+
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -48,6 +50,22 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     // Shared routes for all authenticated users
+
+    Route:: get('/candidates', [TrackerController::class, 'allCandidates']);
+    Route::post('/add', [TrackerController::class, 'addCandidatePost']);
+    Route::post('/check', [TrackerController::class, 'checkCandidate']);
+    Route::put('/edit/{candidate_id}', [TrackerController::class, 'editCandidatePost']);
+    Route::delete('/delete/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
+    Route::get('/send-email/{candidate_id}', [TrackerController::class, 'sendEmailCandidateProfile']);
+    Route::get('/mail-to-hr', [TrackerController::class, 'mailToHr']);
+
+
+
+
+    Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
+
+
+
     Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
     Route::get('/employees', [EmployeeController::class, 'directory']);
     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
@@ -118,5 +136,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/helpdesk-search', [SettingController::class,'helpdesk_search'])->name('em-helpdesk-search');
     });
 
+
     
+  
 });

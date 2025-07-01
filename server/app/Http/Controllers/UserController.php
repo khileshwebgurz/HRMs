@@ -56,6 +56,7 @@ use Carbon\Carbon;
 //use Session;
 use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 
 
 class UserController extends Controller
@@ -2717,7 +2718,7 @@ class UserController extends Controller
 
     }
 
-    public function candidateProfileView($profile_id)
+    public function candidateProfileViewOLD($profile_id)
     {
         $candidate_status = CandidateStatus::all();
         $candidate_questions = CandidateQuestions::all();
@@ -2729,6 +2730,33 @@ class UserController extends Controller
 
         abort(404);
     }
+
+    public function candidateProfileView($profile_id)
+    {
+        $candidate = Candidates::with([
+            'skills_section',
+            'languages',
+            'educations',
+            'employments',
+            'families',
+            'assessment_section',
+            'other_informations',
+        ])->where('profile_id', $profile_id)->first();
+
+       Log::info('My >>>>', ['candidate' => $candidate]);
+
+        if (!$candidate) {
+            return response()->json(['message' => 'Candidate not found'], 404);
+        }
+
+        return response()->json([
+            'candidate' => $candidate,
+            'candidate_questions' => CandidateQuestions::all(),
+            'candidate_relationship' => Candidates::$relationship,
+            'candidate_status' => CandidateStatus::all(),
+        ]);
+    }
+
 
     public function bulkSendForm(Request $request)
     {

@@ -27,12 +27,10 @@ import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
 import AdminDashboard from "./components/AdminDashboard";
 import { useUser } from "./context/UserContext";
+import CandidateList from "./components/AdminDashboardComponent/allCandidates";
+import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
 
 function App() {
-  const UserData = useUser();
-  const UserID = UserData.id;
-console.log(UserData);
-
   return (
     <Router>
       <Routes>
@@ -67,8 +65,9 @@ console.log(UserData);
           <Route path="/supportticket" element={<SupportTicket />} />
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
+          <Route path="/profile/view/:profile_id" element={<CandidateProfile/>}/>
 
-          
+           <Route path="/trackercandidates" element={<CandidateList />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

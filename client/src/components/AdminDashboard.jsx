@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const AdminDashboard = () => {
-  const [adminData, setAdminData] = useState();
   const [stats, setStats] = useState({
     total_candidates: 0,
     total_active_candidates: 0,
@@ -19,7 +18,7 @@ const AdminDashboard = () => {
         `${import.meta.env.VITE_API_BASE_URL}/dashboard`,
         { withCredentials: true }
       );
-      setAdminData(response.data.data);
+      setStats(response.data.data);
     } catch (error) {
       console.error("Error fetching leave logs:", error);
     }

@@ -17,30 +17,41 @@ class DashboardController extends Controller
     /**
      * Require authentication.
      */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
 
-    public function dashboard()
-    {
-        $role = $this->loginUserRole();
-        $loginUser = Auth::user();
+        public function dashboard()
+        {
+            $role = $this->loginUserRole(); 
+            $loginUser = Auth::user();
 
-        Log::info('My >>>>', ['loginUser' => $loginUser]);
+            //Log::info('My >>>>', ['loginUser' => $loginUser]);
 
-        $total_candidates = Candidates::count();
-        $total_active_candidates = Candidates::whereIn('status', [2, 3, 4, 5, 7])->count();
-        $total_questions = Questions::where('status', '1')->count();
-        $total_users = Employees::where('status', '1')->count();
+            $total_candidates = Candidates::count();
 
-        return view('dashboard', compact(
-            'total_candidates',
-            'total_active_candidates',
-            'total_questions',
-            'total_users'
-        ));
-    }
+           // Log::info('My total_candidates >>>>', ['total_candidates' => $total_candidates]);
+
+            $total_active_candidates = Candidates::whereIn('status', [2, 3, 4, 5, 7])->count();
+
+             //  Log::info('My total_active_candidates >>>>', ['total_active_candidates' => $total_active_candidates]);
+            $total_questions = Questions::where('status', '1')->count();
+
+            //  Log::info('My total_questions >>>>', ['total_questions' => $total_questions]);
+            $total_users = Employees::where('status', '1')->count();
+             //   Log::info('My total_users >>>>', ['total_users' => $total_users]);
+             
+            return response()->json([
+                'status' => 200,
+                'data' => [
+                    'total_candidates' => $total_candidates,
+                    'total_active_candidates' => $total_active_candidates,
+                    'total_questions' => $total_questions,
+                    'total_users' => $total_users,
+                ]
+            ]);
+        }
 
     
     private function loginUserRole()
