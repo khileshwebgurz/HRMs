@@ -7,7 +7,7 @@ const LoginRoute = () => {
 
   if (loading) return <div></div>;
 
-  return authenticated ? <Navigate to="/employee/dashboard" /> : <Login />;
+  return authenticated ? <Navigate to="/dashboard" /> : <Login />;
 };
 
 export default LoginRoute;

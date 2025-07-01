@@ -59,7 +59,7 @@ const Navbar = () => {
       <div className="wrapper" id="menu_button">
         <nav className="main-header navbar navbar-expand-md navbar-light navbar-dark dark-header">
           <div className="container">
-            <Link to="/employee/dashboard" className="brand-link wgz_main_logo">
+            <Link to="/dashboard" className="brand-link wgz_main_logo">
               <img
                 src={webgurzLogo}
                 alt="AdminLTE Logo"

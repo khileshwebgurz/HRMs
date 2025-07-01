@@ -44,11 +44,13 @@ function App() {
             </ProtectedRoute>
           }
         >
+
+          <Route index element={<Navigate to="/dashboard" />} />
+
+  {/* Single dynamic dashboard route */}
+  <Route path="/dashboard" element={<Dashboard />} />
           
-           <Route index element={<Navigate to="/admin/dashboard" />} />
-           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route index element={<Navigate to="/employee/dashboard" />} />
-          <Route path="/employee/dashboard" element={<Dashboard />} />
+           
           
           <Route path="/roles" element={<RoleTable />} />
           <Route path="/roles/add" element={<CreateRoleForm />} />

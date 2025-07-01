@@ -23,7 +23,7 @@ const Login = () => {
         }
       );
 
-      navigate("/employee/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login Error:", error.response?.data || error.message);
       setErrors(error.response?.data || error.message);
