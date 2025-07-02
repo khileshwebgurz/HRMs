@@ -32,6 +32,10 @@ const CandidateList = () => {
     Navigate(`${urls}`);
   }
 
+  const handleEditClick=(urls)=>{
+    Navigate(`/candidate${urls}`);
+  }
+
   const columns = [
     { name: '#', selector: (row, i) => i + 1, width: '60px' },
     { name: 'Name', selector: row => row.full_name },
@@ -49,7 +53,8 @@ const CandidateList = () => {
             <button onClick={()=>handleBrnClick(row.action.view_url)} className="btn btn-info" target="_blank">👁️</button>
           {/* <a href={row.action.view_url} >👁️</a> */}
           {row.action.edit_allowed && (
-            <a href={row.action.edit_url} className="btn btn-success">✏️</a>
+            // <a href={row.action.edit_url} className="btn btn-success">✏️</a>
+            <button onClick={()=>handleEditClick(row.action.edit_url)} className="btn btn-success" target="_blank">✏️</button>
           )}
           {row.action.delete_allowed && (
             <a

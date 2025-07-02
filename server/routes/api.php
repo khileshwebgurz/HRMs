@@ -64,7 +64,9 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
-
+     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
+    Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
+   
 
 
     Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');

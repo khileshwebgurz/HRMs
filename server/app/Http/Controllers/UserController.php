@@ -1610,19 +1610,49 @@ class UserController extends Controller
         }
     }
 
-    public function editCandidate($candidate_id)
+    public function editCandidateOLD($candidate_id)
     {
         $candidate_status = CandidateStatus::all();
         $candidate_questions = CandidateQuestions::all();
         $candidate_relationship = Candidates::$relationship;
         $candidate = Candidates::where('id', $candidate_id)->first();
+
+        
         return view('users.candidates.edit', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship'));
     }
 
-    public function editCandidatePost(Request $request)
+    public function editCandidate($candidate_id)
+    {
+        // $candidate = Candidates::with([
+        //     'skills_section',
+        //     'languages',
+        //     'educations',
+        //     'employments',
+        //     'families',
+        //     'assessment_section',
+        //     'other_informations',
+        // ])->find($candidate_id);
+         $candidate = Candidates::where('id', $candidate_id)->first();
+
+         Log::info('My candidate >>>>', ['candidate' => $candidate]);
+
+        if (!$candidate) {
+            return response()->json(['message' => 'Candidate not found'], 404);
+        }
+
+        return response()->json([
+            'candidate' => $candidate,
+            'candidate_status' => CandidateStatus::all(),
+            'candidate_questions' => CandidateQuestions::all(),
+            'candidate_relationship' => Candidates::$relationship,
+        ]);
+    }
+
+
+    public function editCandidatePostOLD(Request $request)
     {
         $candidate_id = $request->get('candidate_id');
-
+ 
         $loginuser = Auth::user();
         $validator = Validator::make($request->all(), [
             'position' => 'required',
@@ -1701,6 +1731,8 @@ class UserController extends Controller
 
             // Save Skills
             $skill_name = explode(',', $request->get('skill_name'));
+            Log::info('My >>>>', ['skill_name' => $skill_name]);
+
             if (count($skill_name) > 0) {
                 $skillids = [];
                 foreach ($skill_name as $skill) {
@@ -1898,6 +1930,353 @@ class UserController extends Controller
             // Save Assessment Sections
             $candidate_assessment_sections = $request->get('candidate_assessment_sections');
             if (count($candidate_assessment_sections) > 0) {
+                $asssecids = [];
+                foreach ($candidate_assessment_sections as $accessment_type => $cassesment) {
+                    $cassesment = (object) $cassesment;
+                    $accessment_by = $cassesment->accessment_by;
+                    $weight_age = $cassesment->weight_age;
+                    $score = $cassesment->score;
+
+                    if (! empty($accessment_by) || ! empty($weight_age) || ! empty($score)) {
+                        $c_assesment_section = new CandidateAssessmentSections();
+                        $c_assesment_section->candidate_id = $candidate_id;
+                        $c_assesment_section->accessment_type = $accessment_type;
+                        $c_assesment_section->accessment_by = $accessment_by;
+                        if ($weight_age) {
+                            $c_assesment_section->weight_age = $weight_age;
+                        }
+                        $c_assesment_section->score = $score;
+                        $c_assesment_section->Save();
+                        $asssecids[] = $c_assesment_section->id;
+                    }
+
+                    if (count($asssecids) > 0) {
+                        CandidateAssessmentSections::where('candidate_id', $candidate_id)->whereNotIn('id', $asssecids)->delete();
+                    }
+                }
+            }
+            
+            
+            /*
+             * Upload cv
+             */
+            if ($file = $request->file('upload_cv')) {
+                $name = time() . '-' . $file->getClientOriginalName();
+                if ($file->move(public_path('/') . 'uploads/cv/', $name)) {
+                    $candidate->cv_file = $name;
+                }
+            }
+            $candidate->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Candidate form updated.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 401,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function editCandidatePost(Request $request)
+    {
+        $candidate_id = $request->get('candidate_id');
+ 
+        $loginuser = Auth::user();
+        $validator = Validator::make($request->all(), [
+            'position' => 'required',
+            'department' => 'required',
+            'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            // 'mobile_number' => 'unique:candidates,' . $candidate_id . '|mobile_number|required',
+            'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+            'gender' => 'required',
+            'status' => 'required',
+            'upload_cv' => 'mimes:doc,pdf,docx'
+        ],
+        [
+            'position.required' => 'Please enter position',
+            'department.required' => 'Please select the department',
+            'full_name.required'=> 'Please fill the name',
+            'email.required' =>'Please fill the email',
+            'gender.required'=> 'Please select gender'
+
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
+            ]);
+        }
+        $candidate = Candidates::where('id', $candidate_id)->first();
+        try {
+
+            $candidate->user_id = $loginuser->id;
+            $candidate->full_name = $request->get('full_name');
+            $candidate->email = $request->get('email');
+            $candidate->gender = $request->get('gender');
+
+            if ($request->mobile_number) {
+                $validator = Validator::make($request->all(), [
+                    'mobile_number' => 'unique:candidates,mobile_number,' . $candidate_id . '|required|digits:10|numeric'
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => 401,
+                        'message' => $validator->errors()
+                            ->first()
+                    ]);
+                }
+                $candidate->mobile_number = $request->get('mobile_number');
+            }
+
+            $candidate->position = $request->get('position');
+            $candidate->marital_status = $request->get('marital_status');
+            $candidate->residence_address = $request->get('residence_address');
+            $candidate->passport_number = $request->get('passport_number');
+            $candidate->nationality = $request->get('nationality');
+            $candidate->dob = $request->get('dob');
+            $candidate->age = $request->get('age');
+            $candidate->place_of_birth = $request->get('place_of_birth');
+            $candidate->marital_status = $request->get('marital_status');
+            $candidate->hobbies = $request->get('hobbies');
+            $candidate->current_salary = $request->get('current_salary');
+            $candidate->expected_salary = $request->get('expected_salary');
+            $candidate->remarks = $request->get('remarks');
+            $candidate->status = $request->get('status');
+
+            $candidate->date_of_interview = $request->get('date_of_interview');
+            $candidate->interview_score = $request->get('interview_score');
+            $candidate->interviewed_by = $request->get('interviewed_by');
+            $candidate->sourcing = $request->get('sourcing');
+            $candidate->department = $request->get('department');
+            $candidate->offered_salary = $request->get('offered_salary');
+
+            $candidate->save(); // Update Candidate table data
+
+            $candidate_id = $candidate->id;
+
+            // Save Skills - FIXED VERSION
+            $skill_names = $request->get('skill_name');
+            
+            // Handle both array and string formats
+            if (is_string($skill_names)) {
+                $skill_name = explode(',', $skill_names);
+            } else if (is_array($skill_names)) {
+                $skill_name = $skill_names;
+            } else {
+                $skill_name = [];
+            }
+
+            Log::info('My skill_name >>>>', ['skill_name' => $skill_name]);
+            
+            if (count($skill_name) > 0) {
+                $skillids = [];
+                foreach ($skill_name as $skill) {
+                    $skill = trim($skill); // Remove any whitespace
+                    if (!empty($skill)) { // Only save non-empty skills
+                        $c_skill = new CandidateSkills();
+                        $c_skill->candidate_id = $candidate_id;
+                        $c_skill->skill_name = $skill;
+                        $c_skill->Save();
+                        $skillids[] = $c_skill->id;
+                    }
+                }
+
+                if (count($skillids) > 0) {
+                    CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
+                }
+            } else {
+                // If no skills provided, delete all existing skills for this candidate
+                CandidateSkills::where('candidate_id', $candidate_id)->delete();
+            }
+
+            // Save Education
+            $candidate_education = $request->get('candidate_education');
+            if ($candidate_education && count($candidate_education['institute_name']) > 0) {
+                $canedu = [];
+                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce ++) {
+                    $institute_name = $candidate_education['institute_name'][$ce];
+                    $from = $candidate_education['from'][$ce];
+                    $to = $candidate_education['to'][$ce];
+                    $professional_qualification = $candidate_education['professional_qualification'][$ce];
+
+                    if (! empty($institute_name) || ! empty($from) || ! empty($to) || ! empty($professional_qualification)) {
+                        $c_edu = new CandidateEducations();
+                        $c_edu->candidate_id = $candidate_id;
+                        $c_edu->institute_name = $institute_name;
+                        $c_edu->from = $from;
+                        $c_edu->to = $to;
+                        $c_edu->professional_qualification = $professional_qualification;
+                        $c_edu->save();
+                        $canedu[] = $c_edu->id;
+                    }
+                }
+
+                if (count($canedu) > 0) {
+                    CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $canedu)->delete();
+                }
+            }
+
+            // Save Employments
+            $candidate_employments = $request->get('candidate_employments');
+            if ($candidate_employments && count($candidate_employments['company_name']) > 0) {
+
+                $empids = [];
+                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce ++) {
+                    $company_name = $candidate_employments['company_name'][$ce];
+                    $address = $candidate_employments['address'][$ce];
+                    $contact_details = $candidate_employments['contact_details'][$ce];
+                    $date_from = $candidate_employments['date_from'][$ce];
+                    $date_to = $candidate_employments['date_to'][$ce];
+                    $position = $candidate_employments['position'][$ce];
+                    $reason_of_leaving = $candidate_employments['reason_of_leaving'][$ce];
+                    $candidateEmp = new CandidateEmployments();
+
+                    if (! empty($company_name) || ! empty($address) || ! empty($contact_details) || ! empty($date_from) || ! empty($date_to) || ! empty($position) || ! empty($date_from) || ! empty($reason_of_leaving)) {
+                        $c_emp = new CandidateEmployments();
+                        $c_emp->candidate_id = $candidate_id;
+                        $c_emp->company_name = $company_name;
+                        $c_emp->address = $address;
+                        $c_emp->contact_details = $contact_details;
+                        $c_emp->date_from = $date_from;
+                        $c_emp->date_to = $date_to;
+                        $c_emp->position = $position;
+                        $c_emp->reason_of_leaving = $reason_of_leaving;
+                        $c_emp->Save();
+                        $empids[] = $c_emp->id;
+                    }
+                }
+
+                if (count($empids) > 0) {
+                    CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empids)->delete();
+                }
+            }
+
+            // Save Languages
+            $candidate_languages = $request->get('candidate_languages');
+            if ($candidate_languages && count($candidate_languages['english_id']) > 0) {
+                $langids = [];
+                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce ++) {
+                    $language_id = $candidate_languages['english_id'][$ce];
+                    $speak = $candidate_languages['speak'][$ce];
+                    $write = $candidate_languages['write'][$ce];
+                    $understand = $candidate_languages['understand'][$ce];
+
+                    if (! empty($language_id)) {
+                        $c_lang = new CandidateLanguages();
+                        $c_lang->candidate_id = $candidate_id;
+                        $c_lang->language_id = $language_id;
+                        $c_lang->speak = $speak;
+                        $c_lang->write = $write;
+                        $c_lang->understand = $understand;
+                        $c_lang->Save();
+                        $langids[] = $c_lang->id;
+                    }
+                }
+
+                if (count($langids) > 0) {
+                    CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langids)->delete();
+                }
+            }
+
+            // Save Other infomations
+            $candidate_other_informations = $request->get('candidate_other_informations');
+            if ($candidate_other_informations && count($candidate_other_informations['question_id']) > 0) {
+                $otherids = [];
+                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce ++) {
+                    $question_id = $candidate_other_informations['question_id'][$ce];
+                    $status = $candidate_other_informations['status'][$ce];
+                    $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
+
+                    $c_other = new CandidateOtherInformations();
+                    $c_other->candidate_id = $candidate_id;
+                    $c_other->question_id = $question_id;
+                    $c_other->status = $status;
+                    $c_other->reason = $reason;
+                    $c_other->Save();
+                    $otherids[] = $c_other->id;
+                }
+
+                if (count($otherids) > 0) {
+                    CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherids)->delete();
+                }
+            }
+
+            // Save Familes
+            $candidate_families = $request->get('candidate_families');
+            if ($candidate_families && count($candidate_families['name']) > 0) {
+                $famids = [];
+                for ($ce = 0; $ce < count($candidate_families['name']); $ce ++) {
+                    $name = $candidate_families['name'][$ce];
+                    $relationship = $candidate_families['relationship'][$ce];
+                    $age = $candidate_families['age'][$ce];
+                    $occupation = $candidate_families['occupation'][$ce];
+                    $name_of_employer = $candidate_families['name_of_employer'][$ce];
+
+                    if (! empty($name) || ! empty($relationship) || ! empty($age) || ! empty($occupation) || ! empty($name_of_employer)) {
+                        $c_famiily = new CandidateFamilies();
+                        $c_famiily->candidate_id = $candidate_id;
+                        $c_famiily->name = $name;
+                        $c_famiily->relationship = $relationship;
+                        $c_famiily->age = $age;
+                        $c_famiily->occupation = $occupation;
+                        $c_famiily->name_of_employer = $name_of_employer;
+                        $c_famiily->Save();
+                        $famids[] = $c_famiily->id;
+                    }
+
+                    if (count($famids) > 0) {
+                        CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famids)->delete();
+                    }
+                }
+            }
+
+            // Save Accessments
+            $candidate_assessments = $request->get('candidate_assessments');
+            if ($candidate_assessments && count($candidate_assessments) > 0) {
+                $assids = [];
+                foreach ($candidate_assessments as $interviewer => $cassesment) {
+                    $cassesment = (object) $cassesment;
+                    $interviewer = $interviewer;
+                    $interviewer_name = $cassesment->interviewer_name;
+                    $education = $cassesment->education;
+                    $experince = $cassesment->experince;
+                    $attitude = $cassesment->attitude;
+                    $stability = $cassesment->stability;
+                    $technical_skills = $cassesment->technical_skills;
+                    $appearance_personality = $cassesment->appearance_personality;
+                    $skills = $cassesment->skills;
+
+                    if (! empty($interviewer_name) || ! empty($education) || ! empty($experince) || ! empty($attitude) || ! empty($stability) || ! empty($technical_skills) || ! empty($appearance_personality) || ! empty($skills)) {
+                        $c_assesment = new CandidateAssessments();
+                        $c_assesment->candidate_id = $candidate_id;
+                        $c_assesment->interviewer = $interviewer;
+                        $c_assesment->interviewer_name = $interviewer_name;
+                        $c_assesment->education = $education;
+                        $c_assesment->experince = $experince;
+                        $c_assesment->attitude = $attitude;
+                        $c_assesment->stability = $stability;
+                        $c_assesment->technical_skills = $technical_skills;
+                        $c_assesment->appearance_personality = $appearance_personality;
+                        $c_assesment->skills = $skills;
+                        $c_assesment->Save();
+                        $assids[] = $c_assesment->id;
+                    }
+
+                    if (count($assids) > 0) {
+                        CandidateAssessments::where('candidate_id', $candidate_id)->whereNotIn('id', $assids)->delete();
+                    }
+                }
+            }
+
+            // Save Assessment Sections
+            $candidate_assessment_sections = $request->get('candidate_assessment_sections');
+            if ($candidate_assessment_sections && count($candidate_assessment_sections) > 0) {
                 $asssecids = [];
                 foreach ($candidate_assessment_sections as $accessment_type => $cassesment) {
                     $cassesment = (object) $cassesment;
@@ -2373,7 +2752,7 @@ class UserController extends Controller
     public function candidateProfilePost(Request $request)
     {
         $candidate_token = $request->get('candidate_token');
-
+         Log::info('My >>>>', ['candidate_token' => $candidate_token]);
         $loginuser = Auth::user();
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
@@ -2733,16 +3112,16 @@ class UserController extends Controller
 
     public function candidateProfileView($profile_id)
     {
-        $candidate = Candidates::with([
-            'skills_section',
-            'languages',
-            'educations',
-            'employments',
-            'families',
-            'assessment_section',
-            'other_informations',
-        ])->where('profile_id', $profile_id)->first();
-
+        // $candidate = Candidates::with([
+        //     'skills_section',
+        //     'languages',
+        //     'educations',
+        //     'employments',
+        //     'families',
+        //     'assessment_section',
+        //     'other_informations',
+        // ])->where('profile_id', $profile_id)->first();
+       $candidate = Candidates::where('profile_id', $profile_id)->first();
        Log::info('My >>>>', ['candidate' => $candidate]);
 
         if (!$candidate) {

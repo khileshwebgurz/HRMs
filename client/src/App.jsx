@@ -25,8 +25,13 @@ import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
+<<<<<<< Updated upstream
+=======
+import { useUser } from "./context/UserContext";
+>>>>>>> Stashed changes
 import CandidateList from "./components/AdminDashboardComponent/allCandidates";
 import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
+import CandidateEditForm from "./components/AdminDashboardComponent/editCandidates";
 
 function App() {
   return (
@@ -45,8 +50,8 @@ function App() {
 
           <Route index element={<Navigate to="/dashboard" />} />
 
-  {/* Single dynamic dashboard route */}
-  <Route path="/dashboard" element={<Dashboard />} />
+          {/* Single dynamic dashboard route */}
+          <Route path="/dashboard" element={<Dashboard />} />
           
            
           
@@ -66,8 +71,10 @@ function App() {
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
           <Route path="/profile/view/:profile_id" element={<CandidateProfile/>}/>
+          <Route path="/trackercandidates" element={<CandidateList />} />
+          <Route path="/candidate/edit/:candidate_id" element={<CandidateEditForm />}/>
+          <Route path="/candidate/update" element={<CandidateEditForm />}/>
 
-           <Route path="/trackercandidates" element={<CandidateList />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
