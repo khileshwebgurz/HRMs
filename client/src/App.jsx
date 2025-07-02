@@ -25,10 +25,7 @@ import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
-<<<<<<< Updated upstream
-=======
 import { useUser } from "./context/UserContext";
->>>>>>> Stashed changes
 import CandidateList from "./components/AdminDashboardComponent/allCandidates";
 import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
 import CandidateEditForm from "./components/AdminDashboardComponent/editCandidates";
