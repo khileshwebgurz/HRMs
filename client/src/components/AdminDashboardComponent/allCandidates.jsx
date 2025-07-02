@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 const CandidateList = () => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [profileID, setProfileId] =useState("");
   const Navigate = useNavigate();
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const CandidateProfile = () => {
   const { profile_id } = useParams();
-  console.log(profile_id);
+
   const [candidateData, setCandidateData] = useState([]);
 
 

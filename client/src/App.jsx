@@ -25,8 +25,6 @@ import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
-import AdminDashboard from "./components/AdminDashboard";
-import { useUser } from "./context/UserContext";
 import CandidateList from "./components/AdminDashboardComponent/allCandidates";
 import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
 

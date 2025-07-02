@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { Link } from 'react-router-dom';
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     total_candidates: 0,
@@ -82,12 +82,12 @@ const AdminDashboard = () => {
                         alt=""
                       />
                     </figure>
-                    <a href={box.link}>
+                    <Link to={box.link}>
                       <div className="info-box-content">
                         <span className="info-box-number">{box.count}</span>
                         <span className="info-box-text">{box.label}</span>
                       </div>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>

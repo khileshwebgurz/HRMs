@@ -45,7 +45,8 @@ Route::middleware(['auth:api'])->group(function () {
             'role' => $role->role_name ?? null,
             'role_id' => $role->id ?? null,
             'user_role' => $user->user_role,
-            'permissions' => $permissionSlugs
+            'permissions' => $permissionSlugs,
+            'profile_pic'=> $user-> profile_pic,
         ]);
     });
 

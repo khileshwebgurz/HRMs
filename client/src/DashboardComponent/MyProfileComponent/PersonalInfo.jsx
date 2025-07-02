@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState } from 'react';
-const PersonalInfo = ({employeedata}) => {
+import axios from 'axios';
+const PersonalInfo = ({employeedata , user}) => {
 
     const [employee, setEmployee] = useState({
         name: employeedata.candidateData?.full_name || "",

@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import "../../public/css/employee-panel.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
   const navigate = useNavigate();
 
   const defaultProfile = `/dist/img/profile.png`;
   const profilePic = user?.profile_pic
-    ? `/uploads/employees-photos/${user.profile_pic}`
+    ? `../../public/uploads/employees-photos/${user.profile_pic}`
     : defaultProfile;
 
   const handleLogout = async () => {

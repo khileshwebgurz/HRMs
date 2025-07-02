@@ -57,7 +57,7 @@ const MyProfile = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === "personal" && <PersonalInfo employeedata={employee} />}
+        {activeTab === "personal" && <PersonalInfo employeedata={employee} user={user}/>}
         {activeTab === "basic" && <BasicInfo employeedata={employee} />}
         {activeTab === "appraisal" && <AppraisalInfo />}
       </div>

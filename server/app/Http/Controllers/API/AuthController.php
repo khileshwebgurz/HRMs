@@ -69,7 +69,8 @@ class AuthController extends Controller
                 'role' => $role->name ?? null,
                 'role_id' => $role->id ?? null,
                 'user_role' => $employee->user_role,
-                'permissions' => $permissionSlugs
+                'permissions' => $permissionSlugs,
+                'profile_pic' => $employee-> profile_pic,
             ]
         ])->cookie(
             'access_token',
