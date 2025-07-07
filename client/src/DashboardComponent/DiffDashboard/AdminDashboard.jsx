@@ -53,7 +53,7 @@ const AdminDashboard = () => {
               {
                 count: stats.total_active_candidates,
                 label: 'Active Candidates',
-                link: '/allcandidates',
+                link: '/candidate/all-candidates',
                 icon: 'active',
               },
               {

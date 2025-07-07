@@ -35,3 +35,20 @@ ALTER TABLE tickets ALTER COLUMN id SET DEFAULT nextval('tickets_id_seq');
 SELECT MAX(id) FROM tickets;
 SELECT setval('tickets_id_seq', 51, false);
 SELECT setval('tickets_id_seq', (SELECT MAX(id) FROM tickets));
+
+
+
+
+
+
+-----------------------------------
+
+[2025-07-07 07:15:33] local.ERROR: SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "question_options_pkey"
+DETAIL:  Key (id)=(3) already exists. (Connection: pgsql, SQL: insert into "question_options" ("question_id", "option_name", "updated_at", "created_at") values (224, test1, 2025-07-07 07:15:33, 2025-07-07 07:15:33) returning "id") {"userId":1,"exception":"[object] (Illuminate\\Database\\UniqueConstraintViolationException(code: 23505): SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint \"question_options_pkey\"
+
+
+solution :
+
+SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions));
+
+SELECT setval('question_options_id_seq', (SELECT MAX(id) FROM question_options));

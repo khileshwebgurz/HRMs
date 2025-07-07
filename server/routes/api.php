@@ -19,6 +19,7 @@ use App\Http\Controllers\Employee\AttendanceLogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrackerController;
+use App\Http\Controllers\QuestionController;
 
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -64,9 +65,21 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
-     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
+    Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
     Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
+    Route:: get('/candidate/all-candidates', [UserController::class, 'allCandidates']);
+    Route:: delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
+    Route:: get('/users/export-users', [UserController::class, 'exportUsers']);
+    Route:: get('/users/export-candidates', [UserController::class, 'exportCandidates']);
+    Route:: get('/users/export-download/{file_name}', [UserController::class, 'exportDownload']);
    
+    //test Users Admin,Recruiter,HR
+    Route:: get('/all-questions', [QuestionController::class, 'allQuestions']);
+    Route:: get('/add-question', [QuestionController::class, 'addQuestion']);
+    Route:: post('add-question-post', [QuestionController::class, 'addQuestionPost']);
+    Route:: get('/edit-question/{question_id}', [QuestionController::class, 'editQuestion']);
+    Route:: post('edit-question-post', [QuestionController::class, 'editQuestionPost']);
+    Route::delete('/delete-question/{question_id}', [QuestionController::class, 'deleteQuestion']);
 
 
     Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');

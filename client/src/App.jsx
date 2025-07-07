@@ -29,6 +29,11 @@ import { useUser } from "./context/UserContext";
 import CandidateList from "./components/AdminDashboardComponent/allCandidates";
 import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
 import CandidateEditForm from "./components/AdminDashboardComponent/editCandidates";
+import ActiveCandidatesList from "./components/AdminDashboardComponent/activeCandidatesList";
+import QuestionsList from "./components/AdminDashboardComponent/questionsList";
+import AddQuestion from "./components/AdminDashboardComponent/addQuestion";
+import EditQuestion from "./components/AdminDashboardComponent/EditQuestion";
+
 
 function App() {
   return (
@@ -71,6 +76,10 @@ function App() {
           <Route path="/trackercandidates" element={<CandidateList />} />
           <Route path="/candidate/edit/:candidate_id" element={<CandidateEditForm />}/>
           <Route path="/candidate/update" element={<CandidateEditForm />}/>
+          <Route path="/candidate/all-candidates" element={<ActiveCandidatesList />}/>
+          <Route path="/all-questions" element={<QuestionsList />}/>
+          <Route path="/add-question" element={<AddQuestion />}/>
+          <Route path="/edit-question/:question_id" element={<EditQuestion />} />
 
           <Route path="*" element={<NotFound />} />
         </Route>

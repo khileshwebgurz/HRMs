@@ -676,7 +676,7 @@ class UserController extends Controller
               $employeeleave->save();
         }
 
-    }
+        }
             }
            
        $user->room_id = $request->room_name;
@@ -2327,175 +2327,360 @@ class UserController extends Controller
         }
     }
 
-  public function allCandidates(Request $request)
+    public function allCandidatesOLD(Request $request)
+        {
+            if(!in_array('all_candidates', Session::get('permission')[0])){
+                abort(404);
+            }
+            $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+            if($permission_role->view == '2')
+            {
+            $data = Candidates::where('created_by',Auth::user()->id)->orderBy('created_at', 'desc')->get();
+            }
+            elseif($permission_role->view =='3')
+            {
+                $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
+                $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
+            }
+            elseif ($permission_role->view == '4') {
+                $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
+                $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
+            }
+            elseif ($permission_role->view == '5') {
+            $data = Candidates::select('*');
+            }
+
+            if ($request->ajax()) {
+                $loginuser = Auth::user();
+                $results = DataTables::of($data)->addIndexColumn()
+                    ->addcolumn('select', function (Candidates $candidate) {
+                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
+                })
+                    ->editcolumn('id', function (Candidates $candidate) {
+                    return 'HRM' . $candidate->id;
+                })
+                    ->editcolumn('gender', function (Candidates $candidate) {
+                    return ($candidate->gender) ? Candidates::$gender[$candidate->gender] : '';
+                })
+                    ->editcolumn('status', function (Candidates $candidate) {
+                    // return $candidate->candidate_status['status_name'];
+                    $emp = $candidate->candidate_status;
+                    return ($emp) ? $emp['status_name'] : '';
+                })
+                    ->addcolumn('education', function (Candidates $candidate) {
+                    // return $candidate->educations->first()['professional_qualification'];
+                    $emp = $candidate->educations->first();
+                    return ($emp) ? $emp['professional_qualification'] : '';
+                })
+                    ->addcolumn('current_employer', function (Candidates $candidate) {
+                    $emp = $candidate->employments->first();
+                    return ($emp) ? $emp['company_name'] : '';
+                })
+                    ->editcolumn('department', function (Candidates $candidate) {
+                    return ($candidate->department) ? Candidates::$departments[$candidate->department] : '';
+                })
+                    ->editcolumn('created_at', function ($row) {
+                    return date('d M, Y', strtotime($row->created_at));
+                })
+                    ->editcolumn('date_of_interview', function ($row) {
+                    return ($row->date_of_interview) ? date('d M, Y', strtotime($row->date_of_interview)) : '';
+                })
+                    ->addColumn('action', function ($row) {
+                    $role = loginUserRole();
+                    $id = Auth::user()->id;
+                    $created_by = $row->created_by;
+                    $manager =  Employees::where('id', $created_by)->first();
+                    $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+                    $btn = '<div class="btn-group btn-group-sm">';
+                    $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('candidateProfileView', $row->profile_id) . '" target="_blank" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure></a> ';
+                    //comment
+                    $btn .= '<a class="btn btn-success site-icon comment-icon " style="color:#707070;" data-toggle="tooltip"
+                        data-html="true"  data-original-title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" ><figure><i class="fa fa-comment"></i></figure></a> ';
+
+                    if($permission_role->edit == '2')
+                    {
+                        if($id == $created_by)
+                        {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                    elseif($permission_role->edit == '3')
+                    {
+                        if($id == $manager->manager_id)
+                        {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                    elseif($permission_role->edit == '4')
+                    {
+                        if($id == $manager->manager_id || $id == $created_by)
+                        {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                elseif($permission_role->edit == '5')
+                    {
+                    
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                        
+                    }
+                    if ($role == User::ROLE_RECRUITER) {
+
+                        $btn .= '<a class="btn site-icon delete-icon title="Delete" style="background-color: #808080;border-color: #808080;color:#fff;" href="#" onclick="return confirm(\'You are not authorized with this permission please contact to HR for further.\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                    } else {
+                        if($permission_role->delete == '2')
+                    {
+                        if($id == $created_by)
+                        {
+                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                    elseif($permission_role->delete == '3')
+                    {
+                        if($id == $manager->manager_id)
+                        {
+                        $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                    elseif($permission_role->delete == '4')
+                    {
+                        if($id == $manager->manager_id || $id == $created_by)
+                        {
+                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        }
+                    }
+                elseif($permission_role->delete == '5')
+                    {
+                        $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        
+                    }
+
+                        $dis = 'javascript:void(0)';
+                        $onclck = '';
+                        if ($row->status == 7) {
+                            $dis = route('startOnboarding', $row->id);
+                            $onclck = 'onclick="return confirm(\'Are you sure You want to start Onboarding?\')"';
+                        }
+                        $btn .= '<a class="btn btn-success site-icon menu-icon" title="Start Onboarding" href="' . $dis . '"   ' . $onclck . ' ><figure><img src="'.asset("/dist/img/2021/icons/menu.png").'" alt="editor">
+                        <img src="'.asset("/dist/img/2021/icons/menu-overlay.png").'" alt="editor">
+                        </figure></a> ';
+                    }
+                $btn .= ' <a class="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"  title="Send Apptitute Test" href="javascript:void(0)"data-link="' . route('generateTest', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/paper-plane.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/paper-plane-white.png").'" alt="editor"></figure></a> ';
+                
+                // $btn .= ' <a title="View Candidate" href="' . route('sendEmailCandidateProfile', $row->id) . '" class="edit btn btn-info btn-sm">Send Profile</a> ';
+                
+                    $btn .= '</div>';
+
+                    return $btn;
+                })
+                    ->rawColumns([
+                    'action',
+                    'select'
+                ])
+                    ->make(true);
+                $res = (array) $results;
+                if ($request->get('export') != '-') {
+
+                    $res['original']['status'] = 'download';
+                    $items = $res['original']['data'];
+
+                    $name = 'candidates-' . time() . '.' . $request->get('export');
+                    $file = Excel::store(new CandidateCsvExport($items), $name);
+
+                    $res['original']['download_link'] = route('exportdownload', $name);
+                    return $res['original'];
+                } else {
+                    $res['original']['status'] = '';
+                    return $res['original'];
+                }
+            }
+            return view('users.candidates.list');
+        }
+
+    
+    public function allCandidatesNN(Request $request)
     {
-        if(!in_array('all_candidates', Session::get('permission')[0])){
-            abort(404);
+        
+        Log::info('My jkjkkkkkkkk >>>>');
+        $user = Auth::user();
+        $role = $user->user_role;
+        $permission_role = Roles::find($role);
+        // $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+        // if (!in_array('all_candidates', $user->permissions())) {
+        //     return response()->json(['error' => 'Unauthorized'], 403);
+        // }
+          Log::info('My 2 >>>>',['permission_role' => $permission_role]);
+        // Permission checks based on the role
+        $candidatesQuery = Candidates::query();
+         // Log::info('My candidatesQuery >>>>', ['candidatesQuery' => $candidatesQuery->toSql()]);
+
+        if ($permission_role->view == '2') {
+            // View own candidates
+            $candidatesQuery->where('created_by', $user->id);
+            Log::info('My 2 >>>>');
+        } elseif ($permission_role->view == '3') {
+            // View candidates managed by the user
+            $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+            $candidatesQuery->whereIn('created_by', $employees);
+                 Log::info('My 3 >>>>');
+        } elseif ($permission_role->view == '4') {
+            // View candidates managed by the user or the user itself
+            $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
+            $candidatesQuery->whereIn('created_by', $employees);
+                 Log::info('My 4 >>>>');
+        } elseif ($permission_role->view == '5') {
+            // No restrictions
+                 Log::info('My 5 >>>>');
+        } elseif ($permission_role->view == '1') {
+            // No restrictions
+                 Log::info('My 1 >>>>');
         }
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-        if($permission_role->view == '2')
-        {
-          $data = Candidates::where('created_by',Auth::user()->id)->orderBy('created_at', 'desc')->get();
+
+        // Get candidates
+        $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
+
+        // If it's an AJAX request (for DataTables)
+        if ($request->ajax()) {
+            $results = DataTables::of($candidates)
+                ->addIndexColumn()
+                ->addColumn('select', function (Candidates $candidate) {
+                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
+                })
+                ->editColumn('id', function (Candidates $candidate) {
+                    return 'HRM' . $candidate->id;
+                })
+                ->editColumn('gender', function (Candidates $candidate) {
+                    return $candidate->gender ? Candidates::$gender[$candidate->gender] : '';
+                })
+                ->editColumn('status', function (Candidates $candidate) {
+                    return $candidate->candidate_status ? $candidate->candidate_status->status_name : '';
+                })
+                ->addColumn('education', function (Candidates $candidate) {
+                    return $candidate->educations->first() ? $candidate->educations->first()->professional_qualification : '';
+                })
+                ->addColumn('current_employer', function (Candidates $candidate) {
+                    return $candidate->employments->first() ? $candidate->employments->first()->company_name : '';
+                })
+                ->editColumn('department', function (Candidates $candidate) {
+                    return $candidate->department ? Candidates::$departments[$candidate->department] : '';
+                })
+                ->editColumn('created_at', function ($candidate) {
+                    return $candidate->created_at->format('d M, Y');
+                })
+                ->editColumn('date_of_interview', function ($candidate) {
+                    return $candidate->date_of_interview ? $candidate->date_of_interview->format('d M, Y') : '';
+                })
+                ->addColumn('action', function ($candidate) use ($role, $permission_role, $user) {
+                    $actions = '';
+                    // Add action buttons (View, Edit, Delete, etc.)
+                    if ($permission_role->edit == '2' && $candidate->created_by == $user->id) {
+                        $actions .= '<a href="' . route('candidateedit', $candidate->id) . '">Edit</a>';
+                    }
+                    if ($permission_role->delete == '2' && $candidate->created_by == $user->id) {
+                        $actions .= '<a href="' . route('candidatedelete', $candidate->id) . '" onclick="return confirm(\'Are you sure?\')">Delete</a>';
+                    }
+                    return $actions;
+                })
+                ->rawColumns(['select', 'action'])
+                ->make(true);
+
+            return response()->json($results);
         }
-        elseif($permission_role->view =='3')
-        {
-            $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
-            $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
+
+        // Export functionality (CSV)
+        if ($request->get('export') != '-') {
+            $items = $candidates->toArray();
+            $name = 'candidates-' . time() . '.' . $request->get('export');
+            $file = Excel::store(new CandidateCsvExport($items), $name);
+            return response()->json(['download_link' => route('exportdownload', $name)]);
         }
-        elseif ($permission_role->view == '4') {
-            $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
-            $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
-        }
-        elseif ($permission_role->view == '5') {
-           $data = Candidates::select('*');
-        }
+
+        // Return candidates data in JSON format
+        return response()->json($candidates);
+    }
+
+    public function allCandidates(Request $request)
+    {
+        Log::info('My jkjkkkkkkkk >>>>');
+        $user = Auth::user();
+        $role = $user->user_role;
+        $permission_role = Roles::find($role);
+
+        Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
+
+        $candidatesQuery = Candidates::query();
+       // $candidatesQuery->where('status', '7');
+        $candidatesQuery->whereIn('status', [2, 3, 4, 5, 7]); 
+
+        if ($permission_role->view == '2') {
+            $candidatesQuery->where('created_by', $user->id);
+            Log::info('My 2 >>>>');
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+            $candidatesQuery->whereIn('created_by', $employees);
+            Log::info('My 3 >>>>');
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
+            $candidatesQuery->whereIn('created_by', $employees);
+            Log::info('My 4 >>>>');
+        } elseif ($permission_role->view == '5') {
+            Log::info('My 5 >>>>');
+        } 
+
+
+        $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
 
         if ($request->ajax()) {
-            $loginuser = Auth::user();
-            $results = DataTables::of($data)->addIndexColumn()
-                ->addcolumn('select', function (Candidates $candidate) {
-                return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
-            })
-                ->editcolumn('id', function (Candidates $candidate) {
-                return 'HRM' . $candidate->id;
-            })
-                ->editcolumn('gender', function (Candidates $candidate) {
-                return ($candidate->gender) ? Candidates::$gender[$candidate->gender] : '';
-            })
-                ->editcolumn('status', function (Candidates $candidate) {
-                // return $candidate->candidate_status['status_name'];
-                $emp = $candidate->candidate_status;
-                return ($emp) ? $emp['status_name'] : '';
-            })
-                ->addcolumn('education', function (Candidates $candidate) {
-                // return $candidate->educations->first()['professional_qualification'];
-                $emp = $candidate->educations->first();
-                return ($emp) ? $emp['professional_qualification'] : '';
-            })
-                ->addcolumn('current_employer', function (Candidates $candidate) {
-                $emp = $candidate->employments->first();
-                return ($emp) ? $emp['company_name'] : '';
-            })
-                ->editcolumn('department', function (Candidates $candidate) {
-                return ($candidate->department) ? Candidates::$departments[$candidate->department] : '';
-            })
-                ->editcolumn('created_at', function ($row) {
-                return date('d M, Y', strtotime($row->created_at));
-            })
-                ->editcolumn('date_of_interview', function ($row) {
-                return ($row->date_of_interview) ? date('d M, Y', strtotime($row->date_of_interview)) : '';
-            })
-                ->addColumn('action', function ($row) {
-                $role = loginUserRole();
-                $id = Auth::user()->id;
-                $created_by = $row->created_by;
-                $manager =  Employees::where('id', $created_by)->first();
-                $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-                $btn = '<div class="btn-group btn-group-sm">';
-                $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('candidateProfileView', $row->profile_id) . '" target="_blank" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure></a> ';
-                //comment
-                   $btn .= '<a class="btn btn-success site-icon comment-icon " style="color:#707070;" data-toggle="tooltip"
-                     data-html="true"  data-original-title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" ><figure><i class="fa fa-comment"></i></figure></a> ';
-
-                if($permission_role->edit == '2')
-                {
-                    if($id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+            $results = DataTables::of($candidates)
+                ->addIndexColumn()
+                ->addColumn('select', function (Candidates $candidate) {
+                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
+                })
+                ->editColumn('id', function (Candidates $candidate) {
+                    return 'HRM' . $candidate->id;
+                })
+                ->editColumn('gender', function (Candidates $candidate) {
+                    return $candidate->gender ? Candidates::$gender[$candidate->gender] : '';
+                })
+                ->editColumn('status', function (Candidates $candidate) {
+                    return $candidate->candidate_status ? $candidate->candidate_status->status_name : '';
+                })
+                ->addColumn('education', function (Candidates $candidate) {
+                    return $candidate->educations->first() ? $candidate->educations->first()->professional_qualification : '';
+                })
+                ->addColumn('current_employer', function (Candidates $candidate) {
+                    return $candidate->employments->first() ? $candidate->employments->first()->company_name : '';
+                })
+                ->editColumn('department', function (Candidates $candidate) {
+                    return $candidate->department ? Candidates::$departments[$candidate->department] : '';
+                })
+                ->editColumn('created_at', function ($candidate) {
+                    return $candidate->created_at->format('d M, Y');
+                })
+                ->editColumn('date_of_interview', function ($candidate) {
+                    return $candidate->date_of_interview ? $candidate->date_of_interview->format('d M, Y') : '';
+                })
+                ->addColumn('action', function ($candidate) use ($role, $permission_role, $user) {
+                    $actions = '';
+                    // Add action buttons (View, Edit, Delete, etc.)
+                    if ($permission_role->edit == '2' && $candidate->created_by == $user->id) {
+                        $actions .= '<a href="' . route('candidateedit', $candidate->id) . '">Edit</a>';
                     }
-                }
-                elseif($permission_role->edit == '3')
-                {
-                     if($id == $manager->manager_id)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                    if ($permission_role->delete == '2' && $candidate->created_by == $user->id) {
+                        $actions .= '<a href="' . route('candidatedelete', $candidate->id) . '" onclick="return confirm(\'Are you sure?\')">Delete</a>';
                     }
-                }
-                elseif($permission_role->edit == '4')
-                {
-                     if($id == $manager->manager_id || $id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
-                    }
-                }
-               elseif($permission_role->edit == '5')
-                {
-                   
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
-                    
-                }
-                if ($role == User::ROLE_RECRUITER) {
-
-                    $btn .= '<a class="btn site-icon delete-icon title="Delete" style="background-color: #808080;border-color: #808080;color:#fff;" href="#" onclick="return confirm(\'You are not authorized with this permission please contact to HR for further.\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                } else {
-                    if($permission_role->delete == '2')
-                {
-                    if($id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                    }
-                }
-                elseif($permission_role->delete == '3')
-                {
-                     if($id == $manager->manager_id)
-                    {
-                       $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                    }
-                }
-                elseif($permission_role->delete == '4')
-                {
-                     if($id == $manager->manager_id || $id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                    }
-                }
-               elseif($permission_role->delete == '5')
-                {
-                    $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                    
-                }
-
-                    $dis = 'javascript:void(0)';
-                    $onclck = '';
-                    if ($row->status == 7) {
-                        $dis = route('startOnboarding', $row->id);
-                        $onclck = 'onclick="return confirm(\'Are you sure You want to start Onboarding?\')"';
-                    }
-                    $btn .= '<a class="btn btn-success site-icon menu-icon" title="Start Onboarding" href="' . $dis . '"   ' . $onclck . ' ><figure><img src="'.asset("/dist/img/2021/icons/menu.png").'" alt="editor">
-                    <img src="'.asset("/dist/img/2021/icons/menu-overlay.png").'" alt="editor">
-                    </figure></a> ';
-                }
-               $btn .= ' <a class="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"  title="Send Apptitute Test" href="javascript:void(0)"data-link="' . route('generateTest', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/paper-plane.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/paper-plane-white.png").'" alt="editor"></figure></a> ';
-               
-               // $btn .= ' <a title="View Candidate" href="' . route('sendEmailCandidateProfile', $row->id) . '" class="edit btn btn-info btn-sm">Send Profile</a> ';
-              
-                $btn .= '</div>';
-
-                return $btn;
-            })
-                ->rawColumns([
-                'action',
-                'select'
-            ])
+                    return $actions;
+                })
+                ->rawColumns(['select', 'action'])
                 ->make(true);
-            $res = (array) $results;
-            if ($request->get('export') != '-') {
 
-                $res['original']['status'] = 'download';
-                $items = $res['original']['data'];
-
-                $name = 'candidates-' . time() . '.' . $request->get('export');
-                $file = Excel::store(new CandidateCsvExport($items), $name);
-
-                $res['original']['download_link'] = route('exportdownload', $name);
-                return $res['original'];
-            } else {
-                $res['original']['status'] = '';
-                return $res['original'];
-            }
+            return response()->json($results);
         }
-        return view('users.candidates.list');
+
+        return response()->json($candidates);
     }
+
+
 
     public function exportDownload($file_path)
     {
