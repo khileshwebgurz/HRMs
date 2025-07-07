@@ -59,13 +59,13 @@ const AdminDashboard = () => {
               {
                 count: stats.total_questions,
                 label: 'Total Questions',
-                link: '/allQuestions',
+                link: '/all-questions',
                 icon: 'conversation',
               },
               {
                 count: stats.total_users,
                 label: 'Active Employees',
-                link: '/allemployees',
+                link: '/all-employees',
                 icon: 'people',
               },
             ].map((box, idx) => (
