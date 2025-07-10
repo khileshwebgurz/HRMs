@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class QuestionController extends Controller
 {
-    public function allQuestions(Request $request)
+    public function allQuestionsWW(Request $request)
     {
         $user = Auth::user();
         $role = Roles::find($user->user_role);
@@ -61,7 +61,61 @@ class QuestionController extends Controller
         ]);
     }
 
-     public function addQuestion()
+
+    public function allQuestions(Request $request)
+    {
+        $user = Auth::user();
+        $role = Roles::find($user->user_role);
+
+        if (!$role || $role->view == '1') {
+            return response()->json([
+                'status' => false,
+                'message' => "You don't have permission to view. Please contact HR.",
+                'data' => []
+            ], 403);
+        }
+
+        $query = Questions::where('status', 1);
+
+        if ($role->view == '2') {
+            $query->where('created_by', $user->id);
+        } elseif ($role->view == '3') {
+            $employeeIds = Employees::where('manager_id', $user->id)->pluck('id');
+            $query->whereIn('created_by', $employeeIds);
+        } elseif ($role->view == '4') {
+            $employeeIds = Employees::where('manager_id', $user->id)
+                ->orWhere('id', $user->id)
+                ->pluck('id');
+            $query->whereIn('created_by', $employeeIds);
+        }
+
+        $questionTypes = Questions::$question_type;
+
+        $questions = $query->latest()->paginate(10); // 10 per page
+
+        $formatted = $questions->map(function ($q, $i) use ($questionTypes) {
+            return [
+                'id' => $q->id,
+                'question' => nl2br($q->question),
+                'question_type' => $questionTypes[$q->question_type] ?? 'N/A',
+                'can_edit' => true,
+                'can_delete' => true
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $formatted,
+            'pagination' => [
+                'current_page' => $questions->currentPage(),
+                'last_page' => $questions->lastPage(),
+                'per_page' => $questions->perPage(),
+                'total' => $questions->total()
+            ]
+        ]);
+    }
+
+    public function addQuestion()
     {
         $question_type = Questions::$question_type;
         $user = Auth::user();
@@ -246,5 +300,7 @@ class QuestionController extends Controller
             ]);
         }
     }
+
+    
 
 }

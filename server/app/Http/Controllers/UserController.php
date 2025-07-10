@@ -397,7 +397,7 @@ class UserController extends Controller
     /**
      * Add employee page.
      */
-    public function addEmployee()
+    public function addEmployeeOLD()
     {
         $loginuser = Auth::user();
         $user_role = Auth::user()->user_role;
@@ -410,7 +410,7 @@ class UserController extends Controller
     /**
      * add new employee and send email notification to employee to create account password.
      */
-    public function addEmployeePost(Request $request)
+    public function addEmployeePostOLD(Request $request)
     {
         // $loginuser = Auth::user();
 
@@ -516,6 +516,216 @@ class UserController extends Controller
                 'message' => 'Something Wrong. Try Again.'
             ]);
         }
+    }
+
+
+    public function addEmployee()
+    {
+        $user = Auth::user();
+        $role = Roles::find($user->user_role);
+
+        $assign = [];
+        if ($role->add != '2') {
+            if ($role->add == '4') {
+                $assign = Employees::where('manager_id', $user->id)
+                    ->orWhere('id', $user->id)->get();
+            } elseif ($role->add == '5') {
+                $all_roles = Roles::where('id', '!=', '2')->pluck('id')->toArray();
+                $assign = Employees::whereIn('user_role', $all_roles)->get();
+            } else {
+                $assign = Employees::where('manager_id', $user->id)->get();
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'assignable_employees' => $assign,
+            'can_assign' => $role->add != '2'
+        ]);
+    }
+
+
+    public function addEmployeePost(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
+        }
+
+        $user = new Employees();
+        $permission_role = Roles::find(Auth::user()->user_role);
+        $created_by = $permission_role->add == '2' ? Auth::user()->id : $request->created_by;
+
+        if (!$created_by) {
+            return response()->json(['status' => 401, 'message' => 'Please select to whom you would assign to']);
+        }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt('#WEBGURUZ#'); // Placeholder
+        $user->token = Str::random(32);
+        $user->created_by = $created_by;
+
+        if ($user->save()) {
+            $ObCandidates = ObCandidates::firstOrNew(['id' => $request->on_candidate_id]);
+            $ObCandidates->name = $request->name;
+            $ObCandidates->email = $request->email;
+            $ObCandidates->office_employee_id = $user->id;
+            $ObCandidates->created_by = $created_by;
+            $ObCandidates->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Employee added successfully',
+                'token' => $user->token // ✅ Return token for frontend
+            ]);
+        }
+
+        return response()->json(['status' => 401, 'message' => 'Something went wrong. Try again.']);
+    }
+
+
+    public function validateEmployeeToken($type, $token)
+    {
+        $employee = Employees::where('token', $token)->first();
+
+        if (!$employee) {
+            return response()->json(['status' => 404, 'message' => 'Invalid or expired token']);
+        }
+
+        if ($type === 'accept') {
+            return response()->json([
+                'status' => 200,
+                'data' => [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                    'email' => $employee->email
+                ]
+            ]);
+        }
+
+        if ($type === 'declined') {
+            $employee->delete();
+            return response()->json(['status' => 200, 'message' => 'Invitation declined and account deleted.']);
+        }
+
+        return response()->json(['status' => 400, 'message' => 'Invalid type']);
+    }
+
+
+    public function setPasswordEmployeePost(Request $request, $token)
+    {
+        $request->validate([
+            'password' => 'required|min:6|confirmed'
+        ]);
+
+        $user = Employees::where('token', $token)->first();
+
+        if (!$user) {
+            return response()->json(['status' => 404, 'message' => 'Invalid token']);
+        }
+
+        $user->password = bcrypt($request->password);
+        $user->token = null;
+        $user->readiness_status = true;
+
+        if ($user->save()) {
+            return response()->json(['status' => 200, 'message' => 'Password set successfully. You can now log in.']);
+        }
+
+        return response()->json(['status' => 500, 'message' => 'Failed to set password']);
+    }
+
+    public function addEmployeePostNEw(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i'
+        ], [
+            'name.required' => 'Please fill the name',
+            'email.required' => 'Please fill the email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        $user = new Employees();
+
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->add == '2') {
+            $created_by = Auth::user()->id;
+        } else {
+            if (empty($request->created_by)) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Please select to whom you would assign to'
+                ]);
+            }
+            $created_by = $request->created_by;
+        }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt('#WEBGURUZ#');
+        $user->token = Str::random(32);
+        $user->created_by = $created_by;
+
+        if ($user->save()) {
+            $ObCandidates = null;
+
+            if (!empty($request->on_candidate_id)) {
+                $ObCandidates = ObCandidates::find($request->on_candidate_id);
+            }
+
+            if (!$ObCandidates) {
+                $ObCandidates = new ObCandidates();
+            }
+
+          
+            $ObCandidates->name = $request->name;
+            $ObCandidates->email = $request->email;
+            $ObCandidates->office_employee_id = $user->id;
+            $ObCandidates->created_by = $created_by;
+            $ObCandidates->save();
+
+            // Send Email
+            // $to_name = $user->name;
+            // $to_email = $user->email;
+            // $data = [
+            //     'name' => $request->name,
+            //     'invite_link_accept' => route('setPasswordEmployee', ['accept', $user->token]),
+            //     'invite_link_declined' => route('setPasswordEmployee', ['declined', $user->token])
+            // ];
+
+            // Mail::send('emails.employee-invite', $data, function ($message) use ($to_name, $to_email) {
+            //     $message->to($to_email, $to_name)->subject('Welcome to HRM');
+            // });
+
+            // if (!Mail::failures()) {
+            //     return response()->json([
+            //         'status' => 200,
+            //         'message' => 'Employee added successfully'
+            //     ]);
+            // } else {
+            //     return response()->json([
+            //         'status' => 401,
+            //         'message' => 'Something went wrong while sending email.'
+            //     ]);
+            // }
+        }
+
+        return response()->json([
+            'status' => 401,
+            'message' => 'Something went wrong. Try again.'
+        ]);
     }
 
     
@@ -706,7 +916,7 @@ class UserController extends Controller
     /**
      * get all employees
      */
-    public function allEmployees(Request $request)
+    public function allEmployeesOLD(Request $request)
     {
         $loginuser = Auth::user();
         
@@ -942,6 +1152,87 @@ class UserController extends Controller
         return view('users.employees.listuser', compact('user_roles'));
     }
 
+     public function allEmployees(Request $request)
+    {
+        $user = Auth::user();
+        $role = Roles::find($user->user_role);
+
+        if (!$role || $role->view == '1') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $query = match ($role->view) {
+            '2' => Employees::where('created_by', $user->id),
+            '3' => Employees::whereIn('created_by', Employees::where('manager_id', $user->id)->pluck('id')),
+            '4' => Employees::whereIn('created_by', Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')),
+            '5' => Employees::query(),
+            default => null,
+        };
+
+        if (!$query) {
+            return response()->json(['data' => []]);
+        }
+
+        $employees = $query->orderBy('name')->get();
+
+        // Enrich data
+        $data = $employees->map(function ($employee) use ($user) {
+            $employee->manager_name = optional(Employees::find($employee->manager_id))->name ?? '-';
+            $employee->gender_text = $employee->gender === '1' ? 'Male' : 'Female';
+            $employee->progress = $this->calculateProgress($employee);
+
+            return [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'email' => $employee->email,
+                'phone' => $employee->phone,
+                'gender' => $employee->gender_text,
+                'manager' => $employee->manager_name,
+                'status' => $employee->status ? 'Active' : 'Inactive',
+                'progress' => $employee->progress,
+                'created_by' => $employee->created_by,
+            ];
+        });
+
+        return response()->json(['data' => $data]);
+    }
+
+    private function calculateProgress($employee)
+    {
+        $candidate = ObCandidates::where('office_employee_id', $employee->id)->first();
+        if (!$candidate) return 0;
+
+        $progress = 0;
+        $weights = [1 => 40, 2 => 20, 3 => 10, 4 => 10, 5 => 15];
+
+        foreach ($weights as $tab => $weight) {
+            $fieldIds = ObTabFieldRelations::where('tab_id', $tab)->pluck('field_id');
+            $optionIds = ObTabFieldOptions::whereNotIn('type', [3, 6])->whereIn('field_id', $fieldIds)->pluck('id');
+            $filled = ObTabFieldData::where('ob_candidate_id', $candidate->id)
+                ->whereNotNull('value')
+                ->where('value', '!=', '')
+                ->where('value', '!=', '[]')
+                ->whereIn('field_id', $optionIds)
+                ->pluck('field_id');
+
+            if ($fieldIds->diff($filled)->isEmpty()) {
+                $progress += $weight;
+            }
+        }
+
+        if ($progress == 95) {
+            OnboardRequests::firstOrCreate(
+                ['candidate_name' => $employee->name],
+                [
+                    'updated_by' => Auth::user()->name,
+                    'link' => url('hrm/onboarding/candidate/' . $candidate->id),
+                ]
+            );
+        }
+
+        return $progress;
+    }
+
     /**
      * employee accept/declined the account creation.
      * If employee Accept then show the password set screen where employee can set the password else showing the declined message and
@@ -969,7 +1260,7 @@ class UserController extends Controller
      *
      * @params user_id
      */
-    public function setPasswordEmployeePost(Request $request, $token)
+    public function setPasswordEmployeePostOLD(Request $request, $token)
     {
         $user = Employees::where('token', $token)->first();
         $validator = Validator::make($request->all(), [

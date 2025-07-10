@@ -1,31 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Navigation hook
+import { useNavigate } from 'react-router-dom';
 
 const QuestionsList = () => {
   const [questions, setQuestions] = useState([]);
   const [hasPermission, setHasPermission] = useState(true);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // React Router navigation
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchQuestions();
-  }, []);
+    fetchQuestions(page);
+  }, [page]);
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = async (pageNumber = 1) => {
+    setLoading(true);
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/all-questions`,
+        `${import.meta.env.VITE_API_BASE_URL}/all-questions?page=${pageNumber}`,
         { withCredentials: true }
       );
 
       if (res.data.status) {
         setQuestions(res.data.data);
+        setPagination(res.data.pagination);
       } else {
         setHasPermission(false);
       }
     } catch (err) {
-      if (err.response && err.response.status === 403) {
+      if (err.response?.status === 403) {
         setHasPermission(false);
       }
     } finally {
@@ -35,13 +39,11 @@ const QuestionsList = () => {
 
   const handleDelete = async (questionId) => {
     if (!confirm('Are you sure you want to delete this question?')) return;
-
     try {
       const res = await axios.delete(
         `${import.meta.env.VITE_API_BASE_URL}/delete-question/${questionId}`,
         { withCredentials: true }
       );
-
       if (res.data.status === 200) {
         setQuestions((prev) => prev.filter((q) => q.id !== questionId));
         alert(res.data.message || 'Question deleted successfully.');
@@ -53,8 +55,13 @@ const QuestionsList = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const handlePageChange = (newPage) => {
+    if (newPage !== page && newPage > 0 && newPage <= pagination.last_page) {
+      setPage(newPage);
+    }
+  };
 
+  if (loading) return <div>Loading...</div>;
   if (!hasPermission) {
     return (
       <div className="container-fluid">
@@ -100,7 +107,7 @@ const QuestionsList = () => {
               <tbody>
                 {questions.map((q, index) => (
                   <tr key={q.id}>
-                    <td>{index + 1}</td>
+                    <td>{(pagination.per_page * (page - 1)) + (index + 1)}</td>
                     <td dangerouslySetInnerHTML={{ __html: q.question }} />
                     <td>{q.question_type}</td>
                     <td>
@@ -129,13 +136,30 @@ const QuestionsList = () => {
                 ))}
                 {questions.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="text-center">
-                      No questions found.
-                    </td>
+                    <td colSpan="4" className="text-center">No questions found.</td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="pagination-controls d-flex justify-content-between mt-3">
+            <button
+              disabled={page <= 1}
+              onClick={() => handlePageChange(page - 1)}
+              className="btn btn-secondary btn-sm"
+            >
+              Previous
+            </button>
+            <span>Page {page} of {pagination.last_page}</span>
+            <button
+              disabled={page >= pagination.last_page}
+              onClick={() => handlePageChange(page + 1)}
+              className="btn btn-secondary btn-sm"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

@@ -72,7 +72,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route:: get('/users/export-users', [UserController::class, 'exportUsers']);
     Route:: get('/users/export-candidates', [UserController::class, 'exportCandidates']);
     Route:: get('/users/export-download/{file_name}', [UserController::class, 'exportDownload']);
-   
+    Route:: get('/all-employees', [UserController::class, 'allEmployees']);
+    Route::get('/add-employee', [UserController::class, 'addEmployee']);
+    Route::post('/add-employee-post', [UserController::class, 'addEmployeePost']);
+    Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken']);
+     Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost']);
+
+
     //test Users Admin,Recruiter,HR
     Route:: get('/all-questions', [QuestionController::class, 'allQuestions']);
     Route:: get('/add-question', [QuestionController::class, 'addQuestion']);
@@ -80,6 +86,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route:: get('/edit-question/{question_id}', [QuestionController::class, 'editQuestion']);
     Route:: post('edit-question-post', [QuestionController::class, 'editQuestionPost']);
     Route::delete('/delete-question/{question_id}', [QuestionController::class, 'deleteQuestion']);
+
+
 
 
     Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');

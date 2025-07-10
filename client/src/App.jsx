@@ -5,6 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import Dashboard from "./components/Dashboard";
 import Directory from "./DashboardComponent/Directory";
 import Attendance from "./DashboardComponent/Attendance";
@@ -33,6 +34,9 @@ import ActiveCandidatesList from "./components/AdminDashboardComponent/activeCan
 import QuestionsList from "./components/AdminDashboardComponent/questionsList";
 import AddQuestion from "./components/AdminDashboardComponent/addQuestion";
 import EditQuestion from "./components/AdminDashboardComponent/EditQuestion";
+import ActiveEmployees from "./components/AdminDashboardComponent/activeEmployees";
+import AddEmployee from "./components/AdminDashboardComponent/addEmployees";
+import SetPassword from "./components/AdminDashboardComponent/SetPassword";
 
 
 function App() {
@@ -80,6 +84,10 @@ function App() {
           <Route path="/all-questions" element={<QuestionsList />}/>
           <Route path="/add-question" element={<AddQuestion />}/>
           <Route path="/edit-question/:question_id" element={<EditQuestion />} />
+          <Route path="/all-employees" element={<ActiveEmployees />} />
+          <Route path="/add-employee" element={<AddEmployee />} />
+          <Route path="/set-password/:token" element={<SetPassword />} />
+
 
           <Route path="*" element={<NotFound />} />
         </Route>
