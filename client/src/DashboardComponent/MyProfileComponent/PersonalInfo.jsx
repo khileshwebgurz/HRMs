@@ -47,6 +47,8 @@ const PersonalInfo = ({employeedata , user}) => {
         other_info: employeedata.candidate || " ",  // it was [] we changed to string " ", fix later on,
       });
       
+
+   
       const [editMode, setEditMode] = useState({}); // Track edit mode for each section
 
      // Handle input changes for simple fields
@@ -76,7 +78,7 @@ const PersonalInfo = ({employeedata , user}) => {
     e.preventDefault();
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${user.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${employeedata.id}`,
         employee,
         { withCredentials: true }
       );

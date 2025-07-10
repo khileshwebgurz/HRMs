@@ -48,7 +48,7 @@ class EmployeeController extends Controller
         $user_roles = User::$role;
         $genders = User::$gender;
 
-        $user = Employees::where('id', $user_id)->first();
+        $user = Employees::where('id', $tab)->first();
 
         $candidate = ObCandidates::where('office_employee_id', $user->id)->first();
         if (!$candidate) {

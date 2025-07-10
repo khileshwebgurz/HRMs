@@ -5,12 +5,12 @@ import PersonalInfo from "./MyProfileComponent/PersonalInfo";
 import BasicInfo from "./MyProfileComponent/BasicInfo";
 import AppraisalInfo from "./MyProfileComponent/AppraisalInfo";
 
-import { useNavigate } from "react-router-dom";
-const MyProfile = () => {
-  const navigate = useNavigate();
+const MyProfile = ({path}) => {
   const user = useUser(); 
   const [employee, setEmployee] = useState([]);
   const [activeTab, setActiveTab] = useState("personal");
+
+  const ID = path ? path : user.id;
 
 
   // Fetch employee data on mount
@@ -18,7 +18,7 @@ const MyProfile = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${user.id}`,
+          `${import.meta.env.VITE_API_BASE_URL}/employee/profile/${ID}`,
           { withCredentials: true }
         );
         setEmployee(response.data);
@@ -32,6 +32,8 @@ const MyProfile = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+
+  // console.log('now new user is >>',employee)
 
   return (
     <div>

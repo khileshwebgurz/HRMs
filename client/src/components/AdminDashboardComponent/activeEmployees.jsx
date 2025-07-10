@@ -14,6 +14,9 @@ const ActiveEmployees = () => {
     .catch(err => console.error(err));
   }, []);
 
+
+
+
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -41,7 +44,7 @@ const ActiveEmployees = () => {
           </tr>
         </thead>
         <tbody>
-          {employees.map((emp, index) => (
+          {employees?.map((emp, index) => (
             <tr key={emp.id}>
               <td>{index + 1}</td>
 
@@ -89,7 +92,7 @@ const ActiveEmployees = () => {
                   ✏️
                 </button>
                 <button className="btn btn-sm btn-outline-secondary me-1"
-                onClick={() => navigate('/myprofile')}
+                onClick={() => navigate(`/users/employee/${emp.id}/view/personal`)}
                 title="View">
                   👁️
                 </button>
