@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { useCandidate } from "../../context/CandidateContext";
 const CandidateList = () => {
+  const contextData = useCandidate();
+
   const [candidates, setCandidates] = useState([]);
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,35 +14,27 @@ const CandidateList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [resetPage, setResetPage] = useState(false);
+
   const navigate = useNavigate();
 
+
+  // initially it might be contextdata is not avaiable , so when avaiable setCandidate and setFilteredCandidates.
   useEffect(() => {
-    fetchCandidates();
-  }, [candidates]);
+    if (contextData && contextData.length > 0) {
+      setCandidates(contextData);
+      setFilteredCandidates(contextData);
+      setLoading(false);
+    }
+  }, [contextData]);
 
   useEffect(() => {
     applySearchAndSort();
   }, [searchTerm, candidates, sortField, sortOrder]);
 
-  const fetchCandidates = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/candidates`,
-        { withCredentials: true }
-      );
-      setCandidates(response.data.data);
-      setFilteredCandidates(response.data.data);
-    } catch (error) {
-      console.error("Error fetching candidates:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const applySearchAndSort = () => {
     let filtered = [...candidates];
 
-    // Filter
     if (searchTerm) {
       filtered = filtered.filter(
         (candidate) =>
@@ -63,7 +57,11 @@ const CandidateList = () => {
     }
 
     setFilteredCandidates(filtered);
-    setCurrentPage(1);
+    if (resetPage) {
+      setCurrentPage(1);
+      setResetPage(false);
+    }
+    // setCurrentPage(1);
   };
 
   const handleSort = (field) => {
@@ -75,10 +73,9 @@ const CandidateList = () => {
     }
   };
 
-  const handleBrnClick = (url) =>{ 
-    console.log('url is >>',url)
-    navigate(`${url}`);}
-
+  const handleBrnClick = (url) => {
+    navigate(`${url}`);
+  };
 
   const handleEditClick = (url) => navigate(`/candidate${url}`);
 
@@ -90,17 +87,22 @@ const CandidateList = () => {
   );
 
   const handleDeleteBtn = async (id) => {
+    const numericId = id.replace("HRM", "");
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/candidates/${id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/candidates/${numericId}`,
         { withCredentials: true }
       );
+
+      const updatedCandidates = candidates.filter(
+        (candidate) => candidate.id !== id
+      );
+
+      setCandidates(updatedCandidates);
     } catch (error) {
       console.error("cannot delete bcz of this issue ->", error);
     }
   };
-
-  console.log('my paginated candidate is >>', paginatedCandidates)
 
   return (
     <div className="container mt-4">
@@ -110,7 +112,10 @@ const CandidateList = () => {
         type="text"
         placeholder="Search by name or email..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setResetPage(true);
+        }}
         className="form-control my-3"
       />
 
@@ -189,7 +194,7 @@ const CandidateList = () => {
                             onClick={(e) => {
                               e.preventDefault();
                               if (window.confirm("Are you sure?")) {
-                                handleDeleteBtn(row.id.replace("HRM", ""));
+                                handleDeleteBtn(row.id);
                               }
                             }}
                             className="btn btn-danger"
