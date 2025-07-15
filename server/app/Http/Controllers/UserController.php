@@ -718,7 +718,7 @@ class UserController extends Controller
         ]);
     }
 
-
+    
     public function editEmployee($user_id)
     {
         $user_roles = User::$role;
@@ -748,6 +748,127 @@ class UserController extends Controller
         $team_name = Employee_manager_team::all();
 
         return view('users.employees.edituser', compact('team_name', 'user', 'loginuser', 'user_roles', 'genders', 'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms', 'employees'));
+    }
+
+
+       /**
+     * Update employee.
+     */
+    public function editEmployeePostOLD(Request $request)
+    {
+        $loginuser = Auth::user();
+        $user_id = $request->user_id;
+        $all_employees= Employees::get();
+        $user = Employees::where('id', $user_id)->first();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            'email' => 'unique:employees,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+            'is_manager' =>'required|in:1, 0',
+            'role_id'=>'required|in:1, 2, 3' 
+        ],
+        [
+            'name.required' => 'Please fill the name',
+            'email.required' => 'Please fill the email'
+
+        ]);
+          
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
+            ]);
+        }
+        
+        $user->name = $request->name;
+        $user->email = $request->email;
+        if ($request->password) {
+            $validator = Validator::make($request->all(), [
+                'password' => 'min:6|confirmed'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()
+                        ->first()
+                ]);
+            }
+            $user->password = bcrypt($request->password);
+        }
+
+        if ($request->phone) {
+            $validator = Validator::make($request->all(), [
+                'phone' => 'digits:10|numeric'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()
+                        ->first()
+                ]);
+            }
+            $user->phone = $request->phone;
+        }
+            $user->gender = $request->gender;
+        // $user->user_role = $request->user_role;
+            $obcandidates = ObCandidates::where('office_employee_id',$request->user_id)->first();
+            if($obcandidates){
+             $obcandidates->attendance_rule_id = $request->attendance_rule_id;
+            $obcandidates->is_crm = $request->crm;
+            $obcandidates->is_interviewer = $request->Interviewer;
+
+            $obcandidates->save();
+            }
+            
+
+            $aa = $request->leave_rule_id;
+            $employee= EmployeeLeaveRules::where('employee_id',$request->user_id)->pluck('leave_rule_id')->toArray();
+            if($aa){
+                 $result=array_intersect($aa,$employee);
+            $arrdiff = array_diff($employee,$result);
+                 
+            
+            foreach($arrdiff as $diff) {
+       $delruleid= EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id', $diff)->delete();
+            }
+        foreach($aa as $aa)
+        {
+           $employeeleave  = EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id',$aa)->first();
+            if(!$employeeleave){
+              $employeeleave = new EmployeeLeaveRules();
+              $employeeleave->leave_rule_id = $aa;
+              $employeeleave->employee_id = $request->user_id;
+              $employeeleave->save();
+        }
+
+        }
+            }
+           
+       $user->room_id = $request->room_name;
+       $user->is_manager = $request->is_manager;
+       $user->role_id = $request->role_id;
+       $user->manager_id = $request->manager_id;
+       $user->team_id = $request->team_id;
+
+        if ($user->save()) {
+
+             $obcandidates->name = $request->name;
+             $obcandidates->email = $request->email;
+             $obcandidates->phone = $request->phone;
+             $obcandidates->save();
+            return response()->json([
+                'status' => 200,
+                'message' => "Employee profile updated"
+            ]);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
     }
 
     /**
@@ -783,10 +904,31 @@ class UserController extends Controller
         abort(404);
     }
 
-    /**
-     * Update employee.
-     */
-    public function editEmployeePost(Request $request)
+ 
+
+    public function editEmployee($user_id)
+    {
+        $user_roles = User::$role;
+        $genders = User::$gender;
+        $loginuser = Auth::user();
+        $rooms = InventoryRooms::where('is_deleted', '0')->get();
+        $user = Employees::findOrFail($user_id);
+        $rules = AttendanceRules::all();
+        $leaverules = LeaveRules::where('for_all','!=','1')->get();
+        $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id');
+        $obcandidates = ObCandidates::where('office_employee_id', $user_id)->first();
+        $team_name = Employee_manager_team::all();
+
+        return response()->json([
+            'status' => 200,
+            'data' => compact(
+                'team_name', 'user', 'loginuser', 'user_roles', 'genders',
+                'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms'
+            )
+        ]);
+    }
+
+     public function editEmployeePost(Request $request)
     {
         $loginuser = Auth::user();
         $user_id = $request->user_id;
@@ -903,6 +1045,7 @@ class UserController extends Controller
             ]);
         }
     }
+
 
     /**
      * get all employees

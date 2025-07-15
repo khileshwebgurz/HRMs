@@ -37,7 +37,7 @@ import ActiveEmployees from "./components/AdminDashboardComponent/activeEmployee
 import AddEmployee from "./components/AdminDashboardComponent/addEmployees";
 import SetPassword from "./components/AdminDashboardComponent/SetPassword";
 import PersonalDetail from "./components/AdminDashboardComponent/PersonalDetail";
-
+import EditEmployeeForm from "./components/AdminDashboardComponent/EditEmployeeForm";
 
 function App() {
   return (
@@ -88,7 +88,7 @@ function App() {
           <Route path="/add-employee" element={<AddEmployee />} />
           <Route path="/set-password/:token" element={<SetPassword />} />
           <Route path="users/employee/:userId/view/personal" element={<PersonalDetail/>}/>
-
+          <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
 
           <Route path="*" element={<NotFound />} />
         </Route>
