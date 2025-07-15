@@ -74,10 +74,14 @@ const CandidateList = () => {
   };
 
   const handleBrnClick = (url) => {
+   
     navigate(`${url}`);
   };
 
-  const handleEditClick = (url) => navigate(`/candidate${url}`);
+  const handleEditClick = (url) => {
+  
+    navigate(`/users/${url}`);
+  }
 
   // Pagination logic
   const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
@@ -176,7 +180,7 @@ const CandidateList = () => {
                     <td>
                       <div className="btn-group">
                         <button
-                          onClick={() => handleBrnClick(row.action?.view_url)}
+                          onClick={() =>handleBrnClick(row.action?.view_url) }
                           className="btn btn-info"
                         >
                           👁️

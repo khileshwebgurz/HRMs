@@ -27,7 +27,6 @@ const RoleTable = () => {
     }
   };
 
-  console.log('my roles>>',roles)
 
   const fetchPermissions = async () => {
     try {

@@ -1,50 +1,84 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import JobParticular from "../CandidateProfileComp/JobParticular";
+import History from "../CandidateProfileComp/History";
 
 const CandidateProfile = () => {
   const { profile_id } = useParams();
 
   const [candidateData, setCandidateData] = useState([]);
+  const [activeTab, setActiveTab] = useState("information");
 
-
-    const fetchCandidateProfile = async () => {
+  const fetchCandidateProfile = async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/candidate/profile/${profile_id}`,
         { withCredentials: true }
       );
-      console.log(response.data);
-      setCandidateData(response.data); 
+    
+      setCandidateData(response.data);
     } catch (error) {
-      console.error('Error fetching candidates:', error);
-    } 
+      console.error("Error fetching candidates:", error);
+    }
   };
 
   useEffect(() => {
     fetchCandidateProfile();
-   }, [profile_id]);
+  }, [profile_id]);
 
   if (!candidateData) return <p>Loading...</p>;
 
-//   const { candidate, candidate_questions, candidate_relationship } = candidateData;
-// console.log(candidateData);
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+
+
   return (
-    // <h1>jhsgdj</h1>
-    <div>
-      <h2>{candidateData?.candidate?.full_name}</h2>
-      <p>Email: {candidateData?.candidate?.email}</p>
-      <p>Mobile: {candidateData?.candidate?.mobile_number}</p>
-
-      <h3>Educations</h3>
-      <ul>
-        {candidateData?.candidate?.educations?.map((edu, i) => (
-          <li key={i}>{edu.institute_name} ({edu.from} - {edu.to}) - {edu.professional_qualification}</li>
-        ))}
-      </ul>
-
-      {/* Add similar sections for employment, family, assessments, etc. */}
-    </div>
+    <>
+      <div className="card card-primary card-outline card-outline-tabs">
+        <div className="card-header p-0 border-bottom-0">
+          <ul className="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+            <li className="nav-item">
+              <button
+                className="nav-link active"
+                id="custom-tabs-four-home-tab"
+                data-toggle="pill"
+                onClick={() => handleTabChange("information")}
+                role="tab"
+                aria-controls="custom-tabs-four-home"
+                aria-selected="true"
+              >
+                Information
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className="nav-link"
+                id="custom-tabs-four-profile-tab"
+                data-toggle="pill"
+                onClick={() => handleTabChange("history")}
+                role="tab"
+                aria-controls="custom-tabs-four-profile"
+                aria-selected="false"
+              >
+                History
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div className="card-body">
+          {/* 	<div className="tab-content" id="custom-tabs-four-tabContent"> */}
+          <div id="custom-tabs-four-tabContent">
+            {activeTab === "information" && (
+              <JobParticular data={candidateData} />
+            )}
+            {activeTab === "history" && <History />}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

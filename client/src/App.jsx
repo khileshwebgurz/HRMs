@@ -26,7 +26,6 @@ import NotFound from "./DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";
-import { useUser } from "./context/UserContext";
 import CandidateList from "./components/AdminDashboardComponent/allCandidates";
 import CandidateProfile from "./components/AdminDashboardComponent/getCandidatesProfile";
 import CandidateEditForm from "./components/AdminDashboardComponent/editCandidates";
@@ -77,9 +76,9 @@ function App() {
           <Route path="/supportticket" element={<SupportTicket />} />
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
-          <Route path="/profile/view/:profile_id" element={<CandidateProfile/>}/>
+          <Route path="/profile/:profile_id/view" element={<CandidateProfile/>}/>
           <Route path="/trackercandidates" element={<CandidateList />} />
-          <Route path="/candidate/edit/:candidate_id" element={<CandidateEditForm />}/>
+          <Route path="/users/edit-candidate/:candidate_id" element={<CandidateEditForm />}/>
           <Route path="/candidate/update" element={<CandidateEditForm />}/>
           <Route path="/candidate/all-candidates" element={<ActiveCandidatesList />}/>
           <Route path="/all-questions" element={<QuestionsList />}/>
@@ -88,8 +87,6 @@ function App() {
           <Route path="/all-employees" element={<ActiveEmployees />} />
           <Route path="/add-employee" element={<AddEmployee />} />
           <Route path="/set-password/:token" element={<SetPassword />} />
-
-          {/* users/employee/840/view/personal */}
           <Route path="users/employee/:userId/view/personal" element={<PersonalDetail/>}/>
 
 

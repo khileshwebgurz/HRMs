@@ -56,9 +56,9 @@ class TrackerController extends Controller
                 'notice_period' => $c->notice_period,
                 'current_location' => $c->current_location,
                 'action' => [
-                    'view_url' => "/profile/view/{$c->profile_id}",
+                    'view_url' => "/profile/{$c->profile_id}/view",
                     'edit_allowed' => $permissionRole->edit == '5' || $c->created_by == $user->id,
-                    'edit_url' => "/edit/{$c->id}",
+                    'edit_url' => "edit-candidate/{$c->id}",
                     'delete_allowed' => $permissionRole->delete == '5' || $c->created_by == $user->id,
                     'delete_url' => "/delete/{$c->id}",
                     'send_email_url' => "/send-email/{$c->id}"
@@ -166,13 +166,30 @@ class TrackerController extends Controller
         }
 
         $candidate->fill($request->only([
-            'full_name', 'email', 'gender', 'mobile_number', 'position', 'marital_status',
-            'residence_address', 'passport_number', 'nationality', 'dob', 'age',
-            'place_of_birth', 'hobbies', 'current_salary', 'expected_salary', 'remarks',
-            'status', 'date_of_interview', 'interview_score', 'interviewed_by',
-            'sourcing', 'department'
+            'full_name',
+            'email',
+            'gender',
+            'mobile_number',
+            'position',
+            'marital_status',
+            'residence_address',
+            'passport_number',
+            'nationality',
+            'dob',
+            'age',
+            'place_of_birth',
+            'hobbies',
+            'current_salary',
+            'expected_salary',
+            'remarks',
+            'status',
+            'date_of_interview',
+            'interview_score',
+            'interviewed_by',
+            'sourcing',
+            'department'
         ]));
-
+       // Log::info('My total_candidates >>>>');
         $candidate->save();
 
         // You can also trigger updating skills, education, employments, etc., from here if needed.

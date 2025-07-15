@@ -93,3 +93,4 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logged out'])->cookie('access_token', '', -1);
     }
 }
+

@@ -52,3 +52,10 @@ solution :
 SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions));
 
 SELECT setval('question_options_id_seq', (SELECT MAX(id) FROM question_options));
+
+
+
+
+=================== for ob_candidates
+
+SELECT setval('ob_candidates_id_seq', (SELECT MAX(id) FROM ob_candidates));

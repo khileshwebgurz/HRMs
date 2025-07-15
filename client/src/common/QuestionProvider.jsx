@@ -15,7 +15,7 @@ const QuestionProvider = ({children}) => {
     setData(response.data);
   }
 
-  console.log('my data is >>>', data);
+
   return(
     <QuestionContext.Provider value={data}>
         {children}

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -118,17 +119,17 @@ class UserController extends Controller
          * exit;
          */
         $loginuser = Auth::user();
-        
-        if(!in_array('all_users', Session::get('permission')[0])){
+
+        if (!in_array('all_users', Session::get('permission')[0])) {
             abort(404);
         }
-        
+
 
         $user_roles = User::$role;
         $genders = User::$gender;
         $roles = Roles::get();
 
-        return view('users.adduser', compact('user_roles', 'genders','roles'));
+        return view('users.adduser', compact('user_roles', 'genders', 'roles'));
     }
 
     /**
@@ -138,21 +139,23 @@ class UserController extends Controller
     {
         // $loginuser = Auth::user();
         $user = new User();
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'unique:users,email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'phone' => 'required|digits:10|numeric',
-            'password' => 'min:6|confirmed|required',
-            'user_role' => 'required'
-        ],
-       [
-        'name.required'=>'Please fill the name',
-        'email.required'=>'Please fill the email',
-        'email.regex' => 'Email should be in proper format',
-        'phone.required' => 'Please fill mobile number',
-        'phone.digits' => 'Please enter 10 digits',
-        'user_role.required' => 'Please select the role'
-       ]
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'unique:users,email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'phone' => 'required|digits:10|numeric',
+                'password' => 'min:6|confirmed|required',
+                'user_role' => 'required'
+            ],
+            [
+                'name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email',
+                'email.regex' => 'Email should be in proper format',
+                'phone.required' => 'Please fill mobile number',
+                'phone.digits' => 'Please enter 10 digits',
+                'user_role.required' => 'Please select the role'
+            ]
         );
 
         if ($validator->fails()) {
@@ -162,30 +165,27 @@ class UserController extends Controller
                     ->first()
             ]);
         }
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-        if($permission_role->add == '2')
-        {
-            $created_by =Auth::user()->id;
-        }
-        else
-        {
-            if(empty($request->created_by)){
-             return response()->json([
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->add == '2') {
+            $created_by = Auth::user()->id;
+        } else {
+            if (empty($request->created_by)) {
+                return response()->json([
                     'status' => 401,
-                    'message' =>'Please select to whom you would assign to'
+                    'message' => 'Please select to whom you would assign to'
                 ]);
+            }
+            $created_by = $request->created_by;
         }
-          $created_by =$request->created_by;
-        }
-       
+
 
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
-        $user->phone =$request->phone;
+        $user->phone = $request->phone;
         $user->gender = $request->gender;
         $user->user_role = $request->user_role;
-        $user->created_by =$created_by;
+        $user->created_by = $created_by;
         if ($user->save()) {
 
             $to_name = $user->full_name;
@@ -230,11 +230,11 @@ class UserController extends Controller
         $loginuser = Auth::user();
         $user = User::where('id', $user_id)->first();
         $roles = Roles::get();
-        if(!in_array('all_users', Session::get('permission')[0])){
+        if (!in_array('all_users', Session::get('permission')[0])) {
             abort(404);
-        } 
-    
-        return view('users.edituser', compact('user', 'loginuser', 'user_roles', 'genders','roles'));
+        }
+
+        return view('users.edituser', compact('user', 'loginuser', 'user_roles', 'genders', 'roles'));
     }
 
     /**
@@ -245,14 +245,17 @@ class UserController extends Controller
         $loginuser = Auth::user();
         $user_id = $request->user_id;
         $user = User::where('id', $user_id)->first();
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'unique:users,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i'
-        ],
-       [
-        'name.required'=>'Please fill the name',
-        'email.required'=>'Please fill the email'
-       ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'unique:users,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i'
+            ],
+            [
+                'name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email'
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -298,7 +301,7 @@ class UserController extends Controller
         $user->gender = $request->gender;
         $user->user_role = $request->user_role;
 
-           
+
         /*
          * if ($request->hasFile('profileImg')) {
          * $this->validate($request, [
@@ -330,65 +333,57 @@ class UserController extends Controller
     public function allUsers(Request $request)
     {
         $loginuser = Auth::user();
-        if(!in_array('all_users', Session::get('permission')[0])){
+        if (!in_array('all_users', Session::get('permission')[0])) {
             abort(404);
-        } 
+        }
         $user_roles = Roles::get();
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-        if($permission_role->view == '2')
-        {
-           $data = User::where('created_by',Auth::user()->id)->orderBy('created_at', 'desc')->get();
-        }
-        elseif($permission_role->view == '3')
-        {
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->view == '2') {
+            $data = User::where('created_by', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '3') {
 
-            $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
-            $data = User::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
-          
-        }
-        elseif ($permission_role->view == '4')
-        {
-            $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
-            $data = User::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
-           
-        }
-        elseif ($permission_role->view == '5') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+            $data = User::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->orWhere('id', Auth::user()->id)->pluck('id')->toArray();
+            $data = User::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '5') {
             $data = User::get();
         }
 
-           if ($request->ajax()) {
-          
+        if ($request->ajax()) {
+
             return DataTables::of($data)->addIndexColumn()
                 ->editcolumn('gender', function (User $user) {
-                return User::$gender[$user->gender];
-            })
+                    return User::$gender[$user->gender];
+                })
                 ->editcolumn('user_role', function ($row) {
-                 $role = $row->roles->role_name;
-                return $role;
-            })
+                    $role = $row->roles->role_name;
+                    return $role;
+                })
                 ->addColumn('action', function ($row) {
-                $loginuser = Auth::user();
+                    $loginuser = Auth::user();
 
-                $btn = '<div class="btn-group btn-group-sm">';
-                $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editUser', $row->id) . '">
+                    $btn = '<div class="btn-group btn-group-sm">';
+                    $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editUser', $row->id) . '">
                          <figure>
-                           <img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor">
+                           <img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor">
                          </figure>
                       </a> ';
-                if ($row->id != $loginuser->id) {
-                    $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteUser', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this user?\')">
+                    if ($row->id != $loginuser->id) {
+                        $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteUser', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this user?\')">
                          <figure>
-                           <img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor">
-                           <img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor">
+                           <img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor">
+                           <img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor">
                          </figure>
                     </a>';
-                }
-                $btn .= '</div>';
-                return $btn;
-            })
+                    }
+                    $btn .= '</div>';
+                    return $btn;
+                })
                 ->rawColumns([
-                'action'
-            ])
+                    'action'
+                ])
                 ->make(true);
         }
         return view('users.listuser', compact('user_roles'));
@@ -401,7 +396,7 @@ class UserController extends Controller
     {
         $loginuser = Auth::user();
         $user_role = Auth::user()->user_role;
-        
+
         $user_roles = User::$role;
         $genders = User::$gender;
         return view('users.employees.adduser', compact('user_roles', 'genders'));
@@ -415,15 +410,17 @@ class UserController extends Controller
         // $loginuser = Auth::user();
 
         $user = new Employees();
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i'
-        ],
-        [
-            'name.required' => 'Please fill the name',
-            'email.required' => 'Please fill the email'
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i'
+            ],
+            [
+                'name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email'
 
-        ]
+            ]
         );
 
         if ($validator->fails()) {
@@ -434,21 +431,18 @@ class UserController extends Controller
             ]);
         }
 
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-       if($permission_role->add == '2')
-            {
-                $created_by =Auth::user()->id;
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->add == '2') {
+            $created_by = Auth::user()->id;
+        } else {
+            if (empty($request->created_by)) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Please select to whom you would assign to'
+                ]);
             }
-            else
-            {
-                if(empty($request->created_by)){
-                 return response()->json([
-                        'status' => 401,
-                        'message' =>'Please select to whom you would assign to'
-                    ]);
-            }
-              $created_by =$request->created_by;
-            }
+            $created_by = $request->created_by;
+        }
 
         $user->name = $request->name;
         $user->email = $request->email;
@@ -456,25 +450,21 @@ class UserController extends Controller
         $user->token = Str::random(32);
         $user->created_by = $created_by;
         if ($user->save()) {
-            $ObCandidates = ObCandidates::where('id',$request->on_candidate_id)->first();
-            if(!$ObCandidates)
-            {
+            $ObCandidates = ObCandidates::where('id', $request->on_candidate_id)->first();
+            if (!$ObCandidates) {
                 $ObCandidates = new ObCandidates();
                 $ObCandidates->name = $request->name;
                 $ObCandidates->email = $request->email;
                 $ObCandidates->office_employee_id = $user->id;
                 $ObCandidates->created_by = $created_by;
                 $ObCandidates->save();
+            } else {
+                $ObCandidates->email = $request->email;
+                $ObCandidates->office_employee_id = $user->id;
+                $ObCandidates->created_by = $created_by;
+                $ObCandidates->save();
+            }
 
-            }
-            else
-            {
-                 $ObCandidates->email = $request->email;
-                 $ObCandidates->office_employee_id = $user->id;
-                 $ObCandidates->created_by = $created_by;
-                 $ObCandidates->save(); 
-            }
-            
 
             // if ($request->has('on_candidate_id')) {
             //     $obcandidate = ObCandidates::where('id', $request->on_candidate_id)->first();
@@ -689,7 +679,7 @@ class UserController extends Controller
                 $ObCandidates = new ObCandidates();
             }
 
-          
+
             $ObCandidates->name = $request->name;
             $ObCandidates->email = $request->email;
             $ObCandidates->office_employee_id = $user->id;
@@ -728,36 +718,36 @@ class UserController extends Controller
         ]);
     }
 
-    
+
     public function editEmployee($user_id)
     {
         $user_roles = User::$role;
         $genders = User::$gender;
         $loginuser = Auth::user();
-        $rooms =InventoryRooms::where('is_deleted', '0')->get();
+        $rooms = InventoryRooms::where('is_deleted', '0')->get();
         $user = Employees::where('id', $user_id)->first();
         $rules = AttendanceRules::get();
-        $leaverules = LeaveRules::where('for_all','!=','1')->get();
-        $obcandidates = ObCandidates::where('office_employee_id',$user_id)->first();
-        $employees = Employees::where('id',$user_id)->first();
-        if($obcandidates){
-           $attendance_rule = AttendanceRules::where('id',$obcandidates->attendance_rule_id)->first(); 
+        $leaverules = LeaveRules::where('for_all', '!=', '1')->get();
+        $obcandidates = ObCandidates::where('office_employee_id', $user_id)->first();
+        $employees = Employees::where('id', $user_id)->first();
+        if ($obcandidates) {
+            $attendance_rule = AttendanceRules::where('id', $obcandidates->attendance_rule_id)->first();
         }
-        
-        $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id')->toArray();
-       // $user_role = Auth::user()->user_role;
-       //  $role = Roles::where('id', $user_role)->where('id','!=', '1')->first();
-       //  if($role)
-       //  {
-       //      $myArray = explode(',', $role->permissions);
-       //      if(!in_array('manage_employees', $myArray)){
-       //          abort(404);
-       //      }
-       //  }
-        
-       $team_name = Employee_manager_team::all();
 
-        return view('users.employees.edituser', compact('team_name','user', 'loginuser', 'user_roles', 'genders','rules','leaverules','employeeleave','obcandidates','rooms','employees'));
+        $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id')->toArray();
+        // $user_role = Auth::user()->user_role;
+        //  $role = Roles::where('id', $user_role)->where('id','!=', '1')->first();
+        //  if($role)
+        //  {
+        //      $myArray = explode(',', $role->permissions);
+        //      if(!in_array('manage_employees', $myArray)){
+        //          abort(404);
+        //      }
+        //  }
+
+        $team_name = Employee_manager_team::all();
+
+        return view('users.employees.edituser', compact('team_name', 'user', 'loginuser', 'user_roles', 'genders', 'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms', 'employees'));
     }
 
     /**
@@ -775,7 +765,7 @@ class UserController extends Controller
         $employee_id = $user_id;
 
         $candidate_questions = CandidateQuestions::all();
-        $candidate=$candidate_info = ObCandidates::where('office_employee_id', $user->id)->first();
+        $candidate = $candidate_info = ObCandidates::where('office_employee_id', $user->id)->first();
         $candidate_id = $candidate->candidate_id;
         $candidateData = Candidates::where('id', $candidate_id)->first();
 
@@ -783,11 +773,11 @@ class UserController extends Controller
         $candidate_id = $candidate->id;
 
         if ($tab == 'personal') {
-            return view('users.employees.view.personal', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData', 'candidate_questions','candidate_info', 'candidate_id'));
+            return view('users.employees.view.personal', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData', 'candidate_questions', 'candidate_info', 'candidate_id'));
         } else if ($tab == 'official') {
-            return view('users.employees.view.official', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData', 'candidate_questions','candidate_info', 'candidate_id'));
+            return view('users.employees.view.official', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData', 'candidate_questions', 'candidate_info', 'candidate_id'));
         } else if ($tab == 'appraisal') {
-            return view('users.employees.view.appraisal', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData','candidate_info', 'candidate_questions', 'candidate_id'));
+            return view('users.employees.view.appraisal', compact('tab', 'employee_id', 'user', 'loginuser', 'user_roles', 'genders', 'progress', 'candidate', 'candidateData', 'candidate_info', 'candidate_questions', 'candidate_id'));
         }
 
         abort(404);
@@ -800,21 +790,24 @@ class UserController extends Controller
     {
         $loginuser = Auth::user();
         $user_id = $request->user_id;
-        $all_employees= Employees::get();
+        $all_employees = Employees::get();
         $user = Employees::where('id', $user_id)->first();
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'unique:employees,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'is_manager' =>'required|in:1, 0',
-            'role_id'=>'required|in:1, 2, 3' 
-        ],
-        [
-            'name.required' => 'Please fill the name',
-            'email.required' => 'Please fill the email'
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'unique:employees,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'is_manager' => 'required|in:1, 0',
+                'role_id' => 'required|in:1, 2, 3'
+            ],
+            [
+                'name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email'
 
-        ]);
-          
+            ]
+        );
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 401,
@@ -822,7 +815,7 @@ class UserController extends Controller
                     ->first()
             ]);
         }
-        
+
         $user->name = $request->name;
         $user->email = $request->email;
         if ($request->password) {
@@ -854,53 +847,51 @@ class UserController extends Controller
             }
             $user->phone = $request->phone;
         }
-            $user->gender = $request->gender;
+        $user->gender = $request->gender;
         // $user->user_role = $request->user_role;
-            $obcandidates = ObCandidates::where('office_employee_id',$request->user_id)->first();
-            if($obcandidates){
-             $obcandidates->attendance_rule_id = $request->attendance_rule_id;
+        $obcandidates = ObCandidates::where('office_employee_id', $request->user_id)->first();
+        if ($obcandidates) {
+            $obcandidates->attendance_rule_id = $request->attendance_rule_id;
             $obcandidates->is_crm = $request->crm;
             $obcandidates->is_interviewer = $request->Interviewer;
 
             $obcandidates->save();
-            }
-            
-
-            $aa = $request->leave_rule_id;
-            $employee= EmployeeLeaveRules::where('employee_id',$request->user_id)->pluck('leave_rule_id')->toArray();
-            if($aa){
-                 $result=array_intersect($aa,$employee);
-            $arrdiff = array_diff($employee,$result);
-                 
-            
-            foreach($arrdiff as $diff) {
-       $delruleid= EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id', $diff)->delete();
-            }
-        foreach($aa as $aa)
-        {
-           $employeeleave  = EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id',$aa)->first();
-            if(!$employeeleave){
-              $employeeleave = new EmployeeLeaveRules();
-              $employeeleave->leave_rule_id = $aa;
-              $employeeleave->employee_id = $request->user_id;
-              $employeeleave->save();
         }
 
-        }
+
+        $aa = $request->leave_rule_id;
+        $employee = EmployeeLeaveRules::where('employee_id', $request->user_id)->pluck('leave_rule_id')->toArray();
+        if ($aa) {
+            $result = array_intersect($aa, $employee);
+            $arrdiff = array_diff($employee, $result);
+
+
+            foreach ($arrdiff as $diff) {
+                $delruleid = EmployeeLeaveRules::where('employee_id', $request->user_id)->where('leave_rule_id', $diff)->delete();
             }
-           
-       $user->room_id = $request->room_name;
-       $user->is_manager = $request->is_manager;
-       $user->role_id = $request->role_id;
-       $user->manager_id = $request->manager_id;
-       $user->team_id = $request->team_id;
+            foreach ($aa as $aa) {
+                $employeeleave  = EmployeeLeaveRules::where('employee_id', $request->user_id)->where('leave_rule_id', $aa)->first();
+                if (!$employeeleave) {
+                    $employeeleave = new EmployeeLeaveRules();
+                    $employeeleave->leave_rule_id = $aa;
+                    $employeeleave->employee_id = $request->user_id;
+                    $employeeleave->save();
+                }
+            }
+        }
+
+        $user->room_id = $request->room_name;
+        $user->is_manager = $request->is_manager;
+        $user->role_id = $request->role_id;
+        $user->manager_id = $request->manager_id;
+        $user->team_id = $request->team_id;
 
         if ($user->save()) {
 
-             $obcandidates->name = $request->name;
-             $obcandidates->email = $request->email;
-             $obcandidates->phone = $request->phone;
-             $obcandidates->save();
+            $obcandidates->name = $request->name;
+            $obcandidates->email = $request->email;
+            $obcandidates->phone = $request->phone;
+            $obcandidates->save();
             return response()->json([
                 'status' => 200,
                 'message' => "Employee profile updated"
@@ -919,240 +910,192 @@ class UserController extends Controller
     public function allEmployeesOLD(Request $request)
     {
         $loginuser = Auth::user();
-        
-        if(!in_array('all_employees', Session::get('permission')[0])){
+
+        if (!in_array('all_employees', Session::get('permission')[0])) {
             abort(404);
         }
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-        if($permission_role->view == '2')
-        {
-          $data = Employees::where('created_by',Auth::user()->id)->orderBy('name', 'ASC')->get();
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->view == '2') {
+            $data = Employees::where('created_by', Auth::user()->id)->orderBy('name', 'ASC')->get();
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+            $data = Employees::whereIn('created_by', $employees)->orderBy('name', 'ASC')->get();
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->orWhere('id', Auth::user()->id)->pluck('id')->toArray();
+            $data = Employees::whereIn('created_by', $employees)->orderBy('name', 'ASC')->get();
+        } elseif ($permission_role->view == '5') {
+            $data = Employees::orderBy('name', 'ASC')->get();
         }
-        elseif($permission_role->view =='3')
-        {
-            $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
-            $data = Employees::whereIn('created_by',$employees)->orderBy('name', 'ASC')->get();
-        }
-        elseif ($permission_role->view == '4') 
-        {
-            $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
-            $data = Employees::whereIn('created_by',$employees)->orderBy('name', 'ASC')->get();
-        }
-        elseif ($permission_role->view == '5') {
-           $data = Employees::orderBy('name','ASC')->get();
-        }
-        
+
         $user_roles = User::$role;
 
         if ($request->ajax()) {
-           
+
             return DataTables::of($data)->addIndexColumn()
-             ->editcolumn('manager_id', function ($row) {
-               if(!empty($row->manager_id))
-               {
-                $get_manager = Employees::where('id', $row->manager_id)->first();
-                 return $get_manager->name;
-               }
-               else
-               {
-                return '-';
-               }              
-            })
+                ->editcolumn('manager_id', function ($row) {
+                    if (!empty($row->manager_id)) {
+                        $get_manager = Employees::where('id', $row->manager_id)->first();
+                        return $get_manager->name;
+                    } else {
+                        return '-';
+                    }
+                })
                 ->editcolumn('gender', function (Employees $user) {
-                return User::$gender[$user->gender];
-            })
+                    return User::$gender[$user->gender];
+                })
 
                 ->editcolumn('status', function ($row) {
-                return '<input data-id="' . $row->id . '" data-size = "mini" data-style="toggle-button"  class="toggle-class" type="checkbox" data-onstyle="success" data-offstyle="danger" data-toggle="toggle" data-on="Active" data-off="InActivee" '. (( $row->status) ? "checked" : "") .'>';
-            })
+                    return '<input data-id="' . $row->id . '" data-size = "mini" data-style="toggle-button"  class="toggle-class" type="checkbox" data-onstyle="success" data-offstyle="danger" data-toggle="toggle" data-on="Active" data-off="InActivee" ' . (($row->status) ? "checked" : "") . '>';
+                })
                 ->editcolumn('progress', function ($row) {
 
                     $id = $row->id;
                     $name = ObCandidates::where('office_employee_id', $id)->first();
-                    if(!empty($name)){
-                          // for tab 1
-                    $tab_id_1 = ObTabFieldRelations::where('tab_id',1)->pluck('field_id')->toArray();
-                    $full_data_1 = ObTabFieldOptions::whereNotIn('type', array(3,6))->whereIn('field_id', $tab_id_1)->pluck('id')->toArray();
-                    $data_1 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value' ,  '!=' , '')->where('value' ,  '!=' , '[]')->whereIn('field_id', $full_data_1 )->pluck('field_id')->toArray();
+                    if (!empty($name)) {
+                        // for tab 1
+                        $tab_id_1 = ObTabFieldRelations::where('tab_id', 1)->pluck('field_id')->toArray();
+                        $full_data_1 = ObTabFieldOptions::whereNotIn('type', array(3, 6))->whereIn('field_id', $tab_id_1)->pluck('id')->toArray();
+                        $data_1 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value',  '!=', '')->where('value',  '!=', '[]')->whereIn('field_id', $full_data_1)->pluck('field_id')->toArray();
 
-              
-                    $tab_id_2 = ObTabFieldRelations::where('tab_id',2)->pluck('field_id')->toArray();
-                    $full_data_2 = ObTabFieldOptions::whereNotIn('type', array(3,6))->whereIn('field_id', $tab_id_2)->pluck('id')->toArray();
-                    $data_2 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value' ,  '!=' , '')->where('value' ,  '!=' , '[]')->whereIn('field_id', $full_data_2)->pluck('field_id')->toArray();
 
-                   
-                    $tab_id_3 = ObTabFieldRelations::where('tab_id',3)->pluck('field_id')->toArray();
-                    $full_data_3 = ObTabFieldOptions::whereNotIn('type', array(3,6))->whereIn('field_id', $tab_id_3)->pluck('id')->toArray();
-                    $data_3 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value' ,  '!=' , '')->where('value' ,  '!=' , '[]')->whereIn('field_id', $full_data_3)->pluck('field_id')->toArray();
+                        $tab_id_2 = ObTabFieldRelations::where('tab_id', 2)->pluck('field_id')->toArray();
+                        $full_data_2 = ObTabFieldOptions::whereNotIn('type', array(3, 6))->whereIn('field_id', $tab_id_2)->pluck('id')->toArray();
+                        $data_2 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value',  '!=', '')->where('value',  '!=', '[]')->whereIn('field_id', $full_data_2)->pluck('field_id')->toArray();
 
-                    $tab_id_4 = ObTabFieldRelations::where('tab_id',4)->pluck('field_id')->toArray();
-                    $full_data_4 = ObTabFieldOptions::whereNotIn('type', array(3,6))->whereIn('field_id', $tab_id_4)->pluck('id')->toArray();
-                    $data_4 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value' ,  '!=' , '')->where('value' ,  '!=' , '[]')->whereIn('field_id', $full_data_4)->pluck('field_id')->toArray();
- 
-                    $tab_id_5 = ObTabFieldRelations::where('tab_id',5)->pluck('field_id')->toArray();
-                    $full_data_5 = ObTabFieldOptions::whereNotIn('type', array(3,6))->whereIn('field_id', $tab_id_5)->pluck('id')->toArray();
-                    $data_5 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value' ,  '!=' , '')->where('value' ,  '!=' , '[]')->whereIn('field_id', $full_data_5)->pluck('field_id')->toArray();
 
-                    $progress = 0;
-                    if(empty(array_diff($full_data_1, $data_1)))
-                    {
-                         $b =40;
-                         $progress += $b;
-                    }
-                    if(empty(array_diff($full_data_2, $data_2)))
-                    {
-                         $c =20;
-                         $progress = $progress + $c;
-                    }
-                    if(empty(array_diff($full_data_3, $data_3)))
-                    {
-                         $d =10;
-                         $progress = $progress +  $d;
-                    }
-                    if(empty(array_diff($full_data_4, $data_4)))
-                    {
-                         $e =10;
-                         $progress = $progress  + $e;
-                    }
-                    if(empty(array_diff($full_data_5, $data_5)))
-                    {
-                         $f =15;
-                         $progress = $progress  + $f;
-                    }
-                    if( $progress == 95)
-                    {
-                        $onboard =OnboardRequests::where('candidate_name', $row->name)->first();
-                                        if(empty($onboard))
-                                        {
-                                            $request = new OnboardRequests();
-                                            $request->candidate_name = $row->name;
-                                            $request->updated_by = Auth::user()->name;
-                                            $request->link = 'http://103.163.58.156:4016/hrm/onboarding/candidate/'.$name->id.'';
-                                            $request->save();
-                                        }
-                                        else{
-                                            if($onboard->status == '1')
-                                            {
-                                                return '<div class="progress progress-sm border-radius">
+                        $tab_id_3 = ObTabFieldRelations::where('tab_id', 3)->pluck('field_id')->toArray();
+                        $full_data_3 = ObTabFieldOptions::whereNotIn('type', array(3, 6))->whereIn('field_id', $tab_id_3)->pluck('id')->toArray();
+                        $data_3 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value',  '!=', '')->where('value',  '!=', '[]')->whereIn('field_id', $full_data_3)->pluck('field_id')->toArray();
+
+                        $tab_id_4 = ObTabFieldRelations::where('tab_id', 4)->pluck('field_id')->toArray();
+                        $full_data_4 = ObTabFieldOptions::whereNotIn('type', array(3, 6))->whereIn('field_id', $tab_id_4)->pluck('id')->toArray();
+                        $data_4 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value',  '!=', '')->where('value',  '!=', '[]')->whereIn('field_id', $full_data_4)->pluck('field_id')->toArray();
+
+                        $tab_id_5 = ObTabFieldRelations::where('tab_id', 5)->pluck('field_id')->toArray();
+                        $full_data_5 = ObTabFieldOptions::whereNotIn('type', array(3, 6))->whereIn('field_id', $tab_id_5)->pluck('id')->toArray();
+                        $data_5 = ObTabFieldData::where('ob_candidate_id', $name->id)->where('value',  '!=', '')->where('value',  '!=', '[]')->whereIn('field_id', $full_data_5)->pluck('field_id')->toArray();
+
+                        $progress = 0;
+                        if (empty(array_diff($full_data_1, $data_1))) {
+                            $b = 40;
+                            $progress += $b;
+                        }
+                        if (empty(array_diff($full_data_2, $data_2))) {
+                            $c = 20;
+                            $progress = $progress + $c;
+                        }
+                        if (empty(array_diff($full_data_3, $data_3))) {
+                            $d = 10;
+                            $progress = $progress +  $d;
+                        }
+                        if (empty(array_diff($full_data_4, $data_4))) {
+                            $e = 10;
+                            $progress = $progress  + $e;
+                        }
+                        if (empty(array_diff($full_data_5, $data_5))) {
+                            $f = 15;
+                            $progress = $progress  + $f;
+                        }
+                        if ($progress == 95) {
+                            $onboard = OnboardRequests::where('candidate_name', $row->name)->first();
+                            if (empty($onboard)) {
+                                $request = new OnboardRequests();
+                                $request->candidate_name = $row->name;
+                                $request->updated_by = Auth::user()->name;
+                                $request->link = 'http://103.163.58.156:4016/hrm/onboarding/candidate/' . $name->id . '';
+                                $request->save();
+                            } else {
+                                if ($onboard->status == '1') {
+                                    return '<div class="progress progress-sm border-radius">
                                                 <div class="progress-bar bg-primary cstm-progress" style="width:95%"></div>
                                                 </div><small style="color:green;">95%</small>';
-                                            }
-                                            else{
-                                                return '<div class="progress progress-sm border-radius">
+                                } else {
+                                    return '<div class="progress progress-sm border-radius">
                                                     <div class="progress-bar bg-primary cstm-progress" style="width:100%"></div>
                                                     </div><small style="color:green;">100%</small>';
-
-                                            }
+                                }
+                            }
+                        }
+                    } else {
+                        $progress = 0;
                     }
-                }
-                    }else{
-                        $progress=0;
-                    }
-                  
 
-                     return '<div class="progress progress-sm border-radius">
-                                <div class="progress-bar bg-primary cstm-progress" style="width: '.$progress.'%"></div>
-                                </div><small style="color:red;">'.$progress.'%</small>';
 
-              
-            })
+                    return '<div class="progress progress-sm border-radius">
+                                <div class="progress-bar bg-primary cstm-progress" style="width: ' . $progress . '%"></div>
+                                </div><small style="color:red;">' . $progress . '%</small>';
+                })
                 ->addColumn('action', function ($row) {
-                $id = Auth::user()->id;
-                $created_by = $row->created_by;
-                $manager =  Employees::where('id', $created_by)->first();
-                $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-                $btn = '<div class="btn-group btn-group-sm">';
-                if($row->id)
-                {
-                    if($permission_role->edit == '2')
-                {
-                    if($id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
-                           <figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure>';
+                    $id = Auth::user()->id;
+                    $created_by = $row->created_by;
+                    $manager =  Employees::where('id', $created_by)->first();
+                    $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+                    $btn = '<div class="btn-group btn-group-sm">';
+                    if ($row->id) {
+                        if ($permission_role->edit == '2') {
+                            if ($id == $created_by) {
+                                $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
+                           <figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->edit == '3') {
+                            if ($id == $manager->manager_id) {
+                                $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
+                           <figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->edit == '4') {
+                            if ($id == $manager->manager_id || $id == $created_by) {
+                                $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
+                           <figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->edit == '5') {
 
-                    }
-                }
-                elseif($permission_role->edit == '3')
-                {
-                     if($id == $manager->manager_id)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
-                           <figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure>';
-                    }
-                }
-                elseif($permission_role->edit == '4')
-                {
-                     if($id == $manager->manager_id || $id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
-                           <figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure>';
-                    }
-                }
-               elseif($permission_role->edit == '5')
-                {
-                   
-                         $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
-                           <figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure>';
-                    
-                }
-               
-                $btn .= '<a class="btn btn-info site-icon eye-icon" title="View Profile" href="' . route('viewEmployee', [
-                    $row->id,
-                    'personal'
-                ]) . '" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure>';
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('editEmployee', $row->id) . '">
+                           <figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure>';
+                        }
+
+                        $btn .= '<a class="btn btn-info site-icon eye-icon" title="View Profile" href="' . route('viewEmployee', [
+                            $row->id,
+                            'personal'
+                        ]) . '" ><figure><img src="' . asset("/dist/img/2021/icons/eye-icon-lg.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/eye-icon-lg-white.png") . '" alt="editor"></figure>';
 
 
 
-                if($permission_role->delete == '2')
-                {
-                    if($id == $created_by)
-                    {
-                         $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure>';
-                    }
-                }
-                elseif($permission_role->delete == '3')
-                {
-                     if($id == $manager->manager_id)
-                    {
-                         $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure>';
-                    }
-                }
-                elseif($permission_role->delete == '4')
-                {
-                     if($id == $manager->manager_id || $id == $created_by)
-                    {
-                           $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure>';
-                    }
-                }
-               elseif($permission_role->delete == '5')
-                {
-                     $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure>';
-                    
-                }
-                $exit =EmployeeExit::where('employee_id', $row->id)->first();
-                if(!$exit)
-                {
+                        if ($permission_role->delete == '2') {
+                            if ($id == $created_by) {
+                                $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->delete == '3') {
+                            if ($id == $manager->manager_id) {
+                                $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->delete == '4') {
+                            if ($id == $manager->manager_id || $id == $created_by) {
+                                $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure>';
+                            }
+                        } elseif ($permission_role->delete == '5') {
+                            $btn .= '<a class="btn btn-danger site-icon delete-icon" title="Delete" href="' . route('deleteEmployee', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this Employee??\')"><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure>';
+                        }
+                        $exit = EmployeeExit::where('employee_id', $row->id)->first();
+                        if (!$exit) {
 
-                 $btn .= '<a class="btn btn-info site-icon exit-icon exitmodule" title="exit" data-id="'.$row->id. '" ><figure><img src="'.asset("/dist/img/2021/icons/exit.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/exit.png").'" alt="editor"></figure>';
-                }
-              
-                $btn .= '</div>';
-                return $btn;
-                }
-                
-            })
+                            $btn .= '<a class="btn btn-info site-icon exit-icon exitmodule" title="exit" data-id="' . $row->id . '" ><figure><img src="' . asset("/dist/img/2021/icons/exit.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/exit.png") . '" alt="editor"></figure>';
+                        }
+
+                        $btn .= '</div>';
+                        return $btn;
+                    }
+                })
                 ->rawColumns([
-                'action',
-                'progress',
-                'status'
-            ])
+                    'action',
+                    'progress',
+                    'status'
+                ])
                 ->make(true);
         }
         return view('users.employees.listuser', compact('user_roles'));
     }
 
-     public function allEmployees(Request $request)
+    public function allEmployees(Request $request)
     {
         $user = Auth::user();
         $role = Roles::find($user->user_role);
@@ -1289,8 +1232,8 @@ class UserController extends Controller
     public function deleteUser($user_id)
     {
         $loginuser = Auth::user();
-       
-        if(!in_array('all_users', Session::get('permission')[0])){
+
+        if (!in_array('all_users', Session::get('permission')[0])) {
             abort(404);
         }
 
@@ -1300,7 +1243,7 @@ class UserController extends Controller
             return redirect()->route('allusers')->with('success', 'User deleted.');
         } else {
             return redirect()->route('allusers')->with('error', 'Something wrong. Try again.');
-        }           
+        }
     }
 
     /**
@@ -1312,9 +1255,9 @@ class UserController extends Controller
     public function deleteEmployee($user_id)
     {
         $loginuser = Auth::user();
-        
+
         $employee = Employees::findOrFail($user_id);
-        $obcandidates= ObCandidates::where('office_employee_id', '=', $user_id)->firstOrFail();
+        $obcandidates = ObCandidates::where('office_employee_id', '=', $user_id)->firstOrFail();
         $delete = $employee->delete();
         $delete_2 = $obcandidates->delete();
         if ($delete) {
@@ -1388,8 +1331,7 @@ class UserController extends Controller
         }
     }
 
-    public function saveFinalTest(Request $request)
-    {}
+    public function saveFinalTest(Request $request) {}
 
     /**
      * Save test result and send email notification to candidate.
@@ -1448,19 +1390,19 @@ class UserController extends Controller
 
             $to_name = 'Manika';
             $to_email = 'hr@webguruz.in';
-            $candidate_name =$can_test->candidate->full_name;
-            $candidate_position =$can_test->candidate->position;
+            $candidate_name = $can_test->candidate->full_name;
+            $candidate_position = $can_test->candidate->position;
             $data = array(
                 'name' => $to_name,
                 'email' => $to_email,
                 'candidate_name' => $can_test->candidate->full_name
-                
+
             );
 
-           print_r($can_test->candidate->full_name);
-            
-           Mail::send('emails.completed-aptitude-test', $data, function ($message) use ($to_name, $to_email,$candidate_name,$candidate_position) {
-                $message->to($to_email, $to_name)->subject($candidate_name.' Completed Aptitude Test Round 1 - ' .$candidate_position);
+            print_r($can_test->candidate->full_name);
+
+            Mail::send('emails.completed-aptitude-test', $data, function ($message) use ($to_name, $to_email, $candidate_name, $candidate_position) {
+                $message->to($to_email, $to_name)->subject($candidate_name . ' Completed Aptitude Test Round 1 - ' . $candidate_position);
             });
             $noti = new Notifications();
             $noti->type_id = 'test_complete';
@@ -1538,7 +1480,7 @@ class UserController extends Controller
         }
     }
 
-     public function generateTest(Request $request, $candidate_id)
+    public function generateTest(Request $request, $candidate_id)
     {
         $candidate = Candidates::findOrFail($candidate_id);
         if ($candidate) {
@@ -1613,14 +1555,13 @@ class UserController extends Controller
                 // });
 
                 if (! Mail::failures()) {
-                      $noti = new Notifications();
+                    $noti = new Notifications();
                     $noti->type_id = 'aptitude_sent';
-                    $noti->message ='Aptitude test sent to '.$candidate->full_name.' <a target="_blank" style="margin-left: 23px;" href='.route('showTest', $can_test->token).'>Click Here</a>';
+                    $noti->message = 'Aptitude test sent to ' . $candidate->full_name . ' <a target="_blank" style="margin-left: 23px;" href=' . route('showTest', $can_test->token) . '>Click Here</a>';
                     $noti->page_id = $can_test->id;
                     $noti->save();
                     return redirect()->route('allcandidates')->with('success', 'Test sent to candidate email address.');
-                } 
-                else {
+                } else {
                     return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
                 }
 
@@ -1633,7 +1574,7 @@ class UserController extends Controller
 
     public function addCandidate()
     {
-        if(!in_array('add_candidate', Session::get('permission')[0])){
+        if (!in_array('add_candidate', Session::get('permission')[0])) {
             abort(404);
         }
         $candidate_status = CandidateStatus::all();
@@ -1645,28 +1586,31 @@ class UserController extends Controller
     public function addCandidatePost(Request $request)
     {
         $loginuser = Auth::user();
-        $validator = Validator::make($request->all(), [
-            'position' => 'required',
-            'department' => 'required',
-            'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'mobile_number' => 'unique:candidates,mobile_number|required|digits:10',
-            'email' => 'unique:candidates,email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'gender' => 'required',
-            'status' => 'required'
-        ],
-        [
-            'position.required' => 'Please enter position',
-            'department.required' => 'Please select the department',
-            'full_name.required' =>'Please fill the name',
-            'mobile_number.required' =>'Please fill the mobile number',
-            'mobile_number.unique' => 'Mobile number already exists',
-            'mobile_number.digits' => 'Please enter 10 digits mobile number',
-            'email.required' =>'Please fill the email',
-            'gender.required' =>'Please select the gender',
-            'status.required' => 'Please Select the status'
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'position' => 'required',
+                'department' => 'required',
+                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'mobile_number' => 'unique:candidates,mobile_number|required|digits:10',
+                'email' => 'unique:candidates,email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'gender' => 'required',
+                'status' => 'required'
+            ],
+            [
+                'position.required' => 'Please enter position',
+                'department.required' => 'Please select the department',
+                'full_name.required' => 'Please fill the name',
+                'mobile_number.required' => 'Please fill the mobile number',
+                'mobile_number.unique' => 'Mobile number already exists',
+                'mobile_number.digits' => 'Please enter 10 digits mobile number',
+                'email.required' => 'Please fill the email',
+                'gender.required' => 'Please select the gender',
+                'status.required' => 'Please Select the status'
 
 
-        ]);
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -1727,7 +1671,7 @@ class UserController extends Controller
             // Save Education
             $candidate_education = $request->get('candidate_education');
             if (count($candidate_education['institute_name']) > 0) {
-                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
                     $institute_name = $candidate_education['institute_name'][$ce];
                     $from = $candidate_education['from'][$ce];
                     $to = $candidate_education['to'][$ce];
@@ -1748,7 +1692,7 @@ class UserController extends Controller
             // Save Employments
             $candidate_employments = $request->get('candidate_employments');
             if (count($candidate_employments['company_name']) > 0) {
-                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
                     $company_name = $candidate_employments['company_name'][$ce];
                     $address = $candidate_employments['address'][$ce];
                     $contact_details = $candidate_employments['contact_details'][$ce];
@@ -1776,7 +1720,7 @@ class UserController extends Controller
             // Save Languages
             $candidate_languages = $request->get('candidate_languages');
             if (count($candidate_languages['english_id']) > 0) {
-                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
                     $language_id = $candidate_languages['english_id'][$ce];
                     $speak = $candidate_languages['speak'][$ce];
                     $write = $candidate_languages['write'][$ce];
@@ -1797,7 +1741,7 @@ class UserController extends Controller
             // Save Other infomations
             $candidate_other_informations = $request->get('candidate_other_informations');
             if (count($candidate_other_informations['question_id']) > 0) {
-                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
                     $question_id = $candidate_other_informations['question_id'][$ce];
                     $status = $candidate_other_informations['status'][$ce];
                     $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
@@ -1814,7 +1758,7 @@ class UserController extends Controller
             // Save Familes
             $candidate_families = $request->get('candidate_families');
             if (count($candidate_families['name']) > 0) {
-                for ($ce = 0; $ce < count($candidate_families['name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
                     $name = $candidate_families['name'][$ce];
                     $relationship = $candidate_families['relationship'][$ce];
                     $age = $candidate_families['age'][$ce];
@@ -1908,7 +1852,7 @@ class UserController extends Controller
         $candidate_relationship = Candidates::$relationship;
         $candidate = Candidates::where('id', $candidate_id)->first();
 
-        
+
         return view('users.candidates.edit', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship'));
     }
 
@@ -1923,9 +1867,9 @@ class UserController extends Controller
         //     'assessment_section',
         //     'other_informations',
         // ])->find($candidate_id);
-         $candidate = Candidates::where('id', $candidate_id)->first();
+        $candidate = Candidates::where('id', $candidate_id)->first();
 
-         Log::info('My candidate >>>>', ['candidate' => $candidate]);
+        Log::info('My candidate >>>>', ['candidate' => $candidate]);
 
         if (!$candidate) {
             return response()->json(['message' => 'Candidate not found'], 404);
@@ -1943,26 +1887,29 @@ class UserController extends Controller
     public function editCandidatePostOLD(Request $request)
     {
         $candidate_id = $request->get('candidate_id');
- 
-        $loginuser = Auth::user();
-        $validator = Validator::make($request->all(), [
-            'position' => 'required',
-            'department' => 'required',
-            'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            // 'mobile_number' => 'unique:candidates,' . $candidate_id . '|mobile_number|required',
-            'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'gender' => 'required',
-            'status' => 'required',
-            'upload_cv' => 'mimes:doc,pdf,docx'
-        ],
-        [
-            'position.required' => 'Please enter position',
-            'department.required' => 'Please select the department',
-            'full_name.required'=> 'Please fill the name',
-            'email.required' =>'Please fill the email',
-            'gender.required'=> 'Please select gender'
 
-        ]);
+        $loginuser = Auth::user();
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'position' => 'required',
+                'department' => 'required',
+                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                // 'mobile_number' => 'unique:candidates,' . $candidate_id . '|mobile_number|required',
+                'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'gender' => 'required',
+                'status' => 'required',
+                'upload_cv' => 'mimes:doc,pdf,docx'
+            ],
+            [
+                'position.required' => 'Please enter position',
+                'department.required' => 'Please select the department',
+                'full_name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email',
+                'gender.required' => 'Please select gender'
+
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -2043,7 +1990,7 @@ class UserController extends Controller
             $candidate_education = $request->get('candidate_education');
             if (count($candidate_education['institute_name']) > 0) {
                 $canedu = [];
-                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
                     $institute_name = $candidate_education['institute_name'][$ce];
                     $from = $candidate_education['from'][$ce];
                     $to = $candidate_education['to'][$ce];
@@ -2071,7 +2018,7 @@ class UserController extends Controller
             if (count($candidate_employments['company_name']) > 0) {
 
                 $empids = [];
-                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
                     $company_name = $candidate_employments['company_name'][$ce];
                     $address = $candidate_employments['address'][$ce];
                     $contact_details = $candidate_employments['contact_details'][$ce];
@@ -2105,7 +2052,7 @@ class UserController extends Controller
             $candidate_languages = $request->get('candidate_languages');
             if (count($candidate_languages['english_id']) > 0) {
                 $langids = [];
-                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
                     $language_id = $candidate_languages['english_id'][$ce];
                     $speak = $candidate_languages['speak'][$ce];
                     $write = $candidate_languages['write'][$ce];
@@ -2132,7 +2079,7 @@ class UserController extends Controller
             $candidate_other_informations = $request->get('candidate_other_informations');
             if (count($candidate_other_informations['question_id']) > 0) {
                 $otherids = [];
-                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
                     $question_id = $candidate_other_informations['question_id'][$ce];
                     $status = $candidate_other_informations['status'][$ce];
                     $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
@@ -2155,7 +2102,7 @@ class UserController extends Controller
             $candidate_families = $request->get('candidate_families');
             if (count($candidate_families['name']) > 0) {
                 $famids = [];
-                for ($ce = 0; $ce < count($candidate_families['name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
                     $name = $candidate_families['name'][$ce];
                     $relationship = $candidate_families['relationship'][$ce];
                     $age = $candidate_families['age'][$ce];
@@ -2246,8 +2193,8 @@ class UserController extends Controller
                     }
                 }
             }
-            
-            
+
+
             /*
              * Upload cv
              */
@@ -2274,32 +2221,47 @@ class UserController extends Controller
     public function editCandidatePost(Request $request)
     {
         $candidate_id = $request->get('candidate_id');
- 
-        $loginuser = Auth::user();
-        $validator = Validator::make($request->all(), [
-            'position' => 'required',
-            'department' => 'required',
-            'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            // 'mobile_number' => 'unique:candidates,' . $candidate_id . '|mobile_number|required',
-            'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'gender' => 'required',
-            'status' => 'required',
-            'upload_cv' => 'mimes:doc,pdf,docx'
-        ],
-        [
-            'position.required' => 'Please enter position',
-            'department.required' => 'Please select the department',
-            'full_name.required'=> 'Please fill the name',
-            'email.required' =>'Please fill the email',
-            'gender.required'=> 'Please select gender'
 
-        ]);
+        Log::info('My candidate_id is from edit functionality >>>> ' . json_encode($request->all()));
+
+
+        $loginuser = Auth::user();
+        $candidateProfile = $request->get('candidateProfile', []);
+        $recommendation = $request->get('recommendation', []);
+
+        foreach ($candidateProfile as $key => $value) {
+            $request->merge([$key => $value]);
+        }
+
+        foreach ($recommendation as $key => $value) {
+            $request->merge([$key => $value]);
+        }
+
+        // Now these keys exist in root level and can be validated
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'position' => 'required',
+                'department' => 'required',
+                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'gender' => 'required',
+                'status' => 'required',
+                'upload_cv' => 'mimes:doc,pdf,docx',
+            ],
+            [
+                'position.required' => 'Please enter position',
+                'department.required' => 'Please select the department',
+                'full_name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email',
+                'gender.required' => 'Please select gender',
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 401,
-                'message' => $validator->errors()
-                    ->first()
+                'message' => $validator->errors()->first()
             ]);
         }
         $candidate = Candidates::where('id', $candidate_id)->first();
@@ -2353,7 +2315,7 @@ class UserController extends Controller
 
             // Save Skills - FIXED VERSION
             $skill_names = $request->get('skill_name');
-            
+
             // Handle both array and string formats
             if (is_string($skill_names)) {
                 $skill_name = explode(',', $skill_names);
@@ -2363,8 +2325,8 @@ class UserController extends Controller
                 $skill_name = [];
             }
 
-            Log::info('My skill_name >>>>', ['skill_name' => $skill_name]);
-            
+
+
             if (count($skill_name) > 0) {
                 $skillids = [];
                 foreach ($skill_name as $skill) {
@@ -2390,7 +2352,7 @@ class UserController extends Controller
             $candidate_education = $request->get('candidate_education');
             if ($candidate_education && count($candidate_education['institute_name']) > 0) {
                 $canedu = [];
-                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
                     $institute_name = $candidate_education['institute_name'][$ce];
                     $from = $candidate_education['from'][$ce];
                     $to = $candidate_education['to'][$ce];
@@ -2418,7 +2380,7 @@ class UserController extends Controller
             if ($candidate_employments && count($candidate_employments['company_name']) > 0) {
 
                 $empids = [];
-                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
                     $company_name = $candidate_employments['company_name'][$ce];
                     $address = $candidate_employments['address'][$ce];
                     $contact_details = $candidate_employments['contact_details'][$ce];
@@ -2452,7 +2414,7 @@ class UserController extends Controller
             $candidate_languages = $request->get('candidate_languages');
             if ($candidate_languages && count($candidate_languages['english_id']) > 0) {
                 $langids = [];
-                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
                     $language_id = $candidate_languages['english_id'][$ce];
                     $speak = $candidate_languages['speak'][$ce];
                     $write = $candidate_languages['write'][$ce];
@@ -2479,7 +2441,7 @@ class UserController extends Controller
             $candidate_other_informations = $request->get('candidate_other_informations');
             if ($candidate_other_informations && count($candidate_other_informations['question_id']) > 0) {
                 $otherids = [];
-                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce ++) {
+                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
                     $question_id = $candidate_other_informations['question_id'][$ce];
                     $status = $candidate_other_informations['status'][$ce];
                     $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
@@ -2502,7 +2464,7 @@ class UserController extends Controller
             $candidate_families = $request->get('candidate_families');
             if ($candidate_families && count($candidate_families['name']) > 0) {
                 $famids = [];
-                for ($ce = 0; $ce < count($candidate_families['name']); $ce ++) {
+                for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
                     $name = $candidate_families['name'][$ce];
                     $relationship = $candidate_families['relationship'][$ce];
                     $age = $candidate_families['age'][$ce];
@@ -2593,8 +2555,8 @@ class UserController extends Controller
                     }
                 }
             }
-            
-            
+
+
             /*
              * Upload cv
              */
@@ -2619,132 +2581,105 @@ class UserController extends Controller
     }
 
     public function allCandidatesOLD(Request $request)
-        {
-            if(!in_array('all_candidates', Session::get('permission')[0])){
-                abort(404);
-            }
-            $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-            if($permission_role->view == '2')
-            {
-            $data = Candidates::where('created_by',Auth::user()->id)->orderBy('created_at', 'desc')->get();
-            }
-            elseif($permission_role->view =='3')
-            {
-                $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
-                $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
-            }
-            elseif ($permission_role->view == '4') {
-                $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
-                $data = Candidates::whereIn('created_by',$employees)->orderBy('created_at', 'desc')->get();
-            }
-            elseif ($permission_role->view == '5') {
+    {
+        if (!in_array('all_candidates', Session::get('permission')[0])) {
+            abort(404);
+        }
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->view == '2') {
+            $data = Candidates::where('created_by', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+            $data = Candidates::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->orWhere('id', Auth::user()->id)->pluck('id')->toArray();
+            $data = Candidates::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
+        } elseif ($permission_role->view == '5') {
             $data = Candidates::select('*');
-            }
+        }
 
-            if ($request->ajax()) {
-                $loginuser = Auth::user();
-                $results = DataTables::of($data)->addIndexColumn()
-                    ->addcolumn('select', function (Candidates $candidate) {
+        if ($request->ajax()) {
+            $loginuser = Auth::user();
+            $results = DataTables::of($data)->addIndexColumn()
+                ->addcolumn('select', function (Candidates $candidate) {
                     return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
                 })
-                    ->editcolumn('id', function (Candidates $candidate) {
+                ->editcolumn('id', function (Candidates $candidate) {
                     return 'HRM' . $candidate->id;
                 })
-                    ->editcolumn('gender', function (Candidates $candidate) {
+                ->editcolumn('gender', function (Candidates $candidate) {
                     return ($candidate->gender) ? Candidates::$gender[$candidate->gender] : '';
                 })
-                    ->editcolumn('status', function (Candidates $candidate) {
+                ->editcolumn('status', function (Candidates $candidate) {
                     // return $candidate->candidate_status['status_name'];
                     $emp = $candidate->candidate_status;
                     return ($emp) ? $emp['status_name'] : '';
                 })
-                    ->addcolumn('education', function (Candidates $candidate) {
+                ->addcolumn('education', function (Candidates $candidate) {
                     // return $candidate->educations->first()['professional_qualification'];
                     $emp = $candidate->educations->first();
                     return ($emp) ? $emp['professional_qualification'] : '';
                 })
-                    ->addcolumn('current_employer', function (Candidates $candidate) {
+                ->addcolumn('current_employer', function (Candidates $candidate) {
                     $emp = $candidate->employments->first();
                     return ($emp) ? $emp['company_name'] : '';
                 })
-                    ->editcolumn('department', function (Candidates $candidate) {
+                ->editcolumn('department', function (Candidates $candidate) {
                     return ($candidate->department) ? Candidates::$departments[$candidate->department] : '';
                 })
-                    ->editcolumn('created_at', function ($row) {
+                ->editcolumn('created_at', function ($row) {
                     return date('d M, Y', strtotime($row->created_at));
                 })
-                    ->editcolumn('date_of_interview', function ($row) {
+                ->editcolumn('date_of_interview', function ($row) {
                     return ($row->date_of_interview) ? date('d M, Y', strtotime($row->date_of_interview)) : '';
                 })
-                    ->addColumn('action', function ($row) {
+                ->addColumn('action', function ($row) {
                     $role = loginUserRole();
                     $id = Auth::user()->id;
                     $created_by = $row->created_by;
                     $manager =  Employees::where('id', $created_by)->first();
-                    $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+                    $permission_role = Roles::where('id', Auth::user()->user_role)->first();
                     $btn = '<div class="btn-group btn-group-sm">';
-                    $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('candidateProfileView', $row->profile_id) . '" target="_blank" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure></a> ';
+                    $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('candidateProfileView', $row->profile_id) . '" target="_blank" ><figure><img src="' . asset("/dist/img/2021/icons/eye-icon-lg.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/eye-icon-lg-white.png") . '" alt="editor"></figure></a> ';
                     //comment
                     $btn .= '<a class="btn btn-success site-icon comment-icon " style="color:#707070;" data-toggle="tooltip"
-                        data-html="true"  data-original-title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" title="Name:'.$row->full_name.'& Remarks:'.$row->remarks.'" ><figure><i class="fa fa-comment"></i></figure></a> ';
+                        data-html="true"  data-original-title="Name:' . $row->full_name . '& Remarks:' . $row->remarks . '" title="Name:' . $row->full_name . '& Remarks:' . $row->remarks . '" ><figure><i class="fa fa-comment"></i></figure></a> ';
 
-                    if($permission_role->edit == '2')
-                    {
-                        if($id == $created_by)
-                        {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                    if ($permission_role->edit == '2') {
+                        if ($id == $created_by) {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
                         }
-                    }
-                    elseif($permission_role->edit == '3')
-                    {
-                        if($id == $manager->manager_id)
-                        {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                    } elseif ($permission_role->edit == '3') {
+                        if ($id == $manager->manager_id) {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
                         }
-                    }
-                    elseif($permission_role->edit == '4')
-                    {
-                        if($id == $manager->manager_id || $id == $created_by)
-                        {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
+                    } elseif ($permission_role->edit == '4') {
+                        if ($id == $manager->manager_id || $id == $created_by) {
+                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
                         }
-                    }
-                elseif($permission_role->edit == '5')
-                    {
-                    
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/pencil.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/pencil-white.png").'" alt="editor"></figure></a> ';
-                        
+                    } elseif ($permission_role->edit == '5') {
+
+                        $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
                     }
                     if ($role == User::ROLE_RECRUITER) {
 
-                        $btn .= '<a class="btn site-icon delete-icon title="Delete" style="background-color: #808080;border-color: #808080;color:#fff;" href="#" onclick="return confirm(\'You are not authorized with this permission please contact to HR for further.\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        $btn .= '<a class="btn site-icon delete-icon title="Delete" style="background-color: #808080;border-color: #808080;color:#fff;" href="#" onclick="return confirm(\'You are not authorized with this permission please contact to HR for further.\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
                     } else {
-                        if($permission_role->delete == '2')
-                    {
-                        if($id == $created_by)
-                        {
-                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
+                        if ($permission_role->delete == '2') {
+                            if ($id == $created_by) {
+                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
+                            }
+                        } elseif ($permission_role->delete == '3') {
+                            if ($id == $manager->manager_id) {
+                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
+                            }
+                        } elseif ($permission_role->delete == '4') {
+                            if ($id == $manager->manager_id || $id == $created_by) {
+                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
+                            }
+                        } elseif ($permission_role->delete == '5') {
+                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
                         }
-                    }
-                    elseif($permission_role->delete == '3')
-                    {
-                        if($id == $manager->manager_id)
-                        {
-                        $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                        }
-                    }
-                    elseif($permission_role->delete == '4')
-                    {
-                        if($id == $manager->manager_id || $id == $created_by)
-                        {
-                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                        }
-                    }
-                elseif($permission_role->delete == '5')
-                    {
-                        $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="'.asset("/dist/img/2021/icons/delete.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/delete-white.png").'" alt="editor"></figure></a> ';
-                        
-                    }
 
                         $dis = 'javascript:void(0)';
                         $onclck = '';
@@ -2752,46 +2687,46 @@ class UserController extends Controller
                             $dis = route('startOnboarding', $row->id);
                             $onclck = 'onclick="return confirm(\'Are you sure You want to start Onboarding?\')"';
                         }
-                        $btn .= '<a class="btn btn-success site-icon menu-icon" title="Start Onboarding" href="' . $dis . '"   ' . $onclck . ' ><figure><img src="'.asset("/dist/img/2021/icons/menu.png").'" alt="editor">
-                        <img src="'.asset("/dist/img/2021/icons/menu-overlay.png").'" alt="editor">
+                        $btn .= '<a class="btn btn-success site-icon menu-icon" title="Start Onboarding" href="' . $dis . '"   ' . $onclck . ' ><figure><img src="' . asset("/dist/img/2021/icons/menu.png") . '" alt="editor">
+                        <img src="' . asset("/dist/img/2021/icons/menu-overlay.png") . '" alt="editor">
                         </figure></a> ';
                     }
-                $btn .= ' <a class="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"  title="Send Apptitute Test" href="javascript:void(0)"data-link="' . route('generateTest', $row->id) . '" ><figure><img src="'.asset("/dist/img/2021/icons/paper-plane.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/paper-plane-white.png").'" alt="editor"></figure></a> ';
-                
-                // $btn .= ' <a title="View Candidate" href="' . route('sendEmailCandidateProfile', $row->id) . '" class="edit btn btn-info btn-sm">Send Profile</a> ';
-                
+                    $btn .= ' <a class="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"  title="Send Apptitute Test" href="javascript:void(0)"data-link="' . route('generateTest', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/paper-plane.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/paper-plane-white.png") . '" alt="editor"></figure></a> ';
+
+                    // $btn .= ' <a title="View Candidate" href="' . route('sendEmailCandidateProfile', $row->id) . '" class="edit btn btn-info btn-sm">Send Profile</a> ';
+
                     $btn .= '</div>';
 
                     return $btn;
                 })
-                    ->rawColumns([
+                ->rawColumns([
                     'action',
                     'select'
                 ])
-                    ->make(true);
-                $res = (array) $results;
-                if ($request->get('export') != '-') {
+                ->make(true);
+            $res = (array) $results;
+            if ($request->get('export') != '-') {
 
-                    $res['original']['status'] = 'download';
-                    $items = $res['original']['data'];
+                $res['original']['status'] = 'download';
+                $items = $res['original']['data'];
 
-                    $name = 'candidates-' . time() . '.' . $request->get('export');
-                    $file = Excel::store(new CandidateCsvExport($items), $name);
+                $name = 'candidates-' . time() . '.' . $request->get('export');
+                $file = Excel::store(new CandidateCsvExport($items), $name);
 
-                    $res['original']['download_link'] = route('exportdownload', $name);
-                    return $res['original'];
-                } else {
-                    $res['original']['status'] = '';
-                    return $res['original'];
-                }
+                $res['original']['download_link'] = route('exportdownload', $name);
+                return $res['original'];
+            } else {
+                $res['original']['status'] = '';
+                return $res['original'];
             }
-            return view('users.candidates.list');
         }
+        return view('users.candidates.list');
+    }
 
-    
+
     public function allCandidatesNN(Request $request)
     {
-        
+
         Log::info('My jkjkkkkkkkk >>>>');
         $user = Auth::user();
         $role = $user->user_role;
@@ -2800,10 +2735,10 @@ class UserController extends Controller
         // if (!in_array('all_candidates', $user->permissions())) {
         //     return response()->json(['error' => 'Unauthorized'], 403);
         // }
-          Log::info('My 2 >>>>',['permission_role' => $permission_role]);
+        Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
         // Permission checks based on the role
         $candidatesQuery = Candidates::query();
-         // Log::info('My candidatesQuery >>>>', ['candidatesQuery' => $candidatesQuery->toSql()]);
+        // Log::info('My candidatesQuery >>>>', ['candidatesQuery' => $candidatesQuery->toSql()]);
 
         if ($permission_role->view == '2') {
             // View own candidates
@@ -2813,18 +2748,18 @@ class UserController extends Controller
             // View candidates managed by the user
             $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
             $candidatesQuery->whereIn('created_by', $employees);
-                 Log::info('My 3 >>>>');
+            Log::info('My 3 >>>>');
         } elseif ($permission_role->view == '4') {
             // View candidates managed by the user or the user itself
             $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
             $candidatesQuery->whereIn('created_by', $employees);
-                 Log::info('My 4 >>>>');
+            Log::info('My 4 >>>>');
         } elseif ($permission_role->view == '5') {
             // No restrictions
-                 Log::info('My 5 >>>>');
+            Log::info('My 5 >>>>');
         } elseif ($permission_role->view == '1') {
             // No restrictions
-                 Log::info('My 1 >>>>');
+            Log::info('My 1 >>>>');
         }
 
         // Get candidates
@@ -2900,8 +2835,8 @@ class UserController extends Controller
         Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
 
         $candidatesQuery = Candidates::query();
-       // $candidatesQuery->where('status', '7');
-        $candidatesQuery->whereIn('status', [2, 3, 4, 5, 7]); 
+        // $candidatesQuery->where('status', '7');
+        $candidatesQuery->whereIn('status', [2, 3, 4, 5, 7]);
 
         if ($permission_role->view == '2') {
             $candidatesQuery->where('created_by', $user->id);
@@ -2916,7 +2851,7 @@ class UserController extends Controller
             Log::info('My 4 >>>>');
         } elseif ($permission_role->view == '5') {
             Log::info('My 5 >>>>');
-        } 
+        }
 
 
         $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
@@ -2997,74 +2932,61 @@ class UserController extends Controller
 
     public function exportCandidates()
     {
-       // return Excel::download(new CandidateCsvExport(), 'candidates-' . time() . '.xlsx');  // old functionality
+        // return Excel::download(new CandidateCsvExport(), 'candidates-' . time() . '.xlsx');  // old functionality
         $candidates = Candidates::where('status', '!=', 0)->get()->toArray();
 
         return Excel::download(new CandidateCsvExport($candidates), 'candidates-' . time() . '.xlsx');
-
-      
-
     }
 
     public function allCandidateTest(Request $request)
     {
-        if(!in_array('review_aptitude_test', Session::get('permission')[0])){
+        if (!in_array('review_aptitude_test', Session::get('permission')[0])) {
             abort(404);
         }
-         $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
 
-          if($permission_role->view == '2')
-            {
-                $data = CandidateTest::with('candidate')->where('created_by',Auth::user()->id)->latest();
-            }
-            elseif($permission_role->view =='3')
-            {
+        if ($permission_role->view == '2') {
+            $data = CandidateTest::with('candidate')->where('created_by', Auth::user()->id)->latest();
+        } elseif ($permission_role->view == '3') {
 
-                $employees = Employees::where('manager_id',Auth::user()->id)->pluck('id')->toArray();
-                $data = CandidateTest::with('candidate')->whereIn('created_by',$employees)->latest();
-            }
-            elseif ($permission_role->view == '4') {
-                $employees = Employees::where('manager_id',Auth::user()->id)->orWhere('id',Auth::user()->id)->pluck('id')->toArray();
-                $data = CandidateTest::with('candidate')->whereIn('created_by',$employees)->latest();
-            }
-            elseif ($permission_role->view == '5') {
-              $data = CandidateTest::with('candidate')->latest();
-            }
+            $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+            $data = CandidateTest::with('candidate')->whereIn('created_by', $employees)->latest();
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)->orWhere('id', Auth::user()->id)->pluck('id')->toArray();
+            $data = CandidateTest::with('candidate')->whereIn('created_by', $employees)->latest();
+        } elseif ($permission_role->view == '5') {
+            $data = CandidateTest::with('candidate')->latest();
+        }
         if ($request->ajax()) {
-           
+
             return DataTables::of($data)->addIndexColumn()
                 ->editcolumn('status', function (CandidateTest $candidate) {
-                return CandidateTest::$status[$candidate->status];
-            })
+                    return CandidateTest::$status[$candidate->status];
+                })
                 ->editcolumn('candidate_id', function (CandidateTest $candidate) {
-                if(isset($candidate->candidate->full_name))
-                {
-                     return $candidate->candidate->full_name . ' (' . $candidate->candidate->id . ')';
-                }
-                else
-                {
-                    return '-';
-                }
-               
-            })
-                 ->editcolumn('id', function ($row) {
-                    $input = '<input type ="text" style="width:160px;" value ="https://hrm.webguruz.in/public/test/'.$row->token.'" readonly><button class="btn btn-primary edit"  data-id="https://hrm.webguruz.in/public/test/'.$row->token.'" > copy</button>';
-                    $link ='<a style="cursor: pointer;" class="edit" title="click to copy" data-id="https://hrm.webguruz.in/public/test/'.$row->token.'" >https://hrm.webguruz.in/public/test/'.$row->token.'</a>';
-                return $input ;
-               
-            })
+                    if (isset($candidate->candidate->full_name)) {
+                        return $candidate->candidate->full_name . ' (' . $candidate->candidate->id . ')';
+                    } else {
+                        return '-';
+                    }
+                })
+                ->editcolumn('id', function ($row) {
+                    $input = '<input type ="text" style="width:160px;" value ="https://hrm.webguruz.in/public/test/' . $row->token . '" readonly><button class="btn btn-primary edit"  data-id="https://hrm.webguruz.in/public/test/' . $row->token . '" > copy</button>';
+                    $link = '<a style="cursor: pointer;" class="edit" title="click to copy" data-id="https://hrm.webguruz.in/public/test/' . $row->token . '" >https://hrm.webguruz.in/public/test/' . $row->token . '</a>';
+                    return $input;
+                })
                 ->addColumn('action', function ($row) {
-                $btn = '<div class="btn-group btn-group-sm">';
-                if ($row->status == 3) {
-                $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('viewCandidateTest', $row->id) . '" target="_blank" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure></a> ';
-                }
-                $btn .= '</div>';
-                return $btn;
-            })
+                    $btn = '<div class="btn-group btn-group-sm">';
+                    if ($row->status == 3) {
+                        $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('viewCandidateTest', $row->id) . '" target="_blank" ><figure><img src="' . asset("/dist/img/2021/icons/eye-icon-lg.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/eye-icon-lg-white.png") . '" alt="editor"></figure></a> ';
+                    }
+                    $btn .= '</div>';
+                    return $btn;
+                })
                 ->rawColumns([
-                'id',
-                'action'
-            ])
+                    'id',
+                    'action'
+                ])
                 ->make(true);
         }
         return view('users.candidates.test.list');
@@ -3212,14 +3134,14 @@ class UserController extends Controller
         $candidate_status = CandidateStatus::all();
         $candidate_questions = CandidateQuestions::all();
         $candidate_relationship = Candidates::$relationship;
-        $countries = Country::get(["name","id"]);
-        $cities = City::get(["name","id"]);
-        $states = State::get(["name","id"]);
+        $countries = Country::get(["name", "id"]);
+        $cities = City::get(["name", "id"]);
+        $states = State::get(["name", "id"]);
         $candidate = Candidates::where('profile_token', $token)->whereNotNull('profile_token')
             ->whereDate('profile_token_date', '>=', date('Y-m-d H:i:s'))
             ->first();
         if ($candidate) {
-            return view('front.candidate-profile', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship','countries','cities','states'));
+            return view('front.candidate-profile', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship', 'countries', 'cities', 'states'));
         }
 
         abort(404);
@@ -3228,21 +3150,24 @@ class UserController extends Controller
     public function candidateProfilePost(Request $request)
     {
         $candidate_token = $request->get('candidate_token');
-         Log::info('My >>>>', ['candidate_token' => $candidate_token]);
+        Log::info('My >>>>', ['candidate_token' => $candidate_token]);
         $loginuser = Auth::user();
-        $validator = Validator::make($request->all(), [
-            'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'gender' => 'required',
-            'residence_address' =>'required',
-            'nationality'=>'required',
-            'dob'=>'required',
-            'place_of_birth'=>'required',
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'gender' => 'required',
+                'residence_address' => 'required',
+                'nationality' => 'required',
+                'dob' => 'required',
+                'place_of_birth' => 'required',
 
-        ],
-        [
-          'full_name'=> 'Please enter fullname',
-          'gender' =>'Please select gender'
-        ]);
+            ],
+            [
+                'full_name' => 'Please enter fullname',
+                'gender' => 'Please select gender'
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -3265,58 +3190,53 @@ class UserController extends Controller
                 ]);
             }
         }
-        if(empty($request->candidate_education['institute_name']['0'])){
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'Institute name cannot be blank'
-                ]);
+        if (empty($request->candidate_education['institute_name']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Institute name cannot be blank'
+            ]);
         }
-        if(empty($request->candidate_education['professional_qualification']['0']))
-        {
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'Qualification cannot be blank'
-                ]);
+        if (empty($request->candidate_education['professional_qualification']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Qualification cannot be blank'
+            ]);
         }
-         if(empty($request->candidate_employments['company_name']['0']))
-         {
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'company name cannot be blank'
-                ]);
+        if (empty($request->candidate_employments['company_name']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'company name cannot be blank'
+            ]);
         }
-        if(empty($request->candidate_employments['contact_details']['0']))
-        {
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'company contact details cannot be blank'
-                ]);
+        if (empty($request->candidate_employments['contact_details']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'company contact details cannot be blank'
+            ]);
         }
-          if(empty($request->candidate_employments['position']['0']))
-          {
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'Position cannot be blank'
-                ]);
+        if (empty($request->candidate_employments['position']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Position cannot be blank'
+            ]);
         }
-        if(empty($request->candidate_employments['reason_of_leaving']['0']))
-        {
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'reason of leaving cannot be blank'
-                ]);
+        if (empty($request->candidate_employments['reason_of_leaving']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'reason of leaving cannot be blank'
+            ]);
         }
-        if(empty($request->candidate_families['name']['0'])){
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'Family Name cannot be blank'
-                ]);
+        if (empty($request->candidate_families['name']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Family Name cannot be blank'
+            ]);
         }
-        if(empty($request->candidate_families['relationship']['0'])){
-             return response()->json([
-                    'status' => 401,
-                    'message' =>'Family Relationship cannot be blank'
-                ]);
+        if (empty($request->candidate_families['relationship']['0'])) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Family Relationship cannot be blank'
+            ]);
         }
 
         // try {
@@ -3365,7 +3285,7 @@ class UserController extends Controller
         $candidate_education = $request->get('candidate_education');
         if (count($candidate_education['institute_name']) > 0) {
             $canedu = [];
-            for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce ++) {
+            for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
                 $institute_name = $candidate_education['institute_name'][$ce];
                 $from = $candidate_education['from'][$ce];
                 $to = $candidate_education['to'][$ce];
@@ -3393,7 +3313,7 @@ class UserController extends Controller
         if (count($candidate_employments['company_name']) > 0) {
 
             $empids = [];
-            for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce ++) {
+            for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
                 $company_name = $candidate_employments['company_name'][$ce];
                 $address = $candidate_employments['address'][$ce];
                 $contact_details = $candidate_employments['contact_details'][$ce];
@@ -3427,7 +3347,7 @@ class UserController extends Controller
         $candidate_languages = $request->get('candidate_languages');
         if (count($candidate_languages['english_id']) > 0) {
             $langids = [];
-            for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce ++) {
+            for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
                 $language_id = $candidate_languages['english_id'][$ce];
                 $speak = $candidate_languages['speak'][$ce];
                 $write = $candidate_languages['write'][$ce];
@@ -3454,7 +3374,7 @@ class UserController extends Controller
         $candidate_other_informations = $request->get('candidate_other_informations');
         if (count($candidate_other_informations['question_id']) > 0) {
             $otherids = [];
-            for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce ++) {
+            for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
                 $question_id = $candidate_other_informations['question_id'][$ce];
                 $status = $candidate_other_informations['status'][$ce];
                 $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
@@ -3477,7 +3397,7 @@ class UserController extends Controller
         $candidate_families = $request->get('candidate_families');
         if (count($candidate_families['name']) > 0) {
             $famids = [];
-            for ($ce = 0; $ce < count($candidate_families['name']); $ce ++) {
+            for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
                 $name = $candidate_families['name'][$ce];
                 $relationship = $candidate_families['relationship'][$ce];
                 $age = $candidate_families['age'][$ce];
@@ -3559,18 +3479,16 @@ class UserController extends Controller
             $noti->message = $candidate->full_name . ' has Updated profile';
             $noti->page_id = $candidate->id;
             $noti->save();
-             return response()->json([
-            'status' => 200,
-            'message' => 'Profile updated.'
-        ]);
-        } else
-          {
-             return response()->json([
-            'status' => 401,
-            'message' => 'Error'
-        ]);
-           }
-
+            return response()->json([
+                'status' => 200,
+                'message' => 'Profile updated.'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Error'
+            ]);
+        }
     }
 
     public function candidateProfileViewOLD($profile_id)
@@ -3597,8 +3515,8 @@ class UserController extends Controller
         //     'assessment_section',
         //     'other_informations',
         // ])->where('profile_id', $profile_id)->first();
-       $candidate = Candidates::where('profile_id', $profile_id)->first();
-       Log::info('My >>>>', ['candidate' => $candidate]);
+        $candidate = Candidates::where('profile_id', $profile_id)->first();
+        Log::info('My >>>>', ['candidate' => $candidate]);
 
         if (!$candidate) {
             return response()->json(['message' => 'Candidate not found'], 404);
@@ -3664,7 +3582,7 @@ class UserController extends Controller
 
     public function realTimeNotification()
     {
-        $notifications = Notifications::where('notify_status', '1')->where('notify_type','!=', 3)->orderBy('id', 'DESC')->get();
+        $notifications = Notifications::where('notify_status', '1')->where('notify_type', '!=', 3)->orderBy('id', 'DESC')->get();
         if ($notifications) {
             $messages = [];
             foreach ($notifications as $notify) {
@@ -3684,45 +3602,39 @@ class UserController extends Controller
         }
     }
 
-     public function importEmployees() 
+    public function importEmployees()
     {
-        Excel::import(new EmployeesImport,request()->file('file'));
-           
+        Excel::import(new EmployeesImport, request()->file('file'));
+
         return back();
     }
 
     public function passwordMail(Request $request)
-       {
-          Excel::import(new MailPasswordImport,request()->file('file'));   
-          return back();
-
-       }
-
-     public function exportEmployees(Request $request) 
     {
-            return Excel::download(new ExportEmployees, 'employees.xlsx');
+        Excel::import(new MailPasswordImport, request()->file('file'));
+        return back();
     }
 
-      public function changeStatus(Request $request)
+    public function exportEmployees(Request $request)
+    {
+        return Excel::download(new ExportEmployees, 'employees.xlsx');
+    }
+
+    public function changeStatus(Request $request)
     {
         $user_id = $request->user_id;
         $status = $request->status;
         $user = Employees::find($request->user_id);
-        if($user->is_manager == '1' && $status == '0')  
-        {
-            return view('modals.allocate-manager', compact('status','user_id'));
-        }
-        else
-        {
+        if ($user->is_manager == '1' && $status == '0') {
+            return view('modals.allocate-manager', compact('status', 'user_id'));
+        } else {
 
-        $user->status = $request->status;
-        $user->password= '';
-        $user->save();
-  
-        return response()->json(['response'=>'deactive','success'=>'Status change successfully.']);
+            $user->status = $request->status;
+            $user->password = '';
+            $user->save();
+
+            return response()->json(['response' => 'deactive', 'success' => 'Status change successfully.']);
         }
-        
-       
     }
 
     public function changeEmployeeStatusPost(Request $request)
@@ -3730,19 +3642,17 @@ class UserController extends Controller
 
         $new_manager = $request->new_manager;
         $user = Employees::find($request->user_id);
-        $managers =Employees::where('manager_id', $request->user_id)->pluck('id')->toArray();
-        foreach ($managers as $manager) 
-        {
-            $emp =Employees::where('id', $manager)->first();
+        $managers = Employees::where('manager_id', $request->user_id)->pluck('id')->toArray();
+        foreach ($managers as $manager) {
+            $emp = Employees::where('id', $manager)->first();
             $emp->manager_id = $request->new_manager;
             $emp->save();
-            
         }
         $user->status = $request->status;
-        $user->password= '';
+        $user->password = '';
         $user->save();
-  
-       return response()->json([
+
+        return response()->json([
             'status' => 200,
             'message' => "Status Changed succesfully"
         ]);
@@ -3757,28 +3667,28 @@ class UserController extends Controller
         // $user->status = $request->status;
         // $user->password= '';
         // $user->save();
-  
+
         // return response()->json(['success'=>'Status change successfully.']);
     }
 
     public function inductionNotCompleted(Request $request)
     {
-      $requests=OnboardRequests::pluck('candidate_name')->toArray();
-      $candidate =ObCandidates::pluck('name')->toArray();
-      $result=array_diff($candidate,$requests);
-      $name= implode(",",$result);
-      $to_email ='tamanna@webguruz.co.in';
-      $email_subject = "Induction not completed";
-      $email_content ="You haven't completed the induction of following profiles";
- 
-      $data = array(
-        'email_subject' => $email_subject,
-        'email_content' => $email_content,
-        'name' =>$name
+        $requests = OnboardRequests::pluck('candidate_name')->toArray();
+        $candidate = ObCandidates::pluck('name')->toArray();
+        $result = array_diff($candidate, $requests);
+        $name = implode(",", $result);
+        $to_email = 'tamanna@webguruz.co.in';
+        $email_subject = "Induction not completed";
+        $email_content = "You haven't completed the induction of following profiles";
 
-      );
+        $data = array(
+            'email_subject' => $email_subject,
+            'email_content' => $email_content,
+            'name' => $name
+
+        );
         Mail::send('emails.induction', $data, function ($message) use ($email_subject, $to_email) {
-        $message->to($to_email)->subject($email_subject);
+            $message->to($to_email)->subject($email_subject);
         });
 
         return response()->json([
@@ -3789,127 +3699,109 @@ class UserController extends Controller
 
     public function  onboardRequestMail(Request $request)
     {
-        $requests=OnboardRequests::where('status', '1')->pluck('candidate_name')->toArray();
+        $requests = OnboardRequests::where('status', '1')->pluck('candidate_name')->toArray();
         // print_r($requests);die();
-            $name= implode(",",$requests);
-            $to_email ='tamanna@webguruz.co.in';
-            $email_subject = "Onboarding request";
-            $email_content ="You haven't Approve the Onboarding request of following employees: ";
+        $name = implode(",", $requests);
+        $to_email = 'tamanna@webguruz.co.in';
+        $email_subject = "Onboarding request";
+        $email_content = "You haven't Approve the Onboarding request of following employees: ";
 
-            $data = array(
-                'email_subject' => $email_subject,
-                'email_content' => $email_content,
-                'name' =>$name
+        $data = array(
+            'email_subject' => $email_subject,
+            'email_content' => $email_content,
+            'name' => $name
 
-            );
-            Mail::send('emails.onboard-requests', $data, function ($message) use ($email_subject, $to_email) {
-                $message->to($to_email)->subject($email_subject);
-            });
+        );
+        Mail::send('emails.onboard-requests', $data, function ($message) use ($email_subject, $to_email) {
+            $message->to($to_email)->subject($email_subject);
+        });
 
         return response()->json([
             'status' => 200,
             'message' => "Email send to jass"
         ]);
-
     }
 
     public function OnboardRequests(Request $request)
     {
-        if(!in_array('onboard_requests', Session::get('permission')[0])){
+        if (!in_array('onboard_requests', Session::get('permission')[0])) {
             abort(404);
         }
         if ($request->ajax()) {
             $data = OnboardRequests::get();
             return DataTables::of($data)->addIndexColumn()
                 ->editcolumn('status', function ($row) {
-                    if($row->status == '1')
-                    {
-                        return 'Pending';                
-                    }
-                    else{
+                    if ($row->status == '1') {
+                        return 'Pending';
+                    } else {
                         return 'Approved';
                     }
-                return CandidateTest::$status[$candidate->status];
-            })
-                 ->editcolumn('link', function ($row) {
-                       $btn = '<div class="btn-group btn-group-sm">';
-                        $btn .= '<a class="btn btn-info site-icon eye-icon" title="View Profile" target="_blank" href="' .$row->link. '" ><figure><img src="'.asset("/dist/img/2021/icons/eye-icon-lg.png").'" alt="editor"><img src="'.asset("/dist/img/2021/icons/eye-icon-lg-white.png").'" alt="editor"></figure>';
-                       
-                        $btn .= '</div>';
-                        return $btn;
-            })
-                
+                    return CandidateTest::$status[$candidate->status];
+                })
+                ->editcolumn('link', function ($row) {
+                    $btn = '<div class="btn-group btn-group-sm">';
+                    $btn .= '<a class="btn btn-info site-icon eye-icon" title="View Profile" target="_blank" href="' . $row->link . '" ><figure><img src="' . asset("/dist/img/2021/icons/eye-icon-lg.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/eye-icon-lg-white.png") . '" alt="editor"></figure>';
+
+                    $btn .= '</div>';
+                    return $btn;
+                })
+
                 ->addColumn('action', function ($row) {
-                    if($row->status == '1'){
+                    if ($row->status == '1') {
                         $btn = '<div class="btn-group btn-sm btn-group-sm">';
                         $btn .= '<a class="btn btn-warning" title="pending" href="' . route('approveOnboard', $row->id) . '"><b>Approve</b>';
                         $btn .= '</div>';
-                       return $btn;
+                        return $btn;
+                    } else {
+                        return '<i class="fas fa-check" style="color:green;"></i>';
                     }
-                    else{
-                      return '<i class="fas fa-check" style="color:green;"></i>';
-
-                     }
-                        
-            })
+                })
                 ->rawColumns([
-                'action',
-                'status',
-                'link'
-            ])
+                    'action',
+                    'status',
+                    'link'
+                ])
                 ->make(true);
-             }
+        }
         return view('users.employees.onboardrequests');
     }
-    public function approveOnboard(Request $request,$user_id)
+    public function approveOnboard(Request $request, $user_id)
     {
         $onboard = OnboardRequests::where('id', $user_id)->first();
-        $onboard->status ='2';
-        if($onboard->save())
-        {
-           return redirect()->route('onboardRequests')->with('success', 'Onboarding request approved'); 
+        $onboard->status = '2';
+        if ($onboard->save()) {
+            return redirect()->route('onboardRequests')->with('success', 'Onboarding request approved');
         }
     }
     public function viewReadinessTest($test_id)
     {
         $last = ReadinessAnswer::where('employee_id', $test_id)->latest()->first();
-        $employee =Employees::where('id', $test_id)->first();
+        $employee = Employees::where('id', $test_id)->first();
         if ($last) {
-            return view('users.candidates.readiness.view', compact('last','employee'));
+            return view('users.candidates.readiness.view', compact('last', 'employee'));
         } else {
             abort(404);
         }
     }
 
-    public function redirectionTest(Request $request) 
+    public function redirectionTest(Request $request)
     {
-       $url = $_SERVER['REQUEST_URI'];
-       print_r($url);
-
+        $url = $_SERVER['REQUEST_URI'];
+        print_r($url);
     }
 
 
     public function openExitPopup(Request $request)
     {
-        $id =$request->resignation_id;
-         $exit =EmployeeExit::where('employee_id', $id)->first();
-         if($exit)
-         {
-           return response()->json([
-                    'status' => 401,
-                    'message' => 'Already In Progress'
-                ]);
-
-         }
-         else
-         {
-           return view('modals.open-exit-popup-from-admin',compact('exit','id'));
-         }
+        $id = $request->resignation_id;
+        $exit = EmployeeExit::where('employee_id', $id)->first();
+        if ($exit) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Already In Progress'
+            ]);
+        } else {
+            return view('modals.open-exit-popup-from-admin', compact('exit', 'id'));
+        }
     }
-
-
-
-
 }
-
- 
