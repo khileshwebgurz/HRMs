@@ -76,8 +76,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/add-employee', [UserController::class, 'addEmployee']);
     Route::post('/add-employee-post', [UserController::class, 'addEmployeePost']);
     Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken']);
-     Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost']);
+    Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost']);
 
+    Route::get('edit-employee/{user_id}', [UserController::class, 'editEmployee']);
+    Route::post('edit-employee-post', [UserController::class, 'editEmployeePost']);
 
     //test Users Admin,Recruiter,HR
     Route:: get('/all-questions', [QuestionController::class, 'allQuestions']);

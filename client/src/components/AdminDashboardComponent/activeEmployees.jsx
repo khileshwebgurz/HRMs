@@ -88,7 +88,8 @@ const ActiveEmployees = () => {
 
               {/* Action Icons */}
               <td className="text-center">
-                <button className="btn btn-sm btn-outline-primary me-1" title="Edit">
+                <button className="btn btn-sm btn-outline-primary me-1" title="Edit"
+                onClick={() => navigate(`/edit-employee/${emp.id}`)}>
                   ✏️
                 </button>
                 <button className="btn btn-sm btn-outline-secondary me-1"
