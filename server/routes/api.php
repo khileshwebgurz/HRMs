@@ -29,7 +29,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
-  
+
 
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
@@ -47,13 +47,13 @@ Route::middleware(['auth:api'])->group(function () {
             'role_id' => $role->id ?? null,
             'user_role' => $user->user_role,
             'permissions' => $permissionSlugs,
-            'profile_pic'=> $user-> profile_pic,
+            'profile_pic' => $user->profile_pic,
         ]);
     });
 
     // Shared routes for all authenticated users
 
-    Route:: get('/candidates', [TrackerController::class, 'allCandidates']);
+    Route::get('/candidates', [TrackerController::class, 'allCandidates']);
     Route::post('/add', [TrackerController::class, 'addCandidatePost']);
     Route::post('/check', [TrackerController::class, 'checkCandidate']);
     Route::put('/edit/{candidate_id}', [TrackerController::class, 'editCandidatePost']);
@@ -62,17 +62,19 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/mail-to-hr', [TrackerController::class, 'mailToHr']);
 
 
-
+    // 'assessment_section'
 
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
     Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
-    Route:: get('/candidate/all-candidates', [UserController::class, 'allCandidates']);
-    Route:: delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
-    Route:: get('/users/export-users', [UserController::class, 'exportUsers']);
-    Route:: get('/users/export-candidates', [UserController::class, 'exportCandidates']);
-    Route:: get('/users/export-download/{file_name}', [UserController::class, 'exportDownload']);
-    Route:: get('/all-employees', [UserController::class, 'allEmployees']);
+
+    Route::get('/candidate/all-candidates', [UserController::class, 'allCandidates']);
+    Route::delete('//candidate/deleteCandidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
+    Route::delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
+    Route::get('/users/export-users', [UserController::class, 'exportUsers']);
+    Route::get('/users/export-candidates', [UserController::class, 'exportCandidates']);
+    Route::get('/users/export-download/{file_name}', [UserController::class, 'exportDownload']);
+    Route::get('/all-employees', [UserController::class, 'allEmployees']);
     Route::get('/add-employee', [UserController::class, 'addEmployee']);
     Route::post('/add-employee-post', [UserController::class, 'addEmployeePost']);
     Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken']);
@@ -82,11 +84,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('edit-employee-post', [UserController::class, 'editEmployeePost']);
 
     //test Users Admin,Recruiter,HR
-    Route:: get('/all-questions', [QuestionController::class, 'allQuestions']);
-    Route:: get('/add-question', [QuestionController::class, 'addQuestion']);
-    Route:: post('add-question-post', [QuestionController::class, 'addQuestionPost']);
-    Route:: get('/edit-question/{question_id}', [QuestionController::class, 'editQuestion']);
-    Route:: post('edit-question-post', [QuestionController::class, 'editQuestionPost']);
+    Route::get('/all-questions', [QuestionController::class, 'allQuestions']);
+    Route::get('/add-question', [QuestionController::class, 'addQuestion']);
+    Route::post('add-question-post', [QuestionController::class, 'addQuestionPost']);
+    Route::get('/edit-question/{question_id}', [QuestionController::class, 'editQuestion']);
+    Route::post('edit-question-post', [QuestionController::class, 'editQuestionPost']);
     Route::delete('/delete-question/{question_id}', [QuestionController::class, 'deleteQuestion']);
 
 
@@ -107,11 +109,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/calender', [AccountController::class, 'calender']);
     Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
-    Route::post('/change-password', [AccountController:: class ,'editProfile'])->name('em-edit-profile');
+    Route::post('/change-password', [AccountController::class, 'editProfile'])->name('em-edit-profile');
 
     // ticket
-    Route::get('/ticketViewByEmployee',[TicketController::class,'ticketViewByEmployee']);
-    Route::post('/addTicket',[TicketController::class,'addTicket']);
+    Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
+    Route::post('/addTicket', [TicketController::class, 'addTicket']);
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
@@ -119,7 +121,7 @@ Route::middleware(['auth:api'])->group(function () {
     // AttendanceLogController
     // Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
 
-    
+
     //roles
     Route::get('/permissions', [RoleController::class, 'getPermissions']);
     Route::get('/roles/{id}', [RoleController::class, 'getRole']);
@@ -136,33 +138,29 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
 
-     //  Admin-only routes
+    //  Admin-only routes
     Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
         Route::get('/employee/view-leave-request/{leave_id}', [LeavesController::class, 'viewLeaveRequest'])->name('viewLeaveRequest');
         Route::get('/employee/reject-leave-request/{leave_id}', [LeavesController::class, 'rejectLeaveRequest'])->name('rejectLeaveRequest');
-        
+
         Route::post('/get-decline-request', [LeavesController::class, 'decline'])->name('decline');
         Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
 
         Route::get('/get-excel', [UserController::class, 'exportCandidates']);
 
         // helpdesk search
-        Route::get('/helpdesk-search', [SettingController::class,'helpdesk_search'])->name('em-helpdesk-search');
+        Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
     });
 
     //  Employee-only routes (for future)
     Route::middleware('role:2')->group(function () {
         // Add employee-specific routes if needed
-        
+
     });
 
     // IT support
     Route::middleware('role:3')->group(function () {
-        Route::get('/helpdesk-search', [SettingController::class,'helpdesk_search'])->name('em-helpdesk-search');
+        Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
     });
-
-
-    
-  
 });

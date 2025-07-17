@@ -126,7 +126,7 @@ const FamilyDetails = ({familyMembers, setFamilyMembers}) => {
                   <input
                     className="form-control"
                     type="text"
-                    value={member.employer}
+                    value={member.name_of_employer}
                     onChange={(e) =>
                       handleFamilyChange(index, "employer", e.target.value)
                     }

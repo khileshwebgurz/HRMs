@@ -65,7 +65,7 @@ const EducationDetails = ({ educationRows, setEducationRows }) => {
                     <textarea
                       className="form-control"
                       rows="2"
-                      value={row.institute}
+                      value={row.institute_name}
                       onChange={(e) =>
                         handleChange(index, "institute", e.target.value)
                       }
@@ -113,7 +113,7 @@ const EducationDetails = ({ educationRows, setEducationRows }) => {
                     <textarea
                       className="form-control"
                       rows="2"
-                      value={row.qualification}
+                      value={row.professional_qualification}
                       onChange={(e) =>
                         handleChange(index, "qualification", e.target.value)
                       }

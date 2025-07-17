@@ -368,7 +368,7 @@ class LeavesController extends Controller
             $manager = Employees::find($leave->manager_id);
 
             if ($employee && $manager) {
-                $to_emails = ['hr@webguruz.in', $manager->email];
+                $to_emails = ['hr@yopmail.in', $manager->email];
 
                 $data = [
                     'to_name' => $manager->name,
@@ -380,7 +380,7 @@ class LeavesController extends Controller
                 ];
 
                 // Mail::send('attendance.leave-delete', $data, function ($message) use ($to_emails, $employee) {
-                //     $message->from('noreply@webguruz.in', 'noreply')
+                //     $message->from('noreply@yopmail.in', 'noreply')
                 //             ->to($to_emails)
                 //             ->subject('Leave Deletion Notice - ' . $employee->name);
                 // });
@@ -456,7 +456,7 @@ class LeavesController extends Controller
                 $arr = [];
                 $employee = Employees::where('id', $user->id)->first();
                 $manager = Employees::where('id', $user->manager_id)->first();
-                array_push($arr, $manager->email, 'hr@webguruz.in');
+                array_push($arr, $manager->email, 'hr@yopmail.in');
 
                 if (!empty($manager->manager_id)) {
                     $first_level_manager = Employees::where('id', $manager->manager_id)->first();
@@ -492,7 +492,7 @@ class LeavesController extends Controller
                     'reason' => $request->get('reason')
                 );
                 Mail::send('attendance.leave-request-short-leave', $data, function ($message) use ($to_name, $to_emails, $employee) {
-                    $message->from('noreply@webguruz.in', 'noreply')
+                    $message->from('noreply@yopmail.in', 'noreply')
                         ->to($to_emails)
                         ->subject('Leave Application - ' . $employee->name);
                 });
@@ -591,7 +591,7 @@ class LeavesController extends Controller
                     $employee = Employees::where('id', $user->id)->first();
                     
                     $manager = Employees::where('id', $user->manager_id)->first();
-                    array_push($arr, $manager->email, 'hr@webguruz.in');
+                    array_push($arr, $manager->email, 'hr@yopmail.in');
 
                     if (!empty($manager->manager_id)) {
                         $first_level_manager = Employees::where('id', $manager->manager_id)->first();
@@ -616,7 +616,7 @@ class LeavesController extends Controller
                     $to_emails = $arr;
 
                     $to_name = $manager->name;
-                    // $to_emails =['hr@webguruz.in','jp@webguruz.in',$manager->email,'careers@webguruz.in'];
+                    // $to_emails =['hr@yopmail.in','jp@yopmail.in',$manager->email,'careers@yopmail.in'];
                     $data = array(
                         'to_name' => $to_name,
                         'employee' => $employee->name,
@@ -630,7 +630,7 @@ class LeavesController extends Controller
                         'reason' => $request->get('reason')
                     );
                     // Mail::send('attendance.leave-request-alert', $data, function ($message) use ($to_name, $to_emails, $employee) {
-                    //     $message->from('noreply@webguruz.in', 'noreply')
+                    //     $message->from('noreply@yopmail.in', 'noreply')
                     //         ->to($to_emails)
                     //         ->subject('Leave Application - ' . $employee->name);
                     // });
@@ -693,7 +693,7 @@ class LeavesController extends Controller
                         //     'total_applied_leaves' =>$empdb->total_applied_leaves
                         // );
                         // Mail::send('emails.leave-approved-mail', $data, function ($message) use ($to_name, $to_email) {
-                        //     $message->from('noreply@webguruz.in','noreply')
+                        //     $message->from('noreply@yopmail.in','noreply')
                         //     ->to($to_email)
                         //     ->subject('Leave application status');
                         // });
@@ -770,7 +770,7 @@ class LeavesController extends Controller
                             'total_applied_leaves' => $manager->total_applied_leaves
                         );
                         Mail::send('emails.leave-approved-mail', $data, function ($message) use ($to_name, $to_email) {
-                            $message->from('noreply@webguruz.in', 'noreply')
+                            $message->from('noreply@yopmail.in', 'noreply')
                                 ->to($to_email)
                                 ->subject('Leave application status');
                         });
@@ -869,7 +869,7 @@ class LeavesController extends Controller
                             'reason'  => $manager->manager_reason
                         );
                         Mail::send('emails.leave-rejected-mail', $data, function ($message) use ($to_name, $to_email) {
-                            $message->from('noreply@webguruz.in','noreply')
+                            $message->from('noreply@yopmail.in','noreply')
                             ->to($to_email)
                             ->subject('Leave application status');
                         });

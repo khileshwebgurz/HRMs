@@ -7,22 +7,22 @@ import {
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Dashboard from "./components/Dashboard";
-import Directory from "./DashboardComponent/Directory";
-import Attendance from "./DashboardComponent/Attendance";
-import CompanyProfile from "./DashboardComponent/CompanyProfile";
-import ImportantEvents from "./DashboardComponent/ImportantEvents";
-import MyProfile from "./DashboardComponent/MyProfile";
-import Leaves from "./DashboardComponent/Leaves";
-import TeamChart from "./DashboardComponent/TeamChart";
-import SpiritClub from "./DashboardComponent/SpiritClub";
-import SupportTicket from "./DashboardComponent/SupportTicket";
-import HelpDesk from "./DashboardComponent/HelpDesk";
+import Directory from "./components/DashboardComponent/Directory"
+import Attendance from "./components/DashboardComponent/Attendance";
+import CompanyProfile from "./components/DashboardComponent/CompanyProfile";
+import ImportantEvents from "./components/DashboardComponent/ImportantEvents";
+import MyProfile from "./components/DashboardComponent/MyProfile";
+import Leaves from "./components/DashboardComponent/Leaves";
+import TeamChart from "./components/DashboardComponent/TeamChart";
+import SpiritClub from "./components/DashboardComponent/SpiritClub";
+import SupportTicket from "./components/DashboardComponent/SupportTicket";
+import HelpDesk from "./components/DashboardComponent/HelpDesk";
 import Layout from "./components/Layout";
 import RightSidebar from "./components/RightSidebar";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import LoginRoute from "./components/Auth/CustomLoginRoute";
 import LeaveLogs from "./components/Admin/LeaveLogs";
-import NotFound from "./DashboardComponent/NotFound";
+import NotFound from "./components/DashboardComponent/NotFound";
 import ChangePassword from "./components/Auth/ChangePassword";
 import RoleTable from "./components/RoleTable";
 import CreateRoleForm from "./components/CreateRoleForm";

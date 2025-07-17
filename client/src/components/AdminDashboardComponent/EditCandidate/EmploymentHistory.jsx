@@ -105,7 +105,7 @@ const EmploymentHistory = ({employments, setEmployments}) => {
                   <input
                     className="form-control"
                     type="text"
-                    value={emp.from}
+                    value={emp.date_from}
                     onChange={(e) =>
                       handleEmploymentChange(index, "from", e.target.value)
                     }
@@ -117,7 +117,7 @@ const EmploymentHistory = ({employments, setEmployments}) => {
                   <input
                     className="form-control"
                     type="text"
-                    value={emp.to}
+                    value={emp.date_to}
                     onChange={(e) => handleEmploymentChange(index, "to", e.target.value)}
                     placeholder="To (e.g. Jul 2023)"
                     autoComplete="off"

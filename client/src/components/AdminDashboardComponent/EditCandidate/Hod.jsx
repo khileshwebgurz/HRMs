@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Hod = ({ recommendation, setRecommendation }) => {
   const handleHODChange = (e) => {
     const { name, value } = e.target;
@@ -7,6 +9,7 @@ const Hod = ({ recommendation, setRecommendation }) => {
     }));
   };
 
+  console.log("my recommendations are >>>", recommendation);
   return (
     <>
       <div className="card">
@@ -136,11 +139,18 @@ const Hod = ({ recommendation, setRecommendation }) => {
                 onChange={(e) =>
                   setRecommendation((prev) => ({
                     ...prev,
-                    upload_cv: e.target.files[0], // store the file object
+                    upload_cv: e.target.files[0], 
                   }))
                 }
               />
             </div>
+            {recommendation?.cv_file && (
+              <div style={{ marginTop: "10px" }}>
+                <Link target="_blank" to={`${import.meta.env.VITE_API_IMAGE_URL}/uploads/cv/${recommendation.cv_file}`}>
+                  {recommendation?.cv_file}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

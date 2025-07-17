@@ -176,31 +176,32 @@ const CandidateEditForm = () => {
           marital_status: response.data.candidate.marital_status || "",
         });
 
-        setEducationRows(response?.data?.candidate_education || []);
-        setLanguages(response?.data?.candidate_languages || []);
-        setTechnicalSkills(response?.data?.candidate.technical_skills || "");
-        setEmployments(response.data.employment_history || []);
-        setFamilyMembers(response.data.family_details || []);
-        // setRecommendation(response?.data?.candidate_hod || []);
+        setEducationRows(response?.data?.candidate.educations || []);
+        setLanguages(response?.data?.candidate?.languages || []);
+        setTechnicalSkills(response?.data?.candidate?.skills_section || "");
+        setEmployments(response?.data?.candidate?.employments || []);
+        setFamilyMembers(response?.data?.candidate?.families || []);
+        setAssessmentSectionData(
+          response?.data?.candidate?.assessment_section || []
+        );
 
         setRecommendation({
-          status: response.data?.status ?? "",
-          remarks: response.data?.remarks ?? "",
-          sourcing: response.data?.sourcing ?? "",
-          date_of_interview: response.data?.date_of_interview ?? "",
-          interviewed_by: response.data?.interviewed_by ?? "",
-          interview_score: response.data?.interview_score ?? "",
-          current_salary: response.data?.current_salary ?? "",
-          expected_salary: response.data?.expected_salary ?? "",
-          offered_salary: response.data?.offered_salary ?? "",
+          status: response.data?.candidate.status ?? "",
+          remarks: response.data?.candidate.remarks ?? "",
+          sourcing: response.data?.candidate.sourcing ?? "",
+          date_of_interview: response.data?.candidate.date_of_interview ?? "",
+          interviewed_by: response.data?.candidate.interviewed_by ?? "",
+          interview_score: response.data?.candidate.interview_score ?? "",
+          current_salary: response.data?.candidate.current_salary ?? "",
+          expected_salary: response.data?.candidate.expected_salary ?? "",
+          offered_salary: response.data?.candidate.offered_salary ?? "",
+          cv_file: response.data.candidate.cv_file ?? ""
         });
-
-        // setOtherInfo(response.data.candidate_questions || []);
 
         setOtherInfo(
           (response.data.candidate_questions || []).map((q) => ({
             ...q,
-            status: "", // or default "0"/"1"
+            status: "",
             reason: "",
           }))
         );
@@ -223,10 +224,9 @@ const CandidateEditForm = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      // Add candidate ID (if needed in backend)
+
       formData.append("candidate_id", candidate_id);
 
-      // Add Candidate Profile fields
       for (const key in candidateProfile) {
         formData.append(`candidateProfile[${key}]`, candidateProfile[key]);
       }

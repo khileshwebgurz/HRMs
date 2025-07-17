@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import MyProfile from '../../DashboardComponent/MyProfile';
+import MyProfile from '../DashboardComponent/MyProfile';
 const PersonalDetail = () => {
     const paths = useParams();
   

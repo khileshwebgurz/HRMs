@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 
 const LanguageProficiency = ({ languages, setLanguages }) => {
   // ///////////// Handling the Language rows /////////////////////////////////////
