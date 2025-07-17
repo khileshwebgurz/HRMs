@@ -63,7 +63,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     // 'assessment_section'
-
+// candidate/profile/:' f
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
     Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);

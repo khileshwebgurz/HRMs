@@ -906,27 +906,27 @@ class UserController extends Controller
 
  
 
-    public function editEmployee($user_id)
-    {
-        $user_roles = User::$role;
-        $genders = User::$gender;
-        $loginuser = Auth::user();
-        $rooms = InventoryRooms::where('is_deleted', '0')->get();
-        $user = Employees::findOrFail($user_id);
-        $rules = AttendanceRules::all();
-        $leaverules = LeaveRules::where('for_all','!=','1')->get();
-        $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id');
-        $obcandidates = ObCandidates::where('office_employee_id', $user_id)->first();
-        $team_name = Employee_manager_team::all();
+    // public function editEmployee($user_id)
+    // {
+    //     $user_roles = User::$role;
+    //     $genders = User::$gender;
+    //     $loginuser = Auth::user();
+    //     $rooms = InventoryRooms::where('is_deleted', '0')->get();
+    //     $user = Employees::findOrFail($user_id);
+    //     $rules = AttendanceRules::all();
+    //     $leaverules = LeaveRules::where('for_all','!=','1')->get();
+    //     $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id');
+    //     $obcandidates = ObCandidates::where('office_employee_id', $user_id)->first();
+    //     $team_name = Employee_manager_team::all();
 
-        return response()->json([
-            'status' => 200,
-            'data' => compact(
-                'team_name', 'user', 'loginuser', 'user_roles', 'genders',
-                'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms'
-            )
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 200,
+    //         'data' => compact(
+    //             'team_name', 'user', 'loginuser', 'user_roles', 'genders',
+    //             'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms'
+    //         )
+    //     ]);
+    // }
 
      public function editEmployeePost(Request $request)
     {
