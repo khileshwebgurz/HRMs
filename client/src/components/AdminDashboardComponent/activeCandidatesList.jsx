@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function ActiveCandidatesList() {
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,8 @@ function ActiveCandidatesList() {
     }
   };
 
+  console.log('my candidate is ?>>>',candidates[0])
+  console.log('my filteredcandidate is >>', filteredCandidates[0])
   const handleDownload = async (fileType, dataType) => {
     try {
       const url =
@@ -81,6 +85,10 @@ function ActiveCandidatesList() {
     } catch (error) {
       console.error("Error while deleting Candidate", error);
     }
+  };
+
+  const handleEditPage = (candidate_id) => {
+    navigate(`/users/edit-candidate/${candidate_id}`);
   };
 
   return (
@@ -157,7 +165,9 @@ function ActiveCandidatesList() {
                         <td>{candidate.position}</td>
                         <td>{candidate.current_location}</td>
                         <td>
-                          <button>Edit</button>
+                          <button onClick={() => handleEditPage(candidate.id)}>
+                            Edit
+                          </button>
                           <button onClick={() => handleDeleteBtn(candidate.id)}>
                             Delete
                           </button>

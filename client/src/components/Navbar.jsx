@@ -15,28 +15,80 @@ const Navbar = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [notification, setNotification] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [todayWorkingHour, setTodayWorkingHour] = useState("");
+  const [hasClockedInData, setHasClockedInData] = useState(false);
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
 
-  // const handleClockIN = async () => {
-  //   const fetchClockIn = await axios.post(
-  //     "http://localhost:8000/api/clock-in",
-  //     {},
-  //     { withCredentials: true }
-  //   );
-  //   console.log("my clock in response is >>>>", fetchClockIn.data);
-  // };
+  const handleClockIN = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8000/api/clockIn",
+        {},
+        { withCredentials: true }
+      );
+
+      const data = res.data;
+      console.log("Clock In response >>>>", data);
+
+      if (data.attendance?.alreadyLoggedIn === "yes") {
+        setIsClockedIn(true);
+        setTodayWorkingHour(data.today_working_hour || "00:00:00");
+      }
+    } catch (err) {
+      console.error("Clock-In failed", err);
+    }
+  };
+
+  const handleClockOut = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8000/api/clockOut",
+        {},
+        { withCredentials: true }
+      );
+
+      console.log("Clock Out response >>>", res.data);
+      setIsClockedIn(false);
+      setTodayWorkingHour("");
+      setHasClockedInData(false);
+    } catch (err) {
+      console.error("Clock-Out failed", err);
+    }
+  };
 
   useEffect(() => {
     const fetchNotification = async () => {
-      const Notify = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/notification`,
-        { withCredentials: true }
-      );
-      setNotification(Notify.data.data);
+      try {
+        const Notify = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/employee/notification`,
+          { withCredentials: true }
+        );
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
+          { withCredentials: true }
+        );
+
+        setNotification(Notify.data.data);
+
+        const data = res.data;
+        if (data?.a_wh) {
+          setIsClockedIn(true);
+          setTodayWorkingHour(data.a_wh || "00:00:00");
+          setHasClockedInData(true); // set to true
+        } else {
+          setIsClockedIn(false);
+          setTodayWorkingHour("");
+          setHasClockedInData(false); // set to false
+        }
+      } catch (err) {
+        console.error("Failed to fetch clock data", err);
+      }
     };
+
     fetchNotification();
   }, []);
 
@@ -54,6 +106,7 @@ const Navbar = () => {
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
   };
+  
   return (
     <>
       <div className="wrapper" id="menu_button">
@@ -111,38 +164,44 @@ const Navbar = () => {
                 )}
               </li>
 
-              <li className="nav-item dropdown" style={{ display: "" }}>
+              <li className="nav-item dropdown">
                 <div className="clock-in-container">
-                  <div
-                    id="clockInWrapper"
-                    className="no-gutters clockInUser"
-                    data-log-id="a748c773-a3cb-4e2f-abd5-67cc3c40fbf8"
-                  >
-                    <div id="clockInDate" className="text-uppercase"></div>
-
-                    <div className="clockInAction d-flex">
-                      <button
-                        id="clockInBtn"
-                        data-clocked-in="false"
-                        data-selfie="false"
-                        className="clockInBtn btn custom-btn clockInBigAct waves-effect waves-light btn-danger clockInRed"
-                      >
-                        <span
-                          // onClick={handleClockIN}
-                          className="inLabel"
-                          id="clock_in"
+                  <div id="clockInWrapper" className="no-gutters clockInUser">
+                    <div className="clockInAction d-flex flex-column align-items-center">
+                      {!hasClockedInData ? (
+                        <button
+                          id="clockInBtn"
+                          data-clocked-in={isClockedIn.toString()}
+                          className={`clockInBtn btn custom-btn clockInBigAct waves-effect waves-light ${
+                            isClockedIn ? "btn-success" : "btn-danger"
+                          }`}
                         >
-                          CLOCK-IN
-                        </span>{" "}
-                        <span className="outLabel" style={{ display: "none" }}>
-                          CLOCK-OUT
+                          {isClockedIn ? (
+                            <span onClick={handleClockOut} className="outLabel">
+                              CLOCK-OUT
+                            </span>
+                          ) : (
+                            <span
+                              onClick={handleClockIN}
+                              className="inLabel"
+                              id="clock_in"
+                            >
+                              CLOCK-IN
+                            </span>
+                          )}
+                        </button>
+                      ) : (
+                        <span className="inLabel"
+                              id="clock_in">
+                         {todayWorkingHour}
                         </span>
-                        <span className="inTime"></span>{" "}
-                        <span
-                          className="clockOutCalc"
-                          style={{ display: "None" }}
-                        ></span>
-                      </button>
+                      )}
+
+                      {isClockedIn && todayWorkingHour && !hasClockedInData && (
+                        <div className="mt-2 text-muted">
+                          Today Working Hour: {todayWorkingHour}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

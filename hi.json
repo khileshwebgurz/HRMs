@@ -1,18 +1,46 @@
-{
-    "permission_role": {
-        "App\\Models\\Roles": {
-            "id": 1,
-            "role_name": "Super Admin",
-            "created_at": "2021-03-31T23:31:17.000000Z",
-            "updated_at": "2021-12-15T04:47:56.000000Z",
-            "permissions": "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46]",
-            "view": "5",
-            "edit": "5",
-            "add": "5",
-            "delete": "5",
-            "import": "1",
-            "export": "1",
-            "created_by": 478
-        }
+[
+    {
+        "id": 22177,
+        "user_id": 745,
+        "full_name": "Gauri Verma",
+        "mobile_number": "8729054594",
+        "email": "vermagauri089@gmail.com",
+        "position": "graphic designer",
+        "gender": "2",
+        "marital_status": "1",
+        "residence_address": null,
+        "passport_number": null,
+        "nationality": null,
+        "dob": null,
+        "age": null,
+        "place_of_birth": null,
+        "hobbies": null,
+        "current_salary": null,
+        "expected_salary": null,
+        "remarks": null,
+        "profile_token": "n5laXq9zBIvk329m",
+        "profile_id": "8z3jP0T776PIzS4A",
+        "profile_token_date": "2024-03-28 13:35:11",
+        "test_status": "1",
+        "department": "4",
+        "total_experience": "2 years",
+        "total_relevant_experience": null,
+        "sourcing": null,
+        "date_of_interview": null,
+        "interviewed_by": null,
+        "interview_score": null,
+        "notice_period": "0",
+        "current_location": "mohali",
+        "cv_file": null,
+        "status": 7,
+        "created_at": "2024-03-26T00:00:00.000000Z",
+        "updated_at": "2024-03-26T13:37:10.000000Z",
+        "offered_salary": null,
+        "link_status": "0",
+        "country_id": null,
+        "state_id": null,
+        "city_id": null,
+        "created_by": 745,
+        "linked_in": null
     }
-}
+]

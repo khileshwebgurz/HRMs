@@ -718,7 +718,7 @@ class UserController extends Controller
         ]);
     }
 
-    
+
     public function editEmployee($user_id)
     {
         $user_roles = User::$role;
@@ -746,33 +746,51 @@ class UserController extends Controller
         //  }
 
         $team_name = Employee_manager_team::all();
-
-        return view('users.employees.edituser', compact('team_name', 'user', 'loginuser', 'user_roles', 'genders', 'rules', 'leaverules', 'employeeleave', 'obcandidates', 'rooms', 'employees'));
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'user' => $user,
+                'loginuser' => $loginuser,
+                'user_roles' => $user_roles,
+                'genders' => $genders,
+                'rules' => $rules,
+                'leaverules' => $leaverules,
+                'employeeleave' => $employeeleave,
+                'obcandidates' => $obcandidates,
+                'attendance_rule' => $attendance_rule,
+                'rooms' => $rooms,
+                'employees' => $employees,
+                'team_name' => $team_name,
+            ]
+        ]);
     }
 
 
-       /**
+    /**
      * Update employee.
      */
     public function editEmployeePostOLD(Request $request)
     {
         $loginuser = Auth::user();
         $user_id = $request->user_id;
-        $all_employees= Employees::get();
+        $all_employees = Employees::get();
         $user = Employees::where('id', $user_id)->first();
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'unique:employees,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
-            'is_manager' =>'required|in:1, 0',
-            'role_id'=>'required|in:1, 2, 3' 
-        ],
-        [
-            'name.required' => 'Please fill the name',
-            'email.required' => 'Please fill the email'
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'unique:employees,email,' . $user_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
+                'is_manager' => 'required|in:1, 0',
+                'role_id' => 'required|in:1, 2, 3'
+            ],
+            [
+                'name.required' => 'Please fill the name',
+                'email.required' => 'Please fill the email'
 
-        ]);
-          
+            ]
+        );
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 401,
@@ -780,7 +798,7 @@ class UserController extends Controller
                     ->first()
             ]);
         }
-        
+
         $user->name = $request->name;
         $user->email = $request->email;
         if ($request->password) {
@@ -812,53 +830,51 @@ class UserController extends Controller
             }
             $user->phone = $request->phone;
         }
-            $user->gender = $request->gender;
+        $user->gender = $request->gender;
         // $user->user_role = $request->user_role;
-            $obcandidates = ObCandidates::where('office_employee_id',$request->user_id)->first();
-            if($obcandidates){
-             $obcandidates->attendance_rule_id = $request->attendance_rule_id;
+        $obcandidates = ObCandidates::where('office_employee_id', $request->user_id)->first();
+        if ($obcandidates) {
+            $obcandidates->attendance_rule_id = $request->attendance_rule_id;
             $obcandidates->is_crm = $request->crm;
             $obcandidates->is_interviewer = $request->Interviewer;
 
             $obcandidates->save();
-            }
-            
-
-            $aa = $request->leave_rule_id;
-            $employee= EmployeeLeaveRules::where('employee_id',$request->user_id)->pluck('leave_rule_id')->toArray();
-            if($aa){
-                 $result=array_intersect($aa,$employee);
-            $arrdiff = array_diff($employee,$result);
-                 
-            
-            foreach($arrdiff as $diff) {
-       $delruleid= EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id', $diff)->delete();
-            }
-        foreach($aa as $aa)
-        {
-           $employeeleave  = EmployeeLeaveRules::where('employee_id',$request->user_id)->where('leave_rule_id',$aa)->first();
-            if(!$employeeleave){
-              $employeeleave = new EmployeeLeaveRules();
-              $employeeleave->leave_rule_id = $aa;
-              $employeeleave->employee_id = $request->user_id;
-              $employeeleave->save();
         }
 
-        }
+
+        $aa = $request->leave_rule_id;
+        $employee = EmployeeLeaveRules::where('employee_id', $request->user_id)->pluck('leave_rule_id')->toArray();
+        if ($aa) {
+            $result = array_intersect($aa, $employee);
+            $arrdiff = array_diff($employee, $result);
+
+
+            foreach ($arrdiff as $diff) {
+                $delruleid = EmployeeLeaveRules::where('employee_id', $request->user_id)->where('leave_rule_id', $diff)->delete();
             }
-           
-       $user->room_id = $request->room_name;
-       $user->is_manager = $request->is_manager;
-       $user->role_id = $request->role_id;
-       $user->manager_id = $request->manager_id;
-       $user->team_id = $request->team_id;
+            foreach ($aa as $aa) {
+                $employeeleave  = EmployeeLeaveRules::where('employee_id', $request->user_id)->where('leave_rule_id', $aa)->first();
+                if (!$employeeleave) {
+                    $employeeleave = new EmployeeLeaveRules();
+                    $employeeleave->leave_rule_id = $aa;
+                    $employeeleave->employee_id = $request->user_id;
+                    $employeeleave->save();
+                }
+            }
+        }
+
+        $user->room_id = $request->room_name;
+        $user->is_manager = $request->is_manager;
+        $user->role_id = $request->role_id;
+        $user->manager_id = $request->manager_id;
+        $user->team_id = $request->team_id;
 
         if ($user->save()) {
 
-             $obcandidates->name = $request->name;
-             $obcandidates->email = $request->email;
-             $obcandidates->phone = $request->phone;
-             $obcandidates->save();
+            $obcandidates->name = $request->name;
+            $obcandidates->email = $request->email;
+            $obcandidates->phone = $request->phone;
+            $obcandidates->save();
             return response()->json([
                 'status' => 200,
                 'message' => "Employee profile updated"
@@ -904,7 +920,7 @@ class UserController extends Controller
         abort(404);
     }
 
- 
+
 
     // public function editEmployee($user_id)
     // {
@@ -928,7 +944,7 @@ class UserController extends Controller
     //     ]);
     // }
 
-     public function editEmployeePost(Request $request)
+    public function editEmployeePost(Request $request)
     {
         $loginuser = Auth::user();
         $user_id = $request->user_id;
@@ -1403,12 +1419,12 @@ class UserController extends Controller
         $obcandidates = ObCandidates::where('office_employee_id', '=', $user_id)->firstOrFail();
         $delete = $employee->delete();
         $delete_2 = $obcandidates->delete();
-        if ($delete) {
-            $delete_2 = $obcandidates->delete();
-            return redirect('users/all-employees')->with('success', 'Employee deleted.');
-        } else {
-            return redirect()->route('allusers')->with('error', 'Something wrong. Try again.');
-        }
+        // if ($delete) {
+        //     $delete_2 = $obcandidates->delete();
+        //     return redirect('users/all-employees')->with('success', 'Employee deleted.');
+        // } else {
+        //     return redirect()->route('allusers')->with('error', 'Something wrong. Try again.');
+        // }
     }
 
     public function showTest($test_id)
@@ -2463,7 +2479,7 @@ class UserController extends Controller
             if (is_string($skill_names)) {
                 Log::info('My skills are >>>> ');
                 $skill_name = explode(',', $skill_names);
-                Log::info('My name of skills are >>>> ',$skill_name);
+                Log::info('My name of skills are >>>> ', $skill_name);
             } else if (is_array($skill_names)) {
                 Log::info('My skills 2nd are >>>> ');
                 $skill_name = $skill_names;
@@ -2478,8 +2494,8 @@ class UserController extends Controller
                 Log::info('My skills inside >>>> ');
                 $skillids = [];
                 foreach ($skill_name as $skill) {
-                    $skill = trim($skill); 
-                    if (!empty($skill)) { 
+                    $skill = trim($skill);
+                    if (!empty($skill)) {
                         $c_skill = new CandidateSkills();
                         $c_skill->candidate_id = $candidate_id;
                         $c_skill->skill_name = $skill;
@@ -2487,7 +2503,7 @@ class UserController extends Controller
                         $skillids[] = $c_skill->id;
                     }
                 }
-                 Log::info('My id of  skill name >>>> ', $skillids);
+                Log::info('My id of  skill name >>>> ', $skillids);
 
                 if (count($skillids) > 0) {
                     Log::info('My skills inside 2>>>> ');
@@ -2729,11 +2745,11 @@ class UserController extends Controller
                 foreach ($candidate_assessment_sections as $accessment_type => $section) {
                     Log::info('My title >>>> ' . $section['title']);
                     $accessment_type = $section['title'] ?? null;
-                     Log::info('My assessment by >>>> ' . $section['assessment_by']);
+                    Log::info('My assessment by >>>> ' . $section['assessment_by']);
                     $accessment_by = $section['assessment_by'] ?? null;
-                     Log::info('My weight age by >>>> ' . $section['weight_age']);
+                    Log::info('My weight age by >>>> ' . $section['weight_age']);
                     $weight_age = $section['weight_age'] ?? null;
-                      Log::info('My score is  >>>> ' . $section['score']);
+                    Log::info('My score is  >>>> ' . $section['score']);
                     $score = $section['score'] ?? null;
 
                     if (!empty($accessment_by) || !empty($weight_age) || !empty($score)) {
@@ -3041,17 +3057,13 @@ class UserController extends Controller
 
         if ($permission_role->view == '2') {
             $candidatesQuery->where('created_by', $user->id);
-            Log::info('My 2 >>>>');
         } elseif ($permission_role->view == '3') {
             $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
             $candidatesQuery->whereIn('created_by', $employees);
-            Log::info('My 3 >>>>');
         } elseif ($permission_role->view == '4') {
             $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
             $candidatesQuery->whereIn('created_by', $employees);
-            Log::info('My 4 >>>>');
         } elseif ($permission_role->view == '5') {
-            Log::info('My 5 >>>>');
         }
 
 

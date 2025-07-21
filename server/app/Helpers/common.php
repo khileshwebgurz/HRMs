@@ -328,3 +328,81 @@ function noofworkingdays()
 {
     return '21';
 }
+
+function getWeeklyWorkDuration( $user_id, $format = 'string')
+{
+   $startTime = strtotime(date( 'Y-m-d', strtotime( 'monday this week' ) ));
+$endTime = strtotime( date('Y-m-d') );
+
+// Loop between timestamps, 24 hours at a time
+$weekly_time=0;
+for ( $i = $startTime; $i <= $endTime; $i = $i + 86400 ) {
+   $thisDate = date( 'Y-m-d', $i ); // 2010-05-01, 2010-05-02, etc
+
+     $attData = AttendanceLog::select('clock_time')->where('employee_id', $user_id)
+        ->where('clock_date', $thisDate)
+        ->orderBy('id', 'ASC')
+        ->get()
+        ->toArray();
+
+
+    $attData = array_column($attData, 'clock_time');
+
+    $attData = array_chunk($attData, 2);
+
+    $total_time = array();
+    $sum = strtotime('00:00:00');
+
+    $totaltime = 0;
+    foreach ($attData as $time) {
+        $start_time = $time[0];
+         $current_time = (isset($time[1])) ? $time[1] : date('H:i:s');
+if(empty($time[0]) || empty($time[1])){
+  $totaltime = $totaltime + 0;
+}else{
+         $start_t = new DateTime($start_time);
+        $current_t = new DateTime($current_time);
+        $difference = $start_t->diff($current_t);
+        $return_time = $difference->format('%H:%I:%s');
+
+        // $diff = strtotime($to) - strtotime($from);
+        //if (isset($time[1])) {
+            $total_time[] = $return_time;
+            // Converting the time into seconds
+            $timeinsec = strtotime($return_time) - $sum;
+
+            // Sum the time with previous value
+            $totaltime = $totaltime + $timeinsec;
+}
+   
+       // }
+    }
+$weekly_time=$weekly_time+$totaltime;
+
+}
+  
+
+    // Hours is obtained by dividing
+    // totaltime with 3600
+    $m = floor(($weekly_time%3600)/60);
+    $h = floor(($weekly_time%86400)/3600);
+    $s = $weekly_time%60;
+
+    // Remaining value is seconds
+
+    // Printing the result
+    // echo $h." Hours ".$m." Mins";
+
+    // echo '<pre>';
+    // print_r($total_time);
+    // print_r($attData);
+    // echo '</pre>';
+    // exit();
+    // $hours = $attData;
+    // return $total_time;
+    if ($format == 'time') {
+        return date('H:i:s',strtotime('2021-01-01 '.$h . ":" . $m . ":" . $s));
+    } else {
+        return $h . " Hours " . $m . " Mins";
+    }
+}

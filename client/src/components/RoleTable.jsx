@@ -33,7 +33,7 @@ const RoleTable = () => {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/permissions`, {
         withCredentials: true,
       });
-      setAvailablePermissions(res.data.data); // [{id: 1, name: "View Tickets"}, ...]
+      setAvailablePermissions(res.data.data);
     } catch (err) {
       console.error("Failed to fetch permissions", err);
     }

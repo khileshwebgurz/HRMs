@@ -63,13 +63,13 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     // 'assessment_section'
-// candidate/profile/:' f
+    // candidate/profile/:' f
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
     Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
 
     Route::get('/candidate/all-candidates', [UserController::class, 'allCandidates']);
-    Route::delete('//candidate/deleteCandidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
+    Route::delete('/candidate/deleteCandidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
     Route::delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
     Route::get('/users/export-users', [UserController::class, 'exportUsers']);
     Route::get('/users/export-candidates', [UserController::class, 'exportCandidates']);
@@ -120,6 +120,9 @@ Route::middleware(['auth:api'])->group(function () {
 
     // AttendanceLogController
     // Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
+    Route::post('/clockIn', [AuthController::class, 'clockIn']);
+    Route::post('/clockOut', [AuthController::class, 'clockOut']);
+    Route::get('/clockApi', [AuthController::class,'clockApi']);
 
 
     //roles
@@ -148,6 +151,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/get-approval-request', [LeavesController::class, 'approveRequest'])->name('approveRequest');
 
         Route::get('/get-excel', [UserController::class, 'exportCandidates']);
+        Route::get('/delete-employee/{user_id}', [UserController::class, 'deleteEmployee']);
 
         // helpdesk search
         Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
