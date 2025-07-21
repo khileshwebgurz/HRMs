@@ -58,6 +58,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
+use App\Mail\EmployeeInviteMail;
+
 
 
 class UserController extends Controller
@@ -534,7 +536,7 @@ class UserController extends Controller
         ]);
     }
 
-
+       
     public function addEmployeePost(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -577,6 +579,88 @@ class UserController extends Controller
 
         return response()->json(['status' => 401, 'message' => 'Something went wrong. Try again.']);
     }
+
+     public function addEmployeePostNew210725(Request $request)
+        {
+            $validator = Validator::make($request->all(), [
+                'name'  => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i',
+                // optional:
+                'on_candidate_id' => 'nullable|integer',
+                'created_by'      => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => $validator->errors()->first()
+                ]);
+            }
+
+            $authUser        = Auth::user();
+            $permission_role = Roles::find($authUser->user_role);
+
+            // If role->add == '2' user cannot assign; force created_by = current user
+            $created_by = $permission_role->add == '2'
+                ? $authUser->id
+                : $request->created_by;
+
+            if (! $created_by) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Please select to whom you would assign to'
+                ]);
+            }
+
+            $user = new Employees();
+            $user->name       = $request->name;
+            $user->email      = $request->email;
+            $user->password   = bcrypt('#WEBGURUZ#');   // temp placeholder
+            $user->token      = Str::random(32);
+            $user->created_by = $created_by;
+
+            if (! $user->save()) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Something went wrong. Try again.'
+                ]);
+            }
+
+            // Candidate linking
+            $ObCandidates = ObCandidates::firstOrNew(['id' => $request->on_candidate_id]);
+            $ObCandidates->name               = $request->name;
+            $ObCandidates->email              = $request->email;
+            $ObCandidates->office_employee_id = $user->id;
+            $ObCandidates->created_by         = $created_by;
+            $ObCandidates->save();
+
+            // Build invite URLs (match the mail template + expose to frontend)
+            $acceptUrl  = route('setPasswordEmployee', ['accept',   $user->token]);
+            $declineUrl = route('setPasswordEmployee', ['declined', $user->token]);
+
+            // Send email
+            try {
+                Mail::to($user->email)->send(new EmployeeInviteMail($user->name, $user->token));
+            } catch (\Throwable $e) {
+                // You may want to log: logger()->error('Invite mail failed', ['err' => $e]);
+                return response()->json([
+                    'status'       => 500,
+                    'message'      => 'Employee added but email failed to send.',
+                    'token'        => $user->token,
+                    'accept_url'   => $acceptUrl,
+                    'decline_url'  => $declineUrl,
+                    'mail_error'   => $e->getMessage(),
+                ]);
+            }
+
+            return response()->json([
+                'status'      => 200,
+                'message'     => 'Employee added successfully. Invitation email sent.',
+                'token'       => $user->token,
+                'accept_url'  => $acceptUrl,
+                'decline_url' => $declineUrl,
+            ]);
+        }
 
 
     public function validateEmployeeToken($type, $token)
