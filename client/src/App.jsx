@@ -86,7 +86,8 @@ function App() {
           <Route path="/edit-question/:question_id" element={<EditQuestion />} />
           <Route path="/all-employees" element={<ActiveEmployees />} />
           <Route path="/add-employee" element={<AddEmployee />} />
-          <Route path="/set-password/:token" element={<SetPassword />} />
+          <Route path="/set-password/:type/:token" element={<SetPassword />} />
+          {/* <Route path="/set-password/:token" element={<SetPassword />} /> */}
           <Route path="users/employee/:userId/view/personal" element={<PersonalDetail/>}/>
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
 

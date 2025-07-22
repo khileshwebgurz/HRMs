@@ -24,6 +24,13 @@ use App\Http\Controllers\QuestionController;
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
+    ->where('type', 'accept|declined')
+    ->name('employee.token.validate');
+
+Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
+    ->name('employee.token.setPassword');
+
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -77,8 +84,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/all-employees', [UserController::class, 'allEmployees']);
     Route::get('/add-employee', [UserController::class, 'addEmployee']);
     Route::post('/add-employee-post', [UserController::class, 'addEmployeePost']);
-    Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken']);
-    Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost']);
+    // Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken']);
+    // Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost']);
 
     Route::get('edit-employee/{user_id}', [UserController::class, 'editEmployee']);
     Route::post('edit-employee-post', [UserController::class, 'editEmployeePost']);

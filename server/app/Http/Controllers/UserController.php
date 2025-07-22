@@ -511,33 +511,7 @@ class UserController extends Controller
     }
 
 
-    public function addEmployee()
-    {
-        $user = Auth::user();
-        $role = Roles::find($user->user_role);
-
-        $assign = [];
-        if ($role->add != '2') {
-            if ($role->add == '4') {
-                $assign = Employees::where('manager_id', $user->id)
-                    ->orWhere('id', $user->id)->get();
-            } elseif ($role->add == '5') {
-                $all_roles = Roles::where('id', '!=', '2')->pluck('id')->toArray();
-                $assign = Employees::whereIn('user_role', $all_roles)->get();
-            } else {
-                $assign = Employees::where('manager_id', $user->id)->get();
-            }
-        }
-
-        return response()->json([
-            'status' => true,
-            'assignable_employees' => $assign,
-            'can_assign' => $role->add != '2'
-        ]);
-    }
-
-       
-    public function addEmployeePost(Request $request)
+     public function addEmployeePostOOLD(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
@@ -580,88 +554,121 @@ class UserController extends Controller
         return response()->json(['status' => 401, 'message' => 'Something went wrong. Try again.']);
     }
 
-     public function addEmployeePostNew210725(Request $request)
-        {
-            $validator = Validator::make($request->all(), [
-                'name'  => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-                'email' => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i',
-                // optional:
-                'on_candidate_id' => 'nullable|integer',
-                'created_by'      => 'nullable|integer',
-            ]);
+    public function addEmployee()
+    {
+        $user = Auth::user();
+        $role = Roles::find($user->user_role);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'  => 401,
-                    'message' => $validator->errors()->first()
-                ]);
+        $assign = [];
+        if ($role && $role->add != '2') {
+            if ($role->add == '4') {
+                $assign = Employees::where('manager_id', $user->id)
+                    ->orWhere('id', $user->id)
+                    ->get();
+            } elseif ($role->add == '5') {
+                $all_roles = Roles::where('id', '!=', '2')->pluck('id')->toArray();
+                $assign = Employees::whereIn('user_role', $all_roles)->get();
+            } else {
+                $assign = Employees::where('manager_id', $user->id)->get();
             }
+        }
 
-            $authUser        = Auth::user();
-            $permission_role = Roles::find($authUser->user_role);
+        return response()->json([
+            'status' => true,
+            'assignable_employees' => $assign,
+            'can_assign' => $role && $role->add != '2'
+        ]);
+    }
 
-            // If role->add == '2' user cannot assign; force created_by = current user
-            $created_by = $permission_role->add == '2'
-                ? $authUser->id
-                : $request->created_by;
+    public function addEmployeePost(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'           => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            'email'          => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i',
+            'on_candidate_id'=> 'nullable|integer',
+            'created_by'     => 'nullable|integer',
+        ]);
 
-            if (! $created_by) {
-                return response()->json([
-                    'status'  => 401,
-                    'message' => 'Please select to whom you would assign to'
-                ]);
-            }
-
-            $user = new Employees();
-            $user->name       = $request->name;
-            $user->email      = $request->email;
-            $user->password   = bcrypt('#WEBGURUZ#');   // temp placeholder
-            $user->token      = Str::random(32);
-            $user->created_by = $created_by;
-
-            if (! $user->save()) {
-                return response()->json([
-                    'status'  => 401,
-                    'message' => 'Something went wrong. Try again.'
-                ]);
-            }
-
-            // Candidate linking
-            $ObCandidates = ObCandidates::firstOrNew(['id' => $request->on_candidate_id]);
-            $ObCandidates->name               = $request->name;
-            $ObCandidates->email              = $request->email;
-            $ObCandidates->office_employee_id = $user->id;
-            $ObCandidates->created_by         = $created_by;
-            $ObCandidates->save();
-
-            // Build invite URLs (match the mail template + expose to frontend)
-            $acceptUrl  = route('setPasswordEmployee', ['accept',   $user->token]);
-            $declineUrl = route('setPasswordEmployee', ['declined', $user->token]);
-
-            // Send email
-            try {
-                Mail::to($user->email)->send(new EmployeeInviteMail($user->name, $user->token));
-            } catch (\Throwable $e) {
-                // You may want to log: logger()->error('Invite mail failed', ['err' => $e]);
-                return response()->json([
-                    'status'       => 500,
-                    'message'      => 'Employee added but email failed to send.',
-                    'token'        => $user->token,
-                    'accept_url'   => $acceptUrl,
-                    'decline_url'  => $declineUrl,
-                    'mail_error'   => $e->getMessage(),
-                ]);
-            }
-
+        if ($validator->fails()) {
             return response()->json([
-                'status'      => 200,
-                'message'     => 'Employee added successfully. Invitation email sent.',
-                'token'       => $user->token,
-                'accept_url'  => $acceptUrl,
-                'decline_url' => $declineUrl,
+                'status'  => 401,
+                'message' => $validator->errors()->first(),
             ]);
         }
 
+        $authUser        = Auth::user();
+        $permission_role = Roles::find($authUser->user_role);
+
+        // If this role cannot choose assignee, force to current user
+        $created_by = ($permission_role && $permission_role->add == '2')
+            ? $authUser->id
+            : $request->created_by;
+
+        if (!$created_by) {
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Please select to whom you would assign to',
+            ]);
+        }
+
+        // Create employee
+        $employee = new Employees();
+        $employee->name       = $request->name;
+        $employee->email      = $request->email;
+        $employee->password   = bcrypt('#WEBGURUZ#'); // temp placeholder
+        $employee->token      = Str::random(32);
+        $employee->created_by = $created_by;
+
+        if (!$employee->save()) {
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Something went wrong. Try again.',
+            ]);
+        }
+
+        // Candidate linking (only if provided)
+        if ($request->filled('on_candidate_id')) {
+            $ObCandidates = ObCandidates::firstOrNew(['id' => $request->on_candidate_id]);
+        } else {
+            $ObCandidates = new ObCandidates();
+        }
+        $ObCandidates->name               = $request->name;
+        $ObCandidates->email              = $request->email;
+        $ObCandidates->office_employee_id = $employee->id;
+        $ObCandidates->created_by         = $created_by;
+        $ObCandidates->save();
+
+        // Build frontend invite URLs
+        $frontendBase = rtrim(config('app.frontend_url', env('FRONTEND_URL', config('app.url'))), '/');
+        $acceptUrl    = $frontendBase . '/set-password/accept/'   . $employee->token;
+        $declineUrl   = $frontendBase . '/set-password/declined/' . $employee->token;
+
+        // Send email
+        try {
+            Mail::to($employee->email)->send(new EmployeeInviteMail(
+                $employee->name,
+                $acceptUrl,
+                $declineUrl
+            ));
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status'       => 500,
+                'message'      => 'Employee added but email failed to send.',
+                'token'        => $employee->token,
+                'accept_url'   => $acceptUrl,
+                'decline_url'  => $declineUrl,
+                'mail_error'   => $e->getMessage(),
+            ]);
+        }
+
+        return response()->json([
+            'status'      => 200,
+            'message'     => 'Employee added successfully. Invitation email sent.',
+            'token'       => $employee->token,
+            'accept_url'  => $acceptUrl,
+            'decline_url' => $declineUrl,
+        ]);
+    }
 
     public function validateEmployeeToken($type, $token)
     {
@@ -674,16 +681,16 @@ class UserController extends Controller
         if ($type === 'accept') {
             return response()->json([
                 'status' => 200,
-                'data' => [
-                    'id' => $employee->id,
-                    'name' => $employee->name,
-                    'email' => $employee->email
-                ]
+                'data'   => [
+                    'id'    => $employee->id,
+                    'name'  => $employee->name,
+                    'email' => $employee->email,
+                ],
             ]);
         }
 
         if ($type === 'declined') {
-            $employee->delete();
+            $employee->delete(); // hard delete; change to status if needed
             return response()->json(['status' => 200, 'message' => 'Invitation declined and account deleted.']);
         }
 
@@ -694,7 +701,7 @@ class UserController extends Controller
     public function setPasswordEmployeePost(Request $request, $token)
     {
         $request->validate([
-            'password' => 'required|min:6|confirmed'
+            'password' => 'required|min:6|confirmed',
         ]);
 
         $user = Employees::where('token', $token)->first();
@@ -703,9 +710,9 @@ class UserController extends Controller
             return response()->json(['status' => 404, 'message' => 'Invalid token']);
         }
 
-        $user->password = bcrypt($request->password);
-        $user->token = null;
-        $user->readiness_status = true;
+        $user->password         = bcrypt($request->password);
+        $user->token            = null;    // invalidate token
+        $user->readiness_status = true;    // mark activated (add column if needed)
 
         if ($user->save()) {
             return response()->json(['status' => 200, 'message' => 'Password set successfully. You can now log in.']);
