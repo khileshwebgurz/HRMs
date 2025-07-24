@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -6,18 +6,26 @@ const ActiveEmployees = () => {
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const itemsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const limit = 10;
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (page = 1, term=searchTerm) => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/all-employees`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/all-employees?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          term
+        )}`,
         {
           withCredentials: true,
         }
       );
       setEmployees(res.data.data);
+      setCurrentPage(res.data.current_page);
+      setTotalPages(res.data.last_page);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching candidates:", error);
@@ -25,9 +33,18 @@ const ActiveEmployees = () => {
     }
   };
 
+
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    fetchEmployees(currentPage);
+  }, [currentPage]);
+
+    useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchEmployees(1, searchTerm);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
 
   const handleDeleteEmployee = async (id) => {
     try {
@@ -44,12 +61,14 @@ const ActiveEmployees = () => {
     }
   };
 
-  const totalPages = Math.ceil(employees.length / itemsPerPage);
-  const paginatedCandidates = employees.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
+  const handleToggle = (empId) => {
+    const updatedList = employees.map((emp) =>
+      emp.id === empId
+        ? { ...emp, status: emp.status === "Active" ? "Inactive" : "Active" }
+        : emp
+    );
+    setEmployees(updatedList);
+  };
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -61,6 +80,17 @@ const ActiveEmployees = () => {
           + Add Employee
         </button>
       </div>
+
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="form-control my-3"
+      />
 
       <table className="table table-bordered table-striped">
         <thead className="table-light">
@@ -82,9 +112,9 @@ const ActiveEmployees = () => {
               <td colSpan="6">Loading Employees...</td>
             </tr>
           ) : (
-            paginatedCandidates?.map((emp, index) => (
+            employees?.map((emp, index) => (
               <tr key={emp.id}>
-                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                <td>{(currentPage - 1) * limit + index + 1}</td>
                 {/* Status toggle */}
                 <td>
                   <label className="form-switch">
@@ -92,6 +122,7 @@ const ActiveEmployees = () => {
                       type="checkbox"
                       className="form-check-input"
                       checked={emp.status === "Active"}
+                      onChange={() => handleToggle(emp.id)}
                       readOnly
                     />
                   </label>
@@ -165,7 +196,7 @@ const ActiveEmployees = () => {
         <span>
           Page {currentPage} of {totalPages}
         </span>
-        <div>
+        <div className="d-flex align-items-center">
           <button
             className="btn btn-outline-secondary me-2"
             disabled={currentPage === 1}
@@ -173,6 +204,20 @@ const ActiveEmployees = () => {
           >
             Prev
           </button>
+
+          {/* {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={`btn me-2 ${
+                currentPage === i + 1 ? "btn-primary" : "btn-outline-secondary"
+              }`}
+              disabled={currentPage === i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))} */}
+
           <button
             className="btn btn-outline-secondary"
             disabled={currentPage === totalPages}

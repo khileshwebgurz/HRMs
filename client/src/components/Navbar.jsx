@@ -67,23 +67,23 @@ const Navbar = () => {
           `${import.meta.env.VITE_API_BASE_URL}/employee/notification`,
           { withCredentials: true }
         );
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
-          { withCredentials: true }
-        );
+        // const res = await axios.get(
+        //   `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
+        //   { withCredentials: true }
+        // );
 
         setNotification(Notify.data.data);
 
-        const data = res.data;
-        if (data?.a_wh) {
-          setIsClockedIn(true);
-          setTodayWorkingHour(data.a_wh || "00:00:00");
-          setHasClockedInData(true); // set to true
-        } else {
-          setIsClockedIn(false);
-          setTodayWorkingHour("");
-          setHasClockedInData(false); // set to false
-        }
+        // const data = res.data;
+        // if (data?.a_wh) {
+        //   setIsClockedIn(true);
+        //   setTodayWorkingHour(data.a_wh || "00:00:00");
+        //   setHasClockedInData(true); // set to true
+        // } else {
+        //   setIsClockedIn(false);
+        //   setTodayWorkingHour("");
+        //   setHasClockedInData(false); // set to false
+        // }
       } catch (err) {
         console.error("Failed to fetch clock data", err);
       }
@@ -168,7 +168,7 @@ const Navbar = () => {
                 <div className="clock-in-container">
                   <div id="clockInWrapper" className="no-gutters clockInUser">
                     <div className="clockInAction d-flex flex-column align-items-center">
-                      {!hasClockedInData ? (
+                      {/* {!hasClockedInData ? ( */}
                         <button
                           id="clockInBtn"
                           data-clocked-in={isClockedIn.toString()}
@@ -190,12 +190,12 @@ const Navbar = () => {
                             </span>
                           )}
                         </button>
-                      ) : (
+                      {/* ) : ( */}
                         <span className="inLabel"
                               id="clock_in">
                          {todayWorkingHour}
                         </span>
-                      )}
+                      {/* )} */}
 
                       {isClockedIn && todayWorkingHour && !hasClockedInData && (
                         <div className="mt-2 text-muted">

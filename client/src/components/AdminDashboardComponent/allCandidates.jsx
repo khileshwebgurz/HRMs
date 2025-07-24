@@ -1,94 +1,69 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useCandidate } from "../../context/CandidateContext";
-const CandidateList = () => {
-  const contextData = useCandidate();
 
+const CandidateList = () => {
   const [candidates, setCandidates] = useState([]);
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
+  // const [sortField, setSortField] = useState("");
+  // const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
-
-  const [resetPage, setResetPage] = useState(false);
 
   const navigate = useNavigate();
 
-
-  // initially it might be contextdata is not avaiable , so when avaiable setCandidate and setFilteredCandidates.
-  useEffect(() => {
-    if (contextData && contextData.length > 0) {
-      setCandidates(contextData);
-      setFilteredCandidates(contextData);
-      setLoading(false);
-    }
-  }, [contextData]);
-
-  useEffect(() => {
-    applySearchAndSort();
-  }, [searchTerm, candidates, sortField, sortOrder]);
-
-  const applySearchAndSort = () => {
-    let filtered = [...candidates];
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (candidate) =>
-          candidate.full_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          candidate.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchCandidates = async (page = currentPage, term = searchTerm) => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/candidates?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
+          term
+        )}`,
+        { withCredentials: true }
       );
-    }
 
-    // Sort
-    if (sortField) {
-      filtered.sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
-        if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-        if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      });
+      setCandidates(response.data.data);
+      setFilteredCandidates(response.data.data);
+      setCurrentPage(response.data.current_page);
+      setTotalPages(response.data.last_page);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching candidates:", error);
     }
-
-    setFilteredCandidates(filtered);
-    if (resetPage) {
-      setCurrentPage(1);
-      setResetPage(false);
-    }
-    // setCurrentPage(1);
   };
 
-  const handleSort = (field) => {
-    if (field === sortField) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
+  useEffect(() => {
+    fetchCandidates(currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchCandidates(1, searchTerm);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
+
+  // const handleSort = (field) => {
+  //   if (field === sortField) {
+  //     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  //   } else {
+  //     setSortField(field);
+  //     setSortOrder("asc");
+  //   }
+  // };
 
   const handleBrnClick = (url) => {
-   
     navigate(`${url}`);
   };
 
   const handleEditClick = (url) => {
-  
     navigate(`/users/${url}`);
-  }
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
-  const paginatedCandidates = filteredCandidates.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  };
 
   const handleDeleteBtn = async (id) => {
     const numericId = id.replace("HRM", "");
@@ -118,7 +93,7 @@ const CandidateList = () => {
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
-          setResetPage(true);
+          setCurrentPage(1);
         }}
         className="form-control my-3"
       />
@@ -133,22 +108,22 @@ const CandidateList = () => {
                 <tr>
                   <th>#</th>
                   <th
-                    onClick={() => handleSort("full_name")}
+                    // onClick={() => handleSort("full_name")}
                     style={{ cursor: "pointer" }}
                   >
                     Name{" "}
-                    {sortField === "full_name" &&
-                      (sortOrder === "asc" ? "⬆️" : "⬇️")}
+                    {/* {sortField === "full_name" &&
+                      (sortOrder === "asc" ? "⬆️" : "⬇️")} */}
                   </th>
                   <th>Candidate ID</th>
                   <th>LinkedIn</th>
                   <th
-                    onClick={() => handleSort("created_at")}
+                    // onClick={() => handleSort("created_at")}
                     style={{ cursor: "pointer" }}
                   >
                     Date Applied{" "}
-                    {sortField === "created_at" &&
-                      (sortOrder === "asc" ? "⬆️" : "⬇️")}
+                    {/* {sortField === "created_at" &&
+                      (sortOrder === "asc" ? "⬆️" : "⬇️")} */}
                   </th>
                   <th>Email</th>
                   <th>Phone</th>
@@ -158,7 +133,7 @@ const CandidateList = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedCandidates.map((row, index) => (
+                {filteredCandidates.map((row, index) => (
                   <tr key={row.id}>
                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td>{row.full_name}</td>
@@ -180,7 +155,7 @@ const CandidateList = () => {
                     <td>
                       <div className="btn-group">
                         <button
-                          onClick={() =>handleBrnClick(row.action?.view_url) }
+                          onClick={() => handleBrnClick(row.action?.view_url)}
                           className="btn btn-info"
                         >
                           👁️

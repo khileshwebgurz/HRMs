@@ -33,7 +33,7 @@ const MyProfile = ({path}) => {
     setActiveTab(tab);
   };
 
-  // console.log('now new user is >>',employee)
+
 
   return (
     <div>

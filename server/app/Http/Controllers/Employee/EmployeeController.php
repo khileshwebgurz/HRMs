@@ -43,10 +43,12 @@ class EmployeeController extends Controller
 
     public function empProfile(Request $request, $tab)
     {
+        Log::info('My >>>>');
         $loginuser = $request->user();
         $user_id = $loginuser->id;
         $user_roles = User::$role;
         $genders = User::$gender;
+
 
         $user = Employees::where('id', $tab)->first();
 

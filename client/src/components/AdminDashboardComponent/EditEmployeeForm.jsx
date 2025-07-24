@@ -13,6 +13,7 @@ const EditEmployeeForm = () => {
     gender: "",
     password: "",
     password_confirmation: "",
+    role_id: "",
     attendance_rule_id: "",
     leave_rule_id: [],
     room_id: "",
@@ -44,24 +45,6 @@ const EditEmployeeForm = () => {
     6: "test",
   };
 
-  const room = {
-     1: "Business Room",
-    2: "Lab",
-    3: "Server Room",
-    4: "Lab Dev",
-    5: "HR Room",
-    6: "Jass Cabin",
-    7: "Coffee Machine Cabinet",
-    8: "Meeting Room",
-    9: "Kitchen",
-    10: "MD Cabin",
-    11: "Lobby Cabinet",
-    12: "Conference Room",
-    13: "Pantry",
-    14: "Recepition",
-    15: "Washroom Cabinet"
-  }
-
   const fetchData = async () => {
     try {
       const res = await axios.get(
@@ -73,11 +56,10 @@ const EditEmployeeForm = () => {
 
       const data = res.data.data;
       const employee = data.user;
-      const obCandidate = data.obcandidates;
+      const is_interviewer = data.obcandidates;
+      const attendance_rule = data.attendance_rule; //attendance rule seems coming from here but as a rule_name
 
-      const attendanceRules = data.rules;
-      console.log("my attendance rue >>", res.data);
-      // console.log("my response is >>>", attendanceRules?.id?.toString());
+      console.log('my attendance rule is >>',attendance_rule)
 
       setForm({
         name: employee?.name || "",
@@ -86,26 +68,20 @@ const EditEmployeeForm = () => {
         gender: employee?.gender || "",
         password: "",
         password_confirmation: "",
+        role_id: employee?.role_id || "",
         attendance_rule_id: data.rules?.id?.toString() || "",
         leave_rule_id: data.employeeleave?.map((id) => id.toString()) || [],
-        room_id: obCandidate?.room_id?.toString() || "",
+        room_id: data?.user?.room_id?.toString() || "",
         crm: employee?.crm === 1 ? "1" : "0",
-        Interviewer: employee?.interviewer === 1 ? "1" : "0",
+        Interviewer: is_interviewer?.is_interviewer === 1 ? "1" : "0",
         manager_id: employee?.manager_id?.toString() || "",
         team_id: employee?.team_id?.toString() || "",
         is_manager: employee?.is_manager === 1 ? "1" : "0",
       });
 
+
       setRooms(data.rooms || []);
       setTeams(data.team_name || []);
-      // setOptions({
-      //   roles: user_roles,
-      //   genders,
-      //   rules,
-      //   leaveRules: leaverules,
-      //   rooms,
-      //   teams: team_name
-      // });
     } catch (err) {
       console.error("Fetch Error:", err);
     }
@@ -125,8 +101,33 @@ const EditEmployeeForm = () => {
     setForm({ ...form, leave_rule_id: selected });
   };
 
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/edit-employee-post`,
+        {
+          user_id: userId,
+          ...form,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.status === 200) {
+        alert("Employee updated successfully!");
+      } else {
+        alert(res.data.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("An error occurred while submitting the form");
+    }
+  };
+
   return (
-    <form className="container mt-4">
+    <form onSubmit={handleFormSubmit} className="container mt-4">
       <h3>Edit Employee</h3>
       <div className="row">
         <div className="col-md-6">
@@ -183,6 +184,20 @@ const EditEmployeeForm = () => {
             className="form-control"
           />
         </div>
+
+        <div className="col-md-6">
+          <div className="col-md-6">
+            <label>Role</label>
+            <select
+              value={form.role_id}
+              onChange={(e) => setForm({ ...form, role_id: e.target.value })}
+            >
+              <option value="1">Admin(HR)</option>
+              <option value="2">Recruiter</option>
+            </select>
+          </div>
+        </div>
+
         <div className="col-md-6">
           <label>Gender</label>
           <select
@@ -291,7 +306,7 @@ const EditEmployeeForm = () => {
             className="form-control"
           >
             <option value="">Select Team</option>
-            {teams.map((team,index) => (
+            {teams.map((team, index) => (
               <option key={`team-${index}`} value={team.id}>
                 {team.team_name}
               </option>

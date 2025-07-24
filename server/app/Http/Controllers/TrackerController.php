@@ -41,7 +41,26 @@ class TrackerController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $data = $query->with(['candidate_status', 'educations', 'employments'])->get()->map(function ($c) use ($user, $permissionRole) {
+        // search logic
+        $searchTerm = $request->query('search');
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('full_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('email', 'like', "%{$searchTerm}%")
+                    ->orWhere('mobile_number', 'like', "%{$searchTerm}%")
+                    ->orWhere('current_location', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $perPage = $request->query('limit', 10);
+        $page = $request->query('page', 1);
+
+        $paginated = $query
+            ->with(['candidate_status', 'educations', 'employments'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $data = $paginated->getCollection()->map(function ($c) use ($user, $permissionRole) {
             return [
                 'id' => 'HRM' . $c->id,
                 'full_name' => $c->full_name,
@@ -66,7 +85,14 @@ class TrackerController extends Controller
             ];
         });
 
-        return response()->json(['data' => $data]);
+        // Log::info('My total_candidates >>>>',['total candidates are >', $data]);
+
+        return response()->json([
+            'data' => $data,
+            'total' => $paginated->total(),
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+        ]);
     }
 
     // POST /check
@@ -189,7 +215,7 @@ class TrackerController extends Controller
             'sourcing',
             'department'
         ]));
-       // Log::info('My total_candidates >>>>');
+        // Log::info('My total_candidates >>>>');
         $candidate->save();
 
         // You can also trigger updating skills, education, employments, etc., from here if needed.

@@ -2,14 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({
-    total_candidates: 0,
-    total_active_candidates: 0,
-    total_questions: 0,
-    total_users: 0,
-    user_name: '',
-    app_name: 'Laravel',
-  });
+  const [stats, setStats] = useState([]);
 
 
    const adminDataLog = async () => {
@@ -24,6 +17,7 @@ const AdminDashboard = () => {
     }
   };
 
+
   useEffect(() => {
     adminDataLog();
     }, []);
@@ -35,6 +29,7 @@ const AdminDashboard = () => {
           <div className="col-sm-6">
             <h1 className="m-0">
               Welcome {stats.user_name} to {stats.app_name}
+              {/* Hello world */}
             </h1>
           </div>
         </div>

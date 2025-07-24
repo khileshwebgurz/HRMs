@@ -511,7 +511,7 @@ class UserController extends Controller
     }
 
 
-     public function addEmployeePostOOLD(Request $request)
+    public function addEmployeePostOOLD(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
@@ -585,7 +585,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name'           => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
             'email'          => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i',
-            'on_candidate_id'=> 'nullable|integer',
+            'on_candidate_id' => 'nullable|integer',
             'created_by'     => 'nullable|integer',
         ]);
 
@@ -720,6 +720,7 @@ class UserController extends Controller
 
         return response()->json(['status' => 500, 'message' => 'Failed to set password']);
     }
+
 
     public function addEmployeePostNEw(Request $request)
     {
@@ -1042,6 +1043,8 @@ class UserController extends Controller
         $all_employees = Employees::get();
         $user = Employees::where('id', $user_id)->first();
 
+        Log::info('My editing employee is >>>>', ['user' => $user]);
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -1350,6 +1353,8 @@ class UserController extends Controller
         $user = Auth::user();
         $role = Roles::find($user->user_role);
 
+
+        Log::info('My request is  >>>>', ['skill_name' => $request->query('search')]);
         if (!$role || $role->view == '1') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -1363,13 +1368,29 @@ class UserController extends Controller
         };
 
         if (!$query) {
-            return response()->json(['data' => []]);
+            return response()->json(['data' => [], 'total' => 0]);
         }
 
-        $employees = $query->orderBy('name')->get();
+        $searchTerm = $request->query('search');
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                    ->orWhere('email', 'like', "%{$searchTerm}%")
+                    ->orWhere('phone', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Get pagination values from query string
+        $perPage = $request->query('limit', 10);
+        $page = $request->query('page', 1);
+
+        $paginated = $query->orderBy('name')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        // $employees = $query->orderBy('name')->get();
 
         // Enrich data
-        $data = $employees->map(function ($employee) use ($user) {
+        $data = $paginated->getCollection()->map(function ($employee) use ($user) {
             $employee->manager_name = optional(Employees::find($employee->manager_id))->name ?? '-';
             $employee->gender_text = $employee->gender === '1' ? 'Male' : 'Female';
             $employee->progress = $this->calculateProgress($employee);
@@ -1387,7 +1408,12 @@ class UserController extends Controller
             ];
         });
 
-        return response()->json(['data' => $data]);
+        return response()->json([
+            'data' => $data,
+            'total' => $paginated->total(),
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+        ]);
     }
 
     private function calculateProgress($employee)
@@ -3135,12 +3161,12 @@ class UserController extends Controller
 
     public function allCandidates(Request $request)
     {
-        Log::info('My jkjkkkkkkkk >>>>');
+
         $user = Auth::user();
         $role = $user->user_role;
         $permission_role = Roles::find($role);
 
-        Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
+        // Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
 
         $candidatesQuery = Candidates::query();
         // $candidatesQuery->where('status', '7');
@@ -3158,10 +3184,23 @@ class UserController extends Controller
         }
 
 
-        $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
+        // Get pagination params from query
+        $perPage = $request->query('limit', 10);
+        $page = $request->query('page', 1);
+
+        // Paginate the results
+        $paginatedCandidates = $candidatesQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $currentItems = $paginatedCandidates->items();
+
+
+
+        // $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
 
         if ($request->ajax()) {
-            $results = DataTables::of($candidates)
+            $results = DataTables::of($currentItems)
                 ->addIndexColumn()
                 ->addColumn('select', function (Candidates $candidate) {
                     return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
@@ -3204,10 +3243,20 @@ class UserController extends Controller
                 ->rawColumns(['select', 'action'])
                 ->make(true);
 
-            return response()->json($results);
+            return response()->json([
+                'data' => $results->getData(),
+                'total' => $paginatedCandidates->total(),
+                'current_page' => $paginatedCandidates->currentPage(),
+                'last_page' => $paginatedCandidates->lastPage(),
+            ]);
         }
 
-        return response()->json($candidates);
+        return response()->json([
+            'data' => $paginatedCandidates->items(),
+            'total' => $paginatedCandidates->total(),
+            'current_page' => $paginatedCandidates->currentPage(),
+            'last_page' => $paginatedCandidates->lastPage(),
+        ]);
     }
 
 

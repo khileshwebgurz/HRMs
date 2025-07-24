@@ -5,9 +5,9 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 import Dashboard from "./components/Dashboard";
-import Directory from "./components/DashboardComponent/Directory"
+import Directory from "./components/DashboardComponent/Directory";
 import Attendance from "./components/DashboardComponent/Attendance";
 import CompanyProfile from "./components/DashboardComponent/CompanyProfile";
 import ImportantEvents from "./components/DashboardComponent/ImportantEvents";
@@ -32,7 +32,7 @@ import CandidateEditForm from "./components/AdminDashboardComponent/editCandidat
 import ActiveCandidatesList from "./components/AdminDashboardComponent/activeCandidatesList";
 import QuestionsList from "./components/AdminDashboardComponent/questionsList";
 import AddQuestion from "./components/AdminDashboardComponent/addQuestion";
-import EditQuestion from './components/AdminDashboardComponent/editQuestion'
+import EditQuestion from "./components/AdminDashboardComponent/editQuestion";
 import ActiveEmployees from "./components/AdminDashboardComponent/activeEmployees";
 import AddEmployee from "./components/AdminDashboardComponent/addEmployees";
 import SetPassword from "./components/AdminDashboardComponent/SetPassword";
@@ -53,14 +53,11 @@ function App() {
             </ProtectedRoute>
           }
         >
-
           <Route index element={<Navigate to="/dashboard" />} />
 
           {/* Single dynamic dashboard route */}
           <Route path="/dashboard" element={<Dashboard />} />
-          
-           
-          
+
           <Route path="/roles" element={<RoleTable />} />
           <Route path="/roles/add" element={<CreateRoleForm />} />
           <Route path="/change-password" element={<ChangePassword />} />
@@ -76,19 +73,34 @@ function App() {
           <Route path="/supportticket" element={<SupportTicket />} />
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
-          <Route path="/profile/:profile_id/view" element={<CandidateProfile/>}/>
+          <Route
+            path="/profile/:profile_id/view"
+            element={<CandidateProfile />}
+          />
           <Route path="/trackercandidates" element={<CandidateList />} />
-          <Route path="/users/edit-candidate/:candidate_id" element={<CandidateEditForm />}/>
-          <Route path="/candidate/update" element={<CandidateEditForm />}/>
-          <Route path="/candidate/all-candidates" element={<ActiveCandidatesList />}/>
-          <Route path="/all-questions" element={<QuestionsList />}/>
-          <Route path="/add-question" element={<AddQuestion />}/>
-          <Route path="/edit-question/:question_id" element={<EditQuestion />} />
+          <Route
+            path="/users/edit-candidate/:candidate_id"
+            element={<CandidateEditForm />}
+          />
+          <Route path="/candidate/update" element={<CandidateEditForm />} />
+          <Route
+            path="/candidate/all-candidates"
+            element={<ActiveCandidatesList />}
+          />
+          <Route path="/all-questions" element={<QuestionsList />} />
+          <Route path="/add-question" element={<AddQuestion />} />
+          <Route
+            path="/edit-question/:question_id"
+            element={<EditQuestion />}
+          />
           <Route path="/all-employees" element={<ActiveEmployees />} />
           <Route path="/add-employee" element={<AddEmployee />} />
           <Route path="/set-password/:type/:token" element={<SetPassword />} />
           {/* <Route path="/set-password/:token" element={<SetPassword />} /> */}
-          <Route path="users/employee/:userId/view/personal" element={<PersonalDetail/>}/>
+          <Route
+            path="users/employee/:userId/view/personal"
+            element={<PersonalDetail />}
+          />
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
 
           <Route path="*" element={<NotFound />} />

@@ -5,19 +5,22 @@ import { useNavigate } from "react-router-dom";
 function ActiveCandidatesList() {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
-  const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
 
-  const fetchCandidates = async () => {
+  const fetchCandidates = async (page = 1, limit = itemsPerPage) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/candidate/all-candidates`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/candidate/all-candidates?page=${page}&limit=${limit}`,
         { withCredentials: true }
       );
-      setCandidates(response.data);
-      setFilteredCandidates(response.data);
+      setCandidates(response.data.data);
+      setCurrentPage(response.data.current_page);
+      setTotalPages(response.data.last_page);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching candidates:", error);
@@ -25,8 +28,6 @@ function ActiveCandidatesList() {
     }
   };
 
-  console.log('my candidate is ?>>>',candidates[0])
-  console.log('my filteredcandidate is >>', filteredCandidates[0])
   const handleDownload = async (fileType, dataType) => {
     try {
       const url =
@@ -61,16 +62,8 @@ function ActiveCandidatesList() {
 
   // Call fetchCandidates on component mount
   useEffect(() => {
-    fetchCandidates();
-  }, []);
-
-  // Pagination logic
-
-  const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
-  const paginatedCandidates = filteredCandidates.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    fetchCandidates(currentPage);
+  }, [currentPage]);
 
   const handleDeleteBtn = async (id) => {
     try {
@@ -156,7 +149,7 @@ function ActiveCandidatesList() {
                       <td colSpan="6">Loading candidates...</td>
                     </tr>
                   ) : (
-                    paginatedCandidates.map((candidate, index) => (
+                    candidates.map((candidate, index) => (
                       <tr key={candidate.id}>
                         <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td>{candidate.full_name}</td>

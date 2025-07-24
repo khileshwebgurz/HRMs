@@ -1,32 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 
 const EditQuestion = () => {
   const { question_id } = useParams();
   const navigate = useNavigate();
 
-  const [question, setQuestion] = useState('');
-  const [questionType, setQuestionType] = useState('');
+  const [question, setQuestion] = useState("");
+  const [questionType, setQuestionType] = useState("");
   const [questionTypes, setQuestionTypes] = useState({});
-  const [options, setOptions] = useState(['', '', '', '']);
+  const [options, setOptions] = useState(["", "", "", ""]);
   const [answerIndex, setAnswerIndex] = useState(null);
 
   const api = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    axios.get(`${api}/edit-question/${question_id}`, {
-      withCredentials: true
-    }).then(res => {
-      const q = res.data.question;
-      setQuestion(q.question);
-      setQuestionType(q.question_type);
-      setQuestionTypes(res.data.question_types);
-      const loadedOptions = q.options.map(opt => opt.option_name);
-      setOptions([...loadedOptions, '', '', '', ''].slice(0, 4));
-      const correctIndex = q.options.findIndex(opt => opt.id === q.answer);
-      setAnswerIndex(correctIndex);
-    });
+    axios
+      .get(`${api}/edit-question/${question_id}`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        const q = res.data.question;
+        setQuestion(q.question);
+        setQuestionType(q.question_type);
+        setQuestionTypes(res.data.question_types);
+        const loadedOptions = q.options.map((opt) => opt.option_name);
+        setOptions([...loadedOptions, "", "", "", ""].slice(0, 4));
+        const correctIndex = q.options.findIndex((opt) => opt.id === q.answer);
+        setAnswerIndex(correctIndex);
+      });
   }, [question_id]);
 
   const handleOptionChange = (value, index) => {
@@ -37,24 +39,28 @@ const EditQuestion = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const filteredOptions = options.filter(opt => opt.trim() !== '');
-    if (filteredOptions.length < 2) return alert('At least 2 options required');
+    const filteredOptions = options.filter((opt) => opt.trim() !== "");
+    if (filteredOptions.length < 2) return alert("At least 2 options required");
     if (answerIndex === null || answerIndex >= filteredOptions.length)
-      return alert('Select a valid answer');
+      return alert("Select a valid answer");
 
     try {
-      const res = await axios.post(`${api}/edit-question-post`, {
-        question_id,
-        question,
-        question_type: questionType,
-        option: filteredOptions,
-        answer_index: answerIndex
-      }, { withCredentials: true });
+      const res = await axios.post(
+        `${api}/edit-question-post`,
+        {
+          question_id,
+          question,
+          question_type: questionType,
+          option: filteredOptions,
+          answer_index: answerIndex,
+        },
+        { withCredentials: true }
+      );
 
       alert(res.data.message);
-      navigate('/all-questions');
+      navigate("/all-questions");
     } catch (err) {
-      alert(err.response?.data?.message || 'Update failed.');
+      alert(err.response?.data?.message || "Update failed.");
     }
   };
 
@@ -82,7 +88,9 @@ const EditQuestion = () => {
           >
             <option value="">--Select--</option>
             {Object.entries(questionTypes).map(([key, val]) => (
-              <option key={key} value={key}>{val}</option>
+              <option key={key} value={key}>
+                {val}
+              </option>
             ))}
           </select>
         </div>
@@ -91,7 +99,11 @@ const EditQuestion = () => {
           <label>Options</label>
           <table className="table">
             <thead>
-              <tr><th>#</th><th>Option</th><th>Answer</th></tr>
+              <tr>
+                <th>#</th>
+                <th>Option</th>
+                <th>Answer</th>
+              </tr>
             </thead>
             <tbody>
               {options.map((opt, idx) => (
@@ -118,7 +130,9 @@ const EditQuestion = () => {
           </table>
         </div>
 
-        <button type="submit" className="btn btn-success">Update</button>
+        <button type="submit" className="btn btn-success">
+          Update
+        </button>
       </form>
     </div>
   );
