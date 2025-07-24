@@ -3,33 +3,48 @@ import { useNavigate } from "react-router-dom";
 import "../../assets/css/logincss.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+
 const Login = () => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState("");
+  const [remember, setRemember] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      // Send login request
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/login`,
-        { email, password },
-        {
-          withCredentials: true,
-        }
-      );
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/login`,
+      { email, password },
+      { withCredentials: true }
+    );
 
+    console.log('my res >>>',res)
+    const user = res.data?.user;
+    if (user?.readiness_status === 0) {
+      navigate(`/company-policy?email=${encodeURIComponent(user.email)}`);
+    } else {
       navigate("/dashboard");
-    } catch (error) {
-      console.error("Login Error:", error.response?.data || error.message);
-      setErrors(error.response?.data || error.message);
     }
-  };
-  
+    
+  } catch (error) {
+    const errorData = error.response?.data;
+
+    console.error("Login Error:", errorData || error.message);
+
+    // If backend sent a redirect_url (for readiness check), redirect to it
+    if (errorData?.redirect_url) {
+      window.location.href = errorData.redirect_url;
+      return;
+    }
+
+    setErrors(errorData || error.message);
+  }
+};
+
+
   return (
     <div className="login-page">
       <div className="login-box">
@@ -46,14 +61,12 @@ const Login = () => {
           </div>
           <div className="card-body">
             <p className="login-box-msg">Login</p>
-
             <form onSubmit={handleSubmit}>
               <div className="input-group mb-3">
                 <input
                   id="email"
                   type="email"
                   className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                  name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -64,21 +77,13 @@ const Login = () => {
                     <span className="fas fa-envelope"></span>
                   </div>
                 </div>
-                {errors.email && (
-                  <span className="invalid-feedback" role="alert">
-                    <strong>{errors.email}</strong>
-                  </span>
-                )}
               </div>
 
               <div className="input-group mb-3">
                 <input
                   id="password"
                   type="password"
-                  className={`form-control ${
-                    errors.password ? "is-invalid" : ""
-                  }`}
-                  name="password"
+                  className={`form-control ${errors.password ? "is-invalid" : ""}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -89,11 +94,6 @@ const Login = () => {
                     <span className="fas fa-lock"></span>
                   </div>
                 </div>
-                {errors.password && (
-                  <span className="invalid-feedback" role="alert">
-                    <strong>{errors.password}</strong>
-                  </span>
-                )}
               </div>
 
               <div className="row">

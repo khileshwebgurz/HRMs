@@ -17,7 +17,7 @@ use App\Models\EmployeeAttendance;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function loginOLD(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -81,6 +81,81 @@ class AuthController extends Controller
             null,
             true, // Secure (set to false if not using HTTPS locally)
             true, // HttpOnly
+            false,
+            'Strict'
+        );
+    }
+
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required'
+        ]);
+
+        $employee = Employees::where('email', $request->email)->first();
+
+        if (!$employee || !Hash::check($request->password, $employee->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Not ready? Return 403 + redirect URL for frontend
+        if (!$employee->readiness_status) {
+            $base = rtrim(config('app.frontend_url', config('app.url')), '/');
+
+            Log::info('My base >>>>', ['base' => $base]);
+           
+            // If you still store token from invite, include it; else just email param
+            $policyUrl = $base . '/company-policy?email=' . urlencode($employee->email);
+           Log::info('My policyUrl >>>>', ['policyUrl' => $policyUrl.urlencode($request->email)]);
+           
+            // return response()->json([
+            //     'message'      => 'User not ready. Complete readiness process first.',
+            //     'redirect_url' => $policyUrl,
+            // ], 403);
+            return response()->json([
+                'message' => 'User not ready. Complete readiness process first.',
+                'redirect_url' => $policyUrl
+                 
+            ], 403);
+
+        }
+
+        // Role + permissions
+        $role = Roles::find($employee->user_role);
+        $permissionIds = [];
+        $permissionSlugs = [];
+
+        if ($role && $role->permissions) {
+            // assume stored like "[1,2,3]"
+            $permissionIds = array_filter(explode(',', str_replace(['[', ']'], '', $role->permissions)));
+            $permissionSlugs = Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
+        }
+
+        // Passport token
+        $token = $employee->createToken('AccessToken')->accessToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => [
+                'id'          => $employee->id,
+                'email'       => $employee->email,
+                'name'        => $employee->name,
+                'role'        => $role->name ?? null,
+                'role_id'     => $role->id ?? null,
+                'user_role'   => $employee->user_role,
+                'permissions' => $permissionSlugs,
+                'profile_pic' => $employee->profile_pic
+            ]
+        ])->cookie(
+            'access_token',
+            $token,
+            60 * 24,  // minutes (1 day)
+            null,
+            null,
+            true,  // secure (false if local HTTP)
+            true,  // HttpOnly
             false,
             'Strict'
         );

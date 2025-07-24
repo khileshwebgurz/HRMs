@@ -360,4 +360,119 @@ class AccountController extends Controller
         return response()->json($transformed);
     }
     
+
+     public function getCompanyPolicy()
+    {
+        $loginuser = Auth::user();
+
+        if ($loginuser->readiness_status) {
+            return response()->json(['redirect' => 'dashboard'], 200);
+        }
+
+        $policies = [
+            'hr' => Settings::where('key','Hr_Policy_content')->value('value'),
+            'leave' => Settings::where('key','Leave_Policy_content')->value('value'),
+            'travel' => Settings::where('key','Travel_Policy_content')->value('value'),
+        ];
+
+        return response()->json(['policies' => $policies], 200);
+    }
+
+    public function getReadinessQuiz()
+    {
+        $loginuser = Auth::user();
+
+        if ($loginuser->readiness_status) {
+            return response()->json(['redirect' => 'dashboard'], 200);
+        }
+
+        if (empty($loginuser->readiness_quiz)) {
+            $quiz = Questions::select('id')
+                ->where('question_type', 2)
+                ->where('status', 1)
+                ->get()
+                ->random(get_options('readiness_quiz_limit'));
+
+            $readiness_quiz = array_column($quiz->toArray(), 'id');
+            $loginuser->readiness_quiz = json_encode($readiness_quiz);
+            $loginuser->save();
+        }
+
+        $quiz = Questions::select('id', 'question', 'answer')
+            ->with(['options' => function ($q) {
+                $q->select('id', 'question_id', 'option_name');
+            }])
+            ->where('question_type', 2)
+            ->where('status', 1)
+            ->whereIn('id', json_decode($loginuser->readiness_quiz))
+            ->get();
+
+        return response()->json([
+            'quiz' => $quiz,
+            'done' => count((array) json_decode($loginuser->readiness_answer)),
+        ]);
+    }
+
+    public function saveReadinessQuizResult(Request $request)
+    {
+        $loginuser = Auth::user();
+        $readiness_answer_quiz = (array) $request->quiz;
+
+        $correct_answers = Questions::whereIn('id', array_keys($readiness_answer_quiz))
+            ->pluck('answer', 'id')->toArray();
+
+        if (! empty($loginuser->readiness_answer)) {
+            $readiness_answer = (array) json_decode($loginuser->readiness_answer);
+            $readiness_answer_quiz = array_merge($readiness_answer, $readiness_answer_quiz);
+        }
+
+        $loginuser->readiness_answer = json_encode($readiness_answer_quiz);
+
+        if ($request->finalsave == 1) {
+            $total_quiz = count(json_decode($loginuser->readiness_quiz));
+            $finalResult = [];
+
+            foreach ($readiness_answer_quiz as $qid => $ans) {
+                $qid = str_replace('q', '', $qid);
+                $testopt = Questions::find($qid);
+                if ($testopt && $testopt->answer == $ans) {
+                    $finalResult[$qid] = 1;
+                }
+            }
+
+            $score = count($finalResult);
+            $percentage = ($score * 100) / $total_quiz;
+
+            if ($percentage >= 90) {
+                $loginuser->update([
+                    'readiness_score' => $percentage,
+                    'readiness_date' => now(),
+                    'readiness_status' => 1,
+                ]);
+            }
+
+            ReadinessAnswer::create([
+                'employee_id' => $loginuser->id,
+                'questions' => json_encode(array_keys($readiness_answer_quiz)),
+                'correct_answers' => json_encode($correct_answers),
+                'candidate_answers' => json_encode(array_values($readiness_answer_quiz)),
+                'score' => $score,
+            ]);
+
+            Notifications::create([
+                'type_id' => 'readiness_complete',
+                'message' => $loginuser->name . ' completed the readiness quiz with ' . $percentage . '%.',
+                'page_id' => $loginuser->id,
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Thanks for completing the Webguruz Readiness Quiz.',
+                'score' => $percentage
+            ]);
+        }
+
+        $loginuser->save();
+        return response()->json(['status' => 200, 'message' => 'Answer saved.']);
+    }
 }

@@ -31,6 +31,12 @@ Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'v
 Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
     ->name('employee.token.setPassword');
 
+
+    // Protected employee API (must be logged in + ready)
+    Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
+       Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+    });
+
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -98,9 +104,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('edit-question-post', [QuestionController::class, 'editQuestionPost']);
     Route::delete('/delete-question/{question_id}', [QuestionController::class, 'deleteQuestion']);
 
-
-
-
     Route::get('/leave-logs', [LeavesController::class, 'logs'])->name('logs');
     Route::get('/employees', [EmployeeController::class, 'directory']);
     Route::get('/employee/profile/{tab}', [EmployeeController::class, 'empProfile']);
@@ -147,6 +150,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/roles/assign-permissions', [RoleController::class, 'assignPermissionPost'])->name('api.roles.assign_permissions');
     Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
+
+    // 
+    Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
+    Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
+    Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
 
     //  Admin-only routes
     Route::middleware('role:1')->group(function () {

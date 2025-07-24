@@ -712,7 +712,7 @@ class UserController extends Controller
 
         $user->password         = bcrypt($request->password);
         $user->token            = null;    // invalidate token
-        $user->readiness_status = true;    // mark activated (add column if needed)
+       // $user->readiness_status = true;    // mark activated (add column if needed)
 
         if ($user->save()) {
             return response()->json(['status' => 200, 'message' => 'Password set successfully. You can now log in.']);
