@@ -23,6 +23,8 @@ use App\Models\SalarySlipsDetail;
 use App\Models\Salary_Slip_Request;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Database\Eloquent\Model; 
+use App\Models\Employee;
 
 class AccountController extends Controller
 {
@@ -194,8 +196,7 @@ class AccountController extends Controller
     public function getReadinessQuiz()
     {
         $loginuser = Auth::user();
-        Log:
-        info('ytestt', ['testt' => $loginuser]);
+        Log::info('ytestt', ['testt' => $loginuser]);
         if ($loginuser->readiness_status) {
             return response()->json(['redirect' => 'dashboard'], 200);
         }
@@ -235,7 +236,223 @@ class AccountController extends Controller
         ]);
     }
 
-    public function saveReadinessQuizResult(Request $request)
+      public function saveReadinessQuizResult(Request $request)
+    {
+        // Get authenticated user
+        $user = Auth::user();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Validate input
+        $submittedAnswers = (array) $request->quiz;
+        if (empty($submittedAnswers)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'No answers submitted'
+            ], 400);
+        }
+
+        // Debug logging
+        Log::info('SUBMITTED ANSWERS:', ['user_id' => $user->id, 'answers' => $submittedAnswers]);
+
+        // Get question IDs from user's readiness_quiz
+        $questionIds = json_decode($user->readiness_quiz, true);
+        if (empty($questionIds)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'No quiz questions loaded'
+            ], 400);
+        }
+
+        // Get correct answers
+        try {
+            $correctAnswers = Questions::whereIn('id', $questionIds)
+                ->pluck('answer', 'id')
+                ->toArray();
+                
+            Log::info('CORRECT ANSWERS:', $correctAnswers);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch correct answers: ' . $e->getMessage());
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to load correct answers'
+            ], 500);
+        }
+
+        // Calculate score
+        $score = 0;
+        $answerDetails = [];
+
+        foreach ($submittedAnswers as $qId => $submittedAns) {
+            $questionId = (int) str_replace('q', '', $qId);
+            
+            if (!isset($correctAnswers[$questionId])) {
+                Log::warning("Question {$questionId} not found in correct answers!");
+                continue;
+            }
+
+            $isCorrect = (string)$correctAnswers[$questionId] === (string)$submittedAns;
+            $answerDetails[] = [
+                'question_id' => $questionId,
+                'submitted' => $submittedAns,
+                'correct' => $correctAnswers[$questionId],
+                'is_correct' => $isCorrect
+            ];
+
+            if ($isCorrect) $score++;
+        }
+
+        // Calculate percentage
+        $totalQuestions = count($questionIds);
+        $percentage = $totalQuestions > 0 ? round(($score / $totalQuestions) * 100, 2) : 0;
+
+        Log::info('SCORE CALCULATION:', [
+            'user_id' => $user->id,
+            'total_questions' => $totalQuestions,
+            'correct' => $score,
+            'percentage' => $percentage,
+            'details' => $answerDetails
+        ]);
+
+        // Save results
+        if ($request->finalsave == 1) {
+            try {
+                // Update user record
+                DB::table('employees')
+                    ->where('id', $user->id)
+                    ->update([
+                        'readiness_answer' => json_encode($submittedAnswers),
+                        'readiness_score' => $percentage,
+                        'readiness_status' => $percentage >= 90 ? 1 : 0,
+                        'readiness_date' => now(),
+                    ]);
+
+                // Create readiness answer record
+                ReadinessAnswer::create([
+                    'employee_id' => $user->id,
+                    'questions' => json_encode($questionIds),
+                    'correct_answers' => json_encode($correctAnswers),
+                    'candidate_answers' => json_encode($submittedAnswers),
+                    'score' => $score,
+                ]);
+
+                Log::info('QUIZ RESULTS SAVED', [
+                    'user_id' => $user->id,
+                    'score' => $percentage,
+                    'status' => $percentage >= 90 ? 'passed' : 'failed'
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('Failed to save results: ' . $e->getMessage());
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Failed to save results'
+                ], 500);
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'score' => $percentage,
+            'passed' => $percentage >= 90,
+            'message' => $request->finalsave ? 'Quiz submitted successfully!' : 'Progress saved.',
+        ]);
+    }
+
+    public function saveReadinessQuizResult0000(Request $request)
+    {
+        $user = Auth::user();
+        $submittedAnswers = (array) $request->quiz;
+
+        // Debug logging
+        Log::info('SUBMITTED ANSWERS:', $submittedAnswers);
+
+        // Get question IDs from user's readiness_quiz
+        $questionIds = json_decode($user->readiness_quiz, true);
+        if (empty($questionIds)) {
+            return response()->json(['status' => 400, 'message' => 'No quiz questions loaded.'], 400);
+        }
+
+        // Get correct answers as [question_id => answer] pairs
+        $correctAnswers = Questions::whereIn('id', $questionIds)
+            ->pluck('answer', 'id')
+            ->toArray();
+
+        Log::info('CORRECT ANSWERS:', $correctAnswers);
+
+        // Calculate score
+        $score = 0;
+        $answerDetails = [];
+
+        foreach ($submittedAnswers as $qId => $submittedAns) {
+            $questionId = (int) str_replace('q', '', $qId);
+            
+            if (!isset($correctAnswers[$questionId])) {
+                Log::warning("Question {$questionId} not found in correct answers!");
+                continue;
+            }
+
+            $isCorrect = (string)$correctAnswers[$questionId] === (string)$submittedAns;
+            $answerDetails[] = [
+                'question_id' => $questionId,
+                'submitted' => $submittedAns,
+                'correct' => $correctAnswers[$questionId],
+                'is_correct' => $isCorrect
+            ];
+
+            if ($isCorrect) $score++;
+        }
+
+        // Calculate percentage
+        $totalQuestions = count($questionIds);
+        $percentage = $totalQuestions > 0 ? round(($score / $totalQuestions) * 100, 2) : 0;
+
+        Log::info('SCORE CALCULATION:', [
+            'total_questions' => $totalQuestions,
+            'correct' => $score,
+            'percentage' => $percentage,
+            'details' => $answerDetails
+        ]);
+
+        // Save results
+        if ($request->finalsave == 1) {
+            $user->update([
+                'readiness_answer' => json_encode($submittedAnswers),
+                'readiness_score' => $percentage,
+                'readiness_status' => $percentage >= 90 ? 1 : 0,
+                'readiness_date' => now(),
+            ]);
+
+            Log::info('UPDATING USER', [
+                'id' => $user->id,
+                'score' => $percentage,
+                'status' => $percentage >= 90 ? 1 : 0,
+            ]);
+
+
+            ReadinessAnswer::create([
+                'employee_id' => $user->id,
+                'questions' => json_encode($questionIds),
+                'correct_answers' => json_encode($correctAnswers),
+                'candidate_answers' => json_encode($submittedAnswers),
+                'score' => $score,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'score' => $percentage,
+            'passed' => $percentage >= 90,
+            'message' => $request->finalsave ? 'Quiz submitted!' : 'Progress saved.',
+        ]);
+    }
+
+    public function saveReadinessQuizResultolddd(Request $request)
     {
         $loginuser = Auth::user();
         $readiness_answer_quiz = (array) $request->quiz;
@@ -283,11 +500,11 @@ class AccountController extends Controller
                 'score' => $score,
             ]);
 
-            Notifications::create([
-                'type_id' => 'readiness_complete',
-                'message' => $loginuser->name . ' completed the readiness quiz with ' . $percentage . '%.',
-                'page_id' => $loginuser->id,
-            ]);
+            // Notifications::create([
+            //     'type_id' => 'readiness_complete',
+            //     'message' => $loginuser->name . ' completed the readiness quiz with ' . $percentage . '%.',
+            //     'page_id' => $loginuser->id,
+            // ]);
 
 
             return response()->json([
@@ -303,62 +520,62 @@ class AccountController extends Controller
 
 
    public function salaryslip(Request $request)
-{
-    $loginuser = Auth::user();
+        {
+            $loginuser = Auth::user();
 
-    $data = Salary_Slip_Request::where("employee_id", $loginuser->id)->latest()->get();
+            $data = Salary_Slip_Request::where("employee_id", $loginuser->id)->latest()->get();
 
-    $result = [];
+            $result = [];
 
-    foreach ($data as $row) {
-        $status_type = $row->status;
-        $status_text = $status_type == '0'
-            ? 'Pending'
-            : 'Approved';
+            foreach ($data as $row) {
+                $status_type = $row->status;
+                $status_text = $status_type == '0'
+                    ? 'Pending'
+                    : 'Approved';
 
-        // Fetch months for this slip_relation
-        $slips = SalarySlip::where('relation_id', $row->slip_relation)->get();
+                // Fetch months for this slip_relation
+                $slips = SalarySlip::where('relation_id', $row->slip_relation)->get();
 
-        $month_list = [];
+                $month_list = [];
 
-        foreach ($slips as $slip) {
-            $month_name = match ($slip->month) {
-                '01' => 'January',
-                '02' => 'February',
-                '03' => 'March',
-                '04' => 'April',
-                '05' => 'May',
-                '06' => 'June',
-                '07' => 'July',
-                '08' => 'August',
-                '09' => 'September',
-                '10' => 'October',
-                '11' => 'November',
-                '12' => 'December',
-                default => 'Unknown'
-            };
+                foreach ($slips as $slip) {
+                    $month_name = match ($slip->month) {
+                        '01' => 'January',
+                        '02' => 'February',
+                        '03' => 'March',
+                        '04' => 'April',
+                        '05' => 'May',
+                        '06' => 'June',
+                        '07' => 'July',
+                        '08' => 'August',
+                        '09' => 'September',
+                        '10' => 'October',
+                        '11' => 'November',
+                        '12' => 'December',
+                        default => 'Unknown'
+                    };
 
-            $month_list[] = [
-                'name' => $month_name,
-                'download_link' => $status_type == '1'
-                    ? route('salarypdf', $slip->id)
-                    : null
-            ];
+                    $month_list[] = [
+                        'name' => $month_name,
+                        'download_link' => $status_type == '1'
+                            ? route('salarypdf', $slip->id)
+                            : null
+                    ];
+                }
+
+                $result[] = [
+                    'id' => $row->id,
+                    'status' => $status_text,
+                    'months' => $month_list,
+                    'created_at' => $row->created_at->toDateTimeString(),
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+            ]);
         }
-
-        $result[] = [
-            'id' => $row->id,
-            'status' => $status_text,
-            'months' => $month_list,
-            'created_at' => $row->created_at->toDateTimeString(),
-        ];
-    }
-
-    return response()->json([
-        'success' => true,
-        'data' => $result,
-    ]);
-}
 
 
 

@@ -12,5 +12,6 @@ class ReadinessAnswer extends Model
         'correct_answers',
         'candidate_answers',
         'score',
+        'readiness_status', 
     ];
 }
