@@ -96,19 +96,21 @@ class AuthController extends Controller
 
         $employee = Employees::where('email', $request->email)->first();
 
+          Log::info('test',['employee' => $employee]);
         if (!$employee || !Hash::check($request->password, $employee->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         // Not ready? Return 403 + redirect URL for frontend
-        if (!$employee->readiness_status) {
+        if (!$employee->readiness_status  || $employee->readiness_statu == 0 ) {
             $base = rtrim(config('app.frontend_url', config('app.url')), '/');
 
             Log::info('My base >>>>', ['base' => $base]);
            
             // If you still store token from invite, include it; else just email param
-            $policyUrl = $base . '/company-policy?email=' . urlencode($employee->email);
-           Log::info('My policyUrl >>>>', ['policyUrl' => $policyUrl.urlencode($request->email)]);
+          $policyUrl = $base . '/company-policy?email=' . urlencode($employee->email); // ✅ correct
+            Log::info('My policyUrl >>>> ', ['policyUrl' => $policyUrl]);
+
            
             // return response()->json([
             //     'message'      => 'User not ready. Complete readiness process first.',

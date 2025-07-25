@@ -14,7 +14,8 @@ use App\Rules\MatchOldPassword;
 use App\Models\EmployeeAttendance;
 use App\Models\AttendanceRules;
 use App\Models\AttendanceLog;
-
+use App\Models\Settings;
+use App\Models\Questions;
 
 class AccountController extends Controller
 {
@@ -361,39 +362,60 @@ class AccountController extends Controller
     }
     
 
-     public function getCompanyPolicy()
+    public function getCompanyPolicy()
     {
         $loginuser = Auth::user();
-
-        if ($loginuser->readiness_status) {
+          Log::info('test loginuser',['loginuser' => $loginuser]);
+        if ($loginuser?->readiness_status) {
             return response()->json(['redirect' => 'dashboard'], 200);
         }
 
         $policies = [
-            'hr' => Settings::where('key','Hr_Policy_content')->value('value'),
-            'leave' => Settings::where('key','Leave_Policy_content')->value('value'),
-            'travel' => Settings::where('key','Travel_Policy_content')->value('value'),
+            'hr' => Settings::where('key', 'Hr_Policy_content')->value('value'),
+            'leave' => Settings::where('key', 'Leave_Policy_content')->value('value'),
+            'travel' => Settings::where('key', 'Travel_Policy_content')->value('value'),
         ];
 
         return response()->json(['policies' => $policies], 200);
     }
 
-    public function getReadinessQuiz()
-    {
+
+  public function getReadinessQuiz()
+{
+    try {
         $loginuser = Auth::user();
 
+        if (!$loginuser) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        Log::info('Fetching readiness quiz', ['user_id' => $loginuser->id]);
+
+        // If readiness status is already completed, redirect to dashboard
         if ($loginuser->readiness_status) {
             return response()->json(['redirect' => 'dashboard'], 200);
         }
 
+        // If no quiz has been assigned, generate it
         if (empty($loginuser->readiness_quiz)) {
-            $quiz = Questions::select('id')
+            $availableQuestions = Questions::select('id')
                 ->where('question_type', 2)
                 ->where('status', 1)
-                ->get()
-                ->random(get_options('readiness_quiz_limit'));
+                ->get();
 
+            $availableCount = $availableQuestions->count();
+            $limit = get_options('readiness_quiz_limit') ?? 5;
+
+            // Ensure requested number is not more than available
+            $limit = min($limit, $availableCount);
+
+            if ($limit === 0) {
+                return response()->json(['message' => 'No quiz questions available'], 500);
+            }
+
+            $quiz = $availableQuestions->random($limit);
             $readiness_quiz = array_column($quiz->toArray(), 'id');
+
             $loginuser->readiness_quiz = json_encode($readiness_quiz);
             $loginuser->save();
         }
@@ -404,14 +426,19 @@ class AccountController extends Controller
             }])
             ->where('question_type', 2)
             ->where('status', 1)
-            ->whereIn('id', json_decode($loginuser->readiness_quiz))
+            ->whereIn('id', json_decode($loginuser->readiness_quiz, true))
             ->get();
 
         return response()->json([
             'quiz' => $quiz,
             'done' => count((array) json_decode($loginuser->readiness_answer)),
         ]);
+    } catch (\Throwable $e) {
+        Log::error('Error in getReadinessQuiz', ['error' => $e->getMessage()]);
+        return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
     }
+}
+
 
     public function saveReadinessQuizResult(Request $request)
     {

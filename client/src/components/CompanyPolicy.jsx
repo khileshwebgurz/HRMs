@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+
 const CompanyPolicy = () => {
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_BASE_URL;
@@ -25,6 +26,8 @@ const CompanyPolicy = () => {
     setError('');
     try {
       const res = await axios.get(`${api}/employee/company-policy`, { withCredentials: true });
+
+      console.log(res, 'reesssssssssssssssss');
       if (res.data.redirect === 'dashboard') {
         navigate('/dashboard');
       } else if (res.data.policies) {

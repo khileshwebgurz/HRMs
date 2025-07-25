@@ -39,13 +39,16 @@ import SetPassword from "./components/AdminDashboardComponent/SetPassword";
 import PersonalDetail from "./components/AdminDashboardComponent/PersonalDetail";
 import EditEmployeeForm from "./components/AdminDashboardComponent/EditEmployeeForm";
 import CompanyPolicy from "./components/CompanyPolicy";
+import ReadinessQuiz from "./components/ReadinessQuiz";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
-        <Route path="/company-policy" element={<CompanyPolicy />} />
+      
+           <Route path="/company-policy" element={<CompanyPolicy />} />
+           <Route path="/readiness-quiz" element={<ReadinessQuiz />} />
         <Route
           path="/"
           element={
@@ -104,8 +107,7 @@ function App() {
           />
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
 
-         
-           {/* <Route path="/readiness-quiz" element={<ReadinessQuiz />} /> */}
+           
 
           <Route path="*" element={<NotFound />} />
         </Route>
