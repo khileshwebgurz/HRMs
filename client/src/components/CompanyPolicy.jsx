@@ -17,16 +17,16 @@ const CompanyPolicy = () => {
 
   useEffect(() => {
     fetchPolicies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPolicies = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`${api}/employee/company-policy`, { withCredentials: true });
+      const res = await axios.get(`${api}/employee/company-policy`, {
+        withCredentials: true,
+      });
 
-      console.log(res, 'reesssssssssssssssss');
       if (res.data.redirect === 'dashboard') {
         navigate('/dashboard');
       } else if (res.data.policies) {
@@ -64,14 +64,57 @@ const CompanyPolicy = () => {
   }
 
   return (
-    <div className="container mt-5" style={{ maxWidth: 800 }}>
+    <div className="company-policy-container">
+      <style>
+        {`
+          .company-policy-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          }
+          .company-policy-container h2 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+          }
+          .company-policy-section {
+            margin-top: 2rem;
+          }
+          .company-policy-section h5 {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+          }
+          .policy-content {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            max-height: 300px;
+            overflow-y: auto;
+          }
+          .policy-checkbox {
+            margin-top: 0.75rem;
+          }
+          .start-quiz-button {
+            margin-top: 2rem;
+            width: 100%;
+          }
+        `}
+      </style>
+
       <h2>Company Policies</h2>
 
       {policies?.hr && (
-        <div className="mt-4">
+        <div className="company-policy-section">
           <h5>HR Policy</h5>
-          <div dangerouslySetInnerHTML={{ __html: policies.hr }} />
-          <div className="form-check mt-2">
+          <div
+            className="policy-content"
+            dangerouslySetInnerHTML={{ __html: policies.hr }}
+          />
+          <div className="form-check policy-checkbox">
             <input
               type="checkbox"
               className="form-check-input"
@@ -84,10 +127,13 @@ const CompanyPolicy = () => {
       )}
 
       {policies?.leave && (
-        <div className="mt-4">
+        <div className="company-policy-section">
           <h5>Leave Policy</h5>
-          <div dangerouslySetInnerHTML={{ __html: policies.leave }} />
-          <div className="form-check mt-2">
+          <div
+            className="policy-content"
+            dangerouslySetInnerHTML={{ __html: policies.leave }}
+          />
+          <div className="form-check policy-checkbox">
             <input
               type="checkbox"
               className="form-check-input"
@@ -100,10 +146,13 @@ const CompanyPolicy = () => {
       )}
 
       {policies?.travel && (
-        <div className="mt-4">
+        <div className="company-policy-section">
           <h5>Travel Policy</h5>
-          <div dangerouslySetInnerHTML={{ __html: policies.travel }} />
-          <div className="form-check mt-2">
+          <div
+            className="policy-content"
+            dangerouslySetInnerHTML={{ __html: policies.travel }}
+          />
+          <div className="form-check policy-checkbox">
             <input
               type="checkbox"
               className="form-check-input"
@@ -115,7 +164,7 @@ const CompanyPolicy = () => {
         </div>
       )}
 
-      <button className="btn btn-primary mt-4 w-100" onClick={handleStartQuiz}>
+      <button className="btn btn-primary start-quiz-button" onClick={handleStartQuiz}>
         Start Quiz
       </button>
     </div>

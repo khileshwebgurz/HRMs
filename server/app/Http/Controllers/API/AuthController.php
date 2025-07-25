@@ -100,28 +100,9 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // Not ready? Return 403 + redirect URL for frontend
-        if (!$employee->readiness_status) {
-            $base = rtrim(config('app.frontend_url', config('app.url')), '/');
+        Log::info('test', ['test' => $employee]);
 
-            Log::info('My base >>>>', ['base' => $base]);
-           
-            // If you still store token from invite, include it; else just email param
-            $policyUrl = $base . '/company-policy?email=' . urlencode($employee->email);
-           Log::info('My policyUrl >>>>', ['policyUrl' => $policyUrl.urlencode($request->email)]);
-           
-            // return response()->json([
-            //     'message'      => 'User not ready. Complete readiness process first.',
-            //     'redirect_url' => $policyUrl,
-            // ], 403);
-            return response()->json([
-                'message' => 'User not ready. Complete readiness process first.',
-                'redirect_url' => $policyUrl
-                 
-            ], 403);
-
-        }
-
+    
         // Role + permissions
         $role = Roles::find($employee->user_role);
         $permissionIds = [];
@@ -146,7 +127,8 @@ class AuthController extends Controller
                 'role_id'     => $role->id ?? null,
                 'user_role'   => $employee->user_role,
                 'permissions' => $permissionSlugs,
-                'profile_pic' => $employee->profile_pic
+                'profile_pic' => $employee->profile_pic,
+               'readiness_status'  => (int) $employee->readiness_status,
             ]
         ])->cookie(
             'access_token',

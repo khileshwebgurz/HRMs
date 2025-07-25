@@ -16,6 +16,9 @@ use App\Models\AttendanceRules;
 use App\Models\AttendanceLog;
 use App\Models\Settings;
 use App\Models\Questions;
+use App\Models\ReadinessAnswer;
+use App\Models\Notifications;
+
 
 class AccountController extends Controller
 {
@@ -383,22 +386,30 @@ class AccountController extends Controller
     public function getReadinessQuiz()
     {
         $loginuser = Auth::user();
-
+            Log:info('ytestt', ['testt' => $loginuser]);
         if ($loginuser->readiness_status) {
             return response()->json(['redirect' => 'dashboard'], 200);
         }
 
-        if (empty($loginuser->readiness_quiz)) {
-            $quiz = Questions::select('id')
+       if (empty($loginuser->readiness_quiz)) {
+            $quizQuery = Questions::select('id')
                 ->where('question_type', 2)
                 ->where('status', 1)
-                ->get()
-                ->random(get_options('readiness_quiz_limit'));
+                ->get();
 
+            $totalAvailable = $quizQuery->count();
+            $limit = min($totalAvailable, get_options('readiness_quiz_limit'));
+
+            if ($limit == 0) {
+                return response()->json(['message' => 'No readiness quiz questions available.'], 404);
+            }
+
+            $quiz = $quizQuery->random($limit);
             $readiness_quiz = array_column($quiz->toArray(), 'id');
             $loginuser->readiness_quiz = json_encode($readiness_quiz);
             $loginuser->save();
         }
+
 
         $quiz = Questions::select('id', 'question', 'answer')
             ->with(['options' => function ($q) {
@@ -453,6 +464,8 @@ class AccountController extends Controller
                 ]);
             }
 
+            Log::info('testtt', ['testttts' => $percentage]);
+
             ReadinessAnswer::create([
                 'employee_id' => $loginuser->id,
                 'questions' => json_encode(array_keys($readiness_answer_quiz)),
@@ -466,6 +479,7 @@ class AccountController extends Controller
                 'message' => $loginuser->name . ' completed the readiness quiz with ' . $percentage . '%.',
                 'page_id' => $loginuser->id,
             ]);
+
 
             return response()->json([
                 'status' => 200,

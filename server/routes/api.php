@@ -21,17 +21,15 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 
-//  Public (Unauthenticated) Routes
-Route::post('/login', [AuthController::class, 'login']);
-   Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
-      Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
-    Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
-Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
-    ->where('type', 'accept|declined')
-    ->name('employee.token.validate');
+        //  Public (Unauthenticated) Routes
+    Route::post('/login', [AuthController::class, 'login']);
+   
+    Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
+        ->where('type', 'accept|declined')
+        ->name('employee.token.validate');
 
-Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
-    ->name('employee.token.setPassword');
+    Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
+        ->name('employee.token.setPassword');
 
 
     // Protected employee API (must be logged in + ready)
@@ -45,7 +43,9 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
 
-
+ Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
+    Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
+    Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();
