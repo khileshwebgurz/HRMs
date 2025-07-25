@@ -22,9 +22,11 @@ use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 
 //  Public (Unauthenticated) Routes
-    Route::post('/login', [AuthController::class, 'login']);
-   
-    Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
+Route::post('/login', [AuthController::class, 'login']);
+   Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
+      Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
+    Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
+Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
     ->where('type', 'accept|declined')
     ->name('employee.token.validate');
 
@@ -37,14 +39,9 @@ Route::post('/employee/token/set-password/{token}', [UserController::class, 'set
        Route::get('/dashboard', [DashboardController::class, 'dashboard']);
     });
 
-     Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
-   
-    Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-
-      Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
 

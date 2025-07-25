@@ -5,7 +5,7 @@ import axios from 'axios';
 const ReadinessQuiz = () => {
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_BASE_URL;
-console.log(api,'wwww');
+
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState([]);
   const [answers, setAnswers] = useState({});
