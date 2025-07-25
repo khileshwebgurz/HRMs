@@ -1,14 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const AddressInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
+  useEffect(() => {
+    if (employeedata?.candidate) {
+      setFormData({
+        ...employeedata.candidate,
+      });
+    }
+  }, [employeedata]);
 
+  const handleEditClick = () => setIsEditing(true);
   const handleCancelClick = () => {
     setIsEditing(false);
+    setFormData({
+      ...employeedata.candidate,
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    console.log("my form data is >>", formData);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        formData,
+        { withCredentials: true }
+      );
+
+      // if (!response.ok) throw new Error("Failed to submit");
+
+      const data = await response.data;
+      console.log("Success:", data);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
   return (
     <>
@@ -19,7 +52,6 @@ const AddressInfoSection = ({ employeedata }) => {
           {!isEditing && (
             <div className="card-tools wgz_value">
               <a
-                // href="javascript:void(0)"
                 className="btn btn-tool wgz-edit-form"
                 data-id="wgz-addresses"
                 onClick={handleEditClick}
@@ -42,10 +74,9 @@ const AddressInfoSection = ({ employeedata }) => {
               </button>
 
               <a
-                // href="javascript:void(0)"
+                onClick={handleSubmit}
                 className="btn btn-success btn-xs wgz-submit"
                 data-id="wgz-addresses"
-                onClick={() => setIsEditing(false)}
               >
                 {" "}
                 <i className="fas fa-check"></i> Update
@@ -67,7 +98,8 @@ const AddressInfoSection = ({ employeedata }) => {
                       className="form-control"
                       id="current_address"
                       name="current_address"
-                      value={employeedata?.candidate?.current_address}
+                      value={formData?.current_address || ""}
+                      onChange={handleInputChange}
                     ></textarea>
                   </div>
                 ) : (
@@ -88,7 +120,8 @@ const AddressInfoSection = ({ employeedata }) => {
                       className="form-control"
                       id="permanent_address"
                       name="permanent_address"
-                      value={employeedata?.candidate?.permanent_address}
+                      value={formData?.permanent_address || ""}
+                      onChange={handleInputChange}
                     ></textarea>
                   </div>
                 ) : (
@@ -114,7 +147,8 @@ const AddressInfoSection = ({ employeedata }) => {
                       id="current_phone"
                       name="current_phone"
                       maxlength="10"
-                      value={employeedata?.candidate?.current_phone}
+                      value={formData?.current_phone || ""}
+                      onChange={handleInputChange}
                     />
                   </div>
                 ) : (
@@ -137,7 +171,8 @@ const AddressInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="number"
-                      value={employeedata?.candidate?.permanent_phone}
+                      value={formData?.permanent_phone || ""}
+                      onChange={handleInputChange}
                       id="permanent_phone"
                       name="permanent_phone"
                     />

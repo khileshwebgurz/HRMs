@@ -116,13 +116,13 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
               )}
 
               <li className="nav-item">
-                <Link href="/salary-slip" className="nav-link">
+                <Link to="/employee/account/salary-slip" className="nav-link">
                   <i className="nav-icon fas fa-newspaper"></i>Salary Slip
                 </Link>
               </li>
 
               <li className="nav-item">
-                <Link href="/interviews" className="nav-link">
+                <Link to="/interviews" className="nav-link">
                   <i className="nav-icon fas fa-briefcase"></i>
                   Interviews
                 </Link>
@@ -137,7 +137,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link href="/attendance-report" className="nav-link">
+                    <Link to="/attendance-report" className="nav-link">
                       <i className="nav-icon far fa-bell"></i>
                       <p>Attendance Report</p>
                     </Link>
@@ -150,7 +150,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
 					?> */}
               {/* @if($resign) */}
               <li className="nav-item">
-                <Link href="/exit-quiz" className="nav-link">
+                <Link to="/exit-quiz" className="nav-link">
                   <i className="nav-icon fas fa-question-circle"></i>Exit Quiz
                 </Link>
               </li>
@@ -215,7 +215,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
               </li>
 
               <li className="nav-item">
-                <Link href="/spiritClub" className="nav-link">
+                <Link to="/spiritClub" className="nav-link">
                   {" "}
                   <i className="nav-icon fas fa-users"></i>Spirit Club
                 </Link>

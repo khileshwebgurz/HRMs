@@ -10,6 +10,7 @@ import IDInfo from "./PersonalInfo/IDInfo";
 import AcademicCertification from "./PersonalInfo/AcademicCertification";
 import ReferenceNumber from "./PersonalInfo/ReferenceNumber";
 import OtherInformation from "./PersonalInfo/OtherInformation";
+
 const PersonalInfo = ({ employeedata, user }) => {
   console.log("my employee data is >>>", employeedata);
   return (

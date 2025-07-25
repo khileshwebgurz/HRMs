@@ -1,9 +1,12 @@
 import React from "react";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 const PersonalInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
 
+
+  // console.log('my employee data is >>', employeedata)
   const departmentMap = {
     1: "Digital Marketing",
     2: "Business Development",
@@ -17,12 +20,47 @@ const PersonalInfoSection = ({ employeedata }) => {
     10: "Content Writing",
   };
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
+  useEffect(() => {
+    // Set initial form data from props
+    if (employeedata?.candidate) {
+      setFormData({
+        ...employeedata.candidate,
+        gender: employeedata?.candidateData?.gender || "",
+      });
+    }
+  }, [employeedata]);
 
+  const handleEditClick = () => setIsEditing(true);
   const handleCancelClick = () => {
     setIsEditing(false);
+    setFormData({
+      ...employeedata.candidate,
+      gender: employeedata?.candidateData?.gender || "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    console.log('my form data is >>',formData)
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        formData,
+        { withCredentials: true }
+      );
+
+      // if (!response.ok) throw new Error("Failed to submit");
+
+      const data = await response.data;
+      console.log("Success:", data);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -33,7 +71,6 @@ const PersonalInfoSection = ({ employeedata }) => {
           {!isEditing && (
             <div className="card-tools wgz_value">
               <a
-                // href="javascript:void(0)"
                 onClick={handleEditClick}
                 className="btn btn-tool wgz-edit-form"
                 data-id="wgz-personal"
@@ -55,10 +92,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                 <i className="fas fa-times"></i> Cancel
               </button>
               <a
-                //href="javascript:void(0)"
                 className="btn btn-success btn-xs wgz-submit"
                 data-id="wgz-personal"
-                onClick={() => setIsEditing(false)}
+                onClick={handleSubmit}
               >
                 <i className="fas fa-check"></i> Update
               </a>
@@ -80,10 +116,11 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.name}
+                      value={formData?.name || ""}
                       name="name"
                       id="name"
                       maxlength="25"
+                      onChange={handleInputChange}
                     />
                   </div>
                 ) : (
@@ -103,7 +140,8 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.job_title}
+                      value={formData?.job_title || ""}
+                      onChange={handleInputChange}
                       id="job_title"
                       name="job_title"
                     />
@@ -126,7 +164,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.grade}
+                      value={formData?.grade || ""}
+                      onChange={handleInputChange}
+                     
                       id="grade"
                       name="grade"
                     />
@@ -149,14 +189,16 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.grade}
+                      value={formData?.blood_group || ""}
+                      onChange={handleInputChange}
+                     
                       id="blood_group"
                       name="blood_group"
                     />
                   </div>
                 ) : (
                   <div className="wgz_value ">
-                    {employeedata?.candidate?.grade}
+                    {employeedata?.candidate?.blood_group}
                   </div>
                 )}
               </div>
@@ -172,7 +214,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <select
                       className="form-control"
                       name="location"
-                      value={employeedata?.candidate?.location || ""}
+                      value={formData?.location || ""}
+                      onChange={handleInputChange}
+                      
                     >
                       <option value="">Select location..</option>
                       <option value="1">Office</option>
@@ -197,7 +241,8 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.dob || ""}
+                      value={formData?.dob || ""}
+                      onChange={handleInputChange}
                       id="dob"
                       name="dob"
                     />
@@ -219,7 +264,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.nationality || ""}
+                      value={formData?.nationality || ""}
+                      onChange={handleInputChange}
+                    
                       id="nationality"
                       name="nationality"
                     />
@@ -241,7 +288,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                     <input
                       className="form-control"
                       type="email"
-                      value={employeedata?.candidate?.email || ""}
+                      value={formData?.email || ""}
+                      onChange={handleInputChange}
+                     
                       id="email"
                       name="email"
                     />
@@ -263,7 +312,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                   <div className="wgz_field">
                     <select
                       className="form-control"
-                      value={employeedata?.candidate?.department || ""}
+                        value={formData?.department || ""}
+                      onChange={handleInputChange}
+                     
                       name="department"
                     >
                       <option value="">Select..</option>
@@ -297,7 +348,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                   <div className="wgz_field">
                     <select
                       className="form-control"
-                      value={employeedata?.candidateData?.gender || ""}
+                      value={formData?.gender || ""}
+                      onChange={handleInputChange}
+                      
                       name="gender"
                     >
                       <option value="">Select Gender..</option>

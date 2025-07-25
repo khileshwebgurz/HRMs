@@ -21,21 +21,23 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 
-        //  Public (Unauthenticated) Routes
-    Route::post('/login', [AuthController::class, 'login']);
-   
-    Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
-        ->where('type', 'accept|declined')
-        ->name('employee.token.validate');
+use App\Http\Controllers\Employee\OnboardProcessController;
 
-    Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
-        ->name('employee.token.setPassword');
+//  Public (Unauthenticated) Routes
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
+    ->where('type', 'accept|declined')
+    ->name('employee.token.validate');
+
+Route::post('/employee/token/set-password/{token}', [UserController::class, 'setPasswordEmployeePost'])
+    ->name('employee.token.setPassword');
 
 
-    // Protected employee API (must be logged in + ready)
-    Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
-       Route::get('/dashboard', [DashboardController::class, 'dashboard']);
-    });
+// Protected employee API (must be logged in + ready)
+Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+});
 
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
@@ -43,7 +45,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
 
- Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
+    Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
     Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
     Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
     // Get logged-in user
@@ -123,9 +125,17 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
     Route::post('/change-password', [AccountController::class, 'editProfile'])->name('em-edit-profile');
 
+    // update my profile
+    Route::post('joining-form-submit', [OnboardProcessController::class, 'joinigFormSubmit']);
+
     // ticket
     Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
+
+
+    // salary slip
+    Route::get('/salary-slip', [AccountController:: class, 'salaryslip']);
+    Route::post('/insert-salary-slip', [AccountController:: class, 'insertsalaryslip']);
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
@@ -134,7 +144,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::post('/clock-in', [AttendanceLogController::class, 'clockIn']);
     Route::post('/clockIn', [AuthController::class, 'clockIn']);
     Route::post('/clockOut', [AuthController::class, 'clockOut']);
-    Route::get('/clockApi', [AuthController::class,'clockApi']);
+    Route::get('/clockApi', [AuthController::class, 'clockApi']);
 
 
     //roles
@@ -154,8 +164,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
 
     // 
- 
- 
+
+
 
     //  Admin-only routes
     Route::middleware('role:1')->group(function () {

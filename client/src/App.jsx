@@ -40,6 +40,7 @@ import PersonalDetail from "./components/AdminDashboardComponent/PersonalDetail"
 import EditEmployeeForm from "./components/AdminDashboardComponent/EditEmployeeForm";
 import CompanyPolicy from "./components/CompanyPolicy";
 import ReadinessQuiz from "./components/ReadinessQuiz";
+import SalarySlip from "./components/RightSidebarComponent/SalarySlip";
 
 function App() {
   return (
@@ -104,6 +105,8 @@ function App() {
             element={<PersonalDetail />}
           />
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
+
+          <Route path="/employee/account/salary-slip" element={<SalarySlip/>}/>
 
           <Route path="/company-policy" element={<CompanyPolicy />} />
          <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  

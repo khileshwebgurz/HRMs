@@ -54,10 +54,18 @@ const ReadinessQuiz = () => {
 
       if (res.data.status === 200) {
         setSuccessMsg(res.data.message);
-        setTimeout(() => navigate('/dashboard'), 2000);
-      } else {
-        setError(res.data.message || 'Failed to submit quiz.');
-      }
+        setTimeout(() => {
+        if (res.data.score >= 90) {
+            navigate('/dashboard');
+          } else {
+            navigate('/company-policy');
+          }
+        }, 2000);
+          setSuccessMsg(res.data.message);
+          //setTimeout(() => navigate('/dashboard'), 2000);
+        } else {
+          setError(res.data.message || 'Failed to submit quiz.');
+        }
     } catch (err) {
       setError('Error submitting quiz.');
     }
