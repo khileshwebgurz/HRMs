@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const OtherSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (employeedata?.candidate) {
+      setFormData({ ...employeedata.candidate });
+    }
+  }, [employeedata]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -9,287 +17,138 @@ const OtherSection = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
+    setFormData({ ...employeedata.candidate });
   };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRadioChange = (e) => {
+    setFormData((prev) => ({ ...prev, marital_status: e.target.value }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        formData,
+        { withCredentials: true }
+      );
+      if (response.data.status === 200) {
+        console.log("Other info updated successfully.");
+        setIsEditing(false);
+      } else {
+        console.warn("Update failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting other info:", error);
+    }
+  };
+
   return (
     <>
       <div className="card wgz-otherinfo">
         <div className="card-header">
           <h3 className="card-title form-header">Other info</h3>
-
-          {!isEditing && (
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-otherinfo"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
-                type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-otherinfo"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit"
-                data-id="wgz-otherinfo"
-                onClick={() => setIsEditing(false)}
-              >
-                {" "}
+              <button className="btn btn-success btn-xs" onClick={handleSubmit}>
                 <i className="fas fa-check"></i> Update
-              </a>
+              </button>
             </div>
           )}
         </div>
+
         <div className="card-body">
           <div className="row">
+            {/* Marital Status */}
             <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="marital_status" className=" col-form-label">
-                  Marital Status
-                </label>
-
+              <div className="form-group">
+                <label className="col-form-label">Marital Status</label>
                 {isEditing ? (
                   <div className="wgz_field">
                     <div className="form-check form-check-inline">
-                      <label className="form-check-label">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="marital_status"
-                          id="marital_status1"
-                          value="1"
-                          checked={
-                            employeedata?.candidate?.marital_status === "1"
-                          }
-                          readOnly
-                        />
-                        Single
-                      </label>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="marital_status"
+                        value="1"
+                        checked={formData.marital_status === "1"}
+                        onChange={handleRadioChange}
+                      />
+                      <label className="form-check-label">Single</label>
                     </div>
                     <div className="form-check form-check-inline">
-                      <label className="form-check-label">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="marital_status"
-                          id="marital_status2"
-                          value="2"
-                          checked={
-                            employeedata?.candidate?.marital_status === "2"
-                          }
-                          readOnly
-                        />
-                        Married
-                      </label>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="marital_status"
+                        value="2"
+                        checked={formData.marital_status === "2"}
+                        onChange={handleRadioChange}
+                      />
+                      <label className="form-check-label">Married</label>
                     </div>
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.marital_status === "1"
+                    {formData.marital_status === "1"
                       ? "Single"
-                      : employeedata?.candidate?.marital_status === "2"
+                      : formData.marital_status === "2"
                       ? "Married"
                       : "N/A"}
                   </div>
                 )}
               </div>
             </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label
-                  htmlFor="spouse_name_profession"
-                  className=" col-form-label"
-                >
-                  Spouses name and profession
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.spouse_name_profession}
-                      id="spouse_name_profession"
-                      name="spouse_name_profession"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.spouse_name_profession}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="no_of_children" className=" col-form-label">
-                  No. of children
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.no_of_children}
-                      id="no_of_children"
-                      name="no_of_children"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.no_of_children}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="father_name" className=" col-form-label">
-                  Father’s name
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.father_name}
-                      id="father_name"
-                      name="father_name"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.father_name}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="father_profession" className=" col-form-label">
-                  Profession
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.father_profession}
-                      id="father_profession"
-                      name="father_profession"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.father_profession}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="father_age" className=" col-form-label">
-                  Age
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.father_age}
-                      id="father_age"
-                      name="father_age"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.father_age}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
-          <div className="row">
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="mother_name" className=" col-form-label">
-                  Mother’s name
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
+            {/* Spouse, Children, Father, Mother Info */}
+            {[
+              ["spouse_name_profession", "Spouse's name and profession"],
+              ["no_of_children", "No. of children"],
+              ["father_name", "Father’s name"],
+              ["father_profession", "Father’s profession"],
+              ["father_age", "Father’s age"],
+              ["mother_name", "Mother’s name"],
+              ["mother_profession", "Mother’s profession"],
+              ["mother_age", "Mother’s age"],
+            ].map(([key, label]) => (
+              <div className="col-sm-6 col-md-4" key={key}>
+                <div className="form-group">
+                  <label htmlFor={key} className="col-form-label">
+                    {label}
+                  </label>
+                  {isEditing ? (
                     <input
                       className="form-control"
                       type="text"
-                      value={employeedata?.candidate?.mother_name}
-                      id="mother_name"
-                      name="mother_name"
+                      id={key}
+                      name={key}
+                      value={formData[key] || ""}
+                      onChange={handleInputChange}
                     />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.mother_name}
-                  </div>
-                )}
+                  ) : (
+                    <div className="wgz_value">{formData[key] || "—"}</div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="mother_profession" className=" col-form-label">
-                  Profession
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.mother_profession}
-                      id="mother_profession"
-                      name="mother_profession"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.mother_profession}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="mother_age" className=" col-form-label">
-                  Age
-                </label>
-                {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.mother_age}
-                      id="mother_age"
-                      name="mother_age"
-                    />
-                  </div>
-                ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.mother_age}
-                  </div>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const IDInfo = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [idType, setIdType] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+
+  useEffect(() => {
+    if (employeedata?.candidate) {
+      setIdType(employeedata.candidate.id_type || "");
+      setIdNumber(employeedata.candidate.id_number || "");
+    }
+  }, [employeedata]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -9,49 +19,84 @@ const IDInfo = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
+    setIdType(employeedata?.candidate?.id_type || "");
+    setIdNumber(employeedata?.candidate?.id_number || "");
   };
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...employeedata.candidate,
+        id_type: idType,
+        id_number: idNumber,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 200) {
+        console.log("ID info updated successfully");
+        setIsEditing(false);
+      } else {
+        console.warn("Failed to submit ID info");
+      }
+    } catch (error) {
+      console.error("Error submitting ID info:", error);
+    }
+  };
+
+  const getIdTypeLabel = (value) => {
+    switch (value) {
+      case "1":
+        return "Adhaar";
+      case "2":
+        return "Passport";
+      case "3":
+        return "Driving License";
+      case "4":
+        return "Income Tax PAN Card";
+      default:
+        return "N/A";
+    }
+  };
+
   return (
     <>
       <div className="card wgz-idprof">
         <div className="card-header">
           <h3 className="card-title form-header">ID Proof</h3>
 
-          {!isEditing && (
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-idprof"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-idprof"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit mr-1"
-                data-id="wgz-idprof"
-                onClick={() => setIsEditing(false)}
+              <button
+                className="btn btn-success btn-xs mr-1"
+                onClick={handleSubmit}
               >
-                {" "}
                 <i className="fas fa-check"></i> Update
-              </a>
+              </button>
             </div>
           )}
         </div>
+
         <div className="card-body">
           <div className="row">
             <div className="col-sm-6 col-md-4">
@@ -60,47 +105,37 @@ const IDInfo = ({ employeedata }) => {
                   Type of ID
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <select
-                      className="form-control"
-                      value={employeedata?.candidate?.id_type}
-                      name="id_type"
-                    >
-                      <option value="">Select..</option>
-
-                      <option value="1">Adhaar</option>
-
-                      <option value="2">Passport</option>
-
-                      <option value="3">Driving License</option>
-
-                      <option value="4">Income Tax PAN Card</option>
-                    </select>
-                  </div>
+                  <select
+                    className="form-control"
+                    value={idType}
+                    onChange={(e) => setIdType(e.target.value)}
+                  >
+                    <option value="">Select..</option>
+                    <option value="1">Adhaar</option>
+                    <option value="2">Passport</option>
+                    <option value="3">Driving License</option>
+                    <option value="4">Income Tax PAN Card</option>
+                  </select>
                 ) : (
-                  <div className="wgz_value">
-                    {employeedata?.candidate?.id_type}
-                  </div>
+                  <div className="wgz_value">{getIdTypeLabel(idType)}</div>
                 )}
               </div>
             </div>
+
             <div className="col-sm-6 col-md-4">
               <div className="form-group">
                 <label htmlFor="id_number" className="col-form-label">
                   ID No
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.id_number}
-                      id="id_number"
-                      name="id_number"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={idNumber}
+                    onChange={(e) => setIdNumber(e.target.value)}
+                  />
                 ) : (
-                  <div className="wgz_value">{employeedata?.candidate?.id_number}</div>
+                  <div className="wgz_value">{idNumber || "-"}</div>
                 )}
               </div>
             </div>

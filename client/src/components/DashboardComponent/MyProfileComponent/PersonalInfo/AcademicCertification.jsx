@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const AcademicCertification = () => {
+const AcademicCertification = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [academicRows, setAcademicRows] = useState([]);
 
+  useEffect(() => {
+    const initialRows = employeedata?.candidate?.certifications || [];
+    setAcademicRows(initialRows.length > 0 ? initialRows : []);
+  }, [employeedata]);
+
   const handleEditClick = () => setIsEditing(true);
+
   const handleCancelClick = () => {
     setIsEditing(false);
-   
+    const resetRows = employeedata?.candidate?.certifications || [];
+    setAcademicRows(resetRows.length > 0 ? resetRows : []);
   };
 
   const handleAddRow = () => {
@@ -30,6 +38,30 @@ const AcademicCertification = () => {
     updatedRows[index][field] = value;
     setAcademicRows(updatedRows);
   };
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...employeedata.candidate,
+        certifications: academicRows,
+      };
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (res.data.status === 200) {
+        console.log("Certifications updated successfully");
+        setIsEditing(false);
+      } else {
+        console.warn("Failed to update certifications");
+      }
+    } catch (err) {
+      console.error("Error submitting certifications:", err);
+    }
+  };
   return (
     <>
       <div className="card wgz-certi">
@@ -37,58 +69,46 @@ const AcademicCertification = () => {
           <h3 className="card-title form-header">
             CERTIFICATION[S] (Academic or Extra-Curricular)
           </h3>
-          {!isEditing && (
+
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-certi"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-certi"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit mr-1"
-                data-id="wgz-certi"
-                onClick={() => setIsEditing(false)}
+              <button
+                className="btn btn-success btn-xs mr-1"
+                onClick={handleSubmit}
               >
-                {" "}
                 <i className="fas fa-check"></i> Update
-              </a>{" "}
-              <a
-                className="btn btn-primary btn-xs add-family"
-                onClick={handleAddRow}
-                data-added="0"
-              >
+              </button>
+              <button className="btn btn-primary btn-xs" onClick={handleAddRow}>
                 <i className="fas fa-plus"></i> Add Row
-              </a>
+              </button>
             </div>
           )}
         </div>
 
-        <div className="card-body  table-responsive">
-          <table className="table table-bordered " id="wgz_family">
+        <div className="card-body table-responsive">
+          <table className="table table-bordered" id="wgz_family">
             <thead>
               <tr>
                 <th width="2%">S No.</th>
                 <th width="10%">Name</th>
-                <th width="10%">Board/society</th>
-                <th width="10%">Month/year</th>
+                <th width="10%">Board/Society</th>
+                <th width="10%">Month/Year</th>
                 <th width="5%">Action</th>
               </tr>
             </thead>
@@ -103,7 +123,6 @@ const AcademicCertification = () => {
                 academicRows.map((row, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-
                     {isEditing ? (
                       <>
                         <td>

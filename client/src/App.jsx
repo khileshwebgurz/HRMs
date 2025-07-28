@@ -76,6 +76,7 @@ function App() {
           <Route path="/supportticket" element={<SupportTicket />} />
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
+          <Route path="/edit-profile/personal" element={<MyProfile/>}/>
           <Route
             path="/profile/:profile_id/view"
             element={<CandidateProfile />}

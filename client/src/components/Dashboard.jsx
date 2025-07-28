@@ -9,11 +9,11 @@ const Dashboard = () => {
 
   if (!user) return null;
 
-  if (user.user_role === '1' || user.user_role === '3' || user.user_role === '7') {
+  if (user.user_role === '1'  || user.user_role === '7') {
     return <AdminDashboard />;
   }
 
-  if (user.user_role === '2') {
+  if (user.user_role === '2' || user.user_role === '3') {
     return <EmployeeDashboard user={user} />;
   }
 

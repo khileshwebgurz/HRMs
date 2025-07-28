@@ -34,24 +34,24 @@ const PersonalInfo = ({ employeedata, user }) => {
 
               {/* employment history */}
 
-              <EmploymentHistory />
+              <EmploymentHistory  employeedata={employeedata}  />
 
               {/* education details */}
 
-              <EducationDetail />
+              <EducationDetail employeedata={employeedata}  />
               {/* trining */}
 
-              <TrainingInfo />
+              <TrainingInfo  employeedata={employeedata} />
 
               {/* ID proof */}
 
               <IDInfo employeedata={employeedata} />
 
               {/* Academic Certifications */}
-              <AcademicCertification />
+              <AcademicCertification employeedata={employeedata} />
 
               {/* Reference Number */}
-              <ReferenceNumber />
+              <ReferenceNumber employeedata={employeedata}/>
 
               {/* other informations */}
 

@@ -1,14 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const TrainingInfo = () => {
+const TrainingInfo = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [trainingRows, setTrainingRows] = useState([]);
+
+  useEffect(() => {
+    if (employeedata?.candidate?.training_info?.length > 0) {
+      setTrainingRows([...employeedata.candidate.training_info]);
+    }
+  }, [employeedata]);
 
   const handleEditClick = () => setIsEditing(true);
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    // Optionally reset rows here if needed
+    setTrainingRows([...(employeedata?.candidate?.training_info || [])]);
   };
 
   const handleAddRow = () => {
@@ -32,65 +39,78 @@ const TrainingInfo = () => {
     updatedRows[index][field] = value;
     setTrainingRows(updatedRows);
   };
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...employeedata.candidate,
+        training_info: trainingRows,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 200) {
+        console.log("Training info updated successfully");
+        setIsEditing(false);
+      } else {
+        console.warn("Failed to submit training info");
+      }
+    } catch (error) {
+      console.error("Error submitting training info:", error);
+    }
+  };
+
   return (
     <>
       <div className="card wgz-tranind">
         <div className="card-header">
-          <h3 className="card-title form-header">Traning</h3>
+          <h3 className="card-title form-header">Training</h3>
 
-          {!isEditing && (
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-tranind"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-tranind"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit mr-1"
-                data-id="wgz-tranind"
-                onClick={() => setIsEditing(false)}
+              <button
+                className="btn btn-success btn-xs mr-1"
+                onClick={handleSubmit}
               >
-                {" "}
                 <i className="fas fa-check"></i> Update
-              </a>{" "}
-              <a
-                className="btn btn-primary btn-xs add-language"
-                onClick={handleAddRow}
-                data-added="0"
-              >
+              </button>
+              <button className="btn btn-primary btn-xs" onClick={handleAddRow}>
                 <i className="fas fa-plus"></i> Add Row
-              </a>
+              </button>
             </div>
           )}
         </div>
-        <div className="card-body  table-responsive">
-          <table className="table table-bordered " id="wgz_language">
+
+        <div className="card-body table-responsive">
+          <table className="table table-bordered" id="wgz_language">
             <thead>
               <tr>
-                <th width="2%">S No.</th>
-                <th width="10%">Course module</th>
-                <th width="10%">Location</th>
-                <th width="10%">Conducted by</th>
-                <th width="10%">Month/year</th>
-                <th width="5%">Action</th>
+                <th>S No.</th>
+                <th>Course module</th>
+                <th>Location</th>
+                <th>Conducted by</th>
+                <th>Month/year</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -104,7 +124,6 @@ const TrainingInfo = () => {
                 trainingRows.map((row, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-
                     {isEditing ? (
                       <>
                         <td>
@@ -157,7 +176,7 @@ const TrainingInfo = () => {
                         </td>
                         <td>
                           <button
-                            className="btn btn-xs delete-record-training"
+                            className="btn btn-xs btn-danger"
                             onClick={() => handleDeleteRow(index)}
                           >
                             <i className="fas fa-trash"></i>

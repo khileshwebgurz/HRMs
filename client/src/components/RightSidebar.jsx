@@ -121,12 +121,12 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/interviews" className="nav-link">
                   <i className="nav-icon fas fa-briefcase"></i>
                   Interviews
                 </Link>
-              </li>
+              </li> */}
               {/* @if(Auth::user()->is_manager == '1' || Auth::user()->user_role == '3') */}
               {(user?.is_manager === "1" || user?.user_role === "3") && (
                 <>
@@ -149,11 +149,11 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
 					$resign =App\EmployeeExit::where('employee_id', Auth::user()->id)->where('status' , '2')->orWhere('status' ,'3')->first();
 					?> */}
               {/* @if($resign) */}
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/exit-quiz" className="nav-link">
                   <i className="nav-icon fas fa-question-circle"></i>Exit Quiz
                 </Link>
-              </li>
+              </li> */}
               {/* @endif */}
               <li className="nav-item">
                 <Link to="/edit-profile/personal" className="nav-link">
@@ -161,11 +161,11 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/payroll" className="nav-link">
                   <i className="nav-icon fab fa-paypal"></i> Payroll
                 </Link>
-              </li>
+              </li> */}
               {/* @if(Auth::user()->id == '1') */}
               {user?.id === 1 && (
                 <li className="nav-item">
@@ -200,19 +200,19 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/meeting-room" className="nav-link">
                   {" "}
                   <i className="nav-icon far fa-handshake"></i> Meeting Room
                 </Link>
-              </li>
+              </li> */}
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/attendance" className="nav-link">
                   {" "}
                   <i className="nav-icon fas fa-user-clock"></i> Attendance
                 </Link>
-              </li>
+              </li> */}
 
               <li className="nav-item">
                 <Link to="/spiritClub" className="nav-link">
@@ -221,29 +221,29 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/calendar" className="nav-link">
                   {" "}
                   <i className="nav-icon fas fa-calendar-alt"></i>
                   Events
                 </Link>
-              </li>
+              </li> */}
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link to="/appraisals" className="nav-link">
                   {" "}
                   <i className="nav-icon fas fa-certificate"></i>
                   Appraisals
                 </Link>
-              </li>
-
+              </li> */}
+{/* 
               <li className="nav-item">
                 <Link to="/exit" className="nav-link">
                   {" "}
                   <i className="nav-icon far fa-times-circle"></i>
                   Exit
                 </Link>
-              </li>
+              </li> */}
 
               <li className="nav-item">
                 <Link to="/projects" className="nav-link">
@@ -260,8 +260,8 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
-              <li className="nav-item">
-                <Link to="/logout" className="nav-link">
+              <li className="nav-item" onClick={handleLogout}>
+                <Link className="nav-link">
                   {" "}
                   <i className="nav-icon fas fa-sign-out-alt"></i>
                   Logout

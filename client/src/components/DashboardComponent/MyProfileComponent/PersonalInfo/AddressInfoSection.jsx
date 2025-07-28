@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const AddressInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -146,7 +147,7 @@ const AddressInfoSection = ({ employeedata }) => {
                       type="number"
                       id="current_phone"
                       name="current_phone"
-                      maxlength="10"
+                      maxLength="10"
                       value={formData?.current_phone || ""}
                       onChange={handleInputChange}
                     />

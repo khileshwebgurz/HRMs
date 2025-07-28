@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const EmploymentHistory = () => {
+const EmploymentHistory = ({employeedata}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [employmentRows, setEmploymentRows] = useState([]);
+
+  useEffect(() => {
+    if (employeedata?.candidate?.employment_history?.length > 0) {
+      setEmploymentRows([...employeedata.candidate.employment_history]);
+    }
+  }, [employeedata]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -10,6 +17,7 @@ const EmploymentHistory = () => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
+    setEmploymentRows([...(employeedata?.candidate?.employment_history || [])]);
   };
 
   const handleAddRow = () => {
@@ -35,50 +43,62 @@ const EmploymentHistory = () => {
     updatedRows[index][field] = value;
     setEmploymentRows(updatedRows);
   };
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...employeedata.candidate,
+        employment_history: employmentRows,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 200) {
+        console.log("Employment history updated successfully.");
+        setIsEditing(false);
+      } else {
+        console.warn("Submission failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting employment history:", error);
+    }
+  };
   return (
     <>
       <div className="card wgz-eh">
         <div className="card-header">
           <h3 className="card-title form-header">Employment History</h3>
-          {!isEditing && (
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-eh"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-eh"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit mr-1"
-                data-id="wgz-eh"
-                onClick={() => setIsEditing(false)}
+              <button
+                className="btn btn-success btn-xs mr-1"
+                onClick={handleSubmit}
               >
                 <i className="fas fa-check"></i> Update
-              </a>{" "}
-              <a
-                className="btn btn-primary btn-xs add-employment"
-                data-added="0"
-                onClick={handleAddRow}
-              >
+              </button>
+              <button className="btn btn-primary btn-xs" onClick={handleAddRow}>
                 <i className="fas fa-plus"></i> Add Row
-              </a>
+              </button>
             </div>
           )}
         </div>
@@ -88,10 +108,10 @@ const EmploymentHistory = () => {
             Please list your most recent employer first (attach additional pages
             if required)
           </p>
-          <table className="table table-bordered " id="wgz_employment">
+          <table className="table table-bordered" id="wgz_employment">
             <thead>
               <tr>
-                <th width="6%">S No.</th>
+                <th>S No.</th>
                 <th>From To</th>
                 <th>ORGANISATION</th>
                 <th>TITLE AND KEY RESPONSIBILITIES in Short</th>
@@ -102,104 +122,107 @@ const EmploymentHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {/* these tables rows are to be shown when add row is clicked */}
-
-              {employmentRows.map((row, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  {isEditing ? (
-                    <>
-                      <td>
-                        <input
-                          className="form-control"
-                          type="text"
-                          value={row.fromto}
-                          onChange={(e) =>
-                            handleInputChange(index, "fromto", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={row.organisation}
-                          onChange={(e) =>
-                            handleInputChange(
-                              index,
-                              "organisation",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={row.responsibilities}
-                          onChange={(e) =>
-                            handleInputChange(
-                              index,
-                              "responsibilities",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={row.position}
-                          onChange={(e) =>
-                            handleInputChange(index, "position", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={row.salary}
-                          onChange={(e) =>
-                            handleInputChange(index, "salary", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={row.reason}
-                          onChange={(e) =>
-                            handleInputChange(index, "reason", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <a
-                          className="btn btn-xs delete-record-employment"
-                          onClick={() => handleDeleteRow(index)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </a>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{row.fromto || "-"}</td>
-                      <td>{row.organisation || "-"}</td>
-                      <td>{row.responsibilities || "-"}</td>
-                      <td>{row.position || "-"}</td>
-                      <td>{row.salary || "-"}</td>
-                      <td>{row.reason || "-"}</td>
-                      <td>-</td>
-                    </>
-                  )}
-                </tr>
-              ))}
-              {employmentRows.length === 0 && (
+              {employmentRows.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center">
                     No employment history added.
                   </td>
                 </tr>
+              ) : (
+                employmentRows.map((row, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    {isEditing ? (
+                      <>
+                        <td>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={row.fromto}
+                            onChange={(e) =>
+                              handleInputChange(index, "fromto", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <textarea
+                            className="form-control"
+                            value={row.organisation}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "organisation",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <textarea
+                            className="form-control"
+                            value={row.responsibilities}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "responsibilities",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <textarea
+                            className="form-control"
+                            value={row.position}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "position",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <textarea
+                            className="form-control"
+                            value={row.salary}
+                            onChange={(e) =>
+                              handleInputChange(index, "salary", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <textarea
+                            className="form-control"
+                            value={row.reason}
+                            onChange={(e) =>
+                              handleInputChange(index, "reason", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-xs btn-danger"
+                            onClick={() => handleDeleteRow(index)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{row.fromto || "-"}</td>
+                        <td>{row.organisation || "-"}</td>
+                        <td>{row.responsibilities || "-"}</td>
+                        <td>{row.position || "-"}</td>
+                        <td>{row.salary || "-"}</td>
+                        <td>{row.reason || "-"}</td>
+                        <td>-</td>
+                      </>
+                    )}
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

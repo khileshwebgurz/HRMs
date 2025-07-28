@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const EducationDetail = () => {
+const EducationDetail = ({employeedata}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [educationRows, setEducationRows] = useState([]);
 
+  useEffect(() => {
+    if (employeedata?.candidate?.education_details?.length > 0) {
+      setEducationRows([...employeedata.candidate.education_details]);
+    }
+  }, [employeedata]);
+
   const handleEditClick = () => setIsEditing(true);
+
   const handleCancelClick = () => {
     setIsEditing(false);
-    // Optionally reset rows here if needed
+    setEducationRows([...(employeedata?.candidate?.education_details || [])]);
   };
 
   const handleAddRow = () => {
@@ -31,70 +39,81 @@ const EducationDetail = () => {
     updatedRows[index][field] = value;
     setEducationRows(updatedRows);
   };
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...employeedata.candidate,
+        education_details: educationRows,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 200) {
+        console.log("Education details submitted successfully.");
+        setIsEditing(false);
+      } else {
+        console.warn("Submission failed.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
+  };
   return (
     <>
       <div className="card wgz-ed">
         <div className="card-header">
           <h3 className="card-title form-header">Education Details</h3>
 
-          {!isEditing && (
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-ed"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-ed"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit mr-1"
-                data-id="wgz-ed"
-                onClick={() => setIsEditing(false)}
+              <button
+                className="btn btn-success btn-xs mr-1"
+                onClick={handleSubmit}
               >
                 <i className="fas fa-check"></i> Update
-              </a>{" "}
-              <a
-                className="btn btn-primary btn-xs add-education"
-                data-added="0"
-                onClick={handleAddRow}
-              >
+              </button>
+              <button className="btn btn-primary btn-xs" onClick={handleAddRow}>
                 <i className="fas fa-plus"></i> Add Row
-              </a>
+              </button>
             </div>
           )}
         </div>
 
-        <div className="card-body  table-responsive">
-          <table className="table table-bordered " id="wgz_edu_details">
+        <div className="card-body table-responsive">
+          <table className="table table-bordered" id="wgz_edu_details">
             <thead>
               <tr>
-                <th width="6%">S No.</th>
+                <th>S No.</th>
                 <th>Qualification</th>
                 <th>University/board</th>
                 <th>Specialization</th>
                 <th>Year of passing</th>
                 <th>Grade /CGPA</th>
-                <th width="5%">Action</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {/* these need to be shown when add row is clicked */}
               {educationRows.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center">
@@ -105,7 +124,6 @@ const EducationDetail = () => {
                 educationRows.map((row, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-
                     {isEditing ? (
                       <>
                         <td>
@@ -172,7 +190,7 @@ const EducationDetail = () => {
                         </td>
                         <td>
                           <button
-                            className="btn btn-xs delete-record-education"
+                            className="btn btn-xs btn-danger"
                             onClick={() => handleDeleteRow(index)}
                           >
                             <i className="fas fa-trash"></i>

@@ -1,7 +1,15 @@
-import { React, useState } from "react";
+import { React, useState ,useEffect} from "react";
+import axios from "axios";
 
 const ContactInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (employeedata?.candidate) {
+      setFormData({ ...employeedata.candidate });
+    }
+  }, [employeedata]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -9,6 +17,31 @@ const ContactInfoSection = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
+    setFormData({ ...employeedata.candidate });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
+        formData,
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 200) {
+        console.log("Contact info updated successfully.");
+        setIsEditing(false);
+      } else {
+        console.warn("Update failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting contact info:", error);
+    }
   };
 
   return (
@@ -16,183 +49,167 @@ const ContactInfoSection = ({ employeedata }) => {
       <div className="card wgz-contactinfo">
         <div className="card-header">
           <h3 className="card-title form-header">Contact info</h3>
-          {!isEditing && (
+
+          {!isEditing ? (
             <div className="card-tools wgz_value">
-              <a
-                // href="javascript:void(0)"
+              <button
                 className="btn btn-tool wgz-edit-form"
-                data-id="wgz-contactinfo"
                 onClick={handleEditClick}
               >
-                {" "}
                 <i className="fas fa-edit"></i>
-              </a>
+              </button>
             </div>
-          )}
-
-          {isEditing && (
+          ) : (
             <div className="card-tools wgz_field">
               <button
                 type="button"
-                className="btn btn-info btn-xs wgz-close-form mr-1"
-                data-id="wgz-contactinfo"
+                className="btn btn-info btn-xs mr-1"
                 onClick={handleCancelClick}
               >
                 <i className="fas fa-times"></i> Cancel
               </button>
-              <a
-                // href="javascript:void(0)"
-                className="btn btn-success btn-xs wgz-submit"
-                data-id="wgz-contactinfo"
-                onClick={() => setIsEditing(false)}
-              >
-                {" "}
+              <button className="btn btn-success btn-xs" onClick={handleSubmit}>
                 <i className="fas fa-check"></i> Update
-              </a>
+              </button>
             </div>
           )}
         </div>
+
         <div className="card-body">
           <div className="row">
+            {/* First Emergency Contact */}
             <div className="col-sm-6 col-md-4">
               <h5>In case of emergency contacts</h5>
-              <div className="form-group ">
-                <label htmlFor="emergency_name" className=" col-form-label">
+              <div className="form-group">
+                <label htmlFor="emergency_name" className="col-form-label">
                   Name
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.emergency_name}
-                      id="emergency_name"
-                      name="emergency_name"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_name"
+                    value={formData.emergency_name || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_name}
+                  <div className="wgz_value">
+                    {formData.emergency_name || "—"}
                   </div>
                 )}
               </div>
             </div>
+
             <div className="col-sm-6 col-md-4">
               <h5>&nbsp;</h5>
-              <div className="form-group ">
-                <label htmlFor="emergency_relation" className=" col-form-label">
+              <div className="form-group">
+                <label htmlFor="emergency_relation" className="col-form-label">
                   Relation
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.emergency_relation}
-                      id="emergency_relation"
-                      name="emergency_relation"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_relation"
+                    value={formData.emergency_relation || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_relation}
+                  <div className="wgz_value">
+                    {formData.emergency_relation || "—"}
                   </div>
                 )}
               </div>
             </div>
+
             <div className="col-sm-6 col-md-4">
               <h5>&nbsp;</h5>
-              <div className="form-group ">
-                <label htmlFor="emergency_contact" className=" col-form-label">
+              <div className="form-group">
+                <label htmlFor="emergency_contact" className="col-form-label">
                   Contact No.
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="number"
-                      value={employeedata?.candidate?.emergency_contact}
-                      id="emergency_contact"
-                      name="emergency_contact"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_contact"
+                    maxLength="10"
+                    value={formData.emergency_contact || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_contact}
+                  <div className="wgz_value">
+                    {formData.emergency_contact || "—"}
                   </div>
                 )}
               </div>
             </div>
           </div>
+
           <div className="row">
+            {/* Second Emergency Contact */}
             <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label htmlFor="emergency_name_2" className=" col-form-label">
+              <div className="form-group">
+                <label htmlFor="emergency_name_2" className="col-form-label">
                   Name
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.emergency_name_2}
-                      id="emergency_name_2"
-                      name="emergency_name_2"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_name_2"
+                    value={formData.emergency_name_2 || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_name_2}
+                  <div className="wgz_value">
+                    {formData.emergency_name_2 || "—"}
                   </div>
                 )}
               </div>
             </div>
+
             <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
+              <div className="form-group">
                 <label
                   htmlFor="emergency_relation_2"
-                  className=" col-form-label"
+                  className="col-form-label"
                 >
                   Relation
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field">
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={employeedata?.candidate?.emergency_relation_2}
-                      id="emergency_relation_2"
-                      name="emergency_relation_2"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_relation_2"
+                    value={formData.emergency_relation_2 || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_relation_2}
+                  <div className="wgz_value">
+                    {formData.emergency_relation_2 || "—"}
                   </div>
                 )}
               </div>
             </div>
+
             <div className="col-sm-6 col-md-4">
-              <div className="form-group ">
-                <label
-                  htmlFor="emergency_contact_2"
-                  className=" col-form-label"
-                >
+              <div className="form-group">
+                <label htmlFor="emergency_contact_2" className="col-form-label">
                   Contact No.
                 </label>
                 {isEditing ? (
-                  <div className="wgz_field ">
-                    <input
-                      className="form-control"
-                      type="number"
-                      value={employeedata?.candidate?.emergency_contact_2}
-                      id="emergency_contact_2"
-                      name="emergency_contact_2"
-                    />
-                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="emergency_contact_2"
+                    maxLength="10"
+                    value={formData.emergency_contact_2 || ""}
+                    onChange={handleInputChange}
+                  />
                 ) : (
-                  <div className="wgz_value ">
-                    {employeedata?.candidate?.emergency_contact_2}
+                  <div className="wgz_value">
+                    {formData.emergency_contact_2 || "—"}
                   </div>
                 )}
               </div>

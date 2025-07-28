@@ -27,6 +27,7 @@ use App\Models\OnboardRequests;
 use Carbon\Carbon;
 use Session;
 use App\Roles;
+use Illuminate\Support\Facades\Log;
 
 
 class OnboardProcessController extends Controller
@@ -35,6 +36,8 @@ class OnboardProcessController extends Controller
 public function joinigFormSubmit(Request $request)
 
     {
+
+        // Log::info('kjsjhsbjfbsd',['jsdbjhbsd'=> $request]);
         if ($request->has('name')) {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/'

@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
 const PersonalInfoSection = ({ employeedata }) => {
@@ -119,7 +118,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                       value={formData?.name || ""}
                       name="name"
                       id="name"
-                      maxlength="25"
+                      maxLength="25"
                       onChange={handleInputChange}
                     />
                   </div>
