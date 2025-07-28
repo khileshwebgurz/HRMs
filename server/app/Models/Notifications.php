@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Log;
 class Notifications extends Model
 {
 
+
+    protected $fillable = [
+            'notify_type', 'type_id', 'page_id', 'notify_to', 'message', 'notify_status'
+        ];
+
+
     /*  public function saveNotification($notification)
     {
         $message = '';
