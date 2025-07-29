@@ -20,11 +20,14 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\API\ForgotPasswordController;
 
 use App\Http\Controllers\Employee\OnboardProcessController;
 
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::get('/employee/token/validate/{type}/{token}', [UserController::class, 'validateEmployeeToken'])
     ->where('type', 'accept|declined')
@@ -42,7 +45,6 @@ Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
 //  Protected (Authenticated) Routes
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
 
     Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
@@ -134,8 +136,8 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     // salary slip
-    Route::get('/salary-slip', [AccountController:: class, 'salaryslip']);
-    Route::post('/insert-salary-slip', [AccountController:: class, 'insertsalaryslip']);
+    Route::get('/salary-slip', [AccountController::class, 'salaryslip']);
+    Route::post('/insert-salary-slip', [AccountController::class, 'insertsalaryslip']);
 
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
@@ -162,9 +164,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/roles/assign-permissions', [RoleController::class, 'assignPermissionPost'])->name('api.roles.assign_permissions');
     Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
-
-    // 
-
 
 
     //  Admin-only routes
@@ -193,4 +192,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route::middleware('role:3')->group(function () {
         Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
     });
+
+    Route::get('start-onboarding/{candidate_id}', [OnboardProcessController::class, 'startOnboarding'])->name('startOnboarding');
+    Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
+
+});
+
+Route::middleware('auth:api')->prefix('tracker')->group(function () {
+    Route::get('/add-candidate', [TrackerController::class, 'addCandidate'])->name('trackercandidateadd');
+    Route::post('/add-candidate-post', [TrackerController::class, 'addCandidatePost'])->name('trackercandidateaddpost');
 });

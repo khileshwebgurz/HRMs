@@ -41,6 +41,9 @@ import EditEmployeeForm from "./components/AdminDashboardComponent/EditEmployeeF
 import CompanyPolicy from "./components/CompanyPolicy";
 import ReadinessQuiz from "./components/ReadinessQuiz";
 import SalarySlip from "./components/RightSidebarComponent/SalarySlip";
+import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
+import ResetPasswordForm from "./components/Auth/ResetPasswordForm";
+import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
 
 function App() {
   return (
@@ -48,6 +51,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
        
+          <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+          <Route path="/reset-password" element={<ResetPasswordForm />} />
+
         <Route
           path="/"
           element={
@@ -110,8 +116,9 @@ function App() {
           <Route path="/employee/account/salary-slip" element={<SalarySlip/>}/>
 
           <Route path="/company-policy" element={<CompanyPolicy />} />
-         <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  
-         
+          <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  
+           <Route path="/add-candidate" element={<AddCandidate />} />
+
 
           <Route path="*" element={<NotFound />} />
         </Route>

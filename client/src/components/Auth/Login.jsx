@@ -120,8 +120,9 @@ const Login = () => {
             </form>
 
             <p className="mb-1">
-              <a href="/forgot-password">I forgot my password</a>
+              <Link to="/forgot-password">I forgot my password</Link>
             </p>
+
           </div>
         </div>
       </div>
