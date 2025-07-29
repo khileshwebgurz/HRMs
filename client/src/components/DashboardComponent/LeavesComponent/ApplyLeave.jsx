@@ -1,6 +1,9 @@
 import React from "react";
 import { useState } from "react";
 import axios from "axios";
+
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const ApplyLeave = ({
   totalCreditLeaves,
   totalAppliedLeaves,
@@ -9,16 +12,17 @@ const ApplyLeave = ({
   penalty,
 }) => {
   const [isModalActive, setIsModalActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // state for submitting formdata
   const [formData, setFormData] = useState({
-    leave_type: "", 
+    leave_type: "",
     start_date: "",
     end_date: "",
     start_half: "",
     end_half: "",
     reason: "",
-    start_time:"00:00:00"
+    start_time: "00:00:00",
   });
 
   const handleBtnClick = () => {
@@ -32,15 +36,32 @@ const ApplyLeave = ({
   const handleLeaveSubmit = async (e) => {
     e.preventDefault();
 
+    if (isSubmitting) return; // prevent duplicate clicks
+    setIsSubmitting(true);
+
     try {
-     await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/applyLeave`,
         formData,
         { withCredentials: true }
       );
-    
+
+      toast.success("Leave applied successfully!");
+      setFormData({
+        leave_type: "",
+        start_date: "",
+        end_date: "",
+        start_half: "",
+        end_half: "",
+        reason: "",
+        start_time: "00:00:00",
+      });
+      setIsModalActive(false);
     } catch (error) {
+      toast.error("Leave submission failed. Please try again.");
       console.error("Leave submission failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -283,20 +304,25 @@ const ApplyLeave = ({
                       >
                         Close
                       </button>
+
                       <button
                         className="btn btn-success wgz-apply site-main-btn"
                         type="submit"
                         name="Apply"
+                        disabled={isSubmitting}
                       >
-                        Apply
+                        {isSubmitting ? "Applying..." : "Apply"}
                       </button>
                     </div>
                   </form>
                 </div>
+               
               </div>
             </div>
           </div>
         )}
+
+         <ToastContainer />
       </div>
     </>
   );

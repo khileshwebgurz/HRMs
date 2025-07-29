@@ -7,13 +7,23 @@ const ReferenceNumber = ({ employeedata }) => {
     { name: "", contact: "" },
     { name: "", contact: "" },
   ]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    const refData = employeedata?.candidate?.references || [
-      { name: "", contact: "" },
-      { name: "", contact: "" },
-    ];
-    setReferences(refData);
+    if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+      const refData = employeedata.candidate.references || [
+        { name: "", contact: "" },
+        { name: "", contact: "" },
+      ];
+      setReferences(refData);
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
+    }
   }, [employeedata]);
 
   const handleEditClick = () => {
@@ -27,6 +37,13 @@ const ReferenceNumber = ({ employeedata }) => {
       { name: "", contact: "" },
     ];
     setReferences(refData);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleInputChange = (index, field, value) => {
@@ -36,28 +53,38 @@ const ReferenceNumber = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", { ...formData, references });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata?.candidate,
+      const filteredFormData = {
+        section: "references",
         references,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (res.data.status === 200) {
-        console.log("References updated successfully");
+        console.log("References updated successfully:", res.data);
         setIsEditing(false);
       } else {
-        console.warn("Failed to update references");
+        console.warn("Failed to update references:", res.data);
+        alert(res.data.message || "Failed to update references.");
       }
     } catch (error) {
       console.error("Error submitting references:", error);
+      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
+
   return (
     <>
       <div className="card wgz-refer">

@@ -5,11 +5,19 @@ const IDInfo = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [idType, setIdType] = useState("");
   const [idNumber, setIdNumber] = useState("");
+   const [formData, setFormData] = useState({});
 
   useEffect(() => {
     if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
       setIdType(employeedata.candidate.id_type || "");
       setIdNumber(employeedata.candidate.id_number || "");
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -21,30 +29,47 @@ const IDInfo = ({ employeedata }) => {
     setIsEditing(false);
     setIdType(employeedata?.candidate?.id_type || "");
     setIdNumber(employeedata?.candidate?.id_number || "");
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
+
   const handleSubmit = async () => {
+    console.log("my form data is >>", { ...formData, id_type: idType, id_number: idNumber });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata.candidate,
+      const filteredFormData = {
+        section: "id",
         id_type: idType,
         id_number: idNumber,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (response.data.status === 200) {
-        console.log("ID info updated successfully");
+        console.log("ID info updated successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Failed to submit ID info");
+        console.warn("Failed to submit ID info:", response.data);
+        alert(response.data.message || "Failed to update ID info.");
       }
     } catch (error) {
       console.error("Error submitting ID info:", error);
+      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
 

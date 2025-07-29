@@ -446,6 +446,8 @@ class UserController extends Controller
             $created_by = $request->created_by;
         }
 
+         Log::info('My editing employee is >>>>', ['user' => $request->on_candidate_id]);
+
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt('#WEBGURUZ#'); // Str::random(6)
@@ -582,6 +584,8 @@ class UserController extends Controller
 
     public function addEmployeePost(Request $request)
     {
+
+        Log::info('My editing employee is >>>>', ['user' => $request]);
         $validator = Validator::make($request->all(), [
             'name'           => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
             'email'          => 'required|unique:employees,email|regex:/(.+)@(.+)\.(.+)/i',
@@ -1859,6 +1863,8 @@ class UserController extends Controller
         return view('users.candidates.add', compact('candidate_status', 'candidate_questions', 'candidate_relationship'));
     }
 
+
+    // i changed on_candidate_id to candidate_id 
     public function addCandidatePost(Request $request)
     {
         $loginuser = Auth::user();

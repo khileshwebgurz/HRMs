@@ -1,13 +1,37 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const EducationDetail = ({employeedata}) => {
+const EducationDetail = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [educationRows, setEducationRows] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    if (employeedata?.candidate?.education_details?.length > 0) {
-      setEducationRows([...employeedata.candidate.education_details]);
+    if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+
+      let parsedEducation = [];
+
+      // Check if education is a string (JSON) and parse it
+      const rawEducation = employeedata.candidate.education;
+      if (typeof rawEducation === "string") {
+        try {
+          parsedEducation = JSON.parse(rawEducation);
+        } catch (err) {
+          console.warn("Failed to parse education JSON:", err);
+        }
+      } else if (Array.isArray(rawEducation)) {
+        parsedEducation = rawEducation;
+      }
+
+      setEducationRows([...parsedEducation]);
+
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -15,7 +39,29 @@ const EducationDetail = ({employeedata}) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    setEducationRows([...(employeedata?.candidate?.education_details || [])]);
+    setEducationRows([...(employeedata?.candidate?.education || [])]);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+
+    let parsedEducation = [];
+    const rawEducation = employeedata.candidate.education;
+    if (typeof rawEducation === "string") {
+      try {
+        parsedEducation = JSON.parse(rawEducation);
+      } catch (err) {
+        console.warn("Failed to parse education JSON:", err);
+      }
+    } else if (Array.isArray(rawEducation)) {
+      parsedEducation = rawEducation;
+    }
+
+    setEducationRows([...parsedEducation]);
+
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleAddRow = () => {
@@ -41,28 +87,43 @@ const EducationDetail = ({employeedata}) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", {
+      ...formData,
+      education: educationRows,
+    });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata.candidate,
-        education_details: educationRows,
+      const filteredFormData = {
+        section: "education",
+        education: educationRows,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (response.data.status === 200) {
-        console.log("Education details submitted successfully.");
+        console.log("Education details submitted successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Submission failed.");
+        console.warn("Submission failed:", response.data);
+        alert(response.data.message || "Failed to update education details.");
       }
     } catch (error) {
       console.error("Submission error:", error);
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
+
   return (
     <>
       <div className="card wgz-ed">

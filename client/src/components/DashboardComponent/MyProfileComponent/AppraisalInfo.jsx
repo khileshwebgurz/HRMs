@@ -1,6 +1,7 @@
 import React from "react";
 
-const AppraisalInfo = () => {
+const AppraisalInfo = ({employeedata}) => {
+  console.log('here is my appraisal info ', employeedata)
   return (
     <>
       <section className="content mt-4">

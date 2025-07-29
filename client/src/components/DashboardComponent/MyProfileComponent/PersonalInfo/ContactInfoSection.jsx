@@ -5,11 +5,18 @@ const ContactInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
-  useEffect(() => {
+ useEffect(() => {
     if (employeedata?.candidate) {
-      setFormData({ ...employeedata.candidate });
+      const candidateId = employeedata.candidate.candidate_id; // e.g., 15734
+      const onCandidateId = candidateId;
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
+
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -17,7 +24,13 @@ const ContactInfoSection = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    setFormData({ ...employeedata.candidate });
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleInputChange = (e) => {
@@ -26,23 +39,43 @@ const ContactInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", formData);
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
+      const filteredFormData = {
+        section: "contact",
+        emergency_name: formData.emergency_name || "",
+        emergency_relation: formData.emergency_relation || "",
+        emergency_contact: formData.emergency_contact || "",
+        emergency_name_2: formData.emergency_name_2 || "",
+        emergency_relation_2: formData.emergency_relation_2 || "",
+        emergency_contact_2: formData.emergency_contact_2 || "",
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
+      };
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        formData,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (response.data.status === 200) {
-        console.log("Contact info updated successfully.");
+        console.log("Contact info updated successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Update failed.");
+        console.warn("Update failed:", response.data);
+        alert(response.data.message || "Failed to update contact info.");
       }
     } catch (error) {
       console.error("Error submitting contact info:", error);
+      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
+
 
   return (
     <>

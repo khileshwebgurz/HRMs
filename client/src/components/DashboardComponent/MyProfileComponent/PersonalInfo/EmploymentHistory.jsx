@@ -1,13 +1,36 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const EmploymentHistory = ({employeedata}) => {
+const EmploymentHistory = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [employmentRows, setEmploymentRows] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    if (employeedata?.candidate?.employment_history?.length > 0) {
-      setEmploymentRows([...employeedata.candidate.employment_history]);
+    if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+
+      let parsedEmployment = [];
+      // Check if education is a string (JSON) and parse it
+      const rawEmployment = employeedata.candidate.employment_history;
+      if (typeof rawEmployment === "string") {
+        try {
+          parsedEmployment = JSON.parse(rawEmployment);
+        } catch (err) {
+          console.warn("Failed to parse education JSON:", err);
+        }
+      } else if (Array.isArray(rawEmployment)) {
+        parsedEmployment = rawEmployment;
+      }
+
+      setEmploymentRows([...parsedEmployment]);
+
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -18,6 +41,28 @@ const EmploymentHistory = ({employeedata}) => {
   const handleCancelClick = () => {
     setIsEditing(false);
     setEmploymentRows([...(employeedata?.candidate?.employment_history || [])]);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+
+    let parsedEmployment = [];
+    const rawEmployment = employeedata.candidate.employment_history;
+    if (typeof rawEmployment === "string") {
+      try {
+        parsedEmployment = JSON.parse(rawEmployment);
+      } catch (err) {
+        console.warn("Failed to parse education JSON:", err);
+      }
+    } else if (Array.isArray(rawEmployment)) {
+      parsedEmployment = rawEmployment;
+    }
+
+    setEmploymentRows([...parsedEmployment]);
+
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleAddRow = () => {
@@ -45,28 +90,43 @@ const EmploymentHistory = ({employeedata}) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", {
+      ...formData,
+      employment_history: employmentRows,
+    });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata.candidate,
+      const filteredFormData = {
+        section: "employment",
         employment_history: employmentRows,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (response.data.status === 200) {
-        console.log("Employment history updated successfully.");
+        console.log("Employment history updated successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Submission failed.");
+        console.warn("Submission failed:", response.data);
+        alert(response.data.message || "Failed to update employment history.");
       }
     } catch (error) {
       console.error("Error submitting employment history:", error);
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
+
   return (
     <>
       <div className="card wgz-eh">

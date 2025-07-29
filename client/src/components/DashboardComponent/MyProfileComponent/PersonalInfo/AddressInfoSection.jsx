@@ -7,17 +7,26 @@ const AddressInfoSection = ({ employeedata }) => {
 
   useEffect(() => {
     if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
       setFormData({
         ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
       });
     }
   }, [employeedata]);
 
   const handleEditClick = () => setIsEditing(true);
-  const handleCancelClick = () => {
+
+ const handleCancelClick = () => {
     setIsEditing(false);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
     setFormData({
       ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
     });
   };
 
@@ -28,22 +37,36 @@ const AddressInfoSection = ({ employeedata }) => {
 
   const handleSubmit = async () => {
     console.log("my form data is >>", formData);
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
+      const filteredFormData = {
+        section: "address",
+        current_address: formData.current_address || "",
+        permanent_address: formData.permanent_address || "",
+        current_phone: formData.current_phone || "",
+        permanent_phone: formData.permanent_phone || "",
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
+      };
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        formData,
+        filteredFormData,
         { withCredentials: true }
       );
-
-      // if (!response.ok) throw new Error("Failed to submit");
 
       const data = await response.data;
       console.log("Success:", data);
       setIsEditing(false);
     } catch (error) {
       console.error("Error submitting form:", error);
+      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
+
   return (
     <>
       <div className="card wgz-addresses">

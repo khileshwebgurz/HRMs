@@ -4,10 +4,32 @@ import axios from "axios";
 const TrainingInfo = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [trainingRows, setTrainingRows] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    if (employeedata?.candidate?.training_info?.length > 0) {
-      setTrainingRows([...employeedata.candidate.training_info]);
+    if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+
+      let parsedTraining = [];
+      const rawTraining = employeedata.candidate.training;
+
+      if (typeof rawTraining === "string") {
+        try {
+          parsedTraining = JSON.parse(rawTraining);
+        } catch (err) {
+          console.warn("Failed to parse education JSON:", err);
+        }
+      } else if (Array.isArray(rawTraining)) {
+        parsedTraining = rawTraining;
+      }
+
+      setTrainingRows([...parsedTraining]);
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -16,6 +38,28 @@ const TrainingInfo = ({ employeedata }) => {
   const handleCancelClick = () => {
     setIsEditing(false);
     setTrainingRows([...(employeedata?.candidate?.training_info || [])]);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+
+    let parsedTraining = [];
+    const rawTraining = employeedata.candidate.training;
+
+    if (typeof rawTraining === "string") {
+      try {
+        parsedTraining = JSON.parse(rawTraining);
+      } catch (err) {
+        console.warn("Failed to parse education JSON:", err);
+      }
+    } else if (Array.isArray(rawTraining)) {
+      parsedTraining = rawTraining;
+    }
+
+    setTrainingRows([...parsedTraining]);
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleAddRow = () => {
@@ -41,26 +85,40 @@ const TrainingInfo = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", {
+      ...formData,
+      training_info: trainingRows,
+    });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata.candidate,
+      const filteredFormData = {
+        section: "training",
         training_info: trainingRows,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (response.data.status === 200) {
-        console.log("Training info updated successfully");
+        console.log("Training info updated successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Failed to submit training info");
+        console.warn("Submission failed:", response.data);
+        alert(response.data.message || "Failed to update training info.");
       }
     } catch (error) {
       console.error("Error submitting training info:", error);
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
 

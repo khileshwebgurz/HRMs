@@ -11,8 +11,8 @@ import AcademicCertification from "./PersonalInfo/AcademicCertification";
 import ReferenceNumber from "./PersonalInfo/ReferenceNumber";
 import OtherInformation from "./PersonalInfo/OtherInformation";
 
-const PersonalInfo = ({ employeedata, user }) => {
-  console.log("my employee data is >>>", employeedata);
+const PersonalInfo = ({ employeedata }) => {
+  console.log("my personal data data is >>>", employeedata);
   return (
     <>
       <section className="content mt-4 info-sec">
@@ -48,7 +48,7 @@ const PersonalInfo = ({ employeedata, user }) => {
               <IDInfo employeedata={employeedata} />
 
               {/* Academic Certifications */}
-              <AcademicCertification employeedata={employeedata} />
+              {/* <AcademicCertification employeedata={employeedata} /> */}
 
               {/* Reference Number */}
               <ReferenceNumber employeedata={employeedata}/>

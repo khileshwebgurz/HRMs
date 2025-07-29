@@ -7,7 +7,13 @@ const OtherSection = ({ employeedata }) => {
 
   useEffect(() => {
     if (employeedata?.candidate) {
-      setFormData({ ...employeedata.candidate });
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -17,8 +23,16 @@ const OtherSection = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    setFormData({ ...employeedata.candidate });
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
+
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -28,24 +42,46 @@ const OtherSection = ({ employeedata }) => {
     setFormData((prev) => ({ ...prev, marital_status: e.target.value }));
   };
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
+    console.log("my form data is >>", formData);
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
+      const filteredFormData = {
+        section: "other",
+        marital_status: formData.marital_status || "",
+        spouse_name_profession: formData.spouse_name_profession || "",
+        no_of_children: formData.no_of_children || "",
+        father_name: formData.father_name || "",
+        father_profession: formData.father_profession || "",
+        father_age: formData.father_age || "",
+        mother_name: formData.mother_name || "",
+        mother_profession: formData.mother_profession || "",
+        mother_age: formData.mother_age || "",
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
+      };
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        formData,
+        filteredFormData,
         { withCredentials: true }
       );
+
       if (response.data.status === 200) {
-        console.log("Other info updated successfully.");
+        console.log("Other info updated successfully:", response.data);
         setIsEditing(false);
       } else {
-        console.warn("Update failed.");
+        console.warn("Update failed:", response.data);
+        alert(response.data.message || "Failed to update other info.");
       }
     } catch (error) {
       console.error("Error submitting other info:", error);
+      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
-
   return (
     <>
       <div className="card wgz-otherinfo">

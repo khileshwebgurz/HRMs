@@ -42,7 +42,7 @@ const Leaves = () => {
   useEffect(() => {
     if (!leavedetailData) return;
 
-    const doj = new Date(leavedetailData?.user?.date_of_joining);
+    const doj = new Date(leavedetailData?.loginuser?.created_at);
     const dojMonth = doj.getMonth();
     const dojYear = doj.getFullYear();
     const currentDate = new Date();

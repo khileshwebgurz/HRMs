@@ -34,7 +34,6 @@ const MyProfile = ({path}) => {
   };
 
 
-
   return (
     <div>
       {/* Tab Navigation */}
@@ -59,9 +58,9 @@ const MyProfile = ({path}) => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === "personal" && <PersonalInfo employeedata={employee} user={user}/>}
+        {activeTab === "personal" && <PersonalInfo employeedata={employee}/>}
         {activeTab === "basic" && <BasicInfo employeedata={employee} />}
-        {activeTab === "appraisal" && <AppraisalInfo />}
+        {activeTab === "appraisal" && <AppraisalInfo employeedata={employee} />}
       </div>
     </div>
   );

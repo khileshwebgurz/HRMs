@@ -7,15 +7,7 @@ const JobParticular = ({ data }) => {
     //  }
   return (
     <>
-      <div
-        className="tab-pane fade show active"
-        id="custom-tabs-four-home"
-        role="tabpanel"
-        aria-labelledby="custom-tabs-four-home-tab"
-      >
-        <div className="row  mr-1 wgz_candidate_form">
-          <div className="w-100">
-            <form action="" method="post" id="wgz_candidate_form">
+ 
               <div className="col-lg-12">
                 <div className="card">
                   <div className="card-header form-header">Job Particulars</div>
@@ -384,10 +376,7 @@ const JobParticular = ({ data }) => {
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      </div>
+          
     </>
   );
 };

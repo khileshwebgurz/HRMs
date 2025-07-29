@@ -4,15 +4,24 @@ import axios from "axios";
 const OtherInformation = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    if (employeedata?.candidate_questions?.length) {
-      const copied = employeedata.candidate_questions.map((q) => ({
-        ...q,
-        status: q.status?.toString() ?? "",
-        reason: q.reason || "",
-      }));
+    if (employeedata?.candidate) {
+      const candidateId = employeedata.candidate.candidate_id;
+      const onCandidateId = candidateId;
+      const copied =
+        employeedata.candidate_questions?.map((q) => ({
+          ...q,
+          status: q.status?.toString() ?? "",
+          reason: q.reason || "",
+        })) || [];
       setQuestions(copied);
+      setFormData({
+        ...employeedata.candidate,
+        on_candidate_id: onCandidateId,
+        updated_by: "hr-emp",
+      });
     }
   }, [employeedata]);
 
@@ -29,6 +38,13 @@ const OtherInformation = ({ employeedata }) => {
         reason: q.reason || "",
       })) || [];
     setQuestions(copied);
+    const candidateId = employeedata?.candidate?.candidate_id;
+    const onCandidateId = candidateId;
+    setFormData({
+      ...employeedata.candidate,
+      on_candidate_id: onCandidateId,
+      updated_by: "hr-emp",
+    });
   };
 
   const handleChange = (index, field, value) => {
@@ -38,26 +54,40 @@ const OtherInformation = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
+    console.log("my form data is >>", {
+      ...formData,
+      candidate_questions: questions,
+    });
+    if (!formData.on_candidate_id) {
+      alert("Candidate ID is missing. Please contact support.");
+      return;
+    }
     try {
-      const payload = {
-        ...employeedata?.candidate,
+      const filteredFormData = {
+        section: "other_information",
         candidate_questions: questions,
+        on_candidate_id: formData.on_candidate_id,
+        updated_by: formData.updated_by || "hr-emp",
       };
 
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
-        payload,
+        filteredFormData,
         { withCredentials: true }
       );
 
       if (res.data.status === 200) {
-        console.log("Other Information updated successfully");
+        console.log("Other Information updated successfully:", res.data);
         setIsEditing(false);
       } else {
-        console.warn("Failed to update Other Information");
+        console.warn("Failed to update Other Information:", res.data);
+        alert(res.data.message || "Failed to update other information.");
       }
     } catch (error) {
       console.error("Error submitting Other Information:", error);
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
   return (
