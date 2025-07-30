@@ -25,7 +25,7 @@ const CandidateList = () => {
         )}`,
         { withCredentials: true }
       );
-
+console.log(candidates,'datatataa');
       setCandidates(response.data.data);
       setFilteredCandidates(response.data.data);
       setCurrentPage(response.data.current_page);
@@ -65,6 +65,28 @@ const CandidateList = () => {
     navigate(`/users/${url}`);
   };
 
+
+  const handleStartOnboarding = async (candidateId) => {
+const numericId = candidateId.replace("HRM", "");
+    console.log(candidateId,'candidateId');
+ console.log(numericId,'numericId');
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/start-onboarding/${numericId}`,
+      { withCredentials: true }
+    );
+
+    console.log(response, 'response');
+    alert("Candidate successfully onboarded!");
+    // fetchCandidates(currentPage);
+
+  } catch (error) {
+    console.error("Error starting onboarding:", error);
+    alert("Something went wrong during onboarding.");
+  }
+};
+
+
   const handleDeleteBtn = async (id) => {
     const numericId = id.replace("HRM", "");
     try {
@@ -82,6 +104,8 @@ const CandidateList = () => {
       console.error("cannot delete bcz of this issue ->", error);
     }
   };
+
+  console.log(filteredCandidates,'testt');
 
   return (
     <div className="container mt-4">
@@ -126,6 +150,7 @@ const CandidateList = () => {
                       (sortOrder === "asc" ? "⬆️" : "⬇️")} */}
                   </th>
                   <th>Email</th>
+                  <th>Status</th>
                   <th>Phone</th>
                   <th>Notice Period</th>
                   <th>Current Location</th>
@@ -149,6 +174,7 @@ const CandidateList = () => {
                     </td>
                     <td>{row.created_at}</td>
                     <td>{row.email}</td>
+                    <td>{row.status}</td>
                     <td>{row.mobile_number}</td>
                     <td>{row.notice_period}</td>
                     <td>{row.current_location}</td>
@@ -181,6 +207,25 @@ const CandidateList = () => {
                             🗑️
                           </button>
                         )}
+
+                          {row.action.edit_allowed && (
+                          <button
+                            onClick={() => handleEditClick(row.action.edit_url)}
+                            className="btn btn-success"
+                          >
+                            ✏️
+                          </button>
+                        )}
+
+                         
+                          <button
+                            onClick={() => handleStartOnboarding(row.id)}
+                            className="btn btn-primary"
+                          >
+                            🚀 Start Onboarding
+                          </button>
+
+                      
                       </div>
                     </td>
                   </tr>

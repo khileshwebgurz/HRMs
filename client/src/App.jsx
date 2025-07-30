@@ -43,7 +43,7 @@ import ReadinessQuiz from "./components/ReadinessQuiz";
 import SalarySlip from "./components/RightSidebarComponent/SalarySlip";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/Auth/ResetPasswordForm";
-// import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
+ import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
 
 function App() {
   return (
@@ -117,7 +117,7 @@ function App() {
 
           <Route path="/company-policy" element={<CompanyPolicy />} />
           <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  
-           {/* <Route path="/add-candidate" element={<AddCandidate />} /> */}
+           <Route path="/add-candidate" element={<AddCandidate />} />
 
 
           <Route path="*" element={<NotFound />} />

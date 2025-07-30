@@ -161,6 +161,61 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li>
 
+               {/* Recruitment Section */}
+               {user?.user_role === "1" && (
+              <>
+                  <li className="nav-item">
+                    <Link to="/manage-candidates" className="nav-link">
+                      <i className="nav-icon fas fa-user-tie"></i>
+                      Manage Candidates
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/all-candidates" className="nav-link">
+                      <i className="nav-icon fas fa-list"></i>
+                      All Candidates
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                   <Link to="/add-candidate" className="nav-link">
+                      <i className="nav-icon fas fa-user-plus"></i>
+                      Add Candidate
+                    </Link>
+
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/candidate-tracker" className="nav-link">
+                      <i className="nav-icon fas fa-chart-line"></i>
+                      Candidate Tracker
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/import-candidates" className="nav-link">
+                      <i className="nav-icon fas fa-file-import"></i>
+                      Import Candidates
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/job-applications" className="nav-link">
+                      <i className="nav-icon fas fa-file-alt"></i>
+                      Job Applications
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/review-aptitude-test" className="nav-link">
+                      <i className="nav-icon fas fa-clipboard-check"></i>
+                      Review Aptitude Test
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/schedule-interview" className="nav-link">
+                      <i className="nav-icon fas fa-calendar-alt"></i>
+                      Schedule Interview
+                    </Link>
+                  </li>
+                </>
+              )}
+
               {/* <li className="nav-item">
                 <Link to="/payroll" className="nav-link">
                   <i className="nav-icon fab fa-paypal"></i> Payroll
@@ -245,6 +300,8 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li> */}
 
+               
+
               <li className="nav-item">
                 <Link to="/projects" className="nav-link">
                   {" "}
@@ -267,6 +324,10 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                   Logout
                 </Link>
               </li>
+
+              
+            
+
             </ul>
           </nav>
         </div>

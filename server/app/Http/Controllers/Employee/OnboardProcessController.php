@@ -97,6 +97,8 @@ class OnboardProcessController extends Controller
             ];
         });
 
+          Log::info('My transformed >>>>',[' transformed are >', $transformed]);
+            Log::info('My freeze_status >>>>',[' freeze_status are >', Auth::user()->freeze_status]);
         return response()->json([
             'data' => $transformed,
             'permissions' => [

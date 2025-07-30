@@ -11,7 +11,11 @@ use Illuminate\Support\Str;
 use App\Models\Candidates;
 use App\Models\Roles;
 use App\Models\Employees;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use App\Models\CandidateStatus;
+use App\Models\CandidateQuestions;
+
 
 class TrackerController extends Controller
 {
@@ -96,7 +100,7 @@ class TrackerController extends Controller
     }
 
     // POST /check
-    public function checkCandidate(Request $request)
+    public function checkCandidateOLD(Request $request)
     {
         if ($request->has('email')) {
             $validator = Validator::make($request->all(), [
@@ -119,8 +123,180 @@ class TrackerController extends Controller
         return response()->json(['status' => 200, 'message' => 'Valid']);
     }
 
-    // POST /add
+
+   public function addCandidate()
+    {
+        $user = Auth::user();
+        Log::info('Logged-in user', ['user' => $user]);
+
+        $candidate_status = CandidateStatus::all();
+        $candidate_questions = CandidateQuestions::all();
+        $candidate_relationship = Candidates::$relationship;
+
+        $permission_role = Roles::where('id', $user->user_role)->first();
+        Log::info('Permission Role', ['permission_role' => $permission_role]);
+
+        $can_add = $permission_role && $permission_role->add == '5';
+
+        // =================== Assign To Logic (Dropdown) ===================
+        $assign = collect(); // default empty collection
+
+        if ($permission_role->add == '4') {
+            $assign = Employees::where('manager_id', $user->id)
+                ->orWhere('id', $user->id)
+                ->select('id', 'name')
+                ->get();
+        } elseif ($permission_role->add == '5') {
+            $all_roles = Roles::where('id', '!=', '2')->pluck('id')->toArray();
+            $assign = Employees::whereIn('user_role', $all_roles)
+                ->select('id', 'name')
+                ->get();
+        } else {
+            $assign = Employees::where('manager_id', $user->id)
+                ->select('id', 'name')
+                ->get();
+        }
+        // ==================================================================
+
+        Log::info('Assignable Employees', ['assign' => $assign]);
+
+        return response()->json([
+            'candidate_status' => $candidate_status,
+            'candidate_questions' => $candidate_questions,
+            'candidate_relationship' => $candidate_relationship,
+            'can_add' => $can_add,
+            'assignable_employees' => $assign,
+        ]);
+    }
+
+
+
+
+    public function checkCandidate(Request $request)
+    {
+        $type = $request->type;
+
+        if ($type === 'email' && $request->has('email')) {
+            $validator = Validator::make($request->all(), [
+                'email' => 'regex:/(.+)@(.+)\.(.+)/i|unique:candidates,email',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Email already taken or invalid format',
+                ]);
+            }
+        }
+
+        if ($type === 'phone' && $request->has('mobile_number')) {
+            $validator = Validator::make($request->all(), [
+                'mobile_number' => 'digits:10|unique:candidates,mobile_number',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Mobile Number already taken or invalid',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => '',
+        ]);
+    }
+
+
     public function addCandidatePost(Request $request)
+    {
+        $loginuser = Auth::user();
+
+        if ($request->has('full_name')) {
+            $validator = Validator::make($request->all(), [
+                'full_name' => 'required|regex:/^[a-zA-Z\s]+$/'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => 'Name is required and must be valid'], 422);
+            }
+        }
+
+        if ($request->has('linked_in')) {
+            $validator = Validator::make($request->all(), [
+                'linked_in' => 'nullable|regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/'
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => 'LinkedIn URL is not valid'], 422);
+            }
+        }
+
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        if ($permission_role->add == '2') {
+            $created_by = $loginuser->id;
+        } else {
+            if (empty($request->created_by)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please select to whom you would assign to'
+                ], 401);
+            }
+            $created_by = $request->created_by;
+        }
+
+        try {
+            $candidate = new Candidates();
+            $candidate->user_id = $loginuser->id;
+            $candidate->full_name = $request->get('full_name');
+            $candidate->email = $request->get('email');
+            $candidate->mobile_number = $request->get('mobile_number');
+            $candidate->total_experience = $request->get('total_experience');
+            $candidate->notice_period = $request->get('notice_period');
+            $candidate->linked_in = $request->get('linked_in');
+            $candidate->current_location = $request->get('current_location');
+            $candidate->gender = $request->get('gender');
+            $candidate->date_of_interview = $request->get('date');
+            $candidate->position = $request->get('position');
+            $candidate->profile_id = Str::random(16);
+            $candidate->profile_token = Str::random(32);
+            $candidate->remarks = $request->get('remarks');
+            $candidate->created_by = $created_by;
+            $candidate->status = 1;
+
+            if ($request->has('date')) {
+                $candidate->created_at = $request->get('date');
+            }
+
+            if ($request->hasFile('upload_cv')) {
+                $file = $request->file('upload_cv');
+                $name = time() . '-' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/cv/'), $name);
+                $candidate->cv_file = $name;
+            }
+
+            $candidate->save();
+
+            if ($request->input('submit') === 'send_mail') {
+                $this->sendEmailCandidateProfile($candidate->id);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Candidate added successfully',
+                'data' => $candidate
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Exception occurred',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // POST /add
+    public function addCandidatePostOLD29725(Request $request)
     {
         $user = Auth::user();
         $role = Roles::find($user->user_role);
