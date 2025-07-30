@@ -208,16 +208,7 @@ const numericId = candidateId.replace("HRM", "");
                           </button>
                         )}
 
-                          {row.action.edit_allowed && (
-                          <button
-                            onClick={() => handleEditClick(row.action.edit_url)}
-                            className="btn btn-success"
-                          >
-                            ✏️
-                          </button>
-                        )}
-
-                         
+              
                           <button
                             onClick={() => handleStartOnboarding(row.id)}
                             className="btn btn-primary"
