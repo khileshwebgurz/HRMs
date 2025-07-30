@@ -39,7 +39,7 @@ const Rules = () => {
                         </a>
                       </li>
                     </ul>
-                    <div className="tab-content" id="myTabContent">
+                    <div  id="myTabContent">
                       <div
                         className="tab-pane fade active show ml-1"
                         id="general"

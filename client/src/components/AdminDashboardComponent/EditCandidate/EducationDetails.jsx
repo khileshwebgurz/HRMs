@@ -120,7 +120,7 @@ const EducationDetails = ({ educationRows, setEducationRows }) => {
                     ></textarea>
                   </td>
                   <td>
-                    {index > 0 && (
+                    {index >= 0 && (
                       <button
                         type="button"
                         className="btn btn-danger btn-sm"

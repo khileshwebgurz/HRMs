@@ -17,6 +17,8 @@ const AddressInfoSection = ({ employeedata }) => {
     }
   }, [employeedata]);
 
+
+
   const handleEditClick = () => setIsEditing(true);
 
  const handleCancelClick = () => {
@@ -36,7 +38,7 @@ const AddressInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
-    console.log("my form data is >>", formData);
+  
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
@@ -52,14 +54,14 @@ const AddressInfoSection = ({ employeedata }) => {
         updated_by: formData.updated_by || "hr-emp",
       };
 
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,
         filteredFormData,
         { withCredentials: true }
       );
 
-      const data = await response.data;
-      console.log("Success:", data);
+     
+    
       setIsEditing(false);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -128,7 +130,7 @@ const AddressInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value ">
-                    {employeedata?.candidate?.current_address}
+                   {formData?.current_address || ""}
                   </div>
                 )}
               </div>
@@ -150,7 +152,7 @@ const AddressInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value ">
-                    {employeedata?.candidate?.permanent_address}
+                    {formData?.permanent_address || ""}
                   </div>
                 )}
               </div>
@@ -177,7 +179,7 @@ const AddressInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value mt-2">
-                    {employeedata?.candidate?.current_phone}
+                    {formData?.current_phone || ""}
                   </div>
                 )}
               </div>
@@ -203,7 +205,7 @@ const AddressInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value  mt-2">
-                    {employeedata?.candidate?.permanent_phone}
+                    {formData?.permanent_phone || ""}
                   </div>
                 )}
               </div>

@@ -1,6 +1,12 @@
-import React from "react";
+import { useState } from "react";
 
-const MonthlyLog = ({ data }) => {
+const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const handleFilter = () => {
+    getAttendance(1, fromDate, toDate);
+  };
   return (
     <>
       {/* inside MOnthly logs */}
@@ -28,6 +34,8 @@ const MonthlyLog = ({ data }) => {
                   id="from_date"
                   className="form-control dateppp mb-3 input-text"
                   placeholder="From Date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
                 />
               </div>
               <div className="col-sm-3">
@@ -37,14 +45,17 @@ const MonthlyLog = ({ data }) => {
                   id="to_date"
                   className="form-control mb-3 dateppp input-text"
                   placeholder="To Date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
                 />
               </div>
-              <div className="col-sm-2">
+               <div className="col-sm-2">
                 <button
                   type="button"
                   name="filter"
                   id="filter"
                   className="btn btn-primary mb-3 btn-sm site-main-btn"
+                  onClick={handleFilter}
                 >
                   Filter
                 </button>
@@ -77,22 +88,40 @@ const MonthlyLog = ({ data }) => {
                 <tr key={index}>
                   <td>{log.clock_date}</td>
                   <td>{log.status}</td>
-                  <td dangerouslySetInnerHTML={{ __html: log.clock_in}}/>
+                  <td dangerouslySetInnerHTML={{ __html: log.clock_in }} />
                   <td>{log.clock_out}</td>
                   <td>{log.work_duration}</td>
-                  <td dangerouslySetInnerHTML={{ __html: log.after_shift_clockin_reason}}/>
+                  <td
+                    dangerouslySetInnerHTML={{
+                      __html: log.after_shift_clockin_reason,
+                    }}
+                  />
                   <td>{log.breaks}</td>
                   <td>{log.break_duration}</td>
-                  <td>
-                    <button className="btn btn-sm btn-primary">View</button>
-                  </td>
+                  <td></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <div className="pagination mt-3">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => getAttendance(currentPage - 1, fromDate, toDate)}
+          >
+            Previous
+          </button>
+          <span className="mx-2">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => getAttendance(currentPage + 1, fromDate, toDate)}
+          >
+            Next
+          </button>
+        </div>
       </div>
-      
     </>
   );
 };

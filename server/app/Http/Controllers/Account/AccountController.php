@@ -23,7 +23,7 @@ use App\Models\SalarySlipsDetail;
 use App\Models\Salary_Slip_Request;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Database\Eloquent\Model; 
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Employee;
 use App\Mail\ReadinessResultMail;
 
@@ -105,6 +105,78 @@ class AccountController extends Controller
     }
 
 
+    // public function monthlyAttendance(Request $request)
+    // {
+    //     $loginuser = Auth::user();
+
+    //     $user_id = $request->emp_id ?? $loginuser->id;
+
+    //     $shift_type = $loginuser->shift_type;
+
+    //     $shiftTime = $shift_type == 1
+    //         ? explode("-", get_options('day_shift_timing'))
+    //         : explode("-", get_options('night_shift_timing'));
+
+
+    //     $shift_start = $shiftTime[0];
+    //     $shift_end = $shiftTime[1];
+
+    //     $data = EmployeeAttendance::where('employee_id', $user_id);
+
+
+    //     if (!empty($request->startdate) && !empty($request->enddate)) {
+    //         $data = $data->whereBetween('clock_date', [
+    //             $request->startdate,
+    //             $request->enddate
+    //         ]);
+    //     }
+
+    //     $records = $data->get();
+    //     // Log::info('This is records', ['records' => $records]);
+    //     $transformed = $records->map(function ($row) {
+    //         $today = date('Y-m-d');
+
+    //         $user_id = $row->employee_id;
+
+    //         $clock_in = $row->clock_in . ($row->late_reason ? "<br><span style='color:red;'>{$row->late_reason}</span>" : '');
+    //         $after_shift_reason = "<span style='color:red;'>{$row->after_shift_clockin_reason}</span>";
+
+
+    //         // Work Duration
+    //         $work_duration = '-';
+    //         if ($row->clock_date != $today && !empty($row->work_duration)) {
+
+    //             $wd = explode(":", $row->work_duration);
+    //             $work_duration = "{$wd[0]} Hours {$wd[1]} Mins";
+    //         }
+
+    //         // Break Duration
+    //         $break_duration = $row->break_duration ?: "0 Hours 0 Mins";
+
+    //         // Overtime
+    //         $overtime = '-';
+    //         if ($row->clock_date != $today && $row->overtime != '00:00') {
+
+    //             // $od = explode(":", $row->overtime);
+    //             // $overtime = "{$od[0]} Hours {$od[1]} Mins";
+    //         }
+
+    //         return [
+    //             'id' => $row->id,
+    //             'clock_date' => $row->clock_date,
+    //             'status' => $row->clock_date == $today ? '-' : $row->status,
+    //             'clock_in' => $clock_in,
+    //             'after_shift_clockin_reason' => $after_shift_reason,
+    //             'work_duration' => $work_duration,
+    //             'break_duration' => $break_duration,
+    //             // 'overtime' => $overtime,
+    //             'action' => ($row->late_reason || $row->after_shift_clockin_reason) ? true : false,
+    //         ];
+    //     });
+
+    //     return response()->json($transformed);
+    // }
+
     public function monthlyAttendance(Request $request)
     {
         $loginuser = Auth::user();
@@ -131,9 +203,13 @@ class AccountController extends Controller
             ]);
         }
 
-        $records = $data->get();
+        $perPage = $request->get('perPage', 10); // default 10
+        $page = $request->get('page', 1);
+
+        $paginated = $data->paginate($perPage, ['*'], 'page', $page);
+
         // Log::info('This is records', ['records' => $records]);
-        $transformed = $records->map(function ($row) {
+        $transformed = $paginated->getCollection()->map(function ($row) {
             $today = date('Y-m-d');
 
             $user_id = $row->employee_id;
@@ -172,9 +248,15 @@ class AccountController extends Controller
                 // 'overtime' => $overtime,
                 'action' => ($row->late_reason || $row->after_shift_clockin_reason) ? true : false,
             ];
-        });
+        })->toArray();
 
-        return response()->json($transformed);
+        return response()->json([
+            'data' => $transformed,
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'total' => $paginated->total(),
+            'per_page' => $paginated->perPage(),
+        ]);
     }
 
 
@@ -343,17 +425,17 @@ class AccountController extends Controller
                 ]);
 
 
-                  Notifications::create([
-                        'notify_type' => 'info',
-                        'type_id' => 'readiness_complete',
-                        'page_id' => $user->id,
-                        'notify_to' => 1, // Admin or Manager user ID - change as needed
-                        'message' => $user->name . ' has completed the readiness quiz.',
-                        'notify_status' => 1,
-                    ]);
+                Notifications::create([
+                    'notify_type' => 'info',
+                    'type_id' => 'readiness_complete',
+                    'page_id' => $user->id,
+                    'notify_to' => 1, // Admin or Manager user ID - change as needed
+                    'message' => $user->name . ' has completed the readiness quiz.',
+                    'notify_status' => 1,
+                ]);
 
-                    Log::info('Notification created for readiness quiz completion.');
-                    
+                Log::info('Notification created for readiness quiz completion.');
+
                 // Send Email
                 Mail::to($user->email)->send(new ReadinessResultMail(
                     $user->name,
@@ -362,7 +444,6 @@ class AccountController extends Controller
                 ));
 
                 Log::info('Readiness quiz email sent to ' . $user->email);
-
             } catch (\Exception $e) {
                 Log::error('Failed to save results or send mail: ' . $e->getMessage());
                 return response()->json([
@@ -380,12 +461,12 @@ class AccountController extends Controller
         ]);
     }
 
-    
+
     public function saveReadinessQuizResult280725(Request $request)
     {
         // Get authenticated user
         $user = Auth::user();
-        
+
         if (!$user) {
             return response()->json([
                 'status' => 401,
@@ -419,7 +500,7 @@ class AccountController extends Controller
             $correctAnswers = Questions::whereIn('id', $questionIds)
                 ->pluck('answer', 'id')
                 ->toArray();
-                
+
             Log::info('CORRECT ANSWERS:', $correctAnswers);
         } catch (\Exception $e) {
             Log::error('Failed to fetch correct answers: ' . $e->getMessage());
@@ -435,7 +516,7 @@ class AccountController extends Controller
 
         foreach ($submittedAnswers as $qId => $submittedAns) {
             $questionId = (int) str_replace('q', '', $qId);
-            
+
             if (!isset($correctAnswers[$questionId])) {
                 Log::warning("Question {$questionId} not found in correct answers!");
                 continue;
@@ -491,7 +572,6 @@ class AccountController extends Controller
                     'score' => $percentage,
                     'status' => $percentage >= 90 ? 'passed' : 'failed'
                 ]);
-
             } catch (\Exception $e) {
                 Log::error('Failed to save results: ' . $e->getMessage());
                 return response()->json([
@@ -654,5 +734,43 @@ class AccountController extends Controller
         } catch (\Throwable $e) {
             return response()->json(['error' => 'Server Error', 'details' => $e->getMessage()], 500);
         }
+    }
+
+     public function getAttendanceByDate(Request $request)
+    {
+        $res = getWorkingHoursByDate('2021-01-15', 1);
+        $loginuser = Auth::user();
+        // $currentDate = date('Y-m-d');
+        $user_id = $loginuser->id;
+        if ($request->has('emp_id')) {
+
+            $user_id = $request->emp_id;
+        }
+        // Today Attendance
+        $todayAttendance = AttendanceLog::where('employee_id', $user_id)->where('clock_date', $request->date)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $atHtml = '';
+        if ($todayAttendance) {
+            $sno = 1;
+            foreach($todayAttendance as $attendance) {
+                $type = ($attendance->type == 1) ? "In" : "Out";
+                $ip_address = ($attendance->ip_address) ? $attendance->ip_address : "-";
+                $address = ($attendance->address) ? $attendance->address : "-";
+                $clock_time = date("H:i A", strtotime(date('Y-m-d') . ' ' . $attendance->clock_time));
+
+                $atHtml .= '<tr><td>' . $sno . '</td><td>' . $clock_time . '</td><td>' . $type . '</td><td>' . $ip_address . '</td><td>' . $address . '</td></tr>';
+                $sno ++;
+         }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Profile updated",
+            'data' => array(
+                'todayattendancelog' => $atHtml
+            )
+        ]);
     }
 }

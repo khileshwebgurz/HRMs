@@ -616,7 +616,7 @@ class LeavesController extends Controller
                     $to_emails = $arr;
 
                     $to_name = $manager->name;
-                    // $to_emails =['hr@yopmail.in','jp@yopmail.in',$manager->email,'careers@yopmail.in'];
+                    $to_emails =['hr@yopmail.in','jp@yopmail.in',$manager->email,'careers@yopmail.in'];
                     $data = array(
                         'to_name' => $to_name,
                         'employee' => $employee->name,
@@ -629,11 +629,11 @@ class LeavesController extends Controller
                         'view' => route('viewLeaveRequest', $leaves->id),
                         'reason' => $request->get('reason')
                     );
-                    // Mail::send('attendance.leave-request-alert', $data, function ($message) use ($to_name, $to_emails, $employee) {
-                    //     $message->from('noreply@yopmail.in', 'noreply')
-                    //         ->to($to_emails)
-                    //         ->subject('Leave Application - ' . $employee->name);
-                    // });
+                    Mail::send('attendance.leave-request-alert', $data, function ($message) use ($to_name, $to_emails, $employee) {
+                        $message->from('noreply@yopmail.in', 'noreply')
+                            ->to($to_emails)
+                            ->subject('Leave Application - ' . $employee->name);
+                    });
 
 
 

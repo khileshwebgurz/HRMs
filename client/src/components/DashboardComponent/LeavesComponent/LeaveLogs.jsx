@@ -7,6 +7,16 @@ const LeaveLogs = ({ myLeaves, onDelete }) => {
 
   return (
     <div className="table-responsive mt-3">
+        <input
+        type="text"
+        placeholder="Search by name or email..."
+        // value={searchTerm}
+        // onChange={(e) => {
+        //   setSearchTerm(e.target.value);
+        //   setCurrentPage(1);
+        // }}
+        className="form-control my-3"
+      />
       <table className="table table-bordered table-striped">
         <thead className="thead-dark">
           <tr>

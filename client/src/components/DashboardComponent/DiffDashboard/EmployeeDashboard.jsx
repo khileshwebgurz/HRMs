@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 const EmployeeDashboard = ({user}) => {
-    console.log('user insdie employee dashboard ?>>>',user)
+   
   return (
     <>
       <section className="content mt-4">

@@ -106,7 +106,7 @@ const Navbar = () => {
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
   };
-  
+
   return (
     <>
       <div className="wrapper" id="menu_button">
@@ -169,32 +169,41 @@ const Navbar = () => {
                   <div id="clockInWrapper" className="no-gutters clockInUser">
                     <div className="clockInAction d-flex flex-column align-items-center">
                       {/* {!hasClockedInData ? ( */}
-                        <button
-                          id="clockInBtn"
-                          data-clocked-in={isClockedIn.toString()}
-                          className={`clockInBtn btn custom-btn clockInBigAct waves-effect waves-light ${
-                            isClockedIn ? "btn-success" : "btn-danger"
-                          }`}
-                        >
-                          {isClockedIn ? (
-                            <span onClick={handleClockOut} className="outLabel">
-                              CLOCK-OUT
-                            </span>
-                          ) : (
-                            <span
-                              onClick={handleClockIN}
-                              className="inLabel"
-                              id="clock_in"
-                            >
-                              CLOCK-IN
-                            </span>
-                          )}
-                        </button>
+
+                      {new Date()
+                        .toLocaleDateString("en-US", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                        .replace(",", "")}
+
+                      <button
+                        id="clockInBtn"
+                        data-clocked-in={isClockedIn.toString()}
+                        className={`clockInBtn btn custom-btn clockInBigAct waves-effect waves-light ${
+                          isClockedIn ? "btn-success" : "btn-danger"
+                        }`}
+                      >
+                        {isClockedIn ? (
+                          <span onClick={handleClockOut} className="outLabel">
+                            CLOCK-OUT
+                          </span>
+                        ) : (
+                          <span
+                            onClick={handleClockIN}
+                            className="inLabel"
+                            id="clock_in"
+                          >
+                            CLOCK-IN
+                          </span>
+                        )}
+                      </button>
                       {/* ) : ( */}
-                        <span className="inLabel"
-                              id="clock_in">
-                         {todayWorkingHour}
-                        </span>
+                      <span className="inLabel" id="clock_in">
+                        {todayWorkingHour}
+                      </span>
                       {/* )} */}
 
                       {isClockedIn && todayWorkingHour && !hasClockedInData && (

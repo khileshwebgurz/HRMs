@@ -12,7 +12,7 @@ import ReferenceNumber from "./PersonalInfo/ReferenceNumber";
 import OtherInformation from "./PersonalInfo/OtherInformation";
 
 const PersonalInfo = ({ employeedata }) => {
-  console.log("my personal data data is >>>", employeedata);
+  
   return (
     <>
       <section className="content mt-4 info-sec">

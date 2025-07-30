@@ -1,6 +1,23 @@
-import React from "react";
+import { useState } from "react";
 
 const DailyLog = () => {
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+
+  const updateDate = (changeType) => {
+    const current = new Date(selectedDate);
+    current.setDate(current.getDate() + (changeType === "+" ? 1 : -1));
+
+    const newDate = current.toISOString().split("T")[0];
+    setSelectedDate(newDate);
+    onDateChange && onDateChange(newDate); // Optional callback
+  };
+
+  const handleInputChange = (e) => {
+    setSelectedDate(e.target.value);
+    onDateChange && onDateChange(e.target.value);
+  };
   return (
     <>
       <div className="logs-table-container bg-white">
@@ -20,25 +37,30 @@ const DailyLog = () => {
                     <span
                       className="previous-date-txt mr-3 change_date"
                       id="previous_date"
-                      data-type="-"
+                      onClick={() => updateDate("-")}
+                      style={{ cursor: "pointer" }}
                     >
                       <i className="fas fa-chevron-left"></i>
                     </span>
+
                     <input
                       name="date-selector-daily"
                       id="date-selector-daily"
                       className="datePicker date-selector-daily dateppp"
-                      aria-invalid="false"
                       type="date"
-                      defaultValue={new Date().toISOString().split("T")[0]}
+                      value={selectedDate}
+                      onChange={handleInputChange}
                     />
+
                     <span
                       className="next-date-txt ml-3 change_date"
-                      data-type="+"
                       id="next_date"
+                      onClick={() => updateDate("+")}
+                      style={{ cursor: "pointer" }}
                     >
                       <i className="fas fa-chevron-right"></i>
                     </span>
+
                     <span
                       id="monthly_url"
                       data-uu-id="4b7e8f44-59d5-4749-8188-5746711efc97"

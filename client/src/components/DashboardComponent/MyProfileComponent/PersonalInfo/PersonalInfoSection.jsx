@@ -52,7 +52,7 @@ const PersonalInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
-    console.log("my form data is >>", formData);
+   
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;

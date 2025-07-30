@@ -133,7 +133,7 @@ const FamilyDetails = ({familyMembers, setFamilyMembers}) => {
                   />
                 </td>
                 <td>
-                  {index > 0 && (
+                  {index >= 0 && (
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleFamilyDeleteRow(index)}

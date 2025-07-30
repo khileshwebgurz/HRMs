@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import DailyLog from "./DailyLog";
 import MonthlyLog from "./MonthlyLog";
-const Logs = ({ attendance }) => {
+const Logs = ({ attendance,currentPage,totalPages,getAttendance }) => {
   const [nestedTab, setNestedTab] = useState("daily");
   const handleNestedTab = (tab) => {
     setNestedTab(tab);
@@ -20,7 +20,7 @@ const Logs = ({ attendance }) => {
         <ul className="nav nav-tabs" id="myTab" role="tablist">
           <li className="nav-item waves-effect waves-light">
             <button
-              className="nav-link active"
+              
               id="dailylog-tab"
               data-toggle="tab"
               href="#dailylog"
@@ -34,7 +34,7 @@ const Logs = ({ attendance }) => {
           </li>
           <li className="nav-item waves-effect waves-light">
             <button
-              className="nav-link"
+             
               id="monthlylog-tab"
               data-toggle="tab"
               href="#monthlylog"
@@ -74,10 +74,16 @@ const Logs = ({ attendance }) => {
               </div>
             </div>
           </div>
-          {nestedTab === "monthly" && <MonthlyLog data={attendance} />}
+          {nestedTab === "monthly" && <MonthlyLog data={attendance}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getAttendance={getAttendance} />}
         </div>
       </div>
     </>
+
+   
+//https://hrm.webguruz.in/employee/attendance/get-attendance-by-date?ver=1753787531 // 
   );
 };
 

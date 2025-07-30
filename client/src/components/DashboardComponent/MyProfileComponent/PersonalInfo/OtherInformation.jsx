@@ -6,6 +6,7 @@ const OtherInformation = ({ employeedata }) => {
   const [questions, setQuestions] = useState([]);
   const [formData, setFormData] = useState({});
 
+  console.log('my cndnahdhjbdjsf id is >>',employeedata)
   useEffect(() => {
     if (employeedata?.candidate) {
       const candidateId = employeedata.candidate.candidate_id;
@@ -69,6 +70,8 @@ const OtherInformation = ({ employeedata }) => {
         on_candidate_id: formData.on_candidate_id,
         updated_by: formData.updated_by || "hr-emp",
       };
+
+      console.log('my filtered form data is >>>', filteredFormData)
 
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/joining-form-submit`,

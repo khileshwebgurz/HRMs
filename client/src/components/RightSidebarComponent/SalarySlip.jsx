@@ -22,10 +22,10 @@ const SalarySlip = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Selected Months:", selectedMonths);
-    // Call your API here with selectedMonths
+    
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/salary-slip`,
+        `${import.meta.env.VITE_API_BASE_URL}/salary-slip`,
 
         {
           withCredentials: true,

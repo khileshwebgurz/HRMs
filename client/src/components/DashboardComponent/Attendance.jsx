@@ -8,18 +8,38 @@ const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
   const [activeTab, setActiveTab] = useState("logs");
 
-  useEffect(() => {
-    const getAttendance = async () => {
-      const data = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/employee/attendance`,
-        { withCredentials: true }
-      );
-      setAttendance(data.data);
-    };
-    getAttendance();
-  }, []);
+
+const [currentPage, setCurrentPage] = useState(1);
+const [perPage] = useState(10); // or let user change it
+const [totalPages, setTotalPages] = useState(1);
 
 
+ const getAttendance = async (page = 1, startDate = "", endDate = "") => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/employee/attendance`,
+      {
+        withCredentials: true,
+        params: {
+          page,
+          perPage,
+           startdate: startDate,
+        enddate: endDate
+        },
+      }
+    );
+    setAttendance(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setTotalPages(res.data.last_page);
+  } catch (err) {
+    console.error("Error fetching attendance:", err);
+  }
+};
+useEffect(() => {
+  getAttendance();
+}, []);
+
+  console.log('my attendance is >>>',attendance)
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -75,11 +95,16 @@ const Attendance = () => {
                 {/* <div className="tab-content" id="pills-tabContent"> */}
                 {/* className is removed */}
                 <div id="pills-tabContent">
-                  {activeTab === "logs" && <Logs attendance={attendance} />}
+                  {activeTab === "logs" && <Logs attendance={attendance}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        getAttendance={getAttendance}/>}
 
                   {/* only visible when activeTab is rule */}
                   {activeTab === "rules" && <Rules />}
                 </div>
+
+                
               </div>
             </div>
           </div>

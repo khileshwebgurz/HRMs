@@ -11,7 +11,7 @@ const MyProfile = ({path}) => {
   const [activeTab, setActiveTab] = useState("personal");
 
   const ID = path ? path : user.id;
-
+// candidate_id
 
   // Fetch employee data on mount
   useEffect(() => {

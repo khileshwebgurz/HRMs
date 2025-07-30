@@ -150,7 +150,7 @@ const EmploymentHistory = ({employments, setEmployments}) => {
                   </select>
                 </td>
                 <td>
-                  {index > 0 && (
+                  {index >= 0 && (
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleEmploymentDeleteRow(index)}

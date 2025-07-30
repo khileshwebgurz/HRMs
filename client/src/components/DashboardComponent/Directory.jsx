@@ -24,6 +24,7 @@ const Directory = () => {
     fetchData()
   }, [])
 
+  console.log(employee,'sdghdsg');
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
     setCurrentPage(1) // Reset to first page on new search
@@ -107,7 +108,7 @@ const Directory = () => {
 
                   {/* Table */}
                   <div className="table-responsive_">
-                    <table className="table table-striped wg_allinterviews table-responsive">
+                    <table className="table table-striped wg_allinterviews">
                       <thead>
                         <tr>
                           <th>#</th>

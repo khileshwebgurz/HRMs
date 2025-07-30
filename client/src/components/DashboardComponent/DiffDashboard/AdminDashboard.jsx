@@ -22,6 +22,8 @@ const AdminDashboard = () => {
     adminDataLog();
     }, []);
 
+    console.log('my stats is >>',stats)
+
   return (
     <div className="content-header">
       <div className="container-fluid">
