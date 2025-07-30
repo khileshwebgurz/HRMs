@@ -25,13 +25,124 @@ use Illuminate\Support\Str;
 use App\Models\CandidateQuestions;
 use App\Models\OnboardRequests;
 use Carbon\Carbon;
-use Session;
-use App\Roles;
+use Illuminate\Support\Facades\Session;
+use App\Models\Roles;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+
 
 
 class OnboardProcessController extends Controller
 {
+
+ 
+   public function onboardCandidates(Request $request)
+    {
+
+        $permissions = Session::get('permission');
+        Log::info('My permissions >>>>',['total permissions are >', $permissions]);
+        if (!is_array($permissions) || !isset($permissions[0]) || !in_array('onboarding_list', $permissions[0])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $requests = OnboardRequests::pluck('candidate_name')->toArray();
+        $candidate = ObCandidates::pluck('name')->toArray();
+        $result = array_diff($candidate, $requests);
+
+        $permission_role = Roles::find(Auth::user()->user_role);
+        $viewLevel = $permission_role?->view;
+        $data = [];
+
+        switch ($viewLevel) {
+            case '2':
+                $data = ObCandidates::where('created_by', Auth::user()->id)->latest()->get();
+                break;
+            case '3':
+                $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id');
+                $data = ObCandidates::whereIn('created_by', $employees)->latest()->get();
+                break;
+            case '4':
+                $employees = Employees::where('manager_id', Auth::user()->id)
+                    ->orWhere('id', Auth::user()->id)
+                    ->pluck('id');
+                $data = ObCandidates::whereIn('created_by', $employees)->latest()->get();
+                break;
+            case '5':
+                $data = ObCandidates::latest()->get();
+                break;
+        }
+
+        // Optional: Transform department names
+        $departments = [
+            '1' => 'Digital Marketing',
+            '2' => 'Buisness Development',
+            '3' => 'Mobile Development',
+            '4' => 'Web Designing',
+            '5' => 'HR',
+            '6' => 'Admin',
+            '7' => 'Quality',
+            '8' => 'Web Development',
+            '10' => 'Content Writing',
+        ];
+
+        $transformed = $data->map(function ($item) use ($departments) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'email' => $item->email,
+                'phone' => $item->phone,
+                'job_title' => $item->job_title,
+                'department' => $departments[$item->department] ?? 'Other',
+                'date_of_joining' => date('Y-m-d', strtotime($item->date_of_joining)),
+            ];
+        });
+
+        return response()->json([
+            'data' => $transformed,
+            'permissions' => [
+                'view' => $viewLevel,
+                'freeze_status' => Auth::user()->freeze_status,
+            ],
+        ]);
+    }
+
+    public function startOnboarding($candidate_id)
+    {
+        $candidate = Candidates::find($candidate_id);
+        $date = date('Y-m-d');
+
+        if ($candidate) {
+            $onCan = new ObCandidates();
+            $onCan->candidate_id = $candidate_id;
+            $onCan->name = $candidate->full_name;
+            $onCan->phone = $candidate->mobile_number;
+            $onCan->email = $candidate->email;
+            $onCan->job_title = $candidate->position;
+            $onCan->date_of_joining = $date;
+            $onCan->department = $candidate->department;
+            $onCan->created_by = Auth::user()->id;
+            $onCan->save();
+
+           // return redirect()->route('onboardCandidates')->with('success', $candidate->full_name . " candidate is now on onboard.");
+          return Redirect::route('onboardCandidates')->with('success', $candidate->full_name . " candidate is now on onboard.");
+          Log::info('My onboardCandidates >>>>',['total candidates are >', $data]);
+        } else {
+            Log::info('My allcandidates >>>>',['total candidates are >']);
+          return Redirect::route('allcandidates')->with('error', 'Something went wrong. Try again.');
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 // public function joinigFormSubmitOLD(Request $request)
 
@@ -585,7 +696,7 @@ class OnboardProcessController extends Controller
 //     }
 
 
-public function joinigFormSubmit(Request $request)
+    public function joinigFormSubmit(Request $request)
     {
         Log::info('Request data:', $request->all());
 
@@ -835,7 +946,7 @@ public function joinigFormSubmit(Request $request)
         } elseif ($section === 'other_information') {
             foreach ($request->candidate_questions as $question) {
                 $candidateQuestion = CandidateQuestions::where('id', $question['id'])
-                    ->where('ob_candidate_id', $ob_candidate_id)
+                    ->where('id', $ob_candidate_id)
                     ->first();
                 if ($candidateQuestion) {
                     $candidateQuestion->status = $question['status'];
@@ -888,7 +999,7 @@ public function joinigFormSubmit(Request $request)
             // $fieldData->save();
 
             $message = $updated_by == 'hr' ? 'Joining Details Added.' :
-                       ($updated_by == 'hr-emp' ? ($request->updated_form ?? 'Form updated.') : 'Thank you for submitting your details.');
+                    ($updated_by == 'hr-emp' ? ($request->updated_form ?? 'Form updated.') : 'Thank you for submitting your details.');
 
             return response()->json([
                 'status' => 200,
@@ -902,4 +1013,5 @@ public function joinigFormSubmit(Request $request)
             'message' => 'Something went wrong. Try again.'
         ]);
     }
+
 }
