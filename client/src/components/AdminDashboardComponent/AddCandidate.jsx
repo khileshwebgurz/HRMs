@@ -24,6 +24,7 @@ const AddCandidate = () => {
   const [errors, setErrors] = useState({});
   const [rolePermission, setRolePermission] = useState(true); // true = allowed
   const [loading, setLoading] = useState(true);
+  const [submitType, setSubmitType] = useState('save'); // NEW: track button type
 
   useEffect(() => {
     axios
@@ -55,6 +56,8 @@ const AddCandidate = () => {
     for (let key in form) {
       formData.append(key, form[key]);
     }
+
+    formData.append('submit', submitType); // Append clicked button type
 
     axios
       .post(`${API_BASE_URL}/tracker/add-candidate-post`, formData, {
@@ -266,10 +269,18 @@ const AddCandidate = () => {
         </div>
 
         <div className="col-md-12 text-center mt-3">
-          <button className="btn btn-primary mr-3" type="submit" name="submit" value="send_mail">
+          <button
+            className="btn btn-primary mr-3"
+            type="submit"
+            onClick={() => setSubmitType('send_mail')}
+          >
             Save & Email
           </button>
-          <button className="btn btn-secondary" type="submit" name="submit" value="save">
+          <button
+            className="btn btn-secondary"
+            type="submit"
+            onClick={() => setSubmitType('save')}
+          >
             Save Candidate
           </button>
         </div>

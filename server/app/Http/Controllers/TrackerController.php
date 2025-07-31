@@ -15,7 +15,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use App\Models\CandidateStatus;
 use App\Models\CandidateQuestions;
-
+use App\Mail\CandidateProfileUpdate;
 
 class TrackerController extends Controller
 {
@@ -99,31 +99,6 @@ class TrackerController extends Controller
         ]);
     }
 
-    // POST /check
-    public function checkCandidateOLD(Request $request)
-    {
-        if ($request->has('email')) {
-            $validator = Validator::make($request->all(), [
-                'email' => 'regex:/(.+)@(.+)\.(.+)/i|unique:candidates,email'
-            ]);
-            if ($validator->fails()) {
-                return response()->json(['status' => 401, 'message' => 'Email is invalid or already taken']);
-            }
-        }
-
-        if ($request->has('mobile_number')) {
-            $validator = Validator::make($request->all(), [
-                'mobile_number' => 'digits:10|unique:candidates,mobile_number'
-            ]);
-            if ($validator->fails()) {
-                return response()->json(['status' => 401, 'message' => 'Mobile number is invalid or already taken']);
-            }
-        }
-
-        return response()->json(['status' => 200, 'message' => 'Valid']);
-    }
-
-
    public function addCandidate()
     {
         $user = Auth::user();
@@ -168,9 +143,6 @@ class TrackerController extends Controller
             'assignable_employees' => $assign,
         ]);
     }
-
-
-
 
     public function checkCandidate(Request $request)
     {
@@ -275,8 +247,9 @@ class TrackerController extends Controller
             }
 
             $candidate->save();
-
+           Log::info('mail test');
             if ($request->input('submit') === 'send_mail') {
+                Log::info('mail test', ['testing' => $request->input('submit')]);
                 $this->sendEmailCandidateProfile($candidate->id);
             }
 
@@ -294,60 +267,6 @@ class TrackerController extends Controller
         }
     }
 
-
-    // POST /add
-    public function addCandidatePostOLD29725(Request $request)
-    {
-        $user = Auth::user();
-        $role = Roles::find($user->user_role);
-
-        $createdBy = $role->add == '2' ? $user->id : ($request->created_by ?? null);
-        if (!$createdBy) {
-            return response()->json(['status' => 401, 'message' => 'Please assign to someone']);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'full_name' => 'required|regex:/^[a-zA-Z\s]+$/',
-            'email' => 'required|email|unique:candidates,email',
-            'mobile_number' => 'required|digits:10|unique:candidates,mobile_number',
-            'linked_in' => 'nullable|regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
-        }
-
-        $candidate = new Candidates();
-        $candidate->user_id = $user->id;
-        $candidate->full_name = $request->full_name;
-        $candidate->email = $request->email;
-        $candidate->mobile_number = $request->mobile_number;
-        $candidate->notice_period = $request->notice_period;
-        $candidate->linked_in = $request->linked_in;
-        $candidate->current_location = $request->current_location;
-        $candidate->gender = $request->gender;
-        $candidate->profile_id = Str::random(16);
-        $candidate->profile_token = Str::random(32);
-        $candidate->position = $request->position;
-        $candidate->remarks = $request->remarks;
-        $candidate->date_of_interview = $request->date_of_interview;
-        $candidate->created_by = $createdBy;
-        $candidate->status = 1;
-
-        if ($request->hasFile('upload_cv')) {
-            $name = time() . '-' . $request->file('upload_cv')->getClientOriginalName();
-            $request->file('upload_cv')->move(public_path('uploads/cv/'), $name);
-            $candidate->cv_file = $name;
-        }
-
-        $candidate->save();
-
-        if ($request->input('submit') === 'send_mail') {
-            $this->sendEmailCandidateProfile($candidate->id);
-        }
-
-        return response()->json(['status' => 200, 'message' => 'Candidate added']);
-    }
 
     // PUT /edit/{candidate_id}
     public function editCandidatePost(Request $request, $candidate_id)
@@ -409,11 +328,12 @@ class TrackerController extends Controller
     }
 
     // GET /send-email/{candidate_id}
-    public function sendEmailCandidateProfile($candidate_id)
+   public function sendEmailCandidateProfile($candidate_id)
     {
+        
         $candidate = Candidates::findOrFail($candidate_id);
         $candidate->profile_token = Str::random(32);
-        $candidate->profile_token_date = now()->addHours(48);
+        $candidate->profile_token_date = now()->addHours(48); 
         $candidate->save();
 
         $to_email = $candidate->email;
@@ -425,13 +345,17 @@ class TrackerController extends Controller
             'name' => $to_name,
         ];
 
-        Mail::send('emails.candidate-profile', $data, function ($msg) use ($to_email, $to_name) {
-            $msg->to($to_email, $to_name)->subject('Thank you for applying the job.');
-        });
-
-        return response()->json(['status' => 200, 'message' => 'Email sent']);
+        try {
+            Mail::to($to_email)->send(new CandidateProfileUpdate($data));
+            return response()->json(['status' => 200, 'message' => 'Email sent']);
+        } catch (\Exception $e) {
+            
+            Log::error('Error sending email: ' . $e->getMessage());
+            return response()->json(['status' => 500, 'message' => 'Failed to send email. Please try again later.']);
+        }
     }
 
+  
     // GET /mail-to-hr
     public function mailToHr(Request $request)
     {

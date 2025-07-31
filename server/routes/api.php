@@ -209,4 +209,5 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
     Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
     Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
+    Route::get('candidate/profile/{token}/edit', 'UserController@candidateProfile')->name('candidateProfile');
 });

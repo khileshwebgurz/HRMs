@@ -3210,11 +3210,11 @@ class UserController extends Controller
             $message->from('internaltesting24@yopmail.com');
         });
 
-        if (! Mail::failures()) {
-            return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
-        } else {
-            return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
-        }
+            if (! Mail::failures()) {
+                return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
+            } else {
+                return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
+            }
     }
 
     public function candidateProfile($token)

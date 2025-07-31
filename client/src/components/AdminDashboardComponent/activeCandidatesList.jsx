@@ -16,7 +16,8 @@ function ActiveCandidatesList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
-  
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   const fetchData = async (page = 1) => {
     try {
@@ -37,7 +38,7 @@ function ActiveCandidatesList() {
           }
         }
       );
-console.log(response.data,'dataaafa');
+     console.log(response.data,'dataaafa');
       if (response.data) {
         setData(Array.isArray(response.data.data) ? response.data.data : []);
         setDepartments(response.data.departments || {});
@@ -119,22 +120,59 @@ console.log(response.data,'dataaafa');
   //  navigate(/users/edit-candidate/${id});
   };
 
-  const handleStartOnboarding = (id) => {
-    if (confirm('Are you sure You want to start Onboarding?')) {
-      navigate(`/onboarding/start/${id}`);
-    }
-  };
+  // const handleStartOnboarding = (id) => {
+  //   if (confirm('Are you sure You want to start Onboarding?')) {
+  //     navigate(`/onboarding/start/${id}`);
+  //   }
+  // };
+
+    const handleStartOnboarding = async (candidateId) => {
+
+      if (confirm('Are you sure You want to start Onboarding?')) {
+        const numericId = candidateId.replace("HRM", "");
+            console.log(candidateId,'candidateId');
+        console.log(numericId,'numericId');
+          try {
+            const response = await axios.get(
+              `${import.meta.env.VITE_API_BASE_URL}/start-onboarding/${numericId}`,
+              { withCredentials: true }
+            );
+
+            console.log(response, 'response');
+            alert("Candidate successfully onboarded!");
+            // fetchCandidates(currentPage);
+
+          } catch (error) {
+            console.error("Error starting onboarding:", error);
+            alert("Something went wrong during onboarding.");
+          }
+      }
+    };
+
+  // const filteredData = data.filter(candidate => {
+  //   const departmentMatch = !selectedDepartment || 
+  //     (departments[candidate.department] === departments[selectedDepartment]);
+  //   const statusMatch = !selectedStatus || 
+  //     candidate.status === statuses.find(s => s.id == selectedStatus)?.status_name;
+  //   const genderMatch = !selectedGender || 
+  //     candidate.gender?.toString() === selectedGender;
+    
+  //   return departmentMatch && statusMatch && genderMatch;
+  // });
 
   const filteredData = data.filter(candidate => {
-    const departmentMatch = !selectedDepartment || 
-      (departments[candidate.department] === departments[selectedDepartment]);
-    const statusMatch = !selectedStatus || 
-      candidate.status === statuses.find(s => s.id == selectedStatus)?.status_name;
-    const genderMatch = !selectedGender || 
-      candidate.gender?.toString() === selectedGender;
-    
-    return departmentMatch && statusMatch && genderMatch;
-  });
+  const departmentMatch = !selectedDepartment || 
+    (departments[candidate.department] === departments[selectedDepartment]);
+  const statusMatch = !selectedStatus || 
+    candidate.status === statuses.find(s => s.id == selectedStatus)?.status_name;
+  const genderMatch = !selectedGender || 
+    candidate.gender?.toString() === selectedGender;
+  const searchMatch = !searchTerm || 
+    candidate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    candidate.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return departmentMatch && statusMatch && genderMatch && searchMatch;
+});
 
   return (
     <div className="container-fluid">
@@ -144,6 +182,8 @@ console.log(response.data,'dataaafa');
             <div className="col-sm-4">
               <h1>All Candidates</h1>
             </div>
+          
+
             <div className="col-sm-8 text-right all-btn-group">
               <button 
                 className="btn btn-success btn-sm"
@@ -158,6 +198,15 @@ console.log(response.data,'dataaafa');
                 <i className="fas fa-download"></i> Download XLSX
               </button>
             </div>
+              <div className="col-md-3">
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="Search by name or ID"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
           </div>
         </div>
       </section>
