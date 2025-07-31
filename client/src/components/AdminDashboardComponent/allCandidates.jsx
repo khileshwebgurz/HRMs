@@ -53,25 +53,25 @@ console.log(candidates,'datatataa');
   };
 
 
-  const handleStartOnboarding = async (candidateId) => {
-   const numericId = candidateId.replace("HRM", "");
-    console.log(candidateId,'candidateId');
-   console.log(numericId,'numericId');
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/start-onboarding/${numericId}`,
-        { withCredentials: true }
-      );
+const handleSendProdileUpdateLink = async (candidateId) => {
+  const numericId = candidateId.replace("HRM", ""); 
+  console.log(candidateId, 'candidateId');
+  console.log(numericId, 'numericId');
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/send-email/${numericId}`, 
+      { withCredentials: true } 
+    );
 
-      console.log(response, 'response');
-      alert("Candidate successfully onboarded!");
-      // fetchCandidates(currentPage);
-
-    } catch (error) {
-      console.error("Error starting onboarding:", error);
-      alert("Something went wrong during onboarding.");
-    }
-  };
+    console.log(response, 'response');
+      alert("Send Update Profile Link to Candidate successfully!");
+    // fetchCandidates(currentPage);
+    
+  } catch (error) {
+    console.error("Error sending email:", error);
+    alert("Something went wrong while sending the email.");
+  }
+};
 
 
   const handleDeleteBtn = async (id) => {
@@ -181,16 +181,18 @@ console.log(candidates,'datatataa');
                       <div className="btn-group">
                         <button
                           onClick={() => handleBrnClick(row.action?.view_url)}
-                          className="btn btn-info"
+                           style={{color: '#707070'}} 
+                          className="btn btn-info site-icon eye-icon"
                         >
-                          👁️
+                            <i className="fas fa-eye"></i>
                         </button>
                         {row.action.edit_allowed && (
                           <button
                             onClick={() => handleEditClick(row.action.edit_url)}
-                            className="btn btn-success"
+                            className="btn btn-success site-icon pencil-icon"
+                             style={{color: '#707070'}} 
                           >
-                            ✏️
+                           <i className="fas fa-pencil-alt"></i>
                           </button>
                         )}
                         {row.action.delete_allowed && (
@@ -201,19 +203,21 @@ console.log(candidates,'datatataa');
                                 handleDeleteBtn(row.id);
                               }
                             }}
-                            className="btn btn-danger"
+                            className="btn btn-danger delete-icon site-icon"
+                             style={{color: '#707070'}} 
                           >
-                            🗑️
+                           <i className="fas fa-trash"></i>
                           </button>
                         )}
 
               
-                          {/* <button
-                            onClick={() => handleStartOnboarding(row.id)}
-                            className="btn btn-primary"
+                          <button
+                            onClick={() => handleSendProdileUpdateLink(row.id)}
+                            className="site-icon paper-plane-icon"
+                             style={{color: '#707070'}} 
                           >
-                            🚀 Start Onboarding
-                          </button> */}
+                             <i className="fas fa-paper-plane"></i>
+                          </button>
 
                       
                       </div>
