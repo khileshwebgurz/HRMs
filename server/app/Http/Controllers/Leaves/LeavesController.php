@@ -668,215 +668,197 @@ class LeavesController extends Controller
     }
 
     public function applyLeave(Request $request)
-{
-    $type = $request->get('leave_type');
-    $leave_rule = LeaveRules::where('id', $type)->first();
+    {
+        $type = $request->get('leave_type');
+        $leave_rule = LeaveRules::where('id', $type)->first();
+        Log::info('my leave rule array:', $leave_rule->toArray());
 
-    Log::info('My leave rule array:', $leave_rule->toArray());
-
-    // Check if leave rule shows time
-    if ($leave_rule->show_time == '1') {
-        // Get the authenticated user
-        $loginuser = Auth::user();
-        $user = Employees::where('id', $loginuser->id)->first();
-        
-        // Get today's date and ensure leave start date is not before a month ago
-        $todayDate = date('m/26/Y', strtotime("-1 month"));
-
-        // Validation rules
-        $validator = Validator::make($request->all(), [
-            'start_date' => 'required|after_or_equal:' . $todayDate,
-            'start_time' => 'required',
-            'reason' => 'required',
-        ]);
-
-        // If validation fails, return an error response
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 401,
-                'message' => $validator->errors()->first()
+        if ($leave_rule->show_time == '1') {
+            $loginuser = Auth::user();
+            $user = Employees::where('id', $loginuser->id)->first();
+            $todayDate = date('m/26/Y', strtotime("-1 month"));
+            $validator = Validator::make($request->all(), [
+                'start_date' => 'required|after_or_equal:' . $todayDate,
+                'start_time' => 'required',
+                'reason' => 'required',
             ]);
-        }
 
-        // Create a new leave request
-        $leaves = new EmployeeLeaveLogs();
-        $leaves->employee_id = $user->id;
-        $leaves->start_date = $request->get('start_date');
-        $leaves->start_time = $request->get('start_time');
-        $leaves->total_applied_leaves = '0.25';  // assuming a small fraction of a leave
-        $leaves->reason = $request->get('reason');
-        $leaves->leave_type = $request->get('leave_type');
-        $leaves->manager_id = $user->manager_id;
-        $leaves->status = "1";  // Assuming '1' means pending
-
-        if ($leaves->save()) {
-            // Prepare the array of recipients
-            $arr = [];
-            $manager = Employees::where('id', $user->manager_id)->first();
-            array_push($arr, $manager->email, 'hr@yopmail.in');  // Add HR email as fallback
-
-            // If manager has a manager, include them in the notification list
-            if (!empty($manager->manager_id)) {
-                $first_level_manager = Employees::where('id', $manager->manager_id)->first();
-                if ($first_level_manager->id != '1' && $first_level_manager->id != '2') {  // Assuming '1' and '2' are system admins or root managers
-                    array_push($arr, $first_level_manager->email);
-                }
-            }
-
-            // Prepare the data to pass to the email view
-            $leaveRequest = [
-                'manager_name' => $manager->name,
-                'employee_name' => $user->name,
-                'start_date' => $request->get('start_date'),
-                'end_date' => $request->get('start_date'),  // Assuming it's a single day leave request
-                'start_time' => $request->get('start_time'),
-                'reason' => $request->get('reason')
-            ];
-
-            // Send the leave request notification email
-            Mail::to($arr)->send(new LeaveRequestMail($leaveRequest));
-
-            // Create a notification in the system
-            $noti = new Notifications();
-            $noti->type_id = 'attendance_approval_request';  // You might want to adjust this
-            $noti->message = $user->name . ' has requested for leave';
-            $noti->is_seen = 1;
-            $noti->page_id = $leaves->id;
-            $noti->notify_status = 1;
-            $noti->notify_from = Auth::user()->id;
-            $noti->notify_to = $user->manager_id;
-            $noti->notify_type = 2;  // Assuming '2' means a specific notification type
-            $noti->save();
-
-            // Return success response
-            return response()->json([
-                'status' => 200,
-                'message' => 'Leave request created and email sent.',
-                'email' => $arr
-            ]);
-        }
-    } else {
-        // Handle case for leave without time (full-day leave request)
-        $loginuser = Auth::user();
-        $user = Employees::where('id', $loginuser->id)->first();
-        
-        $todayDate = date('m/26/Y', strtotime("-1 month"));
-        $validator = Validator::make($request->all(), [
-            'reason' => 'required',
-            'start_date' => 'required|after_or_equal:' . $todayDate,
-            'end_date' => 'required|after_or_equal:start_date'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 401,
-                'message' => $validator->errors()->first()
-            ]);
-        }
-
-        // Full-day leave request logic
-        $start_date = $request->get('start_date');
-        $end_date = $request->get('end_date');
-        $manager_id = $user->manager_id;
-
-        // Check for half-day inconsistency (if applicable)
-        $start_half = $request->get('start_half');
-        $end_half = $request->get('end_half');
-
-        if ($start_date == $end_date) {
-            if ($start_half == '2' && $end_half == '1') {
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => 401,
-                    'message' => 'Please select the half-day correctly.'
+                    'message' => $validator->errors()->first()
+                ]);
+            }
+
+            $leaves = new EmployeeLeaveLogs();
+            $leaves->employee_id = $user->id;
+            $leaves->start_date = $request->get('start_date');
+            $leaves->end_date = $request->get('start_date');
+            $leaves->start_time = $request->get('start_time');
+            $leaves->total_applied_leaves = '0.25';
+            $leaves->reason = $request->get('reason');
+            $leaves->leave_type = $request->get('leave_type');
+            $leaves->manager_id = $user->manager_id;
+            $leaves->status = "1";
+
+            if ($leaves->save()) {
+                $arr = [];
+                $employee = Employees::where('id', $user->id)->first();
+                $manager = Employees::where('id', $user->manager_id)->first();
+                array_push($arr, $manager->email, 'hr@yopmail.in');
+
+                if (!empty($manager->manager_id)) {
+                    $first_level_manager = Employees::where('id', $manager->manager_id)->first();
+                    if ($first_level_manager->id != '1' && $first_level_manager->id != '2') {
+                        array_push($arr, $first_level_manager->email);
+                    }
+                }
+
+                $to_name = $manager->name;
+                $to_emails = $arr;
+
+                $data = [
+                    'manager_name' => $to_name,
+                    'employee_name' => $employee->name,
+                    'leave_type' => $request->get('leave_type'),
+                    'start_date' => $request->get('start_date'),
+                    'end_date' => $request->get('start_date'),
+                    'start_time' => $request->get('start_time'),
+                    'reason' => $request->get('reason'),
+                    'approve' => route('approveLeaveRequest', $leaves->id),
+                    'reject' => route('rejectLeaveRequest', $leaves->id),
+                    'view' => route('viewLeaveRequest', $leaves->id),
+                ];
+
+                Mail::to($to_emails)->send(new LeaveRequestMail($data));
+
+                $noti = new Notifications();
+                $noti->type_id = 'attendacne_approval_request';
+                $noti->message = $user->name . ' has been requested for leave';
+                $noti->is_seen = 1;
+                $noti->page_id = $leaves->id;
+                $noti->notify_status = 1;
+                $noti->notify_from = Auth::user()->id;
+                $noti->notify_to = $user->manager_id;
+                $noti->notify_type = 2;
+                $noti->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Leave request created',
+                    'email' => $arr
+                ]);
+            }
+        } else {
+            $loginuser = Auth::user();
+            $user = Employees::where('id', $loginuser->id)->first();
+            $todayDate = date('m/26/Y', strtotime("-1 month"));
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required',
+                'start_date' => 'required|after_or_equal:' . $todayDate,
+                'end_date' => 'required|after_or_equal:start_date'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()->first()
+                ]);
+            }
+
+            $start_date = $request->get('start_date');
+            $start_half = $request->get('start_half');
+            $end_date = $request->get('end_date');
+            $end_half = $request->get('end_half');
+
+            if ($start_date == $end_date && $start_half == '2' && $end_half == '1') {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Please select the half proprerly.'
+                ]);
+            }
+
+            try {
+                $start_date_str = strtotime($start_date);
+                $end_date_str = strtotime($end_date);
+                $datediff = $end_date_str - $start_date_str;
+
+                $totalLeavs = [];
+                $totalLeavs[] = round($datediff / (60 * 60 * 24));
+
+                if ($start_half == 1 && $end_half == 1) $totalLeavs[] = 0.5;
+                if ($start_half == 1 && $end_half == 2) $totalLeavs[] = 1;
+                if ($start_half == 2 && $end_half == 2) $totalLeavs[] = 0.5;
+                if ($start_half == 2 && $end_half == 1) $totalLeavs[] = 0;
+
+                $leaves = new EmployeeLeaveLogs();
+                $leaves->employee_id = $user->id;
+                $leaves->start_date = $start_date;
+                $leaves->start_half = $start_half;
+                $leaves->end_date = $end_date;
+                $leaves->end_half = $end_half;
+                $leaves->leave_type = $request->get('leave_type');
+                $leaves->total_applied_leaves = array_sum($totalLeavs);
+                $leaves->reason = $request->get('reason');
+                $leaves->manager_id = $user->manager_id;
+                $leaves->status = "1";
+
+                if ($leaves->save()) {
+                    $arr = [];
+                    $employee = Employees::where('id', $user->id)->first();
+                    $manager = Employees::where('id', $user->manager_id)->first();
+                    array_push($arr, $manager->email, 'hr@yopmail.in');
+
+                    if (!empty($manager->manager_id)) {
+                        $first_level_manager = Employees::where('id', $manager->manager_id)->first();
+                        if ($first_level_manager->id != '1' && $first_level_manager->id != '2') {
+                            array_push($arr, $first_level_manager->email);
+                        }
+                    }
+
+                    $to_emails = ['hr@yopmail.in', 'jp@yopmail.in', $manager->email, 'careers@yopmail.in'];
+                    $to_name = $manager->name;
+
+                    $data = [
+                        'manager_name' => $to_name,
+                        'employee_name' => $employee->name,
+                        'leave_type' => $request->get('leave_type'),
+                        'start_date' => $request->get('start_date'),
+                        'end_date' => $request->get('end_date'),
+                        'start_time' => null,
+                        'reason' => $request->get('reason'),
+                        'approve' => route('approveLeaveRequest', $leaves->id),
+                        'reject' => route('rejectLeaveRequest', $leaves->id),
+                        'view' => route('viewLeaveRequest', $leaves->id),
+                    ];
+
+                    Mail::to($to_emails)->send(new LeaveRequestMail($data));
+
+                    $noti = new Notifications();
+                    $noti->type_id = 'attendacne_approval_request';
+                    $noti->message = $user->name . ' has been requested for leave';
+                    $noti->is_seen = 1;
+                    $noti->page_id = $leaves->id;
+                    $noti->notify_status = 1;
+                    $noti->notify_from = Auth::user()->id;
+                    $noti->notify_to = $user->manager_id;
+                    $noti->notify_type = 2;
+                    $noti->save();
+
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Leave request created',
+                        'email' => $arr
+                    ]);
+                }
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $e->getMessage()
                 ]);
             }
         }
-
-        // Calculate total leave days (considering half-day options)
-        $start_date_str = strtotime($start_date);
-        $end_date_str = strtotime($end_date);
-        $datediff = $end_date_str - $start_date_str;
-
-        $totalLeavs = [];
-        $totalLeavs[] = round($datediff / (60 * 60 * 24));  // Full days
-
-        // Add half-day logic if applicable
-        if ($start_half == 1 && $end_half == 1) {
-            $totalLeavs[] = 0.5;
-        }
-
-        if ($start_half == 1 && $end_half == 2) {
-            $totalLeavs[] = 1;
-        }
-
-        if ($start_half == 2 && $end_half == 2) {
-            $totalLeavs[] = 0.5;
-        }
-
-        if ($start_half == 2 && $end_half == 1) {
-            $totalLeavs[] = 0;
-        }
-
-        // Create the leave request
-        $leaves = new EmployeeLeaveLogs();
-        $leaves->employee_id = $user->id;
-        $leaves->start_date = $start_date;
-        $leaves->start_half = $start_half;
-        $leaves->end_date = $end_date;
-        $leaves->end_half = $end_half;
-        $leaves->leave_type = $request->get('leave_type');
-        $leaves->total_applied_leaves = array_sum($totalLeavs);  // Sum of all leave days and halves
-        $leaves->reason = $request->get('reason');
-        $leaves->manager_id = $user->manager_id;
-        $leaves->status = "1";  // Assuming '1' means pending
-
-        if ($leaves->save()) {
-            // Prepare the array of recipients
-            $arr = [];
-            $manager = Employees::where('id', $user->manager_id)->first();
-            array_push($arr, $manager->email, 'hr@yopmail.in');  // Add HR email as fallback
-
-            // If manager has a manager, include them in the notification list
-            if (!empty($manager->manager_id)) {
-                $first_level_manager = Employees::where('id', $manager->manager_id)->first();
-                if ($first_level_manager->id != '1' && $first_level_manager->id != '2') {  // Assuming '1' and '2' are system admins or root managers
-                    array_push($arr, $first_level_manager->email);
-                }
-            }
-
-            // Prepare the data to pass to the email view
-            $leaveRequest = [
-                'manager_name' => $manager->name,
-                'employee_name' => $user->name,
-                'start_date' => $start_date,
-                'end_date' => $end_date,
-                'start_time' => $request->get('start_time'),
-                'reason' => $request->get('reason')
-            ];
-
-            // Send the leave request notification email
-            Mail::to($arr)->send(new LeaveRequestMail($leaveRequest));
-
-            // Create a notification in the system
-            $noti = new Notifications();
-            $noti->type_id = 'attendance_approval_request';
-            $noti->message = $user->name . ' has requested for leave';
-            $noti->is_seen = 1;
-            $noti->page_id = $leaves->id;
-            $noti->notify_status = 1;
-            $noti->notify_from = Auth::user()->id;
-            $noti->notify_to = $user->manager_id;
-            $noti->notify_type = 2;  // Assuming '2' means a specific notification type
-            $noti->save();
-
-            return response()->json([
-                'status' => 200,
-                'message' => 'Leave request created and email sent.',
-                'email' => $arr
-            ]);
-        }
     }
-}
 
 
     public function approveRequest(Request $request)

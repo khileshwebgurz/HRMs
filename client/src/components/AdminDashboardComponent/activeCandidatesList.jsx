@@ -15,7 +15,8 @@ function ActiveCandidatesList() {
   const [aptitudeLink, setAptitudeLink] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const itemsPerPage = 10;
+  
 
   const fetchData = async (page = 1) => {
     try {
@@ -41,7 +42,7 @@ console.log(response.data,'dataaafa');
         setData(Array.isArray(response.data.data) ? response.data.data : []);
         setDepartments(response.data.departments || {});
         setStatuses(response.data.statuses || []);
-        setCurrentPage(response.data.current_page || 1);
+    //    setCurrentPage(response.data.current_page || 1);
         setTotalPages(response.data.last_page || 1);
       }
     } catch (error) {
@@ -249,6 +250,7 @@ console.log(response.data,'dataaafa');
                             <button
                               className="btn btn-success site-icon pencil-icon"
                               title="Edit"
+                              style={{color: '#707070'}} 
                               onClick={() => handleEdit(candidate.id)}
                             >
                               <i className="fas fa-pencil-alt"></i>
@@ -268,6 +270,7 @@ console.log(response.data,'dataaafa');
                             <button
                               className="btn btn-danger delete-icon site-icon"
                               title="Delete"
+                               style={{color: '#707070'}} vvvvvvvvvvvvvvv
                               onClick={() => handleDelete(candidate.id)}
                             >
                               <i className="fas fa-trash"></i>
