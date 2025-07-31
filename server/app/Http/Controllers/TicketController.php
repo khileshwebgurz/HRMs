@@ -9,6 +9,9 @@ use App\Models\Notifications;
 use App\Models\Employees;
 use Illuminate\Support\Facades\Log;
 use App\Traits\PermissionTrait;
+use Carbon\Carbon;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Mail;
 
 class TicketController extends Controller
 {
@@ -57,7 +60,7 @@ class TicketController extends Controller
             ->take($perPage)
             ->get();
 
-        Log::info('My all ticket requests are  >>>>', ['tickets' => $tickets]);
+
 
         $formattedTickets = $tickets->map(function ($ticket) {
             $employee = $ticket->employee;
@@ -105,9 +108,6 @@ class TicketController extends Controller
             'per_page' => $perPage,
         ]);
     }
-
-
-
 
     public function addTicket(Request $request)
     {
@@ -242,4 +242,277 @@ class TicketController extends Controller
             'ticket_id' => $ticket->id,
         ]);
     }
+
+
+    // this function is completely changed by me , if in any case this doesn't work we need to rollback to older 
+    // function logic from old HRM code.
+    public function ticketViewByITteam(Request $request, $tab)
+    {
+        // $id = Auth::user()->id;
+        // $ticket = Tickets::latest();
+        $filters = Tickets::$filterdata;
+       
+        $open_count = Tickets::where('status', '1')->count();
+        $close_count = Tickets::where('status', '2')->count();
+
+        // Build base query
+        $ticketQuery = Tickets::latest();
+
+        if (!empty($request->datefilter)) {
+            Log::info('My  $request->datefilter) query are  >>>>', ['$request->datefilter)' => $request->datefilter]);
+            $dates = explode(" - ", $request->datefilter);
+
+            Log::info('My  dates query are  >>>>', ['dates' => $dates]);
+            // Check if two dates were passed
+            if (count($dates) === 2) {
+                $start = $dates[0] . ' 00:00:00';
+                $end = $dates[1] . ' 23:59:59';
+            } else {
+                // Only one date - treat as single day filter
+                $start = $dates[0] . ' 00:00:00';
+                $end = $dates[0] . ' 23:59:59';
+            }
+
+            $ticketQuery->whereBetween('created_at', [$start, $end]);
+            Log::info('My  ticket query are  >>>>', ['ticketQuery' => $ticketQuery]);
+        }
+
+        if (!empty($request->status)) {
+            $ticketQuery->where("status", $request->status);
+        }
+
+        // using pagination
+        $perPage = $request->input('per_page', 5);
+        $tickets = $ticketQuery->paginate($perPage);
+
+        // $ticket = $ticket->get();
+
+        // If it's an API request (e.g., from React), return JSON instead of Blade view
+
+        $transformedTickets = $tickets->getCollection()->transform(function ($ticket) {
+            $employee = \App\Models\Employees::find($ticket->employee_id);
+
+            return [
+                'id' => $ticket->id,
+                'ticket_no' => '#IMS-' . $ticket->id,
+                'issue_type' => match ($ticket->issue_type) {
+                    '1' => 'Hardware',
+                    '2' => 'Software',
+                    '3' => 'Server',
+                    '4' => 'Internet',
+                    default => '-',
+                },
+                'issue_level' => match ($ticket->issue_level) {
+                    '1' => 'P1',
+                    '2' => 'P2',
+                    '3' => 'P3',
+                    '4' => 'P4',
+                    default => '-',
+                },
+                'status' => match ($ticket->status) {
+                    '1' => 'Open',
+                    '2' => 'Closed',
+                    '3' => 'In Progress',
+                    default => '-',
+                },
+                'created_at' => $ticket->created_at->format('d/M/Y') === now()->format('d/M/Y')
+                    ? $ticket->created_at->format('H:i A')
+                    : $ticket->created_at->format('d M Y'),
+                'description' => $ticket->description,
+                'employee_name' => $employee->name ?? '-',
+                'work_station' => $employee->work_station_number ?? '-',
+            ];
+        });
+
+        // Return paginated data + open/close counts
+        return response()->json([
+            'tickets' => $transformedTickets,
+            'pagination' => [
+                'total' => $tickets->total(),
+                'current_page' => $tickets->currentPage(),
+                'per_page' => $tickets->perPage(),
+                'last_page' => $tickets->lastPage(),
+            ],
+            'open_count' => $open_count,
+            'close_count' => $close_count,
+            'filterdata' => $filters,
+        ]);
+    }
+
+    // this ticket controller is for it admin
+//     public function addticket(Request $request)
+//   {
+//     $id = Auth::user()->id;
+//     // print_r($id); die();
+//     // $employee = Employees::where('id', $id)->first();
+//     $ticket = new Tickets;
+//     if($request->user_role == '3')
+//     {
+//       $ticket->employee_id = $request['employee'];
+//     }
+//     else
+//     {
+//       $ticket->employee_id = $id;
+//     }
+
+//     if($request['issue'] == 'Hardware')
+//     {
+//       $ticket->issue_type = '1';
+//     }
+//     if($request['issue'] == 'Software')
+//     {
+//       $ticket->issue_type = '2';
+//     }
+//     if($request['issue'] == 'Server')
+//     {
+//       $ticket->issue_type = '3';
+//     }
+//     if($request['issue'] == 'Internet')
+//     {
+//       $ticket->issue_type = '4';
+//     }
+//     // $ticket->issue_type = $request['issue'];
+
+//     if($request['level'] == 'P1')
+//     {
+//       $ticket->issue_level = '1';
+//       $ticket->solved_in = '30 to 60 minutes';
+//       $level_mail = 'P1- Service Unuseable in Production';
+//     }
+//     if($request['level'] == 'P2')
+//     {
+//       $ticket->issue_level = '2';
+//       $ticket->solved_in = 'Upto 2 Hours';
+//       $level_mail = 'P2- Service Partially not working';
+//     }
+//     if($request['level'] == 'P3')
+//     {
+//       $ticket->issue_level = '3';
+//       $ticket->solved_in = 'Upto 8 Hours';
+//       $level_mail = 'P3- Service Partially Impaired';
+//     }
+//     if($request['level'] == 'P4')
+//     {
+//       $ticket->issue_level = '4';
+//       $ticket->solved_in = 'Upto 48 Hours';
+//       $level_mail = 'P4- Service Useable';
+//     }
+//     // $ticket->issue_level = $request['level'];
+//     $ticket->description = $request['description'];
+    
+//     // $ticket->status = '1';
+//     // $ticket->save();
+//     // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
+    
+
+//     // $ticket->issue_to = $it_mail->id;
+
+//     if($ticket->save())
+//     {
+//       $employee = Employees::where('user_role', '3')->where('status', '1')->get();
+//       foreach ($employee as $key => $value)
+//       {
+//         $mail_email[] = $value->email;
+//         $mail_name[] = $value->name;
+//         // $mail_id[] = $value->id;
+
+//         if($value->is_manager == '1')
+//         {
+//           $noti = new Notifications;
+//           $noti->type_id = 'ticket_created';
+//           $noti->message = Auth::user()->name . ' has post a ticket';
+//           $noti->page_id = $ticket->id;
+//           $noti->notify_from = Auth::user()->id;
+//           $noti->notify_type = '2';
+//           $noti->notify_to = $value->id;
+//           $noti->save();
+//         }
+//         else
+//         {
+//           $noti = new Notifications;
+//           $noti->type_id = 'ticket_created';
+//           $noti->message = Auth::user()->name . ' has post a ticket';
+//           $noti->page_id = $ticket->id;
+//           $noti->notify_from = Auth::user()->id;
+//           $noti->notify_to = $value->id;
+//           $noti->notify_type = '3';
+//           $noti->notify_panel = '1';
+//           $noti->save();
+//         }
+//       }
+
+//       $admin = Employees::where('id', '1')->first();
+//       $noti = new Notifications;
+//       $noti->type_id = 'ticket_created';
+//       $noti->message = Auth::user()->name . ' has post a ticket';
+//       $noti->page_id = $ticket->id;
+//       // $noti->notify_status = '2';
+//       $noti->notify_from = $admin->id;
+//       $noti->notify_type = '2';
+//       $noti->notify_to = $admin->id;
+//       $noti->save();
+
+//       // $to_name = $it_mail->name;
+//       // $to_email = $it_mail->email;
+//       $to_name = $mail_name;
+//       $to_email = $mail_email;
+//       $data = array(
+//         // 'name' => $to_name,
+//         'name' => 'IT Team',
+//         'type' => 'New ticket post by '.Auth::user()->name.'',
+//         'issue' => ''.$request['issue']. ' issue has been raised.',
+//         'level' => $level_mail,
+//         'description' => $request['description'],
+//         'id'=> $ticket->id
+//       );
+//       Mail::send('emails.ticket', $data, function ($message) use ($to_name, $to_email) {
+//         $message->to($to_email, $to_name)->subject('Welcome to ticket');
+//       });
+//       if(! Mail::failures())
+//       {
+//         $admin_detail = Employees::where('id', '1')->first();
+//         $to_admin_name = $admin_detail->name;
+//         $to_admin_email = $admin_detail->email;
+//         $data = array(
+//           'name' => $to_admin_name,
+//           'type' => 'New ticket post by '.Auth::user()->name.'',
+//           'issue' => $request['issue']. ' issue has been raised.',
+//           'level' => $level_mail,
+//           'description' => $request['description'],
+//           'id'=> $ticket->id
+//         );
+//         Mail::send('emails.ticket', $data, function ($message) use ($to_admin_name, $to_admin_email) {
+//           $message->to($to_admin_email, $to_admin_name)->subject('Welcome to ticket');
+//         });
+
+//         // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
+//         $thankyou = asset('dist/img/thank-you-img.png');
+//         $countinue = route('em-support-ticket', 'mytickets');
+//         return ["msg"=>"
+//           <div class='thank-you-wrapper text-center'>
+//             <figure>
+//               <img src='$thankyou' alt='' />
+//             </figure>
+//             <h3>Thanks for Submit your Ticket!</h3>
+//             <p>Your Issue will resolve as soon as possible.</p>
+//             <div class='btn-block'><a href='$countinue' class='btn site-main-btn'>Contiune</a></div>
+//           </div>"];
+//       }
+//       else
+//       {
+//         return response()->json([
+//           'status' => 401,
+//           'message' => 'Something Wrong. Try Again.'
+//         ]);
+//       }
+//     }
+//     // else
+//     // {
+//     //   return response()->json([
+//     //     'status' => 401,
+//     //     'message' => 'Something Wrong. Try Again.'
+//     //   ]);
+//     // }
+  
+//   }
 }

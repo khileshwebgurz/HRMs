@@ -45,6 +45,10 @@ import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/Auth/ResetPasswordForm";
  import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
 import AllNotification from "./components/Notification/AllNotification";
+import AllTicketsIT from "./components/DashboardComponent/TicketComponent/AllTicketsIT";
+import NewTicket from "./components/DashboardComponent/TicketComponent/NewTicket";
+import ViewCandidateProfile from "./components/CandidateProfileComp/ViewCandidateProfile";
+import EditCandidateProfile from "./components/CandidateProfileComp/EditCandidateProfile";
 
 function App() {
   return (
@@ -120,6 +124,14 @@ function App() {
           <Route path="/company-policy" element={<CompanyPolicy />} />
           <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  
            <Route path="/add-candidate" element={<AddCandidate />} />
+
+           <Route path="/employee/ticket-system/:name" element={<AllTicketsIT/>}/>
+           <Route path="/employee/support-ticket/newticket" element={<NewTicket/>}/>
+
+           {/* email redirection urls for candidate creation*/}
+           
+           <Route path="/tracker/candidate/profile/:profile_token/edit"  element={<ViewCandidateProfile/>}/>
+           <Route path="/tracker/candidate/profile/:profile_token/view" element={<EditCandidateProfile/>}/>
 
 
           <Route path="*" element={<NotFound />} />

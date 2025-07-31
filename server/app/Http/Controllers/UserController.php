@@ -391,7 +391,7 @@ class UserController extends Controller
         return view('users.listuser', compact('user_roles'));
     }
 
-    
+
 
 
     public function addEmployee()
@@ -554,7 +554,7 @@ class UserController extends Controller
 
         $user->password         = bcrypt($request->password);
         $user->token            = null;    // invalidate token
-       // $user->readiness_status = true;    // mark activated (add column if needed)
+        // $user->readiness_status = true;    // mark activated (add column if needed)
 
         if ($user->save()) {
             return response()->json(['status' => 200, 'message' => 'Password set successfully. You can now log in.']);
@@ -859,7 +859,7 @@ class UserController extends Controller
     /**
      * get all employees
      */
-   
+
 
     public function allEmployees(Request $request)
     {
@@ -992,7 +992,7 @@ class UserController extends Controller
      *
      * @params user_id
      */
-   
+
 
     /**
      * Delete user.
@@ -2756,16 +2756,16 @@ class UserController extends Controller
     }
 
 
-    
+
     public function allCandidates(Request $request)
     {
-        
+
         //  $permissions = Session::get('permission', []);
-        
+
         $currentUser = Auth::user();
-       // Log::info('testtt',['currentUser' => $currentUser]);
+        // Log::info('testtt',['currentUser' => $currentUser]);
         $role = Roles::find($currentUser->user_role);
-         //  Log::info('role',['role' => $role]);
+        //  Log::info('role',['role' => $role]);
         $permissionIds = [];
         $permissionSlugs = [];
 
@@ -2774,55 +2774,53 @@ class UserController extends Controller
             $permissionSlugs = Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
         }
 
-         // Log::info('permissionSlugs',['permissionSlugs' => $permissionSlugs]);
-    
-          if (empty($permissionSlugs) || !in_array('all_candidates', $permissionSlugs)) {
-                abort(403, 'Unauthorized access');
-            }
+        // Log::info('permissionSlugs',['permissionSlugs' => $permissionSlugs]);
+
+        if (empty($permissionSlugs) || !in_array('all_candidates', $permissionSlugs)) {
+            abort(403, 'Unauthorized access');
+        }
 
         $permission_role = Roles::where('id', Auth::user()->user_role)->first();
-        
+
         if (!$permission_role) {
             abort(403, 'Role not found');
         }
 
         // Base query with relationships
         $query = Candidates::with([
-            'candidate_status', 
-            'educations', 
-            'employments', 
-           // 'created_by_user.manager'
+            'candidate_status',
+            'educations',
+            'employments',
+            // 'created_by_user.manager'
         ]);
-        
-        
+
+
         if ($permission_role->view == '2') {
             $query->where('created_by', Auth::user()->id);
-        }
-        elseif ($permission_role->view == '3') {
+        } elseif ($permission_role->view == '3') {
             $employees = Employees::where('manager_id', Auth::user()->id)
                 ->pluck('id')
                 ->toArray();
             $query->whereIn('created_by', $employees);
-        }
-        elseif ($permission_role->view == '4') {
+        } elseif ($permission_role->view == '4') {
             $employees = Employees::where('manager_id', Auth::user()->id)
                 ->orWhere('id', Auth::user()->id)
                 ->pluck('id')
                 ->toArray();
             $query->whereIn('created_by', $employees);
         }
-        
+
         // Handle AJAX/React requests
         if ($request->expectsJson() || $request->ajax()) {
             $perPage = $request->input('per_page', 10);
             $paginatedData = $query->paginate($perPage);
-            
+
             // Transform data with null-safe checks
-            $transformedData = $paginatedData->getCollection()->map(function($candidate) use ($permission_role) {
+            $transformedData = $paginatedData->getCollection()->map(function ($candidate) use ($permission_role) {
                 $manager = optional($candidate->created_by_user)->manager;
                 $currentUserId = Auth::id();
                 $createdBy = $candidate->created_by;
-                
+
                 return [
                     'id' => 'HRM' . $candidate->id,
                     'full_name' => $candidate->full_name ?? '',
@@ -2845,7 +2843,7 @@ class UserController extends Controller
             })->values()->toArray();
 
 
-          //  Log::info('testtst', ['tscsc0' => $transformedData]);
+            //  Log::info('testtst', ['tscsc0' => $transformedData]);
             return response()->json([
                 'data' => $transformedData,
                 'current_page' => $paginatedData->currentPage(),
@@ -2866,9 +2864,9 @@ class UserController extends Controller
         if ($request->has('export') && $request->export != '-') {
             $items = $query->get();
             $name = 'candidates-' . time() . '.' . $request->export;
-            
+
             Excel::store(new CandidateCsvExport($items), $name);
-            
+
             return response()->json([
                 'status' => 'download',
                 'download_link' => route('exportdownload', $name)
@@ -2881,16 +2879,16 @@ class UserController extends Controller
     // Helper method to check edit permissions
     private function checkEditPermission($permission_role, $currentUserId, $createdBy, $manager)
     {
-        if($permission_role->edit == '2') {
+        if ($permission_role->edit == '2') {
             return $currentUserId == $createdBy;
         }
-        if($permission_role->edit == '3') {
+        if ($permission_role->edit == '3') {
             return $manager && $currentUserId == $manager->id;
         }
-        if($permission_role->edit == '4') {
+        if ($permission_role->edit == '4') {
             return ($manager && $currentUserId == $manager->id) || $currentUserId == $createdBy;
         }
-        if($permission_role->edit == '5') {
+        if ($permission_role->edit == '5') {
             return true;
         }
         return false;
@@ -2899,16 +2897,16 @@ class UserController extends Controller
     // Helper method to check delete permissions
     private function checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager)
     {
-        if($permission_role->delete == '2') {
+        if ($permission_role->delete == '2') {
             return $currentUserId == $createdBy;
         }
-        if($permission_role->delete == '3') {
+        if ($permission_role->delete == '3') {
             return $manager && $currentUserId == $manager->id;
         }
-        if($permission_role->delete == '4') {
+        if ($permission_role->delete == '4') {
             return ($manager && $currentUserId == $manager->id) || $currentUserId == $createdBy;
         }
-        if($permission_role->delete == '5') {
+        if ($permission_role->delete == '5') {
             return true;
         }
         return false;
@@ -2920,7 +2918,7 @@ class UserController extends Controller
         $currentUserId = Auth::id();
         $createdBy = $candidate->created_by;
         $manager = $candidate->created_by_user->manager ?? null;
-        
+
         $canEdit = $this->checkEditPermission($permission_role, $currentUserId, $createdBy, $manager);
         $canDelete = $this->checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager);
         $isRecruiter = loginUserRole() === User::ROLE_RECRUITER;
@@ -2987,7 +2985,7 @@ class UserController extends Controller
         }
 
         $buttons['aptitude'] = [
-            'onclick' => "showAptitudeModal('".route('generateTest', $candidate->id)."')",
+            'onclick' => "showAptitudeModal('" . route('generateTest', $candidate->id) . "')",
             'icon' => 'paper-plane',
             'class' => 'btn-warning',
             'title' => 'Send Aptitude Test'
@@ -3210,30 +3208,40 @@ class UserController extends Controller
             $message->from('internaltesting24@yopmail.com');
         });
 
-            if (! Mail::failures()) {
-                return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
-            } else {
-                return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
-            }
+        if (! Mail::failures()) {
+            return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
+        } else {
+            return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
+        }
     }
 
+    // for getting data based on profile_token when user clicks the email update profile
     public function candidateProfile($token)
     {
-        $candidate_status = CandidateStatus::all();
-        $candidate_questions = CandidateQuestions::all();
-        $candidate_relationship = Candidates::$relationship;
-        $countries = Country::get(["name", "id"]);
-        $cities = City::get(["name", "id"]);
-        $states = State::get(["name", "id"]);
-        $candidate = Candidates::where('profile_token', $token)->whereNotNull('profile_token')
-            ->whereDate('profile_token_date', '>=', date('Y-m-d H:i:s'))
+        $candidate = Candidates::where('profile_token', $token)
+            ->whereNotNull('profile_token')
+            ->whereDate('profile_token_date', '>=', now())
             ->first();
-        if ($candidate) {
-            return view('front.candidate-profile', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship', 'countries', 'cities', 'states'));
+
+        if (!$candidate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Candidate not found or token expired.'
+            ], 404);
         }
 
-        abort(404);
+        return response()->json([
+            'status' => true,
+            'candidate' => $candidate,
+            'candidate_status' => CandidateStatus::all(),
+            'candidate_questions' => CandidateQuestions::all(),
+            'candidate_relationship' => Candidates::$relationship,
+            'countries' => Country::get(['id', 'name']),
+            'states' => State::get(['id', 'name']),
+            'cities' => City::get(['id', 'name']),
+        ]);
     }
+
 
     public function candidateProfilePost(Request $request)
     {

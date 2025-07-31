@@ -99,7 +99,7 @@ class TrackerController extends Controller
         ]);
     }
 
-   public function addCandidate()
+    public function addCandidate()
     {
         $user = Auth::user();
         Log::info('Logged-in user', ['user' => $user]);
@@ -247,7 +247,7 @@ class TrackerController extends Controller
             }
 
             $candidate->save();
-           Log::info('mail test');
+            Log::info('mail test');
             if ($request->input('submit') === 'send_mail') {
                 Log::info('mail test', ['testing' => $request->input('submit')]);
                 $this->sendEmailCandidateProfile($candidate->id);
@@ -328,20 +328,23 @@ class TrackerController extends Controller
     }
 
     // GET /send-email/{candidate_id}
-   public function sendEmailCandidateProfile($candidate_id)
+    public function sendEmailCandidateProfile($candidate_id)
     {
-        
+
         $candidate = Candidates::findOrFail($candidate_id);
         $candidate->profile_token = Str::random(32);
-        $candidate->profile_token_date = now()->addHours(48); 
+        $candidate->profile_token_date = now()->addHours(48);
         $candidate->save();
 
         $to_email = $candidate->email;
         $to_name = $candidate->full_name;
 
+
         $data = [
-            'url' => route('candidateProfile', $candidate->profile_token),
-            'candidate_view_url' => route('candidateProfileView', $candidate->profile_id),
+            'url' => env('FRONTEND_URL') . '/tracker/candidate/profile/' . $candidate->profile_token . '/edit',
+            // 'url' => route('candidateProfile', $candidate->profile_token),
+            'candidate_view_url' => env('FRONTEND_URL') . '/tracker/candidate/profile/' . $candidate->profile_token . '/view',
+            // 'candidate_view_url' => route('candidateProfileView', $candidate->profile_id),
             'name' => $to_name,
         ];
 
@@ -349,13 +352,13 @@ class TrackerController extends Controller
             Mail::to($to_email)->send(new CandidateProfileUpdate($data));
             return response()->json(['status' => 200, 'message' => 'Email sent']);
         } catch (\Exception $e) {
-            
+
             Log::error('Error sending email: ' . $e->getMessage());
             return response()->json(['status' => 500, 'message' => 'Failed to send email. Please try again later.']);
         }
     }
 
-  
+
     // GET /mail-to-hr
     public function mailToHr(Request $request)
     {

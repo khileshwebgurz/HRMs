@@ -33,6 +33,8 @@ const ActiveEmployees = () => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchEmployees(currentPage);
   }, [currentPage, itemsPerPage]);

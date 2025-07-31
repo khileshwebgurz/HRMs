@@ -20,7 +20,7 @@ const CandidateList = () => {
        `${import.meta.env.VITE_API_BASE_URL}/candidates?page=${page}&limit=${limit}&search=${encodeURIComponent(term)}`,
         { withCredentials: true }
       );
-console.log(candidates,'datatataa');
+
       setCandidates(response.data.data);
       setFilteredCandidates(response.data.data);
  
@@ -31,6 +31,8 @@ console.log(candidates,'datatataa');
     }
   };
 
+
+  console.log(candidates,'datatataa');
   useEffect(() => {
     fetchCandidates(currentPage);
   }, [currentPage,itemsPerPage]);

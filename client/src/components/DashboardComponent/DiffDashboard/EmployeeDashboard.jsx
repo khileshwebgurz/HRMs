@@ -110,7 +110,7 @@ const EmployeeDashboard = ({user}) => {
                       {user.role_id === 3 ? (
                         <div className="col-md-3 col-6">
                           <div className="dashboard-option option-9">
-                            <a href="{{ route('em-ticket-system', 'alltickets') }}">
+                            <Link to="/employee/ticket-system/alltickets">
                               <div className="option-icon">
                                 {/* <?php $open_c = App\Tickets::where('status', '1')->count(); $progress_c = App\Tickets::where('status', '3')->count(); $open_count = $open_c + $progress_c;?> */}
                                 <i className="fas fa-users"></i>
@@ -118,7 +118,7 @@ const EmployeeDashboard = ({user}) => {
                                 {/* <span className="badge badge-pill badge-danger">{{$open_count }}</span> */}
                               </div>
                               <h6 className="option-name">WIMS</h6>
-                            </a>
+                            </Link>
                           </div>
                         </div>
                       ) : user.id !== 1 ? (
