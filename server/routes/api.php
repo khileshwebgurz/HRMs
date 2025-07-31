@@ -205,4 +205,8 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('/add-candidate', [TrackerController::class, 'addCandidate'])->name('trackercandidateadd');
     Route::post('/add-candidate-post', [TrackerController::class, 'addCandidatePost'])->name('trackercandidateaddpost');
+    Route::get('/candidate/profile/{profile_id}/view', 'UserController@candidateProfileView')->name('candidateProfileView');
+    Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
+    Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
+    Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
 });

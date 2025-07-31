@@ -59,7 +59,7 @@ use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use App\Mail\EmployeeInviteMail;
-
+use App\Models\Permissions;
 
 
 class UserController extends Controller
@@ -2655,7 +2655,7 @@ class UserController extends Controller
         return response()->json($candidates);
     }
 
-    public function allCandidates(Request $request)
+    public function allCandidates30725(Request $request)
     {
 
         $user = Auth::user();
@@ -2756,6 +2756,245 @@ class UserController extends Controller
     }
 
 
+    
+    public function allCandidates(Request $request)
+    {
+        
+        //  $permissions = Session::get('permission', []);
+        
+        $currentUser = Auth::user();
+       // Log::info('testtt',['currentUser' => $currentUser]);
+        $role = Roles::find($currentUser->user_role);
+         //  Log::info('role',['role' => $role]);
+        $permissionIds = [];
+        $permissionSlugs = [];
+
+        if ($role && $role->permissions) {
+            $permissionIds = array_filter(explode(',', str_replace(['[', ']'], '', $role->permissions)));
+            $permissionSlugs = Permissions::whereIn('id', $permissionIds)->pluck('slug')->toArray();
+        }
+
+         // Log::info('permissionSlugs',['permissionSlugs' => $permissionSlugs]);
+    
+          if (empty($permissionSlugs) || !in_array('all_candidates', $permissionSlugs)) {
+                abort(403, 'Unauthorized access');
+            }
+
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        
+        if (!$permission_role) {
+            abort(403, 'Role not found');
+        }
+
+        // Base query with relationships
+        $query = Candidates::with([
+            'candidate_status', 
+            'educations', 
+            'employments', 
+           // 'created_by_user.manager'
+        ]);
+        
+        
+        if ($permission_role->view == '2') {
+            $query->where('created_by', Auth::user()->id);
+        }
+        elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::user()->id)
+                ->pluck('id')
+                ->toArray();
+            $query->whereIn('created_by', $employees);
+        }
+        elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)
+                ->orWhere('id', Auth::user()->id)
+                ->pluck('id')
+                ->toArray();
+            $query->whereIn('created_by', $employees);
+        }
+        
+        // Handle AJAX/React requests
+        if ($request->expectsJson() || $request->ajax()) {
+            $perPage = $request->input('per_page', 10);
+            $paginatedData = $query->paginate($perPage);
+            
+            // Transform data with null-safe checks
+            $transformedData = $paginatedData->getCollection()->map(function($candidate) use ($permission_role) {
+                $manager = optional($candidate->created_by_user)->manager;
+                $currentUserId = Auth::id();
+                $createdBy = $candidate->created_by;
+                
+                return [
+                    'id' => 'HRM' . $candidate->id,
+                    'full_name' => $candidate->full_name ?? '',
+                    'email' => $candidate->email ?? '',
+                    'gender' => $candidate->gender ? (Candidates::$gender[$candidate->gender] ?? '') : '',
+                    'status' => optional($candidate->candidate_status)->status_name ?? '',
+                    'education' => optional($candidate->educations->first())->professional_qualification ?? '',
+                    'current_employer' => optional($candidate->employments->first())->company_name ?? '',
+                    'department' => $candidate->department ? (Candidates::$departments[$candidate->department] ?? '') : '',
+                    'created_at' => $candidate->created_at ? date('d M, Y', strtotime($candidate->created_at)) : '',
+                    'date_of_interview' => $candidate->date_of_interview ? date('d M, Y', strtotime($candidate->date_of_interview)) : '',
+                    'profile_id' => $candidate->profile_id ?? '',
+                    'remarks' => $candidate->remarks ?? '',
+                    'can_edit' => $this->checkEditPermission($permission_role, $currentUserId, $createdBy, $manager),
+                    'can_delete' => $this->checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager),
+                    'can_onboard' => $candidate->status == 7,
+                    'is_recruiter' => loginUserRole() === User::ROLE_RECRUITER,
+                    'actions' => $this->generateActionButtons($candidate, $permission_role)
+                ];
+            })->values()->toArray();
+
+
+            Log::info('testtst', ['tscsc0' => $transformedData]);
+            return response()->json([
+                'data' => $transformedData,
+                'current_page' => $paginatedData->currentPage(),
+                'last_page' => $paginatedData->lastPage(),
+                'total' => $paginatedData->total(),
+                'departments' => Candidates::$departments ?? [],
+                'statuses' => CandidateStatus::all()->toArray(),
+                'filters' => [
+                    'genders' => [
+                        ['value' => '1', 'label' => 'Male'],
+                        ['value' => '2', 'label' => 'Female']
+                    ]
+                ]
+            ]);
+        }
+
+        // Handle exports
+        if ($request->has('export') && $request->export != '-') {
+            $items = $query->get();
+            $name = 'candidates-' . time() . '.' . $request->export;
+            
+            Excel::store(new CandidateCsvExport($items), $name);
+            
+            return response()->json([
+                'status' => 'download',
+                'download_link' => route('exportdownload', $name)
+            ]);
+        }
+
+        return response()->json(['error' => 'Invalid request'], 400);
+    }
+
+    // Helper method to check edit permissions
+    private function checkEditPermission($permission_role, $currentUserId, $createdBy, $manager)
+    {
+        if($permission_role->edit == '2') {
+            return $currentUserId == $createdBy;
+        }
+        if($permission_role->edit == '3') {
+            return $manager && $currentUserId == $manager->id;
+        }
+        if($permission_role->edit == '4') {
+            return ($manager && $currentUserId == $manager->id) || $currentUserId == $createdBy;
+        }
+        if($permission_role->edit == '5') {
+            return true;
+        }
+        return false;
+    }
+
+    // Helper method to check delete permissions
+    private function checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager)
+    {
+        if($permission_role->delete == '2') {
+            return $currentUserId == $createdBy;
+        }
+        if($permission_role->delete == '3') {
+            return $manager && $currentUserId == $manager->id;
+        }
+        if($permission_role->delete == '4') {
+            return ($manager && $currentUserId == $manager->id) || $currentUserId == $createdBy;
+        }
+        if($permission_role->delete == '5') {
+            return true;
+        }
+        return false;
+    }
+
+    // Helper method to generate action buttons HTML
+    private function generateActionButtons($candidate, $permission_role)
+    {
+        $currentUserId = Auth::id();
+        $createdBy = $candidate->created_by;
+        $manager = $candidate->created_by_user->manager ?? null;
+        
+        $canEdit = $this->checkEditPermission($permission_role, $currentUserId, $createdBy, $manager);
+        $canDelete = $this->checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager);
+        $isRecruiter = loginUserRole() === User::ROLE_RECRUITER;
+        $canOnboard = $candidate->status == 7;
+
+        $buttons = [
+            'view' => [
+                'url' => route('candidateProfileView', $candidate->profile_id),
+                'icon' => 'eye',
+                'class' => 'btn-info',
+                'title' => 'View',
+                'target' => '_blank'
+            ],
+            'comment' => [
+                'icon' => 'comment',
+                'class' => 'btn-success',
+                'style' => 'color:#707070',
+                'title' => "Name:{$candidate->full_name}&Remarks:{$candidate->remarks}",
+                'html' => true
+            ]
+        ];
+
+        if ($canEdit) {
+            $buttons['edit'] = [
+                'url' => route('candidateedit', $candidate->id),
+                'icon' => 'pencil-alt',
+                'class' => 'btn-success',
+                'title' => 'Edit'
+            ];
+        }
+
+        if ($isRecruiter) {
+            $buttons['delete'] = [
+                'onclick' => "alert('You are not authorized with this permission please contact to HR for further.')",
+                'icon' => 'trash',
+                'class' => 'btn-secondary',
+                'style' => 'background-color:#808080;border-color:#808080;color:#fff',
+                'title' => 'Delete'
+            ];
+        } elseif ($canDelete) {
+            $buttons['delete'] = [
+                'url' => route('candidatedelete', $candidate->id),
+                'onclick' => "return confirm('Are you sure you want to delete this candidate?')",
+                'icon' => 'trash',
+                'class' => 'btn-danger',
+                'title' => 'Delete'
+            ];
+        }
+
+        if ($canOnboard) {
+            $buttons['onboard'] = [
+                'url' => route('startOnboarding', $candidate->id),
+                'onclick' => "return confirm('Are you sure You want to start Onboarding?')",
+                'icon' => 'clipboard-check',
+                'class' => 'btn-success',
+                'title' => 'Start Onboarding'
+            ];
+        } else {
+            $buttons['onboard'] = [
+                'icon' => 'clipboard-check',
+                'class' => 'btn-success disabled',
+                'title' => 'Not ready for onboarding'
+            ];
+        }
+
+        $buttons['aptitude'] = [
+            'onclick' => "showAptitudeModal('".route('generateTest', $candidate->id)."')",
+            'icon' => 'paper-plane',
+            'class' => 'btn-warning',
+            'title' => 'Send Aptitude Test'
+        ];
+
+        return $buttons;
+    }
 
     public function exportDownload($file_path)
     {

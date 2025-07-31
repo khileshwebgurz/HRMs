@@ -51,7 +51,7 @@ class User extends Authenticatable
     public static $role = [
         1 => 'Admin (HR)',
         2 => 'Recruiter',
-        // 3 => 'HR', // Uncomment if needed
+        3 => 'HR', // Uncomment if needed
     ];
 
     // ✅ Relationships
@@ -86,4 +86,11 @@ class User extends Authenticatable
             'role_label' => self::$role[$user->user_role] ?? null,
         ];
     }
+
+   
+
+        public function manager()
+        {
+            return $this->belongsTo(User::class, 'manager_id');
+        }
 }
