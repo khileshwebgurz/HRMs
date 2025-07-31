@@ -137,7 +137,7 @@ Route::middleware(['auth:api'])->group(function () {
     // ticket
     Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
-
+    Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
 
     // salary slip
     Route::get('/salary-slip', [AccountController::class, 'salaryslip']);
