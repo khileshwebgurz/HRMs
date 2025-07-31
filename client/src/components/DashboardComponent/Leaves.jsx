@@ -10,18 +10,32 @@ const Leaves = () => {
   const [totalCreditLeaves, setTotalCreditLeaves] = useState([]);
   const [activeTab, setActiveTab] = useState("applyleave");
 
+  // for pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState(null);
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fetchLeaveLogs = async () => {
+  const fetchLeaveLogs = async (page = 1, search = "") => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/empLeavelog`,
-        { withCredentials: true }
+        {
+          params: {
+            page,
+            per_page: perPage,
+            search,
+          },
+          withCredentials: true,
+        }
       );
       setEmpDataLog(response.data.data);
+      setTotalPages(Math.ceil(response.data.total / perPage));
     } catch (error) {
       console.error("Error fetching leave logs:", error);
     }
@@ -29,15 +43,18 @@ const Leaves = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const details = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`, {
-        withCredentials: true,
-      });
+      const details = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employee/leaves/details`,
+        {
+          withCredentials: true,
+        }
+      );
       setLeavedetailData(details.data);
-      fetchLeaveLogs();
+      fetchLeaveLogs(currentPage, searchTerm);
     };
 
     fetchData();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   useEffect(() => {
     if (!leavedetailData) return;
@@ -109,7 +126,9 @@ const Leaves = () => {
     <div className="container leave-page mt-4">
       <ul className="nav nav-tabs mb-3">
         <li className="nav-item">
-          <button onClick={() => setActiveTab("applyleave")}>Apply Leave</button>
+          <button onClick={() => setActiveTab("applyleave")}>
+            Apply Leave
+          </button>
         </li>
         <li className="nav-item">
           <button onClick={() => setActiveTab("leave")}>Log</button>
@@ -127,17 +146,31 @@ const Leaves = () => {
       )}
 
       {activeTab === "leave" && (
-        <LeaveLogs myLeaves={empDataLog} onDelete={handleDelete} />
+        <LeaveLogs
+          myLeaves={empDataLog}
+          onDelete={handleDelete}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+        />
       )}
 
       {/* Delete Modal */}
       {showDeleteModal && (
-        <div className="modal show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content p-3">
               <div className="modal-header">
                 <h5 className="modal-title">Delete Leave</h5>
-                <button className="close" onClick={() => setShowDeleteModal(false)}>
+                <button
+                  className="close"
+                  onClick={() => setShowDeleteModal(false)}
+                >
                   &times;
                 </button>
               </div>
@@ -152,10 +185,18 @@ const Leaves = () => {
                   />
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowDeleteModal(false)}
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-danger" disabled={loading}>
+                  <button
+                    type="submit"
+                    className="btn btn-danger"
+                    disabled={loading}
+                  >
                     {loading ? "Processing..." : "Delete"}
                   </button>
                 </div>

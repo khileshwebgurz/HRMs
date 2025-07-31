@@ -59,7 +59,7 @@ const EditEmployeeForm = () => {
       const is_interviewer = data.obcandidates;
       const attendance_rule = data.attendance_rule; //attendance rule seems coming from here but as a rule_name
 
-      console.log('my attendance rule is >>',attendance_rule)
+     
 
       setForm({
         name: employee?.name || "",

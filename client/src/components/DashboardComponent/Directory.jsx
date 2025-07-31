@@ -24,7 +24,7 @@ const Directory = () => {
     fetchData()
   }, [])
 
-  console.log(employee,'sdghdsg');
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
     setCurrentPage(1) // Reset to first page on new search

@@ -122,7 +122,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/employee/leaves/applyLeave', [LeavesController::class, 'applyLeave']);
     Route::get('/employee/getTeamTree', [TeamController::class, 'getTeamTree']);
     Route::get('/employee/attendance', [AccountController::class, 'monthlyAttendance']);
+    
+    // attendance based on date and monthly
+    Route::post('/get-attendance-by-date', [AccountController::class, 'getAttendanceByDate']);
     Route::get('/calender', [AccountController::class, 'calender']);
+    
     Route::get('/company-profile', [EmployeeController::class, 'CompanyProfileView']);
     Route::get('/employee/notification', [NotificationController::class, 'realTimeNotificationByCurrentUser']);
     Route::post('/change-password', [AccountController::class, 'editProfile'])->name('em-edit-profile');

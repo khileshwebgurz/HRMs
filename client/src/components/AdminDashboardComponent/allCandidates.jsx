@@ -7,28 +7,23 @@ const CandidateList = () => {
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [sortField, setSortField] = useState("");
-  // const [sortOrder, setSortOrder] = useState("asc");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemPerPage] = useState(10);
 
   const navigate = useNavigate();
 
-  const fetchCandidates = async (page = currentPage, term = searchTerm) => {
+  const fetchCandidates = async (page = currentPage, term = searchTerm, limit = itemsPerPage) => {
     try {
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/candidates?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
-          term
-        )}`,
+       `${import.meta.env.VITE_API_BASE_URL}/candidates?page=${page}&limit=${limit}&search=${encodeURIComponent(term)}`,
         { withCredentials: true }
       );
 console.log(candidates,'datatataa');
       setCandidates(response.data.data);
       setFilteredCandidates(response.data.data);
-      setCurrentPage(response.data.current_page);
+ 
       setTotalPages(response.data.last_page);
       setLoading(false);
     } catch (error) {
@@ -38,7 +33,7 @@ console.log(candidates,'datatataa');
 
   useEffect(() => {
     fetchCandidates(currentPage);
-  }, [currentPage]);
+  }, [currentPage,itemsPerPage]);
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -48,14 +43,6 @@ console.log(candidates,'datatataa');
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-  // const handleSort = (field) => {
-  //   if (field === sortField) {
-  //     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-  //   } else {
-  //     setSortField(field);
-  //     setSortOrder("asc");
-  //   }
-  // };
 
   const handleBrnClick = (url) => {
     navigate(`${url}`);
@@ -105,12 +92,24 @@ const numericId = candidateId.replace("HRM", "");
     }
   };
 
-  console.log(filteredCandidates,'testt');
+  const handleRecordsPerPage = (e) => {
+    setItemPerPage(parseInt(e.target.value));
+    setCurrentPage(1);
+  };
 
   return (
     <div className="container mt-4">
       <h1>All Candidates</h1>
-
+      <div>
+        Show{" "}
+        <select value={itemsPerPage} onChange={handleRecordsPerPage}>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>{" "}
+        entries
+      </div>
       <input
         type="text"
         placeholder="Search by name or email..."

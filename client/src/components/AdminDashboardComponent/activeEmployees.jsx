@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,9 +9,9 @@ const ActiveEmployees = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const limit = 10;
+  const [itemsPerPage, setItemPerPage] = useState(10);
 
-  const fetchEmployees = async (page = 1, term=searchTerm) => {
+  const fetchEmployees = async (page = 1, term = searchTerm, limit = itemsPerPage) => {
     try {
       const res = await axios.get(
         `${
@@ -24,7 +24,7 @@ const ActiveEmployees = () => {
         }
       );
       setEmployees(res.data.data);
-      setCurrentPage(res.data.current_page);
+      // setCurrentPage(res.data.current_page);
       setTotalPages(res.data.last_page);
       setLoading(false);
     } catch (error) {
@@ -33,12 +33,11 @@ const ActiveEmployees = () => {
     }
   };
 
-
   useEffect(() => {
     fetchEmployees(currentPage);
-  }, [currentPage]);
+  }, [currentPage, itemsPerPage]);
 
-    useEffect(() => {
+  useEffect(() => {
     const delay = setTimeout(() => {
       fetchEmployees(1, searchTerm);
     }, 500);
@@ -69,10 +68,26 @@ const ActiveEmployees = () => {
     );
     setEmployees(updatedList);
   };
+
+  const handleRecordsPerPage = (e) => {
+    setItemPerPage(parseInt(e.target.value));
+    setCurrentPage(1);
+  };
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>All Employees</h3>
+        <div>
+          Show{" "}
+          <select value={itemsPerPage} onChange={handleRecordsPerPage}>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>{" "}
+          entries
+        </div>
+
         <button
           className="btn btn-dark"
           onClick={() => navigate("/add-employee")}
@@ -114,7 +129,7 @@ const ActiveEmployees = () => {
           ) : (
             employees?.map((emp, index) => (
               <tr key={emp.id}>
-                <td>{(currentPage - 1) * limit + index + 1}</td>
+                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 {/* Status toggle */}
                 <td>
                   <label className="form-switch">

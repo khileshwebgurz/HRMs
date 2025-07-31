@@ -1,9 +1,29 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 const DailyLog = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+const [attendanceHtml, setAttendanceHtml] = useState("");
+
+useEffect(() => {
+  const attendancebyDate = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/get-attendance-by-date",
+        { date: selectedDate },
+        { withCredentials: true }
+      );
+
+      setAttendanceHtml(response.data.data.todayattendancelog);
+    } catch (error) {
+      console.error("Error fetching attendance:", error);
+    }
+  };
+
+  attendancebyDate();
+}, [selectedDate]);
+
 
   const updateDate = (changeType) => {
     const current = new Date(selectedDate);
@@ -11,12 +31,12 @@ const DailyLog = () => {
 
     const newDate = current.toISOString().split("T")[0];
     setSelectedDate(newDate);
-    onDateChange && onDateChange(newDate); // Optional callback
+    // onDateChange && onDateChange(newDate); // Optional callback
   };
 
   const handleInputChange = (e) => {
     setSelectedDate(e.target.value);
-    onDateChange && onDateChange(e.target.value);
+    // onDateChange && onDateChange(e.target.value);
   };
   return (
     <>
@@ -78,8 +98,9 @@ const DailyLog = () => {
             <div className="table-wrapper">
               <div className="fixed-th-table-wrapper"></div>
               <table
-                className="table table-bordered table-responsive"
+                className="table table-striped table-condensed"
                 id="daily_log_table"
+                style={{ width: "100%" }}
               >
                 <thead>
                   <tr>
@@ -90,7 +111,8 @@ const DailyLog = () => {
                     <th>Location</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+             <tbody dangerouslySetInnerHTML={{ __html: attendanceHtml }}></tbody>
+
               </table>
             </div>
           </div>

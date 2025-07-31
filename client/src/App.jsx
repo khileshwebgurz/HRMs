@@ -44,6 +44,7 @@ import SalarySlip from "./components/RightSidebarComponent/SalarySlip";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/Auth/ResetPasswordForm";
  import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
+import AllNotification from "./components/Notification/AllNotification";
 
 function App() {
   return (
@@ -93,6 +94,7 @@ function App() {
             element={<CandidateEditForm />}
           />
           <Route path="/candidate/update" element={<CandidateEditForm />} />
+         <Route path="/notifications" element={<AllNotification/>} />
           <Route
             path="/candidate/all-candidates"
             element={<ActiveCandidatesList />}

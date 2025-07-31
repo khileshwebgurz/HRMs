@@ -56,12 +56,12 @@ class TrackerController extends Controller
             });
         }
 
-        $perPage = $request->query('limit', 10);
+        $perPage = $request->query('limit');
         $page = $request->query('page', 1);
 
         $paginated = $query
             ->with(['candidate_status', 'educations', 'employments'])
-            ->orderBy('created_at', 'desc')
+            //->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         $data = $paginated->getCollection()->map(function ($c) use ($user, $permissionRole) {

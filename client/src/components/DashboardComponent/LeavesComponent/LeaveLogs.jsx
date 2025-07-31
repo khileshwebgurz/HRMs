@@ -1,22 +1,30 @@
 import React from "react";
 
-const LeaveLogs = ({ myLeaves, onDelete }) => {
+const LeaveLogs = ({
+  myLeaves,
+  onDelete,
+  searchTerm,
+  setSearchTerm,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+}) => {
   if (!myLeaves || myLeaves.length === 0) {
     return <p>No leave logs found.</p>;
   }
 
   return (
     <div className="table-responsive mt-3">
-        <input
+      {/* <input
         type="text"
-        placeholder="Search by name or email..."
-        // value={searchTerm}
-        // onChange={(e) => {
-        //   setSearchTerm(e.target.value);
-        //   setCurrentPage(1);
-        // }}
+        placeholder="Search by leave type..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1); // reset to page 1 when searching
+        }}
         className="form-control my-3"
-      />
+      /> */}
       <table className="table table-bordered table-striped">
         <thead className="thead-dark">
           <tr>
@@ -40,7 +48,10 @@ const LeaveLogs = ({ myLeaves, onDelete }) => {
               <td>{log.created_at}</td>
               <td>
                 {log.status === "Pending" ? (
-                  <button className="btn btn-danger btn-sm" onClick={() => onDelete(log.id)}>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => onDelete(log.id)}
+                  >
                     <i className="fas fa-trash-alt"></i>
                   </button>
                 ) : (
@@ -51,6 +62,28 @@ const LeaveLogs = ({ myLeaves, onDelete }) => {
           ))}
         </tbody>
       </table>
+
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <button
+          className="btn btn-secondary"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="btn btn-secondary"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

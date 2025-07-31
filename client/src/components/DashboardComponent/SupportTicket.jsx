@@ -16,25 +16,43 @@ const SupportTicket = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
+
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
+
   const handleTabChange = (val) => {
     setTab(val);
   };
-
   useEffect(() => {
-    getTicket();
-  }, []);
+    getTicket(currentPage, statusFilter, dateFilter);
+  }, [currentPage, statusFilter, dateFilter]);
 
-  const getTicket = async () => {
+  const getTicket = async (page = 1, status = "", date = "") => {
     try {
+      const params = {
+        page: page,
+        per_page: perPage,
+      };
+
+      if (status) params.status = status;
+      if (date) params.datefilter = `${date} - ${date}`;
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/ticketViewByEmployee`,
-        { withCredentials: true }
+        {
+          params,
+          withCredentials: true,
+        }
       );
 
       setTicketdata(response.data.data);
       setFilteredTickets(response.data.data);
+      setTotalPages(Math.ceil(response.data.total / perPage));
+      // setCurrentPage(response.data.page);
     } catch (error) {
-      navigate('/403')
+      navigate("/403");
     }
   };
 
@@ -139,7 +157,7 @@ const SupportTicket = () => {
                                 filteredTickets.map((ticket, index) => (
                                   <tr key={ticket.id}>
                                     <td>{ticket.ticket_id}</td>
-                                    <td>{ticket.created_at}</td>
+                                    <td>{ticket.created_at.slice(0,10)}</td>
                                     <td>{ticket.issue_type}</td>
                                     <td>{ticket.description}</td>
                                     <td>{ticket.status}</td>
@@ -167,7 +185,33 @@ const SupportTicket = () => {
                         </div>
                       </div>
 
-                      <div className="card-footer"></div>
+                      <div className="card-footer">
+                        <div className="pagination-controls d-flex justify-content-between mt-3">
+                          <button
+                            className="btn btn-secondary"
+                            disabled={currentPage === 1}
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                          >
+                            Previous
+                          </button>
+                          <span>
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            className="btn btn-secondary"
+                            disabled={currentPage === totalPages}
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                              )
+                            }
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

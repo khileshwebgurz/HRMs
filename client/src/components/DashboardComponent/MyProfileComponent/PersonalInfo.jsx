@@ -10,6 +10,7 @@ import IDInfo from "./PersonalInfo/IDInfo";
 import AcademicCertification from "./PersonalInfo/AcademicCertification";
 import ReferenceNumber from "./PersonalInfo/ReferenceNumber";
 import OtherInformation from "./PersonalInfo/OtherInformation";
+import ProfilePic from "./PersonalInfo/ProfilePic";
 
 const PersonalInfo = ({ employeedata }) => {
   
@@ -19,6 +20,12 @@ const PersonalInfo = ({ employeedata }) => {
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
+
+              {/* Profile Pic & DP */}
+              <ProfilePic employeedata={employeedata}/>
+
+
+
               {/* primary info */}
               <PersonalInfoSection employeedata={employeedata}/>
 

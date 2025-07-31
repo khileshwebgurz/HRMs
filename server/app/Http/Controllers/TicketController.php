@@ -12,30 +12,52 @@ use App\Traits\PermissionTrait;
 
 class TicketController extends Controller
 {
-   use PermissionTrait;
+    use PermissionTrait;
 
     public function ticketViewByEmployee(Request $request)
     {
-        if (!$this->userHasPermission([12])) {
-            return $this->permissionDeniedResponse();
-        }
+        // if (!$this->userHasPermission([12])) {
+        //     return $this->permissionDeniedResponse();
+        // }
 
         $id = Auth::id();
+
+
+
+        $perPage = $request->input('per_page', 10); // Default 10 tickets per page
+        $page = $request->input('page', 1);
+
         $ticketQuery = Tickets::where('employee_id', $id);
 
         if (!empty($request->datefilter)) {
             $dates = explode(" - ", $request->datefilter);
-            $ticketQuery = $ticketQuery->whereBetween('created_at', [
+            $ticketQuery->whereBetween('created_at', [
                 $dates[0] . ' 00:00:00',
                 $dates[1] . ' 23:59:59'
             ]);
         }
 
+        // this is commented bcz this is causing issue when sorting the tickets based on progress, open and closed.
         if (!empty($request->status)) {
-            $ticketQuery = $ticketQuery->where("status", $request->status);
+            $statusMap = [
+                'Open' => 1,
+                'Closed' => 2,
+                'In Progress' => 3,
+            ];
+
+            if (isset($statusMap[$request->status])) {
+                $ticketQuery->where("status", $statusMap[$request->status]);
+            }
         }
 
-        $tickets = $ticketQuery->latest()->get();
+        $total = $ticketQuery->count();
+
+        $tickets = $ticketQuery->latest()
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        Log::info('My all ticket requests are  >>>>', ['tickets' => $tickets]);
 
         $formattedTickets = $tickets->map(function ($ticket) {
             $employee = $ticket->employee;
@@ -61,9 +83,7 @@ class TicketController extends Controller
 
             // Format created_at date
             $createdAt = $ticket->created_at;
-            $formattedDate = $createdAt->isToday()
-                ? $createdAt->format('h:i A')
-                : $createdAt->format('d M Y');
+            $formattedDate = $createdAt;
 
             return [
                 'id' => $ticket->id,
@@ -79,7 +99,10 @@ class TicketController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $formattedTickets
+            'data' => $formattedTickets,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
         ]);
     }
 

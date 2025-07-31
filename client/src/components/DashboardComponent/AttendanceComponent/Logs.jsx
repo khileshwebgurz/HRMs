@@ -83,7 +83,7 @@ const Logs = ({ attendance,currentPage,totalPages,getAttendance }) => {
     </>
 
    
-//https://hrm.webguruz.in/employee/attendance/get-attendance-by-date?ver=1753787531 // 
+
   );
 };
 

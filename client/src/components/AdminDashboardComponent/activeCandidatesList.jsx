@@ -8,7 +8,7 @@ function ActiveCandidatesList() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchCandidates = async (page = 1, limit = itemsPerPage) => {
     try {
@@ -19,7 +19,7 @@ function ActiveCandidatesList() {
         { withCredentials: true }
       );
       setCandidates(response.data.data);
-      setCurrentPage(response.data.current_page);
+      // setCurrentPage(response.data.current_page);
       setTotalPages(response.data.last_page);
       setLoading(false);
     } catch (error) {
@@ -63,7 +63,7 @@ function ActiveCandidatesList() {
   // Call fetchCandidates on component mount
   useEffect(() => {
     fetchCandidates(currentPage);
-  }, [currentPage]);
+  }, [currentPage, itemsPerPage]);
 
   const handleDeleteBtn = async (id) => {
     try {
@@ -84,6 +84,11 @@ function ActiveCandidatesList() {
     navigate(`/users/edit-candidate/${candidate_id}`);
   };
 
+  const handleRecordsPerPage = (e) => {
+    setItemsPerPage(parseInt(e.target.value));
+    setCurrentPage(1);
+  };
+
   return (
     <div>
       <section className="content-header all-candidate-tracker">
@@ -91,6 +96,16 @@ function ActiveCandidatesList() {
           <div className="row mb-2">
             <div className="col-sm-6">
               <h1>All Active Candidates</h1>
+              <div>
+                Show{" "}
+                <select value={itemsPerPage} onChange={handleRecordsPerPage}>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>{" "}
+                entries
+              </div>
             </div>
           </div>
         </div>

@@ -738,7 +738,7 @@ class AccountController extends Controller
 
      public function getAttendanceByDate(Request $request)
     {
-        $res = getWorkingHoursByDate('2021-01-15', 1);
+        // $res = getWorkingHoursByDate('2021-01-15', 1);  commented by me as it is not being used
         $loginuser = Auth::user();
         // $currentDate = date('Y-m-d');
         $user_id = $loginuser->id;

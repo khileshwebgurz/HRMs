@@ -8,6 +8,8 @@ import RightSidebar from "./RightSidebar";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import NotifyDropdown from "./Notification/NotifyDropdown";
+import { notificationdata } from "./Notification/notificationdata";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -63,27 +65,9 @@ const Navbar = () => {
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const Notify = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/employee/notification`,
-          { withCredentials: true }
-        );
-        // const res = await axios.get(
-        //   `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
-        //   { withCredentials: true }
-        // );
+        const res = await notificationdata();
 
-        setNotification(Notify.data.data);
-
-        // const data = res.data;
-        // if (data?.a_wh) {
-        //   setIsClockedIn(true);
-        //   setTodayWorkingHour(data.a_wh || "00:00:00");
-        //   setHasClockedInData(true); // set to true
-        // } else {
-        //   setIsClockedIn(false);
-        //   setTodayWorkingHour("");
-        //   setHasClockedInData(false); // set to false
-        // }
+        setNotification(res);
       } catch (err) {
         console.error("Failed to fetch clock data", err);
       }
@@ -140,28 +124,7 @@ const Navbar = () => {
                   </span>
                 </a>
 
-                {showDropdown && (
-                  <div
-                    className="dropdown-menu dropdown-menu-lg dropdown-menu-right show"
-                    style={{ right: 0, left: "auto" }}
-                  >
-                    {notification.length === 0 ? (
-                      <span className="dropdown-item text-center text-muted">
-                        No notifications
-                      </span>
-                    ) : (
-                      notification.map((note, index) => (
-                        <Link
-                          key={index}
-                          to={note.link || "#"}
-                          className="dropdown-item"
-                        >
-                          {note.message}
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                )}
+                {showDropdown && <NotifyDropdown notification={notification} />}
               </li>
 
               <li className="nav-item dropdown">
