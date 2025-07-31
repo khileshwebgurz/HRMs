@@ -90,23 +90,33 @@ console.log(response.data,'dataaafa');
     }
   };
 
-  const handleDelete = async (id) => {
+ 
+
+   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this candidate?')) return;
-    
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/candidate/delete/${id}`,
-        { withCredentials: true }
-      );
-      fetchData(currentPage); // Refresh data
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('Failed to delete candidate');
-    }
-  };
+  try {
+  const numericId = id.replace(/^HRM/, "");
+
+    await axios.delete(
+      `${import.meta.env.VITE_API_BASE_URL}/candidate/deleteCandidate/${numericId}`,
+      { withCredentials: true }
+    );
+
+    const updatedCandidates = candidates.filter(
+      (candidate) => candidate.id !== id
+    );
+    setCandidates(updatedCandidates);
+     fetchData(currentPage); 
+  } catch (error) {
+    console.error("Error while deleting Candidate", error);
+  }
+};
+
 
   const handleEdit = (id) => {
-    navigate(`/candidates/edit/${id}`);
+     const numericId = id.replace(/^HRM/, "");
+    navigate(`/users/edit-candidate/${numericId}`);
+  //  navigate(/users/edit-candidate/${id});
   };
 
   const handleStartOnboarding = (id) => {
@@ -254,7 +264,9 @@ console.log(response.data,'dataaafa');
                               onClick={() => handleEdit(candidate.id)}
                             >
                               <i className="fas fa-pencil-alt"></i>
-                            </button>
+                           </button>
+
+                          
                           )}
 
                           {candidate.is_recruiter ? (
@@ -270,7 +282,7 @@ console.log(response.data,'dataaafa');
                             <button
                               className="btn btn-danger delete-icon site-icon"
                               title="Delete"
-                               style={{color: '#707070'}} vvvvvvvvvvvvvvv
+                               style={{color: '#707070'}} 
                               onClick={() => handleDelete(candidate.id)}
                             >
                               <i className="fas fa-trash"></i>

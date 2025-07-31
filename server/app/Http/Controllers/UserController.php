@@ -2845,7 +2845,7 @@ class UserController extends Controller
             })->values()->toArray();
 
 
-            Log::info('testtst', ['tscsc0' => $transformedData]);
+          //  Log::info('testtst', ['tscsc0' => $transformedData]);
             return response()->json([
                 'data' => $transformedData,
                 'current_page' => $paginatedData->currentPage(),
