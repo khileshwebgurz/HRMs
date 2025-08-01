@@ -92,23 +92,26 @@ const AllTicketsIT = () => {
                 <div className="main-header card-header d-flex align-items-center">
                   <h3 className="card-title">My Tickets</h3>
                   <div className="card-actions d-flex align-items-center">
-                    <DatePicker
-                      selectsRange={true}
-                      startDate={startDate}
-                      endDate={endDate}
-                      onChange={(update) => {
-                        setDateRange(update);
-                        if (update[0] && update[1]) {
-                          setDateFilter(
-                            `${update[0].toISOString().split("T")[0]} - ${
-                              update[1].toISOString().split("T")[0]
-                            }`
-                          );
-                        }
-                      }}
-                      className="form-control"
-                      placeholderText="YYYY-MM-DD - YYYY-MM-DD"
-                    />
+                      <DatePicker
+                          selectsRange={true}
+                          startDate={startDate}
+                          endDate={endDate}
+                          onChange={(update) => {
+                            setDateRange(update);
+                            if (update[0] && update[1]) {
+                              setDateFilter(
+                                `${update[0].toISOString().split("T")[0]} - ${update[1].toISOString().split("T")[0]}`
+                              );
+                            }
+                          }}
+                          monthsShown={2}           
+                          showTimeSelect             // ✅ show time pickers
+                          timeIntervals={30}         // optional: 30-min intervals
+                          dateFormat="yyyy-MM-dd h:mm aa"
+                          className="form-control"
+                          placeholderText="YYYY-MM-DD - YYYY-MM-DD"
+                        />
+
 
                     <select
                       id="changestatus"
