@@ -18,8 +18,8 @@
         <a href="{{ $data['url'] }}" style="font-size: 18px; line-height: 28px; font-weight: bold; color: #24cef8; text-decoration: underline; padding: 10px 15px; background: #001e36;">Update Profile</a>
     </td>
      <td style="padding: 10px 0px;" align="center">
-        <h3 style="font-weight: normal; line-height: 30px; padding: 30px 0; margin: 0;" class="message"><strong>Keeping your profile up to date is necessary.<br/> Click on the link below to update your profile:</strong></h3>
-        <a href="{{ $data['candidate_view_url'] }}" style="font-size: 18px; line-height: 28px; font-weight: bold; color: #24cef8; text-decoration: underline; padding: 10px 15px; background: #001e36;">Update Profile</a>
+        <h3 style="font-weight: normal; line-height: 30px; padding: 30px 0; margin: 0;" class="message"><strong>Keeping your profile up to date is necessary.<br/> Click on the link below to view your profile:</strong></h3>
+        <a href="{{ $data['candidate_view_url'] }}" style="font-size: 18px; line-height: 28px; font-weight: bold; color: #24cef8; text-decoration: underline; padding: 10px 15px; background: #001e36;">View Profile</a>
     </td>
 </tr>
 

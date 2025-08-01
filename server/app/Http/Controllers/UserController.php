@@ -3625,6 +3625,7 @@ class UserController extends Controller
         //     'other_informations',
         // ])->where('profile_id', $profile_id)->first();
         $candidate = Candidates::where('profile_id', $profile_id)->first();
+        
         Log::info('My >>>>', ['candidate' => $candidate]);
 
         if (!$candidate) {

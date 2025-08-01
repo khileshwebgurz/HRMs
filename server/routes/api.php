@@ -217,3 +217,8 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
  // Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
     Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
 });
+
+Route::middleware([])->prefix('tracker')->group(function () {
+    // Route::get('/candidate/profile/{profile_id}/view', [UserController:: class, 'candidateProfileView']);
+   //  Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
+});

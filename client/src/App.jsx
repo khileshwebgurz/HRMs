@@ -60,6 +60,12 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/reset-password" element={<ResetPasswordForm />} />
 
+           <Route path="/tracker/candidate/profile/:profile_token/edit"  element={<EditCandidateProfile/>}/>
+           <Route path="/tracker/candidate/profile/:profile_token/view" element={<ViewCandidateProfile/>}/>
+         
+
+
+
         <Route
           path="/"
           element={
@@ -143,16 +149,9 @@ function App() {
             element={<NewTicket />}
           />
 
-          {/* email redirection urls for candidate creation*/}
-
-          <Route
-            path="/tracker/candidate/profile/:profile_token/edit"
-            element={<ViewCandidateProfile />}
-          />
-          <Route
-            path="/tracker/candidate/profile/:profile_token/view"
-            element={<EditCandidateProfile />}
-          />
+           {/* email redirection urls for candidate creation*/}
+           
+         
 
           <Route path="*" element={<NotFound />} />
         </Route>

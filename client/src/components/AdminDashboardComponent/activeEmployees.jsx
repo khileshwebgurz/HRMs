@@ -177,33 +177,41 @@ const ActiveEmployees = () => {
 
                 {/* Action Icons */}
                 <td className="text-center">
+                  <div className="btn-group">
                   <button
-                    className="btn btn-sm btn-outline-primary me-1"
+                    className="btn btn-success site-icon pencil-icon"
+                    style={{color: '#707070'}} 
                     title="Edit"
                     onClick={() => navigate(`/edit-employee/${emp.id}`)}
                   >
-                    ✏️
+                    <i className="fas fa-pencil-alt"></i>
                   </button>
                   <button
-                    className="btn btn-sm btn-outline-secondary me-1"
+                    className="btn btn-info site-icon eye-icon"
+                    style={{color: '#707070'}} 
                     onClick={() =>
                       navigate(`/users/employee/${emp.id}/view/personal`)
                     }
                     title="View"
                   >
-                    👁️
+                    <i className="fas fa-eye"></i>
                   </button>
                   <button
                     onClick={() => handleDeleteEmployee(emp.id)}
-                    className="btn btn-sm btn-outline-danger me-1"
+                    className="btn btn-danger delete-icon site-icon"
+                      style={{color: '#707070'}} 
                     title="Delete"
                   >
-                    🗑️
+                     <i className="fas fa-trash"></i>
                   </button>
-                  <button className="btn btn-sm btn-outline-dark" title="Exit">
-                    🔐
+                  <button className="btn btn-sm btn-outline-dark" title="Exit"   style={{color: '#707070'}} >
+                    
+                    <i className="fas fa-sign-out-alt"></i> 
                   </button>
+                  
+                  </div>
                 </td>
+
               </tr>
             ))
           )}
