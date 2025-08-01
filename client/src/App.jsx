@@ -15,7 +15,7 @@ import MyProfile from "./components/DashboardComponent/MyProfile";
 import Leaves from "./components/DashboardComponent/Leaves";
 import TeamChart from "./components/DashboardComponent/TeamChart";
 import SpiritClub from "./components/DashboardComponent/SpiritClub";
-import SupportTicket from "./components/DashboardComponent/SupportTicket";
+import SupportTicket from "./components/DashboardComponent/TicketComponent/EmployeeTicket/SupportTicket";
 import HelpDesk from "./components/DashboardComponent/HelpDesk";
 import Layout from "./components/Layout";
 import RightSidebar from "./components/RightSidebar";
@@ -43,21 +43,22 @@ import ReadinessQuiz from "./components/ReadinessQuiz";
 import SalarySlip from "./components/RightSidebarComponent/SalarySlip";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
 import ResetPasswordForm from "./components/Auth/ResetPasswordForm";
- import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
+import AddCandidate from "./components/AdminDashboardComponent/AddCandidate";
 import AllNotification from "./components/Notification/AllNotification";
-import AllTicketsIT from "./components/DashboardComponent/TicketComponent/AllTicketsIT";
-import NewTicket from "./components/DashboardComponent/TicketComponent/NewTicket";
+import AllTicketsIT from "./components/DashboardComponent/TicketComponent/ItAdminTicket/AllTicketsIT";
+import NewTicket from "./components/DashboardComponent/TicketComponent/ItAdminTicket/NewTicket";
 import ViewCandidateProfile from "./components/CandidateProfileComp/ViewCandidateProfile";
 import EditCandidateProfile from "./components/CandidateProfileComp/EditCandidateProfile";
+import TicketDetails from "./components/DashboardComponent/TicketComponent/ItAdminTicket/TicketDetails";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
-       
-          <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-          <Route path="/reset-password" element={<ResetPasswordForm />} />
+
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
 
         <Route
           path="/"
@@ -87,7 +88,7 @@ function App() {
           <Route path="/supportticket" element={<SupportTicket />} />
           <Route path="/helpdesk" element={<HelpDesk />} />
           <Route path="/sidebar" element={<RightSidebar />} />
-          <Route path="/edit-profile/personal" element={<MyProfile/>}/>
+          <Route path="/edit-profile/personal" element={<MyProfile />} />
           <Route
             path="/profile/:profile_id/view"
             element={<CandidateProfile />}
@@ -98,7 +99,7 @@ function App() {
             element={<CandidateEditForm />}
           />
           <Route path="/candidate/update" element={<CandidateEditForm />} />
-         <Route path="/notifications" element={<AllNotification/>} />
+          <Route path="/notifications" element={<AllNotification />} />
           <Route
             path="/candidate/all-candidates"
             element={<ActiveCandidatesList />}
@@ -119,20 +120,39 @@ function App() {
           />
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
 
-          <Route path="/employee/account/salary-slip" element={<SalarySlip/>}/>
+          <Route
+            path="/employee/account/salary-slip"
+            element={<SalarySlip />}
+          />
 
           <Route path="/company-policy" element={<CompanyPolicy />} />
-          <Route path="/readiness-quiz" element={<ReadinessQuiz />} />  
-           <Route path="/add-candidate" element={<AddCandidate />} />
+          <Route path="/readiness-quiz" element={<ReadinessQuiz />} />
+          <Route path="/add-candidate" element={<AddCandidate />} />
 
-           <Route path="/employee/ticket-system/:name" element={<AllTicketsIT/>}/>
-           <Route path="/employee/support-ticket/newticket" element={<NewTicket/>}/>
+          {/* ticket controller by it admin */}
+          <Route
+            path="/employee/ticket-system/:name"
+            element={<AllTicketsIT />}
+          />
+          <Route
+            path="/employee/ticket-system/detail/:ticketID"
+            element={<TicketDetails />}
+          />
+          <Route
+            path="/employee/support-ticket/newticket"
+            element={<NewTicket />}
+          />
 
-           {/* email redirection urls for candidate creation*/}
-           
-           <Route path="/tracker/candidate/profile/:profile_token/edit"  element={<ViewCandidateProfile/>}/>
-           <Route path="/tracker/candidate/profile/:profile_token/view" element={<EditCandidateProfile/>}/>
+          {/* email redirection urls for candidate creation*/}
 
+          <Route
+            path="/tracker/candidate/profile/:profile_token/edit"
+            element={<ViewCandidateProfile />}
+          />
+          <Route
+            path="/tracker/candidate/profile/:profile_token/view"
+            element={<EditCandidateProfile />}
+          />
 
           <Route path="*" element={<NotFound />} />
         </Route>

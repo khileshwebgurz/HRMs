@@ -893,6 +893,18 @@ class UserController extends Controller
             });
         }
 
+        // ✅ Check if all data is requested (e.g. for dropdown)
+        if ($request->query('all') === 'true') {
+            $employees = $query->orderBy('name')->get()->map(function ($employee) {
+                return [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                ];
+            });
+
+            return response()->json(['data' => $employees]);
+        }
+
         // Get pagination values from query string
         $perPage = $request->query('limit', 10);
         $page = $request->query('page', 1);

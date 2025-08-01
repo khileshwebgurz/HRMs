@@ -138,6 +138,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
     Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
+     Route::get('/ticket/detail/{id}', [TicketController::class ,'detail']);
 
     // salary slip
     Route::get('/salary-slip', [AccountController::class, 'salaryslip']);
@@ -209,6 +210,10 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
     Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
     Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
-    // Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
+      Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
+    Route::post('/addTicket', [TicketController::class, 'addTicket']);
+    Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
+    
+ // Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
     Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
 });

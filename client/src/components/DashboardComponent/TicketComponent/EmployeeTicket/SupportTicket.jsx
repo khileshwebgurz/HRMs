@@ -1,11 +1,11 @@
-import React from "react";
-import "../../assets/css/ticket.css";
+import "../../../../assets/css/ticket.css";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useUser } from "../../context/UserContext";
-import AddTicketForm from "./TicketComponent/AddTicketForm";
+import { useUser } from "../../../../context/UserContext";
+import AddTicketForm from "../EmployeeTicket/AddTicketForm";
 import { useNavigate } from "react-router-dom";
+
 
 const SupportTicket = () => {
   const user = useUser();
@@ -15,8 +15,6 @@ const SupportTicket = () => {
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-
-
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,7 +155,7 @@ const SupportTicket = () => {
                                 filteredTickets.map((ticket, index) => (
                                   <tr key={ticket.id}>
                                     <td>{ticket.ticket_id}</td>
-                                    <td>{ticket.created_at.slice(0,10)}</td>
+                                    <td>{ticket.created_at.slice(0, 10)}</td>
                                     <td>{ticket.issue_type}</td>
                                     <td>{ticket.description}</td>
                                     <td>{ticket.status}</td>

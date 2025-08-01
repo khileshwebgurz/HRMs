@@ -12,6 +12,8 @@ use App\Traits\PermissionTrait;
 use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Mail;
+use App\Models\InventoryItems;
+use App\Models\Ticketreply;
 
 class TicketController extends Controller
 {
@@ -251,7 +253,7 @@ class TicketController extends Controller
         // $id = Auth::user()->id;
         // $ticket = Tickets::latest();
         $filters = Tickets::$filterdata;
-       
+
         $open_count = Tickets::where('status', '1')->count();
         $close_count = Tickets::where('status', '2')->count();
 
@@ -340,179 +342,337 @@ class TicketController extends Controller
     }
 
     // this ticket controller is for it admin
-//     public function addticket(Request $request)
-//   {
-//     $id = Auth::user()->id;
-//     // print_r($id); die();
-//     // $employee = Employees::where('id', $id)->first();
-//     $ticket = new Tickets;
-//     if($request->user_role == '3')
-//     {
-//       $ticket->employee_id = $request['employee'];
-//     }
-//     else
-//     {
-//       $ticket->employee_id = $id;
-//     }
+    //     public function addticket(Request $request)
+    //   {
+    //     $id = Auth::user()->id;
+    //     // print_r($id); die();
+    //     // $employee = Employees::where('id', $id)->first();
+    //     $ticket = new Tickets;
+    //     if($request->user_role == '3')
+    //     {
+    //       $ticket->employee_id = $request['employee'];
+    //     }
+    //     else
+    //     {
+    //       $ticket->employee_id = $id;
+    //     }
 
-//     if($request['issue'] == 'Hardware')
-//     {
-//       $ticket->issue_type = '1';
-//     }
-//     if($request['issue'] == 'Software')
-//     {
-//       $ticket->issue_type = '2';
-//     }
-//     if($request['issue'] == 'Server')
-//     {
-//       $ticket->issue_type = '3';
-//     }
-//     if($request['issue'] == 'Internet')
-//     {
-//       $ticket->issue_type = '4';
-//     }
-//     // $ticket->issue_type = $request['issue'];
+    //     if($request['issue'] == 'Hardware')
+    //     {
+    //       $ticket->issue_type = '1';
+    //     }
+    //     if($request['issue'] == 'Software')
+    //     {
+    //       $ticket->issue_type = '2';
+    //     }
+    //     if($request['issue'] == 'Server')
+    //     {
+    //       $ticket->issue_type = '3';
+    //     }
+    //     if($request['issue'] == 'Internet')
+    //     {
+    //       $ticket->issue_type = '4';
+    //     }
+    //     // $ticket->issue_type = $request['issue'];
 
-//     if($request['level'] == 'P1')
-//     {
-//       $ticket->issue_level = '1';
-//       $ticket->solved_in = '30 to 60 minutes';
-//       $level_mail = 'P1- Service Unuseable in Production';
-//     }
-//     if($request['level'] == 'P2')
-//     {
-//       $ticket->issue_level = '2';
-//       $ticket->solved_in = 'Upto 2 Hours';
-//       $level_mail = 'P2- Service Partially not working';
-//     }
-//     if($request['level'] == 'P3')
-//     {
-//       $ticket->issue_level = '3';
-//       $ticket->solved_in = 'Upto 8 Hours';
-//       $level_mail = 'P3- Service Partially Impaired';
-//     }
-//     if($request['level'] == 'P4')
-//     {
-//       $ticket->issue_level = '4';
-//       $ticket->solved_in = 'Upto 48 Hours';
-//       $level_mail = 'P4- Service Useable';
-//     }
-//     // $ticket->issue_level = $request['level'];
-//     $ticket->description = $request['description'];
-    
-//     // $ticket->status = '1';
-//     // $ticket->save();
-//     // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
-    
+    //     if($request['level'] == 'P1')
+    //     {
+    //       $ticket->issue_level = '1';
+    //       $ticket->solved_in = '30 to 60 minutes';
+    //       $level_mail = 'P1- Service Unuseable in Production';
+    //     }
+    //     if($request['level'] == 'P2')
+    //     {
+    //       $ticket->issue_level = '2';
+    //       $ticket->solved_in = 'Upto 2 Hours';
+    //       $level_mail = 'P2- Service Partially not working';
+    //     }
+    //     if($request['level'] == 'P3')
+    //     {
+    //       $ticket->issue_level = '3';
+    //       $ticket->solved_in = 'Upto 8 Hours';
+    //       $level_mail = 'P3- Service Partially Impaired';
+    //     }
+    //     if($request['level'] == 'P4')
+    //     {
+    //       $ticket->issue_level = '4';
+    //       $ticket->solved_in = 'Upto 48 Hours';
+    //       $level_mail = 'P4- Service Useable';
+    //     }
+    //     // $ticket->issue_level = $request['level'];
+    //     $ticket->description = $request['description'];
 
-//     // $ticket->issue_to = $it_mail->id;
+    //     // $ticket->status = '1';
+    //     // $ticket->save();
+    //     // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
 
-//     if($ticket->save())
-//     {
-//       $employee = Employees::where('user_role', '3')->where('status', '1')->get();
-//       foreach ($employee as $key => $value)
-//       {
-//         $mail_email[] = $value->email;
-//         $mail_name[] = $value->name;
-//         // $mail_id[] = $value->id;
 
-//         if($value->is_manager == '1')
-//         {
-//           $noti = new Notifications;
-//           $noti->type_id = 'ticket_created';
-//           $noti->message = Auth::user()->name . ' has post a ticket';
-//           $noti->page_id = $ticket->id;
-//           $noti->notify_from = Auth::user()->id;
-//           $noti->notify_type = '2';
-//           $noti->notify_to = $value->id;
-//           $noti->save();
-//         }
-//         else
-//         {
-//           $noti = new Notifications;
-//           $noti->type_id = 'ticket_created';
-//           $noti->message = Auth::user()->name . ' has post a ticket';
-//           $noti->page_id = $ticket->id;
-//           $noti->notify_from = Auth::user()->id;
-//           $noti->notify_to = $value->id;
-//           $noti->notify_type = '3';
-//           $noti->notify_panel = '1';
-//           $noti->save();
-//         }
-//       }
+    //     // $ticket->issue_to = $it_mail->id;
 
-//       $admin = Employees::where('id', '1')->first();
-//       $noti = new Notifications;
-//       $noti->type_id = 'ticket_created';
-//       $noti->message = Auth::user()->name . ' has post a ticket';
-//       $noti->page_id = $ticket->id;
-//       // $noti->notify_status = '2';
-//       $noti->notify_from = $admin->id;
-//       $noti->notify_type = '2';
-//       $noti->notify_to = $admin->id;
-//       $noti->save();
+    //     if($ticket->save())
+    //     {
+    //       $employee = Employees::where('user_role', '3')->where('status', '1')->get();
+    //       foreach ($employee as $key => $value)
+    //       {
+    //         $mail_email[] = $value->email;
+    //         $mail_name[] = $value->name;
+    //         // $mail_id[] = $value->id;
 
-//       // $to_name = $it_mail->name;
-//       // $to_email = $it_mail->email;
-//       $to_name = $mail_name;
-//       $to_email = $mail_email;
-//       $data = array(
-//         // 'name' => $to_name,
-//         'name' => 'IT Team',
-//         'type' => 'New ticket post by '.Auth::user()->name.'',
-//         'issue' => ''.$request['issue']. ' issue has been raised.',
-//         'level' => $level_mail,
-//         'description' => $request['description'],
-//         'id'=> $ticket->id
-//       );
-//       Mail::send('emails.ticket', $data, function ($message) use ($to_name, $to_email) {
-//         $message->to($to_email, $to_name)->subject('Welcome to ticket');
-//       });
-//       if(! Mail::failures())
-//       {
-//         $admin_detail = Employees::where('id', '1')->first();
-//         $to_admin_name = $admin_detail->name;
-//         $to_admin_email = $admin_detail->email;
-//         $data = array(
-//           'name' => $to_admin_name,
-//           'type' => 'New ticket post by '.Auth::user()->name.'',
-//           'issue' => $request['issue']. ' issue has been raised.',
-//           'level' => $level_mail,
-//           'description' => $request['description'],
-//           'id'=> $ticket->id
-//         );
-//         Mail::send('emails.ticket', $data, function ($message) use ($to_admin_name, $to_admin_email) {
-//           $message->to($to_admin_email, $to_admin_name)->subject('Welcome to ticket');
-//         });
+    //         if($value->is_manager == '1')
+    //         {
+    //           $noti = new Notifications;
+    //           $noti->type_id = 'ticket_created';
+    //           $noti->message = Auth::user()->name . ' has post a ticket';
+    //           $noti->page_id = $ticket->id;
+    //           $noti->notify_from = Auth::user()->id;
+    //           $noti->notify_type = '2';
+    //           $noti->notify_to = $value->id;
+    //           $noti->save();
+    //         }
+    //         else
+    //         {
+    //           $noti = new Notifications;
+    //           $noti->type_id = 'ticket_created';
+    //           $noti->message = Auth::user()->name . ' has post a ticket';
+    //           $noti->page_id = $ticket->id;
+    //           $noti->notify_from = Auth::user()->id;
+    //           $noti->notify_to = $value->id;
+    //           $noti->notify_type = '3';
+    //           $noti->notify_panel = '1';
+    //           $noti->save();
+    //         }
+    //       }
 
-//         // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
-//         $thankyou = asset('dist/img/thank-you-img.png');
-//         $countinue = route('em-support-ticket', 'mytickets');
-//         return ["msg"=>"
-//           <div class='thank-you-wrapper text-center'>
-//             <figure>
-//               <img src='$thankyou' alt='' />
-//             </figure>
-//             <h3>Thanks for Submit your Ticket!</h3>
-//             <p>Your Issue will resolve as soon as possible.</p>
-//             <div class='btn-block'><a href='$countinue' class='btn site-main-btn'>Contiune</a></div>
-//           </div>"];
-//       }
-//       else
-//       {
-//         return response()->json([
-//           'status' => 401,
-//           'message' => 'Something Wrong. Try Again.'
-//         ]);
-//       }
-//     }
-//     // else
-//     // {
-//     //   return response()->json([
-//     //     'status' => 401,
-//     //     'message' => 'Something Wrong. Try Again.'
-//     //   ]);
-//     // }
-  
-//   }
+    //       $admin = Employees::where('id', '1')->first();
+    //       $noti = new Notifications;
+    //       $noti->type_id = 'ticket_created';
+    //       $noti->message = Auth::user()->name . ' has post a ticket';
+    //       $noti->page_id = $ticket->id;
+    //       // $noti->notify_status = '2';
+    //       $noti->notify_from = $admin->id;
+    //       $noti->notify_type = '2';
+    //       $noti->notify_to = $admin->id;
+    //       $noti->save();
+
+    //       // $to_name = $it_mail->name;
+    //       // $to_email = $it_mail->email;
+    //       $to_name = $mail_name;
+    //       $to_email = $mail_email;
+    //       $data = array(
+    //         // 'name' => $to_name,
+    //         'name' => 'IT Team',
+    //         'type' => 'New ticket post by '.Auth::user()->name.'',
+    //         'issue' => ''.$request['issue']. ' issue has been raised.',
+    //         'level' => $level_mail,
+    //         'description' => $request['description'],
+    //         'id'=> $ticket->id
+    //       );
+    //       Mail::send('emails.ticket', $data, function ($message) use ($to_name, $to_email) {
+    //         $message->to($to_email, $to_name)->subject('Welcome to ticket');
+    //       });
+    //       if(! Mail::failures())
+    //       {
+    //         $admin_detail = Employees::where('id', '1')->first();
+    //         $to_admin_name = $admin_detail->name;
+    //         $to_admin_email = $admin_detail->email;
+    //         $data = array(
+    //           'name' => $to_admin_name,
+    //           'type' => 'New ticket post by '.Auth::user()->name.'',
+    //           'issue' => $request['issue']. ' issue has been raised.',
+    //           'level' => $level_mail,
+    //           'description' => $request['description'],
+    //           'id'=> $ticket->id
+    //         );
+    //         Mail::send('emails.ticket', $data, function ($message) use ($to_admin_name, $to_admin_email) {
+    //           $message->to($to_admin_email, $to_admin_name)->subject('Welcome to ticket');
+    //         });
+
+    //         // return ["msg"=>"Data Inserted","btn"=>"<a href='/hrm/employee/support-ticket' class='btn btn-success'>Contiune</a>",];
+    //         $thankyou = asset('dist/img/thank-you-img.png');
+    //         $countinue = route('em-support-ticket', 'mytickets');
+    //         return ["msg"=>"
+    //           <div class='thank-you-wrapper text-center'>
+    //             <figure>
+    //               <img src='$thankyou' alt='' />
+    //             </figure>
+    //             <h3>Thanks for Submit your Ticket!</h3>
+    //             <p>Your Issue will resolve as soon as possible.</p>
+    //             <div class='btn-block'><a href='$countinue' class='btn site-main-btn'>Contiune</a></div>
+    //           </div>"];
+    //       }
+    //       else
+    //       {
+    //         return response()->json([
+    //           'status' => 401,
+    //           'message' => 'Something Wrong. Try Again.'
+    //         ]);
+    //       }
+    //     }
+    //     // else
+    //     // {
+    //     //   return response()->json([
+    //     //     'status' => 401,
+    //     //     'message' => 'Something Wrong. Try Again.'
+    //     //   ]);
+    //     // }
+
+    //   }
+
+
+    // user ticket details
+    public function detailOLD(Request $request, $id)
+    {
+        $employee_id = Auth::user()->id;
+        $ticket = Tickets::where('id', $id)->first();
+        if ($ticket->issue_type == '1') {
+            $issue = 'Hardware';
+        } elseif ($ticket->issue_type == '2') {
+            $issue = 'Software';
+        } elseif ($ticket->issue_type == '3') {
+            $issue = 'Server';
+        } elseif ($ticket->issue_type == '4') {
+            $issue = 'Internet';
+        } else {
+            $issue = '-';
+        }
+
+        $status = $ticket->status;
+
+        // $date = date('d M Y  H:i A',strtotime($ticket->created_at));
+        $datecheck = date('d/M/Y', strtotime($ticket['created_at']));
+        if (date('d/M/Y') == $datecheck) {
+            $date = date('H:i A', strtotime($ticket['created_at']));
+        } else {
+            $date = date('d M Y', strtotime($ticket['created_at']));
+        }
+
+        $items = InventoryItems::where('employee_id', $employee_id)->get();
+        $employee = Employees::where('id', $employee_id)->first();
+        $desktop = InventoryItems::where('employee_id', $employee_id)->where('hardware_type', '1')->first();
+        $cpu = InventoryItems::where('employee_id', $employee_id)->where('hardware_type', '2')->first();
+        $keyboard = InventoryItems::where('employee_id', $employee_id)->where('hardware_type', '3')->first();
+        $mouse = InventoryItems::where('employee_id', $employee_id)->where('hardware_type', '4')->first();
+        $other = InventoryItems::where('employee_id', $employee_id)->where('hardware_type', '5')->first();
+
+        if (empty($employee->work_station_number)) {
+            $emp_work = "-";
+        } else {
+            $emp_work = $employee->work_station_number;
+        }
+        if (empty($employee->profile_pic)) {
+            $employee_pic = "-";
+        } else {
+            $employee_pic = $employee->profile_pic;
+        }
+        if (empty($employee->name)) {
+            $employee = "-";
+        } else {
+            $employee = $employee->name;
+        }
+        if (empty($desktop->name)) {
+            $desktop = "-";
+        } else {
+            $desktop = $desktop->name;
+        }
+        if (empty($cpu->name)) {
+            $cpu = "-";
+        } else {
+            $cpu = $cpu->name;
+        }
+        if (empty($keyboard->name)) {
+            $keyboard = "-";
+        } else {
+            $keyboard = $keyboard->name;
+        }
+        if (empty($mouse->name)) {
+            $mouse = "-";
+        } else {
+            $mouse = $mouse->name;
+        }
+        if (empty($other->name)) {
+            $other = "-";
+        } else {
+            $other = $other->name;
+        }
+
+        return view('employees.account.ticket-detail', compact('emp_work', 'ticket', 'issue', 'status', 'date', 'employee', 'desktop', 'cpu', 'keyboard', 'mouse', 'other', 'employee_pic', 'id'));
+    }
+
+    public function detail(Request $request, $id)
+    {
+        $employee_id = Auth::user()->id;
+        $ticket = Tickets::find($id);
+
+        $open_count = Tickets::where('status', '1')->count();
+        $close_count = Tickets::where('status', '2')->count();
+
+        // Log::info('My employee_id is >>>>', ['employee_id' => $ticket->employee_id]);
+
+        $employee = Employees::find($ticket->employee_id);
+
+        // Log::info('now my employee is >>>>', ['employee' => $ticket->employee]);
+
+
+        if (!$ticket) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ticket not found.',
+            ], 404);
+        }
+
+        // my all ticket replies
+        Log::info('now mxvzsdgfghgfhy employee is >>>>', ['employee' => $id]);
+       $replies = Ticketreply::where('ticket_id', $id)->get();
+        Log::info('hellojhsdfs is >>>>', ['employee' => $replies]);
+
+
+        // Map issue_type
+        $issueTypes = [
+            '1' => 'Hardware',
+            '2' => 'Software',
+            '3' => 'Server',
+            '4' => 'Internet',
+        ];
+        $issue = $issueTypes[$ticket->issue_type] ?? '-';
+
+        // Format date
+        $createdDate = date('d/M/Y', strtotime($ticket->created_at));
+        $date = (date('d/M/Y') == $createdDate)
+            ? date('H:i A', strtotime($ticket->created_at))
+            : date('d M Y', strtotime($ticket->created_at));
+
+        // $employee = Employees::find($employee_id);
+
+       
+        $emp_work = $employee->work_station_number ?? '-';
+        $employee_pic = $employee->profile_pic ?? '-';
+        $employee_name = $employee->name ?? '-';
+
+        $hardwareNames = fn($type) => InventoryItems::where('employee_id', $employee_id)
+            ->where('hardware_type', $type)
+            ->value('name') ?? '-';
+
+        return response()->json([
+            'status' => true,
+            'ticket' => $ticket,
+            'issue' => $issue,
+            'created_at' => $date,
+            'employee' => [
+                'name' => $employee_name,
+                'profile_pic' => $employee_pic,
+                'work_station' => $emp_work,
+                'employee' => $employee,
+                'open_count' => $open_count,
+                'close_count' => $close_count,
+                'replies' => $replies,
+            ],
+            'hardware' => [
+                'desktop' => $hardwareNames('1'),
+                'cpu' => $hardwareNames('2'),
+                'keyboard' => $hardwareNames('3'),
+                'mouse' => $hardwareNames('4'),
+                'other' => $hardwareNames('5'),
+            ],
+        ]);
+    }
 }
