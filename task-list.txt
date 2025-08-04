@@ -4,6 +4,13 @@ Pending task
 (link_status == '0')
 
 2. Add job applications module
+a. Get all applications
+b.  Bulk action
+c. export
+d. view/ shotlist/reject/follow-up  -actions
+
+
+
 
 3. 
 
