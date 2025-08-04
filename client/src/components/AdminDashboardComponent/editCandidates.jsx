@@ -155,7 +155,6 @@ const CandidateEditForm = () => {
           { withCredentials: true }
         );
 
-        console.log("my response is >>", response.data);
         // setCandidateProfile(response.data.candidate);
         setCandidateProfile({
           position: response.data.candidate.position || "",
@@ -195,7 +194,7 @@ const CandidateEditForm = () => {
           current_salary: response.data?.candidate.current_salary ?? "",
           expected_salary: response.data?.candidate.expected_salary ?? "",
           offered_salary: response.data?.candidate.offered_salary ?? "",
-          cv_file: response.data.candidate.cv_file ?? ""
+          cv_file: response.data.candidate.cv_file ?? "",
         });
 
         setOtherInfo(
@@ -220,6 +219,8 @@ const CandidateEditForm = () => {
     }));
   };
 
+  console.log('my other info is >>>>', otherInfo)
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -242,7 +243,15 @@ const CandidateEditForm = () => {
       });
 
       // Technical Skills
-      formData.append("technicalSkills", technicalSkills);
+      // formData.append("technicalSkills", technicalSkills);
+      formData.append(
+        "technicalSkills",
+        JSON.stringify(
+          Array.isArray(technicalSkills)
+            ? technicalSkills.map((s) => s.skill_name) // from array of objects
+            : technicalSkills.split(",").map((s) => s.trim()) // from string input
+        )
+      );
 
       // Education Rows
       educationRows.forEach((edu, idx) => {
@@ -309,7 +318,7 @@ const CandidateEditForm = () => {
         }
       );
 
-      console.log("Update successful:", response.data);
+      console.log("Update my data successful:", response.data);
       alert("Candidate updated successfully!");
     } catch (error) {
       console.error("Error updating candidate:", error);

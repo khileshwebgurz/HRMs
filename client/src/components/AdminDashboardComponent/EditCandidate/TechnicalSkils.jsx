@@ -1,6 +1,7 @@
 import React from "react";
 
 const TechnicalSkils = ({ technicalSkills, setTechnicalSkills }) => {
+  console.log("my technical skills are >>>", technicalSkills);
   return (
     <>
       <div className="card">
@@ -14,8 +15,17 @@ const TechnicalSkils = ({ technicalSkills, setTechnicalSkills }) => {
                 className="form-control"
                 type="text"
                 name="skill_name"
-                value={technicalSkills}
-                onChange={(e) => setTechnicalSkills(e.target.value)}
+                value={
+                  Array.isArray(technicalSkills)
+                    ? technicalSkills
+                        .map((skill) => skill.skill_name)
+                        .join(", ")
+                    : technicalSkills
+                }
+                onChange={(e) => {
+                  // Store as comma-separated string
+                  setTechnicalSkills(e.target.value);
+                }}
                 id="wgz_skills"
               />
             </div>
