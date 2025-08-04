@@ -1,0 +1,19 @@
+Pending task
+
+1. After 48 hours mail to hr.
+(link_status == '0')
+
+2. Add job applications module
+
+3. 
+
+Candidate :
+
+1. add Candidate
+point-1. save
+point-2. save and email -
+(a. view candidate profile - )
+(b. edit candidate profile -) in progress - remain test mail apptitue
+2. Edit Candidate
+3. Delete  Candidate
+4. Listing Candidate (All candidates)

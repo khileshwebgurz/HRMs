@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CandidateStatus;
 use App\Models\CandidateQuestions;
 use App\Mail\CandidateProfileUpdate;
+use App\Mail\HrCandidateReminder;
 
 class TrackerController extends Controller
 {
@@ -361,7 +362,7 @@ class TrackerController extends Controller
 
 
     // GET /mail-to-hr
-    public function mailToHr(Request $request)
+    public function mailToHrOLD(Request $request)
     {
         $loginuser = Auth::user();
         $date = now()->format('Y-m-d');
@@ -374,6 +375,24 @@ class TrackerController extends Controller
         Mail::send('emails.hr-mail', $data, function ($msg) use ($loginuser) {
             $msg->to($loginuser->email, $loginuser->name)->subject('Candidates not updated the profile');
         });
+
+        return response()->json(['status' => 200, 'message' => 'Email sent to HR']);
+    }
+
+    public function mailToHr(Request $request)
+    {
+        $loginUser = Auth::user();
+        $today = now()->format('Y-m-d');
+
+        $candidates = Candidates::where('link_status', '0')
+            ->whereDate('profile_token_date', $today)
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return response()->json(['status' => 204, 'message' => 'No candidates to notify'], 200);
+        }
+
+        Mail::to($loginUser->email)->send(new HrCandidateReminder($candidates));
 
         return response()->json(['status' => 200, 'message' => 'Email sent to HR']);
     }

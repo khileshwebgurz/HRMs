@@ -2591,7 +2591,7 @@ class UserController extends Controller
     // }
 
     // for getting data based on profile_token when user clicks the email update profile
-    
+
     public function candidateProfile($token)
     {
         $candidate = Candidates::where('profile_token', $token)
@@ -2977,18 +2977,7 @@ class UserController extends Controller
         }
     }
 
-    public function candidateProfileViewOLD($profile_id)
-    {
-        $candidate_status = CandidateStatus::all();
-        $candidate_questions = CandidateQuestions::all();
-        $candidate_relationship = Candidates::$relationship;
-        $candidate = Candidates::where('profile_id', $profile_id)->first();
-        if ($candidate) {
-            return view('front.candidate-profile-view', compact('candidate', 'candidate_status', 'candidate_questions', 'candidate_relationship'));
-        }
-
-        abort(404);
-    }
+   
 
     public function candidateProfileView($profile_id)
     {
