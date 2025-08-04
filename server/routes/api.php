@@ -85,6 +85,9 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     // Active Candidate
+
+Route::post('/candidate-update-profile',[UserController::class,'candidateProfilePost']);
+
     Route::get('/users/candidate/all-candidates', [UserController::class, 'allCandidates']);
     Route::delete('/candidate/deleteCandidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
     Route::delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
@@ -181,6 +184,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/get-excel', [UserController::class, 'exportCandidates']);
         Route::get('/delete-employee/{user_id}', [UserController::class, 'deleteEmployee']);
 
+        
         // helpdesk search
         Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
     });

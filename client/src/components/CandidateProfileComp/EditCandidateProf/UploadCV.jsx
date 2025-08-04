@@ -12,7 +12,7 @@ const UploadCV = () => {
                 className="form-control"
                 type="file"
                 name="upload_cv"
-                value=""
+                // value=""
                 id="upload_cv"
               />
               <div id="cv_file_div" style={{ padding: "10px 0" }}>
@@ -29,7 +29,7 @@ const UploadCV = () => {
                 className="form-control"
                 type="hidden"
                 name="upload_cv_remove"
-                value=""
+                // value=""
                 id="upload_cv_remove"
               />
             </div>

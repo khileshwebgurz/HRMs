@@ -1,8 +1,62 @@
-[
-    "total candidates are >",
-    {
-        "url": "http://localhost:8000/api/tracker/candidate/profile/40mXVRAIzU73Fb7JwL1Gvu9noWfO00Sr/edit",
-        "candidate_view_url": "http://localhost:8000/api/tracker/candidate/profile/Gg35fQc4OIFJ2OLg/view",
-        "name": "Larissa Mueller"
-    }
-]
+{
+    "candidate_token": "yNrXDt5TRyFhQ2icjU8wfujsnIXZ5xaO",
+    "technicalSkills": "[\"Dahlia Frank\"]",
+    "educationRows": [
+        {
+            "institute": "Aperiam vitae et ips",
+            "from": "2015",
+            "to": "2016",
+            "qualification": "Reprehenderit quis a"
+        }
+    ],
+    "languages": [
+        {
+            "language": "English",
+            "speak": "1",
+            "write": "0",
+            "understand": "1"
+        }
+    ],
+    "employments": [
+        {
+            "company_name": "Temporibus saepe qui",
+            "address": "Cillum praesentium e",
+            "contact_details": "Beatae illo commodo",
+            "from": "Delectus reiciendis",
+            "to": "Adipisicing facilis",
+            "position": "Voluptatem esse exe",
+            "reason_of_leaving": "Growth Prospects"
+        }
+    ],
+    "familyMembers": [
+        {
+            "name": "Corrupti dolorem cu",
+            "relationship": "Daughter",
+            "age": "53",
+            "occupation": "Voluptas tempor pers",
+            "employer": "Adipisicing unde non"
+        }
+    ],
+    "otherInfo": [
+        {
+            "id": "1",
+            "status": "1",
+            "reason": "Eiusmod commodi et d"
+        },
+        {
+            "id": "2",
+            "status": "0",
+            "reason": "Eum animi amet sol"
+        },
+        {
+            "id": "3",
+            "status": "0",
+            "reason": "Cumque ullam rerum e"
+        },
+        {
+            "id": "4",
+            "status": "1",
+            "reason": "Voluptatibus ut labo"
+        }
+    ]
+}

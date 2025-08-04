@@ -15,7 +15,7 @@ const PersonalParticular = ({ formData, onChange }) => {
               type="text"
               id="full_name"
               value={formData?.full_name || ""}
-               onChange={(e) => onChange("full_name", e.target.value)}
+              onChange={(e) => onChange("full_name", e.target.value)}
               maxLength="25"
             />
           </div>

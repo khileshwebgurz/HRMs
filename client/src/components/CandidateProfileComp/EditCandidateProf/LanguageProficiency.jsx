@@ -1,17 +1,43 @@
 import React from "react";
 
-const LanguageProficiency = () => {
+const LanguageProficiency = ({ languages, setLanguages }) => {
+  const languagesList = ["English", "Hindi", "Punjabi"];
+
+  const handleLangChange = (index, field, value) => {
+    const updated = [...languages];
+    updated[index][field] = value;
+    setLanguages(updated);
+  };
+
+  const handleLangAddRow = () => {
+    setLanguages([
+      ...languages,
+      { language: "", speak: "1", write: "1", understand: "1" },
+    ]);
+  };
+
+  const handleLangDeleteRow = (index) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this language row?"
+    );
+    if (confirmDelete) {
+      const updated = [...languages];
+      updated.splice(index, 1);
+      setLanguages(updated);
+    }
+  };
   return (
     <>
       <div className="card">
         <div className="card-header">
           Language Profeiciency
-          <a
-            className="btn btn-primary btn-sm float-right add-language"
-            data-added="0"
+          <button
+            type="button"
+            className="btn btn-primary btn-sm float-right"
+            onClick={handleLangAddRow}
           >
             <i className="fas fa-plus"></i> Add Row
-          </a>
+          </button>
         </div>
         <div className="card-body">
           <table className="table table-bordered " id="wgz_language">
@@ -26,212 +52,74 @@ const LanguageProficiency = () => {
               </tr>
             </thead>
             <tbody>
-              <tr id="rec-language-{{$l}}">
-                <td>
-                  <span className="sn"></span>
-                </td>
-                <td>
-                  <select
-                    className="custom-select wgz_english_id"
-                    name="candidate_languages[english_id][<?php echo $l; ?>]"
-                  >
-                    <option value="">Language...</option>
-                    <option value="{{$langk}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_speak"
-                        type="radio"
-                        name="candidate_languages[speak][<?php echo $l; ?>]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_speak"
-                        type="radio"
-                        name="candidate_languages[speak][<?php echo $l; ?>]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_write"
-                        type="radio"
-                        name="candidate_languages[write][<?php echo $l; ?>]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_write"
-                        type="radio"
-                        name="candidate_languages[write][<?php echo $l; ?>]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_understand"
-                        type="radio"
-                        name="candidate_languages[understand][<?php echo $l; ?>]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_understand"
-                        type="radio"
-                        name="candidate_languages[understand][<?php echo $l; ?>]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record-language"
-                    data-id="<?php echo $l; ?>"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
+              {languages.map((lang, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <select
+                      className="custom-select"
+                      value={lang.language}
+                      onChange={(e) =>
+                        handleLangChange(index, "language", e.target.value)
+                      }
+                    >
+                      <option value="">Select Language...</option>
+                      {languagesList.map((lng, i) => (
+                        <option key={i} value={lng}>
+                          {lng}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
 
-              <tr>
-                <td>
-                  <span className="sn">1</span>
-                </td>
-                <td>
-                  <select
-                    className="custom-select wgz_english_id"
-                    name="candidate_languages[english_id][1]"
-                  >
-                    <option value="">Language...</option>
-                    <option value="1">English</option>
-                    <option value="2">Hindi</option>
-                    <option value="3">Punjabi</option>
-                  </select>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_speak"
-                        type="radio"
-                        checked
-                        name="candidate_languages[speak][1]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_speak"
-                        type="radio"
-                        name="candidate_languages[speak][1]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_write"
-                        type="radio"
-                        checked
-                        name="candidate_languages[write][1]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_write"
-                        type="radio"
-                        name="candidate_languages[write][1]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_understand"
-                        type="radio"
-                        checked
-                        name="candidate_languages[understand][1]"
-                        value="1"
-                      />
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input wgz_understand"
-                        type="radio"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record-language"
-                    style={{ display: "none" }}
-                    data-id="0"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
+                  {["speak", "write", "understand"].map((field) => (
+                    <td key={field}>
+                      <div className="form-check form-check-inline">
+                        <label className="form-check-label">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name={`${field}-${index}`}
+                            value="1"
+                            checked={lang[field] === "1"}
+                            onChange={(e) =>
+                              handleLangChange(index, field, e.target.value)
+                            }
+                          />
+                          Yes
+                        </label>
+                      </div>
+                      <div className="form-check form-check-inline">
+                        <label className="form-check-label">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name={`${field}-${index}`}
+                            value="0"
+                            checked={lang[field] === "0"}
+                            onChange={(e) =>
+                              handleLangChange(index, field, e.target.value)
+                            }
+                          />
+                          No
+                        </label>
+                      </div>
+                    </td>
+                  ))}
+
+                  <td>
+                    {index >= 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleLangDeleteRow(index)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

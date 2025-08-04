@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 class CandidateTestOptions extends Model
 {
 
+    protected $fillable = [
+    'candidate_test_id',
+    'question_id',
+    'correct_answer'
+];
     public function question()
     {
         return $this->hasOne('App\Models\Questions', 'id', 'question_id');

@@ -1,17 +1,47 @@
 import React from "react";
 
-const EducationDetail = () => {
+const EducationDetail = ({ educationRows, setEducationRows }) => {
+  // handle input change for education
+  const handleChange = (index, field, value) => {
+    const updated = [...educationRows];
+    updated[index][field] = value;
+    setEducationRows(updated);
+  };
+  // adding new rows
+  const handleAddRow = () => {
+    setEducationRows([
+      ...educationRows,
+      {
+        institute: "",
+        from: "",
+        to: "",
+        qualification: "",
+      },
+    ]);
+  };
+  // handle deleting the rows
+  const handleDeleteRow = (index) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this row?"
+    );
+    if (confirmDelete) {
+      const updated = [...educationRows];
+      updated.splice(index, 1);
+      setEducationRows(updated);
+    }
+  };
   return (
     <>
       <div className="card">
         <div className="card-header">
           Education Details<span className="req">*</span>
-          <a
-            className="btn btn-primary btn-sm float-right add-education"
-            data-added="0"
+          <button
+            type="button"
+            className="btn btn-primary btn-sm float-right"
+            onClick={handleAddRow}
           >
             <i className="fas fa-plus"></i> Add Row
-          </a>
+          </button>
         </div>
         <div className="card-body">
           <table className="table table-bordered " id="wgz_edu_details">
@@ -31,103 +61,80 @@ const EducationDetail = () => {
               </tr>
             </thead>
             <tbody>
-              <tr id="rec-{{$ek}}">
-                <td>
-                  <span className="sn"></span>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    name="candidate_education[institute_name][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <select
-                    className="custom-select"
-                    name="candidate_education[from][]"
-                  >
-                    <option value="">From...</option>
-
-                    <option value="{{$j}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className="custom-select"
-                    name="candidate_education[to][]"
-                  >
-                    <option value="">To...</option>
-
-                    <option value="{{$j}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    name="candidate_education[professional_qualification][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record"
-                    style={{ display: "none" }}
-                    data-id="<?php echo $ek; ?>"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <span className="sn">1</span>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    name="candidate_education[institute_name][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <select
-                    className="custom-select education_from"
-                    name="candidate_education[from][]"
-                  >
-                    <option value="">From...</option>
-
-                    <option value="{{$j}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className="custom-select education_to"
-                    name="candidate_education[to][]"
-                  >
-                    <option value="">To...</option>
-
-                    <option value="{{$j}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    name="candidate_education[professional_qualification][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record"
-                    style={{ display: "none" }}
-                    data-id="0"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
+              {educationRows?.map((row, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <textarea
+                      className="form-control"
+                      rows="2"
+                      value={row.institute_name}
+                      onChange={(e) =>
+                        handleChange(index, "institute", e.target.value)
+                      }
+                    ></textarea>
+                  </td>
+                  <td>
+                    <select
+                      className="custom-select"
+                      value={row.from}
+                      onChange={(e) =>
+                        handleChange(index, "from", e.target.value)
+                      }
+                    >
+                      <option value="">From...</option>
+                      {[...Array(30)].map((_, i) => {
+                        const year = 2024 - i;
+                        return (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      className="custom-select"
+                      value={row.to}
+                      onChange={(e) =>
+                        handleChange(index, "to", e.target.value)
+                      }
+                    >
+                      <option value="">To...</option>
+                      {[...Array(30)].map((_, i) => {
+                        const year = 2024 - i;
+                        return (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </td>
+                  <td>
+                    <textarea
+                      className="form-control"
+                      rows="2"
+                      value={row.professional_qualification}
+                      onChange={(e) =>
+                        handleChange(index, "qualification", e.target.value)
+                      }
+                    ></textarea>
+                  </td>
+                  <td>
+                    {index >= 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteRow(index)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -1,17 +1,60 @@
 import React from "react";
 
-const EmploymentHistory = () => {
+const EmploymentHistory = ({ employments, setEmployments }) => {
+  const handleEmploymentChange = (index, field, value) => {
+    const updated = [...employments];
+    updated[index][field] = value;
+    setEmployments(updated);
+  };
+
+  const handleEmploymentAddRow = () => {
+    setEmployments([
+      ...employments,
+      {
+        company_name: "",
+        address: "",
+        contact_details: "",
+        from: "",
+        to: "",
+        position: "",
+        reason_of_leaving: "",
+      },
+    ]);
+  };
+
+  const handleEmploymentDeleteRow = (index) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this employment row?"
+    );
+    if (confirmDelete) {
+      const updated = [...employments];
+      updated.splice(index, 1);
+      setEmployments(updated);
+    }
+  };
+
+  console.log('my employments are >>>', employments)
+
+  const reasons = [
+    "Growth Prospects",
+    "Medical Issue",
+    "Family Issue",
+    "Salary Issue",
+    "Employee Benefits",
+    "Other",
+  ];
   return (
     <>
       <div className="card">
         <div className="card-header">
           Employment History <span className="req">*</span>
-          <a
-            className="btn btn-primary btn-sm float-right add-employment"
-            data-added="0"
+          <button
+            type="button"
+            className="btn btn-primary btn-sm float-right"
+            onClick={handleEmploymentAddRow}
           >
             <i className="fas fa-plus"></i> Add Row
-          </a>
+          </button>
         </div>
         <div className="card-body">
           <table className="table table-bordered " id="wgz_employment">
@@ -27,141 +70,113 @@ const EmploymentHistory = () => {
               </tr>
             </thead>
             <tbody>
-              <tr id="rec-employment-{{$em}}">
-                <td>
-                  <span className="sn"></span>
-                </td>
-                <td>
-                  Name of the Company{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[company_name][]"
-                  ></textarea>
-                  Address{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[address][]"
-                  ></textarea>
-                  Contact Details{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[contact_details][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="{{$employment->date_from}}"
-                    name="candidate_employments[date_from][]"
-                    autocomplete="nope"
-                  />
-                </td>
-                <td>
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="{{$employment->date_to}}"
-                    name="candidate_employments[date_to][]"
-                    autocomplete="nope"
-                  />
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[position][]"
-                    rows="6"
-                  ></textarea>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[reason_of_leaving][]"
-                    rows="6"
-                  ></textarea>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record-employment"
-                    data-id="{{$em}}"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <span className="sn">1</span>
-                </td>
-                <td>
-                  Name of the Company{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[company_name][]"
-                  ></textarea>
-                  Address{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[address][]"
-                  ></textarea>{" "}
-                  Contact Details{" "}
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[contact_details][]"
-                  ></textarea>
-                </td>
-                <td>
-                  <select
-                    className="custom-select "
-                    name="candidate_employments[date_from][]"
-                  >
-                    <option value="">From...</option>
-
-                    <option value="{{$j}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <select
-                    className="custom-select"
-                    name="candidate_employments[date_to][]"
-                  >
-                    <option value="">To...</option>
-
-                    <option value="{{$k}}"></option>
-                  </select>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    name="candidate_employments[position][]"
-                    rows="6"
-                  ></textarea>
-                </td>
-                <td>
-                  <select
-                    className="custom-select"
-                    name="candidate_employments[reason_of_leaving][]"
-                  >
-                    <option value="">Select Reason</option>
-                    <option value="Growth Prospects">Growth Prospects</option>
-                    <option value="Medical Issue">Medical Issue</option>
-                    <option value="Family Issue">Family Issue</option>
-                    <option value="Salary Issue">Salary Issue</option>
-                    <option value="Employee Benefits">Employee Benefits</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </td>
-                <td>
-                  <a
-                    className="btn btn-xs delete-record-employment"
-                    style={{ display: "none" }}
-                    data-id="0"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </a>
-                </td>
-              </tr>
+              {employments.map((emp, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <div>Name of the Company</div>
+                    <textarea
+                      className="form-control"
+                      value={emp.company_name}
+                      onChange={(e) =>
+                        handleEmploymentChange(
+                          index,
+                          "company_name",
+                          e.target.value
+                        )
+                      }
+                    />
+                    <div>Address</div>
+                    <textarea
+                      className="form-control"
+                      value={emp.address}
+                      onChange={(e) =>
+                        handleEmploymentChange(index, "address", e.target.value)
+                      }
+                    />
+                    <div>Contact Details</div>
+                    <textarea
+                      className="form-control"
+                      value={emp.contact_details}
+                      onChange={(e) =>
+                        handleEmploymentChange(
+                          index,
+                          "contact_details",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="form-control"
+                      type="text"
+                      value={emp.date_from}
+                      onChange={(e) =>
+                        handleEmploymentChange(index, "from", e.target.value)
+                      }
+                      placeholder="From (e.g. Jan 2022)"
+                      autoComplete="off"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="form-control"
+                      type="text"
+                      value={emp.date_to}
+                      onChange={(e) =>
+                        handleEmploymentChange(index, "to", e.target.value)
+                      }
+                      placeholder="To (e.g. Jul 2023)"
+                      autoComplete="off"
+                    />
+                  </td>
+                  <td>
+                    <textarea
+                      className="form-control"
+                      rows="6"
+                      value={emp.position}
+                      onChange={(e) =>
+                        handleEmploymentChange(
+                          index,
+                          "position",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <select
+                      className="custom-select"
+                      value={emp.reason_of_leaving}
+                      onChange={(e) =>
+                        handleEmploymentChange(
+                          index,
+                          "reason_of_leaving",
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="">Select Reason</option>
+                      {reasons.map((reason, i) => (
+                        <option key={i} value={reason}>
+                          {reason}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    {index >= 0 && (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleEmploymentDeleteRow(index)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -12,7 +12,19 @@ import UploadCV from "./EditCandidateProf/UploadCV";
 
 const EditCandidateProfile = () => {
   const { profile_token } = useParams();
-  const [formData, setFormData] = useState(null);
+  const [formDatas, setFormDatas] = useState(null);
+
+  const [educationRows, setEducationRows] = useState([
+    {
+      institute: "",
+      from: "",
+      to: "",
+      qualification: "",
+    },
+  ]);
+
+  const [otherInfo, setOtherInfo] = useState([]);
+
   const fetchData = async () => {
     //candidate/profile/{token}/edit
     const res = await axios.get(
@@ -21,18 +33,137 @@ const EditCandidateProfile = () => {
       }/tracker/candidate/profile/${profile_token}/edit`,
       { withCredentials: true }
     );
-   setFormData(res?.data || {});
+    setFormDatas(res?.data || {});
+    setEducationRows(res?.data.candidate_education);
+    setOtherInfo(res?.data.candidate_questions);
+    setEmployments(res?.data.candidate_employment_history)
+    setTechnicalSkills(res?.data.candidate_skills)
+    setFamilyMembers(res?.data.candidate_families)
   };
   useEffect(() => {
     fetchData();
   }, []);
-  console.log("my candiates are dsfsfgdff>>>", formData);
 
-    const handleCandidateProfileChange = (field, value) => {
-    setFormData((prev) => ({
+  console.log("my candiates are dsfsfgdff>>>", formDatas);
+  const handleCandidateProfileChange = (field, value) => {
+    setFormDatas((prev) => ({
       ...prev,
-      [field]: value,
+      candidate: {
+        ...prev.candidate,
+        [field]: value,
+      },
     }));
+  };
+
+  const [familyMembers, setFamilyMembers] = useState([
+    {
+      name: "",
+      relationship: "",
+      age: "",
+      occupation: "",
+      employer: "",
+    },
+  ]);
+
+  const [technicalSkills, setTechnicalSkills] = useState("");
+  const [employments, setEmployments] = useState([
+    {
+      company_name: "",
+      address: "",
+      contact_details: "",
+      from: "",
+      to: "",
+      position: "",
+      reason_of_leaving: "",
+    },
+  ]);
+
+  const [languages, setLanguages] = useState([
+    {
+      language: "",
+      speak: "1",
+      write: "1",
+      understand: "1",
+    },
+  ]);
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+
+      formData.append("candidate_token", profile_token);
+
+      for (const key in formDatas?.candidate) {
+         formData.append(key, formDatas?.candidate[key]);
+      }
+
+     
+
+
+      // Technical Skills
+      // formData.append("technicalSkills", technicalSkills);
+      formData.append(
+        "technicalSkills",
+        JSON.stringify(
+          Array.isArray(technicalSkills)
+            ? technicalSkills.map((s) => s.skill_name) // from array of objects
+            : technicalSkills.split(",").map((s) => s.trim()) // from string input
+        )
+      );
+
+      // Education Rows
+      educationRows.forEach((edu, idx) => {
+        for (const key in edu) {
+          formData.append(`educationRows[${idx}][${key}]`, edu[key]);
+        }
+      });
+
+      // Languages
+      languages.forEach((lang, idx) => {
+        for (const key in lang) {
+          formData.append(`languages[${idx}][${key}]`, lang[key]);
+        }
+      });
+
+      // Employment History
+      employments.forEach((emp, idx) => {
+        for (const key in emp) {
+          formData.append(`employments[${idx}][${key}]`, emp[key]);
+        }
+      });
+
+      // Family Members
+      familyMembers.forEach((member, idx) => {
+        for (const key in member) {
+          formData.append(`familyMembers[${idx}][${key}]`, member[key]);
+        }
+      });
+
+      // Other Info (questions)
+      otherInfo.forEach((info, idx) => {
+        formData.append(`otherInfo[${idx}][id]`, info.id);
+        formData.append(`otherInfo[${idx}][status]`, info.status);
+        formData.append(`otherInfo[${idx}][reason]`, info.reason);
+      });
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/candidate-update-profile`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Update my data successful:", response.data);
+      alert("Candidate updated successfully!");
+    } catch (error) {
+      console.error("Error updating candidate:", error);
+      alert("Failed to update candidate.");
+    }
   };
 
   return (
@@ -57,39 +188,52 @@ const EditCandidateProfile = () => {
               action=""
               method="post"
               id="wgz_candidate_form"
-              enctype="multipart/form-data"
+              encType="multipart/form-data"
             >
               <input type="hidden" name="candidate_token" />
               <div className="col-lg-12">
-                <PersonalParticular formData={formData?.candidate} onChange={handleCandidateProfileChange} />
+                <PersonalParticular
+                  formData={formDatas?.candidate}
+                  onChange={handleCandidateProfileChange}
+                />
 
-                <EducationDetail formData={formData?.candidate_education} setFormData={setFormData} />
+                <EducationDetail
+                  educationRows={educationRows}
+                  setEducationRows={setEducationRows}
+                />
 
-                <LanguageProficiency />
+                <LanguageProficiency
+                  languages={languages}
+                  setLanguages={setLanguages}
+                />
 
-                <TechnicalSkill />
+                <TechnicalSkill
+                  technicalSkills={technicalSkills}
+                  setTechnicalSkills={setTechnicalSkills}
+                />
 
-                <EmploymentHistory />
+                <EmploymentHistory
+                  employments={employments}
+                  setEmployments={setEmployments}
+                />
 
-                <FamilyDetail />
+                <FamilyDetail
+                  familyMembers={familyMembers}
+                  setFamilyMembers={setFamilyMembers}
+                />
 
-                <OtherInfo />
-                <UploadCV />
+                <OtherInfo otherInfo={otherInfo} setOtherInfo={setOtherInfo} />
+                {/* <UploadCV /> */}
 
                 <div className="row">
                   <div className="col-lg-12">
-                    <input
+                    <button
                       className="btn btn-success float-right wgz-submit"
                       type="submit"
-                      name="submit"
-                      value="Update Profile"
-                    />
-                    <input
-                      className="btn btn-success float-right news"
-                      name="submit"
-                      value="Edit Profile"
-                      style={{ display: "none" }}
-                    />
+                      onClick={handleFormSubmit}
+                    >
+                      Submit
+                    </button>
                   </div>
                 </div>
               </div>

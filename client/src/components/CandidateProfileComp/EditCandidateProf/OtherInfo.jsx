@@ -1,6 +1,18 @@
 import React from "react";
 
-const OtherInfo = () => {
+const OtherInfo = ({ otherInfo, setOtherInfo }) => {
+
+  const handleStatusChange = (index, value) => {
+    const updated = [...otherInfo];
+    updated[index].status = value;
+    setOtherInfo(updated);
+  };
+
+  const handleReasonChange = (index, value) => {
+    const updated = [...otherInfo];
+    updated[index].reason = value;
+    setOtherInfo(updated);
+  };
   return (
     <>
       <div className="card">
@@ -17,49 +29,49 @@ const OtherInfo = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  {" "}
-                  <input
-                    type="hidden"
-                    name="candidate_other_informations[question_id][{{$question->id}}]"
-                    value="{{$question->id}}"
-                  />
-                </td>
-                <td>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="candidate_other_informations[status][{{$question->id}}]"
-                        value="1"
-                      />{" "}
-                      Yes
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <label className="form-check-label">
-                      {" "}
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="candidate_other_informations[status][{{$question->id}}]"
-                        value="0"
-                      />{" "}
-                      No
-                    </label>
-                  </div>
-                </td>
-                <td>
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    name="candidate_other_informations[reason][{{$question->id}}]"
-                  ></textarea>
-                </td>
-              </tr>
+             {otherInfo.map((question, index) => (
+                <tr key={question.id}>
+                  <td>{question.question}</td>
+                  <td>
+                    <div className="form-check form-check-inline">
+                      <label className="form-check-label">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name={`status-${question.id}`}
+                          value="1"
+                          checked={question.status === "1"}
+                          onChange={() => handleStatusChange(index, "1")}
+                        />
+                        Yes
+                      </label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <label className="form-check-label">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name={`status-${question.id}`}
+                          value="0"
+                          checked={question.status === "0"}
+                          onChange={() => handleStatusChange(index, "0")}
+                        />
+                        No
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                    <textarea
+                      className="form-control"
+                      rows="2"
+                      value={question.reason}
+                      onChange={(e) =>
+                        handleReasonChange(index, e.target.value)
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

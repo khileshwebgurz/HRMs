@@ -8,6 +8,15 @@ class CandidateTest extends Model
 
     protected $table = 'candidate_test';
 
+     protected $fillable = [
+        'candidate_id',   // <-- Add this
+        'token',
+        'status',
+        'created_by',
+        'pending_time',
+        'type'
+    ];
+
     static $status = [
         1 => 'Active',
         2 => 'Link Expired',

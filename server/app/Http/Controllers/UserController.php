@@ -61,6 +61,14 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\EmployeeInviteMail;
 use App\Models\Permissions;
 
+use Illuminate\Support\Facades\DB;
+use App\Models\CandidateSkill;
+use App\Models\CandidateEducation;
+use App\Models\CandidateEmployment;
+use App\Models\CandidateLanguage;
+use App\Models\CandidateOtherInformation;
+use App\Models\CandidateFamily;
+
 
 class UserController extends Controller
 {
@@ -1667,7 +1675,7 @@ class UserController extends Controller
     }
 
 
-     public function editCandidatePost(Request $request)
+    public function editCandidatePost(Request $request)
     {
         $candidate_id = $request->get('candidate_id');
 
@@ -2130,7 +2138,7 @@ class UserController extends Controller
         }
     }
 
-   
+
 
     public function allCandidates(Request $request)
     {
@@ -2251,7 +2259,7 @@ class UserController extends Controller
         return response()->json(['error' => 'Invalid request'], 400);
     }
 
-   
+
     private function checkEditPermission($permission_role, $currentUserId, $createdBy, $manager)
     {
         if ($permission_role->edit == '2') {
@@ -2606,376 +2614,715 @@ class UserController extends Controller
             ], 404);
         }
 
-    if (!$candidate) {
+        if (!$candidate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Candidate not found or token expired.'
+            ], 404);
+        }
+
         return response()->json([
-            'status' => false,
-            'message' => 'Candidate not found or token expired.'
-        ], 404);
+            'status' => true,
+            'candidate' => $candidate,
+            'candidate_status' => CandidateStatus::all(),
+            'candidate_questions' => CandidateQuestions::all(),
+            'candidate_relationship' => Candidates::$relationship,
+            'candidate_education' => CandidateEducations::where('candidate_id', $candidate->id)->get(),
+            'candidate_language' => CandidateLanguages::where('candidate_id', $candidate->id)->get(),
+            'candidate_skills' => CandidateSkills::where('candidate_id', $candidate->id)->get(),
+            'candidate_employment_history' => CandidateEmployments::where('candidate_id', $candidate->id)->get(),
+            'candidate_families' => CandidateFamilies::where('candidate_id', $candidate->id)->get(),
+            'candidate_other_info' => CandidateOtherInformations::where('candidate_id', $candidate->id)->get(),
+            'countries' => Country::get(['id', 'name']),
+            'states' => State::get(['id', 'name']),
+            'cities' => City::get(['id', 'name']),
+        ]);
     }
 
-    return response()->json([
-        'status' => true,
-        'candidate' => $candidate,
-        'candidate_status' => CandidateStatus::all(),
-        'candidate_questions' => CandidateQuestions::all(),
-        'candidate_relationship' => Candidates::$relationship,
-        'candidate_education' => CandidateEducations::where('candidate_id', $candidate->id)->get(),
-        'candidate_language' => CandidateLanguages::where('candidate_id', $candidate->id)->get(),
-        'candidate_skills' => CandidateSkills::where('candidate_id', $candidate->id)->get(),
-        'candidate_employment_history'=> CandidateEmployments::where('candidate_id', $candidate->id)->get(),
-        'candidate_families' => CandidateFamilies::where('candidate_id', $candidate->id)->get(),
-        'candidate_other_info'=> CandidateOtherInformations::where('candidate_id',$candidate->id)->get(),
-        'countries' => Country::get(['id', 'name']),
-        'states' => State::get(['id', 'name']),
-        'cities' => City::get(['id', 'name']),
-    ]);
-}
 
+    // public function candidateProfilePostOLD(Request $request)
+    // {
+    //     $candidate_token = $request->get('candidate_token');
+    //    Log::info('Full Candidate Profile POST Request >>>> ' . json_encode($request->all()));
 
-    public function candidateProfilePost(Request $request)
+    //     $loginuser = Auth::user();
+    //     $validator = Validator::make(
+    //         $request->all(),
+    //         [
+    //             'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+    //             'gender' => 'required',
+    //             'residence_address' => 'required',
+    //             'nationality' => 'required',
+    //             'dob' => 'required',
+    //             'place_of_birth' => 'required',
+
+    //         ],
+    //         [
+    //             'full_name' => 'Please enter fullname',
+    //             'gender' => 'Please select gender'
+    //         ]
+    //     );
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => $validator->errors()
+    //                 ->first()
+    //         ]);
+    //     }
+
+    //     if ($request->file('upload_cv')) {
+    //         $validator = Validator::make($request->all(), [
+    //             'upload_cv' => 'mimes:pdf,doc,docx'
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'status' => 401,
+    //                 'message' => $validator->errors()
+    //                     ->first()
+    //             ]);
+    //         }
+    //     }
+    //     if (empty($request->candidate_education['institute_name']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Institute name cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_education['professional_qualification']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Qualification cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_employments['company_name']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'company name cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_employments['contact_details']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'company contact details cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_employments['position']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Position cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_employments['reason_of_leaving']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'reason of leaving cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_families['name']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Family Name cannot be blank'
+    //         ]);
+    //     }
+    //     if (empty($request->candidate_families['relationship']['0'])) {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Family Relationship cannot be blank'
+    //         ]);
+    //     }
+
+    //     // try {
+    //     $candidate = Candidates::where('profile_token', $candidate_token)->first();
+    //     // $candidate->user_id = $loginuser->id;
+    //     $candidate->full_name = $request->get('full_name');
+    //     $candidate->gender = $request->get('gender');
+    //     // $candidate->position = $request->get('position');
+    //     $candidate->marital_status = $request->get('marital_status');
+    //     $candidate->residence_address = $request->get('residence_address');
+    //     $candidate->passport_number = $request->get('passport_number');
+    //     $candidate->nationality = $request->get('nationality');
+    //     $candidate->dob = $request->get('dob');
+    //     $candidate->age = $request->get('age');
+    //     $candidate->country_id = $request->get('country');
+    //     $candidate->city_id = $request->get('city');
+    //     $candidate->state_id = $request->get('state');
+    //     $candidate->place_of_birth = $request->get('place_of_birth');
+    //     $candidate->marital_status = $request->get('marital_status');
+    //     $candidate->hobbies = $request->get('hobbies');
+    //     $candidate->link_status = '1';
+    //     // $candidate->current_salary = $request->get('current_salary');
+    //     // $candidate->expected_salary = $request->get('expected_salary');
+    //     $candidate->save(); // Update Candidate table data
+
+    //     $candidate_id = $candidate->id;
+
+    //     // Save Skills
+    //     $skill_name = explode(',', $request->get('skill_name'));
+    //     if (count($skill_name) > 0) {
+    //         $skillids = [];
+    //         foreach ($skill_name as $skill) {
+    //             $c_skill = new CandidateSkills();
+    //             $c_skill->candidate_id = $candidate_id;
+    //             $c_skill->skill_name = $skill;
+    //             $c_skill->save();
+    //             $skillids[] = $c_skill->id;
+    //         }
+
+    //         if (count($skillids) > 0) {
+    //             CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
+    //         }
+    //     }
+
+    //     // Save Education
+    //     $candidate_education = $request->get('candidate_education');
+    //     if (count($candidate_education['institute_name']) > 0) {
+    //         $canedu = [];
+    //         for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
+    //             $institute_name = $candidate_education['institute_name'][$ce];
+    //             $from = $candidate_education['from'][$ce];
+    //             $to = $candidate_education['to'][$ce];
+    //             $professional_qualification = $candidate_education['professional_qualification'][$ce];
+
+    //             if (! empty($institute_name) || ! empty($from) || ! empty($to) || ! empty($professional_qualification)) {
+    //                 $c_edu = new CandidateEducations();
+    //                 $c_edu->candidate_id = $candidate_id;
+    //                 $c_edu->institute_name = $institute_name;
+    //                 $c_edu->from = $from;
+    //                 $c_edu->to = $to;
+    //                 $c_edu->professional_qualification = $professional_qualification;
+    //                 $c_edu->save();
+    //                 $canedu[] = $c_edu->id;
+    //             }
+    //         }
+
+    //         if (count($canedu) > 0) {
+    //             CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $canedu)->delete();
+    //         }
+    //     }
+
+    //     // Save Employments
+    //     $candidate_employments = $request->get('candidate_employments');
+
+    //     if (count($candidate_employments['company_name']) > 0) {
+
+    //         $empids = [];
+    //         for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
+    //             $company_name = $candidate_employments['company_name'][$ce];
+    //             $address = $candidate_employments['address'][$ce];
+    //             $contact_details = $candidate_employments['contact_details'][$ce];
+    //             $date_from = $candidate_employments['date_from'][$ce];
+    //             $date_to = $candidate_employments['date_to'][$ce];
+    //             $position = $candidate_employments['position'][$ce];
+    //             $reason_of_leaving = $candidate_employments['reason_of_leaving'][$ce];
+    //             $candidateEmp = new CandidateEmployments();
+
+    //             if (! empty($company_name) || ! empty($address) || ! empty($contact_details) || ! empty($date_from) || ! empty($date_to) || ! empty($position) || ! empty($date_from) || ! empty($reason_of_leaving)) {
+    //                 $c_emp = new CandidateEmployments();
+    //                 $c_emp->candidate_id = $candidate_id;
+    //                 $c_emp->company_name = $company_name;
+    //                 $c_emp->address = $address;
+    //                 $c_emp->contact_details = $contact_details;
+    //                 $c_emp->date_from = $date_from;
+    //                 $c_emp->date_to = $date_to;
+    //                 $c_emp->position = $position;
+    //                 $c_emp->reason_of_leaving = $reason_of_leaving;
+    //                 $c_emp->save();
+    //                 $empids[] = $c_emp->id;
+    //             }
+    //         }
+
+    //         if (count($empids) > 0) {
+    //             CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empids)->delete();
+    //         }
+    //     }
+
+    //     // Save Languages
+    //     $candidate_languages = $request->get('candidate_languages');
+    //     if (count($candidate_languages['english_id']) > 0) {
+    //         $langids = [];
+    //         for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
+    //             $language_id = $candidate_languages['english_id'][$ce];
+    //             $speak = $candidate_languages['speak'][$ce];
+    //             $write = $candidate_languages['write'][$ce];
+    //             $understand = $candidate_languages['understand'][$ce];
+
+    //             if (! empty($language_id)) {
+    //                 $c_lang = new CandidateLanguages();
+    //                 $c_lang->candidate_id = $candidate_id;
+    //                 $c_lang->language_id = $language_id;
+    //                 $c_lang->speak = $speak;
+    //                 $c_lang->write = $write;
+    //                 $c_lang->understand = $understand;
+    //                 $c_lang->save();
+    //                 $langids[] = $c_lang->id;
+    //             }
+    //         }
+
+    //         if (count($langids) > 0) {
+    //             CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langids)->delete();
+    //         }
+    //     }
+
+    //     // Save Other infomations
+    //     $candidate_other_informations = $request->get('candidate_other_informations');
+    //     if (count($candidate_other_informations['question_id']) > 0) {
+    //         $otherids = [];
+    //         for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
+    //             $question_id = $candidate_other_informations['question_id'][$ce];
+    //             $status = $candidate_other_informations['status'][$ce];
+    //             $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
+
+    //             $c_other = new CandidateOtherInformations();
+    //             $c_other->candidate_id = $candidate_id;
+    //             $c_other->question_id = $question_id;
+    //             $c_other->status = $status;
+    //             $c_other->reason = $reason;
+    //             $c_other->save();
+    //             $otherids[] = $c_other->id;
+    //         }
+
+    //         if (count($otherids) > 0) {
+    //             CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherids)->delete();
+    //         }
+    //     }
+
+    //     // Save Familes
+    //     $candidate_families = $request->get('candidate_families');
+    //     if (count($candidate_families['name']) > 0) {
+    //         $famids = [];
+    //         for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
+    //             $name = $candidate_families['name'][$ce];
+    //             $relationship = $candidate_families['relationship'][$ce];
+    //             $age = $candidate_families['age'][$ce];
+    //             $occupation = $candidate_families['occupation'][$ce];
+    //             $name_of_employer = $candidate_families['name_of_employer'][$ce];
+
+    //             if (! empty($name) || ! empty($relationship) || ! empty($age) || ! empty($occupation) || ! empty($name_of_employer)) {
+    //                 $c_famiily = new CandidateFamilies();
+    //                 $c_famiily->candidate_id = $candidate_id;
+    //                 $c_famiily->name = $name;
+    //                 $c_famiily->relationship = $relationship;
+    //                 $c_famiily->age = $age;
+    //                 $c_famiily->occupation = $occupation;
+    //                 $c_famiily->name_of_employer = $name_of_employer;
+    //                 $c_famiily->save();
+    //                 $famids[] = $c_famiily->id;
+    //             }
+
+    //             if (count($famids) > 0) {
+    //                 CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famids)->delete();
+    //             }
+    //         }
+    //     }
+
+    //     if ($request->get('upload_cv_remove')) {
+    //         $candidate->cv_file = null;
+    //         $candidate->save();
+    //     }
+
+    //     /*
+    //      * Upload cv
+    //      */
+    //     if ($file = $request->file('upload_cv')) {
+    //         $name = time() . '-' . $file->getClientOriginalName();
+    //         if ($file->move(public_path('/') . 'uploads/cv/', $name)) {
+    //             $candidate->cv_file = $name;
+    //             $candidate->save();
+    //         }
+    //     }
+
+    //     $can_test = new CandidateTest();
+    //     $can_test->candidate_id = $candidate_id;
+    //     $can_test->token = Str::random(32);
+    //     $can_test->status = 1;
+    //     $can_test->created_by = Auth::user()->id;
+    //     $can_test->pending_time = '00:00';
+    //     $can_test->type = 2;
+
+    //     // $can_test->interview_type = $can_test->type;
+    //     $can_test->save();
+
+    //     $questions = Questions::where('status', '1')->get()->random($this->questionLimit);
+    //     if ($questions) {
+    //         foreach ($questions as $question) {
+    //             $can_test_ques = new CandidateTestOptions();
+    //             $can_test_ques->candidate_test_id = $can_test->id;
+    //             $can_test_ques->question_id = $question->id;
+    //             $can_test_ques->correct_answer = $question->answer;
+
+    //             $can_test_ques->save();
+    //         }
+    //     }
+
+    //     $to_name = $candidate->full_name;
+    //     $to_email = $candidate->email;
+    //     $data = array(
+    //         'name' => $to_name,
+    //         'addresslink' => ($can_test->type == 1) ? get_options('office_address_link') : '',
+    //         'test_url' => route('showTest', $can_test->token)
+    //     );
+
+    //     Mail::send('emails.test-invite', $data, function ($message) use ($to_name, $to_email) {
+    //         $message->to($to_email, $to_name)->subject('HRM Aptitude Quiz');
+    //     });
+
+    //     if (! Mail::failures()) {
+    //         $noti = new Notifications();
+    //         $noti->type_id = 'profile_updated';
+    //         $noti->message = $candidate->full_name . ' has Updated profile';
+    //         $noti->page_id = $candidate->id;
+    //         $noti->save();
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Profile updated.'
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'status' => 401,
+    //             'message' => 'Error'
+    //         ]);
+    //     }
+    // }
+
+    public function candidateProfilePostNEW(Request $request)
     {
+        Log::info('Full Candidate Profile POST Request >>>> ' . json_encode($request->all()));
+
         $candidate_token = $request->get('candidate_token');
-        Log::info('My >>>>', ['candidate_token' => $candidate_token]);
-        $loginuser = Auth::user();
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-                'gender' => 'required',
-                'residence_address' => 'required',
-                'nationality' => 'required',
-                'dob' => 'required',
-                'place_of_birth' => 'required',
-
-            ],
-            [
-                'full_name' => 'Please enter fullname',
-                'gender' => 'Please select gender'
-            ]
-        );
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 401,
-                'message' => $validator->errors()
-                    ->first()
-            ]);
-        }
-
-        if ($request->file('upload_cv')) {
-            $validator = Validator::make($request->all(), [
-                'upload_cv' => 'mimes:pdf,doc,docx'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => $validator->errors()
-                        ->first()
-                ]);
-            }
-        }
-        if (empty($request->candidate_education['institute_name']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Institute name cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_education['professional_qualification']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Qualification cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_employments['company_name']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'company name cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_employments['contact_details']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'company contact details cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_employments['position']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Position cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_employments['reason_of_leaving']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'reason of leaving cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_families['name']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Family Name cannot be blank'
-            ]);
-        }
-        if (empty($request->candidate_families['relationship']['0'])) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Family Relationship cannot be blank'
-            ]);
-        }
-
-        // try {
         $candidate = Candidates::where('profile_token', $candidate_token)->first();
-        // $candidate->user_id = $loginuser->id;
-        $candidate->full_name = $request->get('full_name');
-        $candidate->gender = $request->get('gender');
-        // $candidate->position = $request->get('position');
-        $candidate->marital_status = $request->get('marital_status');
-        $candidate->residence_address = $request->get('residence_address');
-        $candidate->passport_number = $request->get('passport_number');
-        $candidate->nationality = $request->get('nationality');
-        $candidate->dob = $request->get('dob');
-        $candidate->age = $request->get('age');
-        $candidate->country_id = $request->get('country');
-        $candidate->city_id = $request->get('city');
-        $candidate->state_id = $request->get('state');
-        $candidate->place_of_birth = $request->get('place_of_birth');
-        $candidate->marital_status = $request->get('marital_status');
-        $candidate->hobbies = $request->get('hobbies');
-        $candidate->link_status = '1';
-        // $candidate->current_salary = $request->get('current_salary');
-        // $candidate->expected_salary = $request->get('expected_salary');
-        $candidate->save(); // Update Candidate table data
+
+        if (! $candidate) {
+            return response()->json(['status' => 404, 'message' => 'Candidate not found.']);
+        }
+
+        // Validate basic required fields
+        // $validator = Validator::make($request->all(), [
+        //     'candidateProfile.full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+        //     'candidateProfile.gender' => 'required',
+        //     'candidateProfile.residence_address' => 'required',
+        //     'candidateProfile.nationality' => 'required',
+        //     'candidateProfile.dob' => 'required',
+        //     'candidateProfile.place_of_birth' => 'required',
+        // ], [
+        //     'candidateProfile.full_name.required' => 'Please enter fullname',
+        //     'candidateProfile.gender.required' => 'Please select gender'
+        // ]);
+
+        // if ($validator->fails()) {
+        //     return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
+        // }
+
+        $profile = $request->input('candidateProfile');
+
+        $candidate->fill([
+            'full_name' => $profile['full_name'] ?? '',
+            'gender' => $profile['gender'] ?? '',
+            'marital_status' => $profile['marital_status'] ?? '',
+            'residence_address' => $profile['residence_address'] ?? '',
+            'passport_number' => $profile['passport_number'] ?? '',
+            'nationality' => $profile['nationality'] ?? '',
+            'dob' => $profile['dob'] ?? '',
+            'age' => $profile['age'] ?? '',
+            'country_id' => $profile['country'] ?? '',
+            'city_id' => $profile['city'] ?? '',
+            'state_id' => $profile['state'] ?? '',
+            'place_of_birth' => $profile['place_of_birth'] ?? '',
+            'hobbies' => $profile['hobbies'] ?? '',
+            'link_status' => '1',
+        ])->save();
 
         $candidate_id = $candidate->id;
 
         // Save Skills
-        $skill_name = explode(',', $request->get('skill_name'));
-        if (count($skill_name) > 0) {
-            $skillids = [];
-            foreach ($skill_name as $skill) {
-                $c_skill = new CandidateSkills();
-                $c_skill->candidate_id = $candidate_id;
-                $c_skill->skill_name = $skill;
-                $c_skill->save();
-                $skillids[] = $c_skill->id;
+        $skills = json_decode($request->get('technicalSkills'), true);
+        $skillIds = [];
+        if (!empty($skills)) {
+            foreach ($skills as $skill) {
+                $c_skill = CandidateSkills::updateOrCreate([
+                    'candidate_id' => $candidate_id,
+                    'skill_name' => $skill
+                ]);
+                $skillIds[] = $c_skill->id;
             }
-
-            if (count($skillids) > 0) {
-                CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
-            }
+            CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillIds)->delete();
         }
 
         // Save Education
-        $candidate_education = $request->get('candidate_education');
-        if (count($candidate_education['institute_name']) > 0) {
-            $canedu = [];
-            for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
-                $institute_name = $candidate_education['institute_name'][$ce];
-                $from = $candidate_education['from'][$ce];
-                $to = $candidate_education['to'][$ce];
-                $professional_qualification = $candidate_education['professional_qualification'][$ce];
-
-                if (! empty($institute_name) || ! empty($from) || ! empty($to) || ! empty($professional_qualification)) {
-                    $c_edu = new CandidateEducations();
-                    $c_edu->candidate_id = $candidate_id;
-                    $c_edu->institute_name = $institute_name;
-                    $c_edu->from = $from;
-                    $c_edu->to = $to;
-                    $c_edu->professional_qualification = $professional_qualification;
-                    $c_edu->save();
-                    $canedu[] = $c_edu->id;
-                }
-            }
-
-            if (count($canedu) > 0) {
-                CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $canedu)->delete();
+        $educationRows = $request->input('educationRows', []);
+        $eduIds = [];
+        foreach ($educationRows as $edu) {
+            if (!empty($edu['institute']) || !empty($edu['qualification'])) {
+                $c_edu = CandidateEducations::create([
+                    'candidate_id' => $candidate_id,
+                    'institute_name' => $edu['institute'],
+                    'from' => $edu['from'],
+                    'to' => $edu['to'],
+                    'professional_qualification' => $edu['qualification'],
+                ]);
+                $eduIds[] = $c_edu->id;
             }
         }
+        CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $eduIds)->delete();
 
-        // Save Employments
-        $candidate_employments = $request->get('candidate_employments');
-
-        if (count($candidate_employments['company_name']) > 0) {
-
-            $empids = [];
-            for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
-                $company_name = $candidate_employments['company_name'][$ce];
-                $address = $candidate_employments['address'][$ce];
-                $contact_details = $candidate_employments['contact_details'][$ce];
-                $date_from = $candidate_employments['date_from'][$ce];
-                $date_to = $candidate_employments['date_to'][$ce];
-                $position = $candidate_employments['position'][$ce];
-                $reason_of_leaving = $candidate_employments['reason_of_leaving'][$ce];
-                $candidateEmp = new CandidateEmployments();
-
-                if (! empty($company_name) || ! empty($address) || ! empty($contact_details) || ! empty($date_from) || ! empty($date_to) || ! empty($position) || ! empty($date_from) || ! empty($reason_of_leaving)) {
-                    $c_emp = new CandidateEmployments();
-                    $c_emp->candidate_id = $candidate_id;
-                    $c_emp->company_name = $company_name;
-                    $c_emp->address = $address;
-                    $c_emp->contact_details = $contact_details;
-                    $c_emp->date_from = $date_from;
-                    $c_emp->date_to = $date_to;
-                    $c_emp->position = $position;
-                    $c_emp->reason_of_leaving = $reason_of_leaving;
-                    $c_emp->save();
-                    $empids[] = $c_emp->id;
-                }
-            }
-
-            if (count($empids) > 0) {
-                CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empids)->delete();
+        // Save Employment History
+        $employments = $request->input('employments', []);
+        $empIds = [];
+        foreach ($employments as $emp) {
+            if (!empty($emp['company_name'])) {
+                $c_emp = CandidateEmployments::create([
+                    'candidate_id' => $candidate_id,
+                    'company_name' => $emp['company_name'],
+                    'address' => $emp['address'],
+                    'contact_details' => $emp['contact_details'],
+                    'date_from' => $emp['from'],
+                    'date_to' => $emp['to'],
+                    'position' => $emp['position'],
+                    'reason_of_leaving' => $emp['reason_of_leaving']
+                ]);
+                $empIds[] = $c_emp->id;
             }
         }
+        CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empIds)->delete();
 
         // Save Languages
-        $candidate_languages = $request->get('candidate_languages');
-        if (count($candidate_languages['english_id']) > 0) {
-            $langids = [];
-            for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
-                $language_id = $candidate_languages['english_id'][$ce];
-                $speak = $candidate_languages['speak'][$ce];
-                $write = $candidate_languages['write'][$ce];
-                $understand = $candidate_languages['understand'][$ce];
-
-                if (! empty($language_id)) {
-                    $c_lang = new CandidateLanguages();
-                    $c_lang->candidate_id = $candidate_id;
-                    $c_lang->language_id = $language_id;
-                    $c_lang->speak = $speak;
-                    $c_lang->write = $write;
-                    $c_lang->understand = $understand;
-                    $c_lang->save();
-                    $langids[] = $c_lang->id;
-                }
-            }
-
-            if (count($langids) > 0) {
-                CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langids)->delete();
+        $languages = $request->input('languages', []);
+        $langIds = [];
+        foreach ($languages as $lang) {
+            if (!empty($lang['language'])) {
+                $c_lang = CandidateLanguages::create([
+                    'candidate_id' => $candidate_id,
+                    'language_id' => $lang['language'],
+                    'speak' => $lang['speak'],
+                    'write' => $lang['write'],
+                    'understand' => $lang['understand']
+                ]);
+                $langIds[] = $c_lang->id;
             }
         }
+        CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langIds)->delete();
 
-        // Save Other infomations
-        $candidate_other_informations = $request->get('candidate_other_informations');
-        if (count($candidate_other_informations['question_id']) > 0) {
-            $otherids = [];
-            for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
-                $question_id = $candidate_other_informations['question_id'][$ce];
-                $status = $candidate_other_informations['status'][$ce];
-                $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
-
-                $c_other = new CandidateOtherInformations();
-                $c_other->candidate_id = $candidate_id;
-                $c_other->question_id = $question_id;
-                $c_other->status = $status;
-                $c_other->reason = $reason;
-                $c_other->save();
-                $otherids[] = $c_other->id;
-            }
-
-            if (count($otherids) > 0) {
-                CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherids)->delete();
+        // Save Family Members
+        $familyMembers = $request->input('familyMembers', []);
+        $famIds = [];
+        foreach ($familyMembers as $fm) {
+            if (!empty($fm['name'])) {
+                $c_fam = CandidateFamilies::create([
+                    'candidate_id' => $candidate_id,
+                    'name' => $fm['name'],
+                    'relationship' => $fm['relationship'],
+                    'age' => $fm['age'],
+                    'occupation' => $fm['occupation'],
+                    'name_of_employer' => $fm['employer']
+                ]);
+                $famIds[] = $c_fam->id;
             }
         }
+        CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famIds)->delete();
 
-        // Save Familes
-        $candidate_families = $request->get('candidate_families');
-        if (count($candidate_families['name']) > 0) {
-            $famids = [];
-            for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
-                $name = $candidate_families['name'][$ce];
-                $relationship = $candidate_families['relationship'][$ce];
-                $age = $candidate_families['age'][$ce];
-                $occupation = $candidate_families['occupation'][$ce];
-                $name_of_employer = $candidate_families['name_of_employer'][$ce];
-
-                if (! empty($name) || ! empty($relationship) || ! empty($age) || ! empty($occupation) || ! empty($name_of_employer)) {
-                    $c_famiily = new CandidateFamilies();
-                    $c_famiily->candidate_id = $candidate_id;
-                    $c_famiily->name = $name;
-                    $c_famiily->relationship = $relationship;
-                    $c_famiily->age = $age;
-                    $c_famiily->occupation = $occupation;
-                    $c_famiily->name_of_employer = $name_of_employer;
-                    $c_famiily->save();
-                    $famids[] = $c_famiily->id;
-                }
-
-                if (count($famids) > 0) {
-                    CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famids)->delete();
-                }
-            }
+        // Save Other Info
+        $otherInfo = $request->input('otherInfo', []);
+        $otherIds = [];
+        foreach ($otherInfo as $info) {
+            $c_other = CandidateOtherInformations::create([
+                'candidate_id' => $candidate_id,
+                'question_id' => $info['id'],
+                'status' => $info['status'],
+                'reason' => $info['status'] ? $info['reason'] : ''
+            ]);
+            $otherIds[] = $c_other->id;
         }
+        CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherIds)->delete();
+
+        return response()->json(['status' => 200, 'message' => 'Candidate updated successfully.']);
+    }
+
+
+
+
+    public function candidateProfilePost(Request $request)
+{
+    Log::info('Candidate Profile Post Request >>> ' . json_encode($request->all()));
+
+    $validator = Validator::make($request->all(), [
+        'candidate_token'     => 'required|string|exists:candidates,profile_token',
+        'full_name'           => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+        'gender'              => 'required',
+        'residence_address'   => 'required',
+        'nationality'         => 'required',
+        'dob'                 => 'required|date',
+        'place_of_birth'      => 'required',
+        'upload_cv'           => 'nullable|file|mimes:pdf,doc,docx'
+    ], [
+        'full_name.required' => 'Please enter fullname',
+        'gender.required'    => 'Please select gender',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        $candidate = Candidates::where('profile_token', $request->candidate_token)->firstOrFail();
+
+        $candidate->update([
+            'full_name'         => $request->full_name,
+            'gender'            => $request->gender,
+            'marital_status'    => $request->marital_status,
+            'residence_address' => $request->residence_address,
+            'passport_number'   => $request->passport_number,
+            'nationality'       => $request->nationality,
+            'dob'               => $request->dob,
+            'age'               => $request->age,
+            'country_id'        => $request->country,
+            'state_id'          => $request->state,
+            'city_id'           => $request->city,
+            'place_of_birth'    => $request->place_of_birth,
+            'hobbies'           => $request->hobbies,
+            'link_status'       => 1
+        ]);
 
         if ($request->get('upload_cv_remove')) {
             $candidate->cv_file = null;
-            $candidate->save();
         }
 
-        /*
-         * Upload cv
-         */
-        if ($file = $request->file('upload_cv')) {
-            $name = time() . '-' . $file->getClientOriginalName();
-            if ($file->move(public_path('/') . 'uploads/cv/', $name)) {
-                $candidate->cv_file = $name;
-                $candidate->save();
+        if ($request->hasFile('upload_cv')) {
+            $file = $request->file('upload_cv');
+            $filename = time() . '-' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/cv/'), $filename);
+            $candidate->cv_file = $filename;
+        }
+
+        $candidate->save();
+
+        // --- Skills ---
+        $skillNames = explode(',', $request->input('technicalSkills', '')); // Get skills from request
+        $candidate->skills_section()->delete(); // Delete old skills
+
+        // Insert new skills
+        foreach ($skillNames as $skill) {
+            $skill = trim($skill);
+            if (!empty($skill)) {
+                $candidate->skills_section()->create(['skill_name' => $skill]);
             }
         }
+        
 
-        $can_test = new CandidateTest();
-        $can_test->candidate_id = $candidate_id;
-        $can_test->token = Str::random(32);
-        $can_test->status = 1;
-        $can_test->created_by = Auth::user()->id;
-        $can_test->pending_time = '00:00';
-        $can_test->type = 2;
-
-        // $can_test->interview_type = $can_test->type;
-        $can_test->save();
-
-        $questions = Questions::where('status', '1')->get()->random($this->questionLimit);
-        if ($questions) {
-            foreach ($questions as $question) {
-                $can_test_ques = new CandidateTestOptions();
-                $can_test_ques->candidate_test_id = $can_test->id;
-                $can_test_ques->question_id = $question->id;
-                $can_test_ques->correct_answer = $question->answer;
-
-                $can_test_ques->save();
-            }
+        // --- Educations ---
+        CandidateEducations::where('candidate_id', $candidate->id)->delete();
+        foreach ($request->input('educationRows', []) as $edu) {
+            CandidateEducations::create([
+                'candidate_id'               => $candidate->id,
+                'institute_name'             => $edu['institute_name'] ?? '',
+                'from'                       => $edu['from'] ?? '',
+                'to'                         => $edu['to'] ?? '',
+                'professional_qualification' => $edu['professional_qualification'] ?? ''
+            ]);
         }
 
-        $to_name = $candidate->full_name;
-        $to_email = $candidate->email;
-        $data = array(
-            'name' => $to_name,
-            'addresslink' => ($can_test->type == 1) ? get_options('office_address_link') : '',
-            'test_url' => route('showTest', $can_test->token)
-        );
+        // --- Employments ---
+        CandidateEmployments::where('candidate_id', $candidate->id)->delete();
+        foreach ($request->input('employments', []) as $emp) {
+            CandidateEmployments::create([
+                'candidate_id'     => $candidate->id,
+                'company_name'     => $emp['company_name'] ?? '',
+                'address'          => $emp['address'] ?? '',
+                'contact_details'  => $emp['contact_details'] ?? '',
+                'date_from'        => $emp['date_from'] ?? '',
+                'date_to'          => $emp['date_to'] ?? '',
+                'position'         => $emp['position'] ?? '',
+                'reason_of_leaving'=> $emp['reason_of_leaving'] ?? ''
+            ]);
+        }
 
-        Mail::send('emails.test-invite', $data, function ($message) use ($to_name, $to_email) {
-            $message->to($to_email, $to_name)->subject('HRM Aptitude Quiz');
+        // --- Languages ---
+        CandidateLanguages::where('candidate_id', $candidate->id)->delete();
+        foreach ($request->input('languages', []) as $lang) {
+            CandidateLanguages::create([
+                'candidate_id' => $candidate->id,
+                'language_id'  => $lang['language_id'] ?? 1,
+                'speak'        => $lang['speak'] ?? 0,
+                'write'        => $lang['write'] ?? 0,
+                'understand'   => $lang['understand'] ?? 0
+            ]);
+        }
+
+        // --- Other Information ---
+        CandidateOtherInformations::where('candidate_id', $candidate->id)->delete();
+        foreach ($request->input('otherInfo', []) as $info) {
+            CandidateOtherInformations::create([
+                'candidate_id' => $candidate->id,
+                'question_id'  => $info['question_id'] ?? 1,
+                'status'       => $info['status'] ?? 0,
+                'reason'       => $info['reason'] ?? ''
+            ]);
+        }
+
+        // --- Families ---
+        CandidateFamilies::where('candidate_id', $candidate->id)->delete();
+        foreach ($request->input('familyMembers', []) as $fam) {
+            CandidateFamilies::create([
+                'candidate_id'     => $candidate->id,
+                'name'             => $fam['name'] ?? '',
+                'relationship'     => $fam['relationship'] ?? '',
+                'age'              => $fam['age'] ?? 12,
+                'occupation'       => $fam['occupation'] ?? '',
+                'name_of_employer' => $fam['name_of_employer'] ?? ''
+            ]);
+        }
+
+        // --- Test Creation ---
+        $test = CandidateTest::create([
+            'candidate_id' => $candidate->id,
+            'token'        => Str::random(32),
+            'status'       => 1,
+            'created_by'   => Auth::id(),
+            'pending_time' => '00:00',
+            'type'         => 2
+        ]);
+
+        // --- Assign random questions ---
+        $questions = Questions::where('status', 1)
+                              ->inRandomOrder()
+                              ->limit(10) // You can use config('settings.quiz_question_limit') if dynamic
+                              ->get();
+
+        foreach ($questions as $question) {
+            CandidateTestOptions::create([
+                'candidate_test_id' => $test->id,
+                'question_id'       => $question->id,
+                'correct_answer'    => $question->answer
+            ]);
+        }
+
+        // --- Send Email ---
+        Mail::send('emails.test-invite', [
+            'name'     => $candidate->full_name,
+            'test_url' => route('showTest', $test->token)
+        ], function ($message) use ($candidate) {
+            $message->to($candidate->email, $candidate->full_name)->subject('HRM Aptitude Quiz');
         });
 
-        if (! Mail::failures()) {
-            $noti = new Notifications();
-            $noti->type_id = 'profile_updated';
-            $noti->message = $candidate->full_name . ' has Updated profile';
-            $noti->page_id = $candidate->id;
-            $noti->save();
-            return response()->json([
-                'status' => 200,
-                'message' => 'Profile updated.'
-            ]);
-        } else {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Error'
-            ]);
-        }
+        // --- Notification ---
+        Notifications::create([
+            'type_id' => 'profile_updated',
+            'message' => $candidate->full_name . ' has updated profile',
+            'page_id' => $candidate->id,
+        ]);
+
+        DB::commit();
+
+        return response()->json(['status' => 200, 'message' => 'Profile updated successfully.']);
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        Log::error('Profile Update Error: ' . $e->getMessage());
+        return response()->json(['status' => 500, 'message' => 'Server error. Please try again.']);
     }
+}
 
    
 
@@ -2989,7 +3336,7 @@ class UserController extends Controller
             'families',
             'assessment_section'
         ])->where('profile_id', $profile_id)->first();
-         Log::info('My candidate >>>>',[' candidates are >', $candidate]);
+        Log::info('My candidate >>>>', [' candidates are >', $candidate]);
 
         if (!$candidate) {
             return response()->json(['message' => 'Not found'], 404);
