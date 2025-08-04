@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
 
-const PersonalParticular = ({candidateProfile , onChange}) => {
+const PersonalParticular = ({ candidateProfile, onChange }) => {
   return (
     <>
-     <div className="card">
+      <div className="card">
         <div className="card-header">Personal Particulars</div>
         <div className="card-body">
           <div className="form-group row">
@@ -41,11 +41,6 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                 </div>
               </div>
 
-           
-             
-
-             
-
               <div className="form-group row">
                 <label className="col-4 col-form-label">
                   Gender<span className="req">*</span>
@@ -61,7 +56,6 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                         value="1"
                         checked={candidateProfile.gender === "1"}
                         onChange={() => onChange("gender", "1")}
-                        
                       />
                       Male
                     </label>
@@ -76,7 +70,6 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                         value="2"
                         checked={candidateProfile.gender === "2"}
                         onChange={() => onChange("gender", "2")}
-                        
                       />
                       Female
                     </label>
@@ -84,7 +77,10 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                 </div>
               </div>
               <div className="form-group row">
-                <label htmlFor="passport_number" className="col-4 col-form-label">
+                <label
+                  htmlFor="passport_number"
+                  className="col-4 col-form-label"
+                >
                   Passport Number
                 </label>
                 <div className="col-8">
@@ -92,7 +88,9 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                     className="form-control"
                     type="text"
                     value={candidateProfile.passport_number}
-                    onChange={(e) => onChange("passport_number", e.target.value)}
+                    onChange={(e) =>
+                      onChange("passport_number", e.target.value)
+                    }
                     name="passport_number"
                     id="passport_number"
                   />
@@ -102,7 +100,10 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
 
             <div className="col-lg-6">
               <div className="form-group row">
-                <label htmlFor="residence_address" className="col-4 col-form-label">
+                <label
+                  htmlFor="residence_address"
+                  className="col-4 col-form-label"
+                >
                   Address<span className="req">*</span>
                 </label>
                 <div className="col-8">
@@ -111,7 +112,9 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                     rows="3"
                     id="residence_address"
                     value={candidateProfile.residence_address}
-                    onChange={(e) => onChange("residence_address", e.target.value)}
+                    onChange={(e) =>
+                      onChange("residence_address", e.target.value)
+                    }
                     name="residence_address"
                   />
                 </div>
@@ -133,7 +136,10 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                 </div>
               </div>
               <div className="form-group row">
-                <label htmlFor="place_of_birth" className="col-4 col-form-label">
+                <label
+                  htmlFor="place_of_birth"
+                  className="col-4 col-form-label"
+                >
                   Place of Birth<span className="req">*</span>
                 </label>
                 <div className="col-8">
@@ -141,7 +147,7 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                     className="form-control"
                     type="text"
                     value={candidateProfile.place_of_birth}
-                     onChange={(e) => onChange("place_of_birth", e.target.value)}
+                    onChange={(e) => onChange("place_of_birth", e.target.value)}
                     id="place_of_birth"
                     name="place_of_birth"
                   />
@@ -156,7 +162,7 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
                   className="form-control"
                   type="text"
                   value={candidateProfile.email}
-                   onChange={(e) => onChange("email", e.target.value)}
+                  onChange={(e) => onChange("email", e.target.value)}
                   id="email"
                   name="email"
                 />
@@ -253,7 +259,7 @@ const PersonalParticular = ({candidateProfile , onChange}) => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default PersonalParticular
+export default PersonalParticular;

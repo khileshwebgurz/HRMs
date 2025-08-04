@@ -2606,17 +2606,30 @@ class UserController extends Controller
             ], 404);
         }
 
+    if (!$candidate) {
         return response()->json([
-            'status' => true,
-            'candidate' => $candidate,
-            'candidate_status' => CandidateStatus::all(),
-            'candidate_questions' => CandidateQuestions::all(),
-            'candidate_relationship' => Candidates::$relationship,
-            'countries' => Country::get(['id', 'name']),
-            'states' => State::get(['id', 'name']),
-            'cities' => City::get(['id', 'name']),
-        ]);
+            'status' => false,
+            'message' => 'Candidate not found or token expired.'
+        ], 404);
     }
+
+    return response()->json([
+        'status' => true,
+        'candidate' => $candidate,
+        'candidate_status' => CandidateStatus::all(),
+        'candidate_questions' => CandidateQuestions::all(),
+        'candidate_relationship' => Candidates::$relationship,
+        'candidate_education' => CandidateEducations::where('candidate_id', $candidate->id)->get(),
+        'candidate_language' => CandidateLanguages::where('candidate_id', $candidate->id)->get(),
+        'candidate_skills' => CandidateSkills::where('candidate_id', $candidate->id)->get(),
+        'candidate_employment_history'=> CandidateEmployments::where('candidate_id', $candidate->id)->get(),
+        'candidate_families' => CandidateFamilies::where('candidate_id', $candidate->id)->get(),
+        'candidate_other_info'=> CandidateOtherInformations::where('candidate_id',$candidate->id)->get(),
+        'countries' => Country::get(['id', 'name']),
+        'states' => State::get(['id', 'name']),
+        'cities' => City::get(['id', 'name']),
+    ]);
+}
 
 
     public function candidateProfilePost(Request $request)
@@ -2997,7 +3010,8 @@ class UserController extends Controller
             'candidate' => $candidate,
             'candidate_questions' => CandidateQuestions::all(),
             'candidate_relationship' => Candidates::$relationship,
-            'candidate_status' => CandidateStatus::all()
+            'candidate_status' => CandidateStatus::all(),
+            'candidate_education' => CandidateEducations::all(),
         ]);
     }
 
