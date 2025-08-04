@@ -208,7 +208,7 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
     Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
     Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
-      Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
+    Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
     Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
     
