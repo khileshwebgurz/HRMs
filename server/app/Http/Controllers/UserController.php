@@ -2251,7 +2251,7 @@ class UserController extends Controller
         return response()->json(['error' => 'Invalid request'], 400);
     }
 
-    // Helper method to check edit permissions
+   
     private function checkEditPermission($permission_role, $currentUserId, $createdBy, $manager)
     {
         if ($permission_role->edit == '2') {
@@ -2269,7 +2269,6 @@ class UserController extends Controller
         return false;
     }
 
-    // Helper method to check delete permissions
     private function checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager)
     {
         if ($permission_role->delete == '2') {
@@ -2287,7 +2286,7 @@ class UserController extends Controller
         return false;
     }
 
-    // Helper method to generate action buttons HTML
+
     private function generateActionButtons($candidate, $permission_role)
     {
         $currentUserId = Auth::id();
@@ -2592,6 +2591,7 @@ class UserController extends Controller
     // }
 
     // for getting data based on profile_token when user clicks the email update profile
+    
     public function candidateProfile($token)
     {
         $candidate = Candidates::where('profile_token', $token)

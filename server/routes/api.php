@@ -204,10 +204,10 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('/add-candidate', [TrackerController::class, 'addCandidate'])->name('trackercandidateadd');
     Route::post('/add-candidate-post', [TrackerController::class, 'addCandidatePost'])->name('trackercandidateaddpost');
-    Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
-    Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
+    Route::get('/edit-candidate/{candidate_id}', [UserController::class, 'editCandidate']);
+    Route::get('/delete-candidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
     Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
-      Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
+    Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
     Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
     
