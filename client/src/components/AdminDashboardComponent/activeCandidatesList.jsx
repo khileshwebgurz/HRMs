@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+// users Controller
 function ActiveCandidatesList() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -22,7 +22,7 @@ function ActiveCandidatesList() {
   const fetchData = async (page = 1) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/candidate/all-candidates`,
+        `${import.meta.env.VITE_API_BASE_URL}/users/candidate/all-candidates`,
         {
           params: {
             page,
@@ -65,7 +65,7 @@ function ActiveCandidatesList() {
   const handleDownload = async (type) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/candidate/all-candidates`,
+        `${import.meta.env.VITE_API_BASE_URL}/users/candidate/all-candidates`,
         {
           params: { 
             export: type,

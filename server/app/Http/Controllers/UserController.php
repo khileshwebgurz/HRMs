@@ -2301,7 +2301,8 @@ class UserController extends Controller
 
         $buttons = [
             'view' => [
-                'url' => route('candidateProfileView', $candidate->profile_id),
+                // 'url' => route('candidateProfileView', $candidate->profile_id),
+                'url' => '',
                 'icon' => 'eye',
                 'class' => 'btn-info',
                 'title' => 'View',
@@ -2563,32 +2564,32 @@ class UserController extends Controller
         }
     }
 
-    public function sendEmailCandidateProfile($candidate_id)
-    {
-        $candidate = Candidates::findOrFail($candidate_id);
+    // public function sendEmailCandidateProfile($candidate_id)
+    // {
+    //     $candidate = Candidates::findOrFail($candidate_id);
 
-        $to_name = $candidate->full_name;
-        $to_email = $candidate->email;
-        $candidate->profile_token =  Str::random(16);
-        $candidate->profile_token_date = date("Y-m-d H:i:s", strtotime('+48 hours'));
-        $candidate->save();
+    //     $to_name = $candidate->full_name;
+    //     $to_email = $candidate->email;
+    //     $candidate->profile_token =  Str::random(16);
+    //     $candidate->profile_token_date = date("Y-m-d H:i:s", strtotime('+48 hours'));
+    //     $candidate->save();
 
-        $data = array(
-            'url' => route('candidateProfile', $candidate->profile_token),
-            'candidate_view_url' => route('candidateProfileView', $candidate->profile_id),
-            'name' => $to_name
-        );
-        Mail::send('emails.candidate-profile', $data, function ($message) use ($to_name, $to_email) {
-            $message->to($to_email, $to_name)->subject('Thank you for applying the job.');
-            $message->from('internaltesting24@yopmail.com');
-        });
+    //     $data = array(
+    //         'url' => route('candidateProfile', $candidate->profile_token),
+    //         'candidate_view_url' => route('candidateProfileView', $candidate->profile_id),
+    //         'name' => $to_name
+    //     );
+    //     Mail::send('emails.candidate-profile', $data, function ($message) use ($to_name, $to_email) {
+    //         $message->to($to_email, $to_name)->subject('Thank you for applying the job.');
+    //         $message->from('internaltesting24@yopmail.com');
+    //     });
 
-        if (! Mail::failures()) {
-            return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
-        } else {
-            return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
-        }
-    }
+    //     if (! Mail::failures()) {
+    //         return redirect()->route('allcandidates')->with('success', 'Profile link sent to candidate email address.');
+    //     } else {
+    //         return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
+    //     }
+    // }
 
     // for getting data based on profile_token when user clicks the email update profile
     public function candidateProfile($token)

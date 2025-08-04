@@ -96,7 +96,7 @@ function App() {
             path="/profile/:profile_id/view"
             element={<CandidateProfile />}
           />
-          <Route path="/trackercandidates" element={<CandidateList />} />
+          <Route path="/tracker/candidates" element={<CandidateList />} />
           <Route
             path="/users/edit-candidate/:candidate_id"
             element={<CandidateEditForm />}
@@ -104,7 +104,7 @@ function App() {
           <Route path="/candidate/update" element={<CandidateEditForm />} />
           <Route path="/notifications" element={<AllNotification />} />
           <Route
-            path="/candidate/all-candidates"
+            path="/users/candidate/all-candidates"
             element={<ActiveCandidatesList />}
           />
           <Route path="/all-questions" element={<QuestionsList />} />

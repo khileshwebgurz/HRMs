@@ -44,13 +44,13 @@ const AdminDashboard = () => {
               {
                 count: stats.total_candidates,
                 label: 'Total Candidates',
-                link: '/trackercandidates',
+                link: '/tracker/candidates',
                 icon: 'candidate',
               },
               {
                 count: stats.total_active_candidates,
                 label: 'Active Candidates',
-                link: '/candidate/all-candidates',
+                link: '/users/candidate/all-candidates',
                 icon: 'active',
               },
               {

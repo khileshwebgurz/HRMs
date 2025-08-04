@@ -70,8 +70,7 @@ Route::middleware(['auth:api'])->group(function () {
         ]);
     });
 
-    // Shared routes for all authenticated users
-
+   // All Candidate
     Route::get('/candidates', [TrackerController::class, 'allCandidates']);
     Route::post('/add', [TrackerController::class, 'addCandidatePost']);
     Route::post('/check', [TrackerController::class, 'checkCandidate']);
@@ -80,14 +79,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/send-email/{candidate_id}', [TrackerController::class, 'sendEmailCandidateProfile']);
     Route::get('/mail-to-hr', [TrackerController::class, 'mailToHr']);
 
-
-    // 'assessment_section'
-    // candidate/profile/:' f
     Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
     Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
     Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
 
-    Route::get('/candidate/all-candidates', [UserController::class, 'allCandidates']);
+
+    // Active Candidate
+    Route::get('/users/candidate/all-candidates', [UserController::class, 'allCandidates']);
     Route::delete('/candidate/deleteCandidate/{candidate_id}', [UserController::class, 'deleteCandidate']);
     Route::delete('/candidates/{candidate_id}', [TrackerController::class, 'deleteCandidate']);
     Route::get('/users/export-users', [UserController::class, 'exportUsers']);
@@ -206,7 +204,6 @@ Route::middleware(['auth:api'])->group(function () {
 Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('/add-candidate', [TrackerController::class, 'addCandidate'])->name('trackercandidateadd');
     Route::post('/add-candidate-post', [TrackerController::class, 'addCandidatePost'])->name('trackercandidateaddpost');
-  //  Route::get('/candidate/profile/{profile_id}/view', 'UserController@candidateProfileView')->name('candidateProfileView');
     Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
     Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
     Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
@@ -214,11 +211,11 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::post('/addTicket', [TicketController::class, 'addTicket']);
     Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
     
- // Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
-    Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
+    // Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
+   
 });
 
 Route::middleware([])->prefix('tracker')->group(function () {
-     Route::get('/candidate/profile/{profile_id}/view', [UserController:: class, 'candidateProfileView']);
-     Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
+    Route::get('/candidate/profile/{profile_id}/view', [UserController:: class, 'candidateProfileView']);
+    Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
 });
