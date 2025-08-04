@@ -61,11 +61,8 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordForm />} />
 
            <Route path="/tracker/candidate/profile/:profile_token/edit"  element={<EditCandidateProfile/>}/>
-           <Route path="/tracker/candidate/profile/:profile_token/view" element={<ViewCandidateProfile/>}/>
+           <Route path="/tracker/candidate/profile/:profile_id/view" element={<ViewCandidateProfile/>}/>
          
-
-
-
         <Route
           path="/"
           element={

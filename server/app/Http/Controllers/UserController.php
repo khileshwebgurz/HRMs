@@ -1667,341 +1667,7 @@ class UserController extends Controller
     }
 
 
-    public function editCandidatePostOLD(Request $request)
-    {
-        $candidate_id = $request->get('candidate_id');
-
-        $loginuser = Auth::user();
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'position' => 'required',
-                'department' => 'required',
-                'full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-                // 'mobile_number' => 'unique:candidates,' . $candidate_id . '|mobile_number|required',
-                'email' => 'unique:candidates,email,' . $candidate_id . '|email|required|regex:/(.+)@(.+)\.(.+)/i',
-                'gender' => 'required',
-                'status' => 'required',
-                'upload_cv' => 'mimes:doc,pdf,docx'
-            ],
-            [
-                'position.required' => 'Please enter position',
-                'department.required' => 'Please select the department',
-                'full_name.required' => 'Please fill the name',
-                'email.required' => 'Please fill the email',
-                'gender.required' => 'Please select gender'
-
-            ]
-        );
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 401,
-                'message' => $validator->errors()
-                    ->first()
-            ]);
-        }
-        $candidate = Candidates::where('id', $candidate_id)->first();
-        try {
-
-            $candidate->user_id = $loginuser->id;
-            $candidate->full_name = $request->get('full_name');
-            $candidate->email = $request->get('email');
-            $candidate->gender = $request->get('gender');
-
-            if ($request->mobile_number) {
-                $validator = Validator::make($request->all(), [
-                    'mobile_number' => 'unique:candidates,mobile_number,' . $candidate_id . '|required|digits:10|numeric'
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json([
-                        'status' => 401,
-                        'message' => $validator->errors()
-                            ->first()
-                    ]);
-                }
-                $candidate->mobile_number = $request->get('mobile_number');
-            }
-
-            $candidate->position = $request->get('position');
-            $candidate->marital_status = $request->get('marital_status');
-            $candidate->residence_address = $request->get('residence_address');
-            $candidate->passport_number = $request->get('passport_number');
-            $candidate->nationality = $request->get('nationality');
-            $candidate->dob = $request->get('dob');
-            $candidate->age = $request->get('age');
-            $candidate->place_of_birth = $request->get('place_of_birth');
-            $candidate->marital_status = $request->get('marital_status');
-            $candidate->hobbies = $request->get('hobbies');
-            $candidate->current_salary = $request->get('current_salary');
-            $candidate->expected_salary = $request->get('expected_salary');
-            $candidate->remarks = $request->get('remarks');
-            $candidate->status = $request->get('status');
-
-            $candidate->date_of_interview = $request->get('date_of_interview');
-            $candidate->interview_score = $request->get('interview_score');
-            $candidate->interviewed_by = $request->get('interviewed_by');
-            $candidate->sourcing = $request->get('sourcing');
-            $candidate->department = $request->get('department');
-            $candidate->offered_salary = $request->get('offered_salary');
-
-            $candidate->save(); // Update Candidate table data
-
-            $candidate_id = $candidate->id;
-
-            // Save Skills
-            $skill_name = explode(',', $request->get('skill_name'));
-            Log::info('My >>>>', ['skill_name' => $skill_name]);
-
-            if (count($skill_name) > 0) {
-                $skillids = [];
-                foreach ($skill_name as $skill) {
-                    $c_skill = new CandidateSkills();
-                    $c_skill->candidate_id = $candidate_id;
-                    $c_skill->skill_name = $skill;
-                    $c_skill->Save();
-                    $skillids[] = $c_skill->id;
-                }
-
-                if (count($skillids) > 0) {
-                    CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
-                }
-            }
-
-            // Save Education
-            $candidate_education = $request->get('candidate_education');
-            if (count($candidate_education['institute_name']) > 0) {
-                $canedu = [];
-                for ($ce = 0; $ce < count($candidate_education['institute_name']); $ce++) {
-                    $institute_name = $candidate_education['institute_name'][$ce];
-                    $from = $candidate_education['from'][$ce];
-                    $to = $candidate_education['to'][$ce];
-                    $professional_qualification = $candidate_education['professional_qualification'][$ce];
-
-                    if (! empty($institute_name) || ! empty($from) || ! empty($to) || ! empty($professional_qualification)) {
-                        $c_edu = new CandidateEducations();
-                        $c_edu->candidate_id = $candidate_id;
-                        $c_edu->institute_name = $institute_name;
-                        $c_edu->from = $from;
-                        $c_edu->to = $to;
-                        $c_edu->professional_qualification = $professional_qualification;
-                        $c_edu->save();
-                        $canedu[] = $c_edu->id;
-                    }
-                }
-
-                if (count($canedu) > 0) {
-                    CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $canedu)->delete();
-                }
-            }
-
-            // Save Employments
-            $candidate_employments = $request->get('candidate_employments');
-            if (count($candidate_employments['company_name']) > 0) {
-
-                $empids = [];
-                for ($ce = 0; $ce < count($candidate_employments['company_name']); $ce++) {
-                    $company_name = $candidate_employments['company_name'][$ce];
-                    $address = $candidate_employments['address'][$ce];
-                    $contact_details = $candidate_employments['contact_details'][$ce];
-                    $date_from = $candidate_employments['date_from'][$ce];
-                    $date_to = $candidate_employments['date_to'][$ce];
-                    $position = $candidate_employments['position'][$ce];
-                    $reason_of_leaving = $candidate_employments['reason_of_leaving'][$ce];
-                    $candidateEmp = new CandidateEmployments();
-
-                    if (! empty($company_name) || ! empty($address) || ! empty($contact_details) || ! empty($date_from) || ! empty($date_to) || ! empty($position) || ! empty($date_from) || ! empty($reason_of_leaving)) {
-                        $c_emp = new CandidateEmployments();
-                        $c_emp->candidate_id = $candidate_id;
-                        $c_emp->company_name = $company_name;
-                        $c_emp->address = $address;
-                        $c_emp->contact_details = $contact_details;
-                        $c_emp->date_from = $date_from;
-                        $c_emp->date_to = $date_to;
-                        $c_emp->position = $position;
-                        $c_emp->reason_of_leaving = $reason_of_leaving;
-                        $c_emp->Save();
-                        $empids[] = $c_emp->id;
-                    }
-                }
-
-                if (count($empids) > 0) {
-                    CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empids)->delete();
-                }
-            }
-
-            // Save Languages
-            $candidate_languages = $request->get('candidate_languages');
-            if (count($candidate_languages['english_id']) > 0) {
-                $langids = [];
-                for ($ce = 1; $ce <= count($candidate_languages['english_id']); $ce++) {
-                    $language_id = $candidate_languages['english_id'][$ce];
-                    $speak = $candidate_languages['speak'][$ce];
-                    $write = $candidate_languages['write'][$ce];
-                    $understand = $candidate_languages['understand'][$ce];
-
-                    if (! empty($language_id)) {
-                        $c_lang = new CandidateLanguages();
-                        $c_lang->candidate_id = $candidate_id;
-                        $c_lang->language_id = $language_id;
-                        $c_lang->speak = $speak;
-                        $c_lang->write = $write;
-                        $c_lang->understand = $understand;
-                        $c_lang->Save();
-                        $langids[] = $c_lang->id;
-                    }
-                }
-
-                if (count($langids) > 0) {
-                    CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langids)->delete();
-                }
-            }
-
-            // Save Other infomations
-            $candidate_other_informations = $request->get('candidate_other_informations');
-            if (count($candidate_other_informations['question_id']) > 0) {
-                $otherids = [];
-                for ($ce = 1; $ce <= count($candidate_other_informations['question_id']); $ce++) {
-                    $question_id = $candidate_other_informations['question_id'][$ce];
-                    $status = $candidate_other_informations['status'][$ce];
-                    $reason = ($status) ? $candidate_other_informations['reason'][$ce] : "";
-
-                    $c_other = new CandidateOtherInformations();
-                    $c_other->candidate_id = $candidate_id;
-                    $c_other->question_id = $question_id;
-                    $c_other->status = $status;
-                    $c_other->reason = $reason;
-                    $c_other->Save();
-                    $otherids[] = $c_other->id;
-                }
-
-                if (count($otherids) > 0) {
-                    CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherids)->delete();
-                }
-            }
-
-            // Save Familes
-            $candidate_families = $request->get('candidate_families');
-            if (count($candidate_families['name']) > 0) {
-                $famids = [];
-                for ($ce = 0; $ce < count($candidate_families['name']); $ce++) {
-                    $name = $candidate_families['name'][$ce];
-                    $relationship = $candidate_families['relationship'][$ce];
-                    $age = $candidate_families['age'][$ce];
-                    $occupation = $candidate_families['occupation'][$ce];
-                    $name_of_employer = $candidate_families['name_of_employer'][$ce];
-
-                    if (! empty($name) || ! empty($relationship) || ! empty($age) || ! empty($occupation) || ! empty($name_of_employer)) {
-                        $c_famiily = new CandidateFamilies();
-                        $c_famiily->candidate_id = $candidate_id;
-                        $c_famiily->name = $name;
-                        $c_famiily->relationship = $relationship;
-                        $c_famiily->age = $age;
-                        $c_famiily->occupation = $occupation;
-                        $c_famiily->name_of_employer = $name_of_employer;
-                        $c_famiily->Save();
-                        $famids[] = $c_famiily->id;
-                    }
-
-                    if (count($famids) > 0) {
-                        CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famids)->delete();
-                    }
-                }
-            }
-
-            // Save Accessments
-            $candidate_assessments = $request->get('candidate_assessments');
-            if (count($candidate_assessments) > 0) {
-                $assids = [];
-                foreach ($candidate_assessments as $interviewer => $cassesment) {
-                    $cassesment = (object) $cassesment;
-                    $interviewer = $interviewer;
-                    $interviewer_name = $cassesment->interviewer_name;
-                    $education = $cassesment->education;
-                    $experince = $cassesment->experince;
-                    $attitude = $cassesment->attitude;
-                    $stability = $cassesment->stability;
-                    $technical_skills = $cassesment->technical_skills;
-                    $appearance_personality = $cassesment->appearance_personality;
-                    $skills = $cassesment->skills;
-
-                    if (! empty($interviewer_name) || ! empty($education) || ! empty($experince) || ! empty($attitude) || ! empty($stability) || ! empty($technical_skills) || ! empty($appearance_personality) || ! empty($skills)) {
-                        $c_assesment = new CandidateAssessments();
-                        $c_assesment->candidate_id = $candidate_id;
-                        $c_assesment->interviewer = $interviewer;
-                        $c_assesment->interviewer_name = $interviewer_name;
-                        $c_assesment->education = $education;
-                        $c_assesment->experince = $experince;
-                        $c_assesment->attitude = $attitude;
-                        $c_assesment->stability = $stability;
-                        $c_assesment->technical_skills = $technical_skills;
-                        $c_assesment->appearance_personality = $appearance_personality;
-                        $c_assesment->skills = $skills;
-                        $c_assesment->Save();
-                        $assids[] = $c_assesment->id;
-                    }
-
-                    if (count($assids) > 0) {
-                        CandidateAssessments::where('candidate_id', $candidate_id)->whereNotIn('id', $assids)->delete();
-                    }
-                }
-            }
-
-            // Save Assessment Sections
-            $candidate_assessment_sections = $request->get('candidate_assessment_sections');
-            if (count($candidate_assessment_sections) > 0) {
-                $asssecids = [];
-                foreach ($candidate_assessment_sections as $accessment_type => $cassesment) {
-                    $cassesment = (object) $cassesment;
-                    $accessment_by = $cassesment->accessment_by;
-                    $weight_age = $cassesment->weight_age;
-                    $score = $cassesment->score;
-
-                    if (! empty($accessment_by) || ! empty($weight_age) || ! empty($score)) {
-                        $c_assesment_section = new CandidateAssessmentSections();
-                        $c_assesment_section->candidate_id = $candidate_id;
-                        $c_assesment_section->accessment_type = $accessment_type;
-                        $c_assesment_section->accessment_by = $accessment_by;
-                        if ($weight_age) {
-                            $c_assesment_section->weight_age = $weight_age;
-                        }
-                        $c_assesment_section->score = $score;
-                        $c_assesment_section->Save();
-                        $asssecids[] = $c_assesment_section->id;
-                    }
-
-                    if (count($asssecids) > 0) {
-                        CandidateAssessmentSections::where('candidate_id', $candidate_id)->whereNotIn('id', $asssecids)->delete();
-                    }
-                }
-            }
-
-
-            /*
-             * Upload cv
-             */
-            if ($file = $request->file('upload_cv')) {
-                $name = time() . '-' . $file->getClientOriginalName();
-                if ($file->move(public_path('/') . 'uploads/cv/', $name)) {
-                    $candidate->cv_file = $name;
-                }
-            }
-            $candidate->save();
-
-            return response()->json([
-                'status' => 200,
-                'message' => 'Candidate form updated.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 401,
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    public function editCandidatePost(Request $request)
+     public function editCandidatePost(Request $request)
     {
         $candidate_id = $request->get('candidate_id');
 
@@ -2011,6 +1677,7 @@ class UserController extends Controller
         $loginuser = Auth::user();
         $candidateProfile = $request->get('candidateProfile', []);
         $recommendation = $request->get('recommendation', []);
+
 
         foreach ($candidateProfile as $key => $value) {
             $request->merge([$key => $value]);
@@ -2042,18 +1709,25 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) {
+
+
+
             return response()->json([
                 'status' => 401,
                 'message' => $validator->errors()->first()
             ]);
         }
         $candidate = Candidates::where('id', $candidate_id)->first();
+
         try {
+
+            Log::info('My datas are >>>>', ['user_id' => $loginuser->id]);
 
             $candidate->user_id = $loginuser->id;
             $candidate->full_name = $request->get('full_name');
             $candidate->email = $request->get('email');
             $candidate->gender = $request->get('gender');
+
 
             if ($request->mobile_number) {
                 $validator = Validator::make($request->all(), [
@@ -2096,48 +1770,81 @@ class UserController extends Controller
 
             $candidate_id = $candidate->id;
 
-            // Save Skills - FIXED VERSION
-            $skill_names = $request->get('technicalSkills');
-            Log::info('My candidate skills are >>>> ' . json_encode($skill_names));
 
-            // Handle both array and string formats
-            if (is_string($skill_names)) {
-                Log::info('My skills are >>>> ');
-                $skill_name = explode(',', $skill_names);
-                Log::info('My name of skills are >>>> ', $skill_name);
-            } else if (is_array($skill_names)) {
-                Log::info('My skills 2nd are >>>> ');
-                $skill_name = $skill_names;
-            } else {
-                Log::info('My last skill name >>>> ');
-                $skill_name = [];
-            }
+            // //////////////////// OLD technical skills ////////////////////////////
+
+            // $skill_names = $request->get('technicalSkills');
 
 
+            // // Handle both array and string formats
+            // if (is_string($skill_names)) {
+            //     Log::info('My skills are >>>> ');
+            //     $skill_name = explode(',', $skill_names);
+            //     Log::info('My name of skills are >>>> ', $skill_name);
+            // } else if (is_array($skill_names)) {
+            //     Log::info('My skills 2nd are >>>> ');
+            //     $skill_name = $skill_names;
+            // } else {
+            //     Log::info('My last skill name >>>> ');
+            //     $skill_name = [];
+            // }
+            // $skill_name = $skill_names;
 
-            if (count($skill_name) > 0) {
-                Log::info('My skills inside >>>> ');
+
+            // $skill_name = is_string($skill_name) ? explode(',', $skill_name) : $skill_name;
+            // if (count($skill_name) > 0) {
+            //     Log::info('My skills inside >>>> ');
+            //     $skillids = [];
+            //     foreach ($skill_name as $skill) {
+            //         $skill = trim($skill);
+            //         if (!empty($skill)) {
+            //             $c_skill = new CandidateSkills();
+            //             $c_skill->candidate_id = $candidate_id;
+            //             $c_skill->skill_name = $skill;
+            //             $c_skill->Save();
+            //             $skillids[] = $c_skill->id;
+            //         }
+            //     }
+            //     Log::info('My id of  skill name >>>> ', $skillids);
+
+            //     if (count($skillids) > 0) {
+            //         Log::info('My skills inside 2>>>> ');
+            //         CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
+            //     }
+            // } else {
+            //     Log::info('My sfinal boxxss2>>>> ');
+            //     // If no skills provided, delete all existing skills for this candidate
+            //     CandidateSkills::where('candidate_id', $candidate_id)->delete();
+            // }
+
+
+            $skill_names = json_decode($request->get('technicalSkills'), true);
+            Log::info('Decoded candidate skills >>>>', $skill_names);
+
+            // Ensure it's an array
+            if (is_array($skill_names) && count($skill_names) > 0) {
                 $skillids = [];
-                foreach ($skill_name as $skill) {
+                foreach ($skill_names as $skill) {
                     $skill = trim($skill);
                     if (!empty($skill)) {
                         $c_skill = new CandidateSkills();
                         $c_skill->candidate_id = $candidate_id;
                         $c_skill->skill_name = $skill;
-                        $c_skill->Save();
+                        $c_skill->save();
                         $skillids[] = $c_skill->id;
                     }
                 }
-                Log::info('My id of  skill name >>>> ', $skillids);
 
-                if (count($skillids) > 0) {
-                    Log::info('My skills inside 2>>>> ');
-                    CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillids)->delete();
-                }
+                Log::info('Saved skill IDs >>>>', $skillids);
+
+                // Remove old skills not in the list
+                CandidateSkills::where('candidate_id', $candidate_id)
+                    ->whereNotIn('id', $skillids)
+                    ->delete();
             } else {
-                Log::info('My sfinal boxxss2>>>> ');
-                // If no skills provided, delete all existing skills for this candidate
+                // If no skills provided, delete all
                 CandidateSkills::where('candidate_id', $candidate_id)->delete();
+                Log::info('All skills deleted for candidate_id: ' . $candidate_id);
             }
 
             // Save Education
@@ -2415,6 +2122,7 @@ class UserController extends Controller
                 'message' => 'Candidate form updated.'
             ]);
         } catch (\Exception $e) {
+            Log::info('My final error execption  failed here >>>> ' . $e->getMessage());
             return response()->json([
                 'status' => 401,
                 'message' => $e->getMessage()
@@ -2422,352 +2130,7 @@ class UserController extends Controller
         }
     }
 
-    public function allCandidatesOLD(Request $request)
-    {
-        if (!in_array('all_candidates', Session::get('permission')[0])) {
-            abort(404);
-        }
-        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
-        if ($permission_role->view == '2') {
-            $data = Candidates::where('created_by', Auth::user()->id)->orderBy('created_at', 'desc')->get();
-        } elseif ($permission_role->view == '3') {
-            $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
-            $data = Candidates::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
-        } elseif ($permission_role->view == '4') {
-            $employees = Employees::where('manager_id', Auth::user()->id)->orWhere('id', Auth::user()->id)->pluck('id')->toArray();
-            $data = Candidates::whereIn('created_by', $employees)->orderBy('created_at', 'desc')->get();
-        } elseif ($permission_role->view == '5') {
-            $data = Candidates::select('*');
-        }
-
-        if ($request->ajax()) {
-            $loginuser = Auth::user();
-            $results = DataTables::of($data)->addIndexColumn()
-                ->addcolumn('select', function (Candidates $candidate) {
-                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
-                })
-                ->editcolumn('id', function (Candidates $candidate) {
-                    return 'HRM' . $candidate->id;
-                })
-                ->editcolumn('gender', function (Candidates $candidate) {
-                    return ($candidate->gender) ? Candidates::$gender[$candidate->gender] : '';
-                })
-                ->editcolumn('status', function (Candidates $candidate) {
-                    // return $candidate->candidate_status['status_name'];
-                    $emp = $candidate->candidate_status;
-                    return ($emp) ? $emp['status_name'] : '';
-                })
-                ->addcolumn('education', function (Candidates $candidate) {
-                    // return $candidate->educations->first()['professional_qualification'];
-                    $emp = $candidate->educations->first();
-                    return ($emp) ? $emp['professional_qualification'] : '';
-                })
-                ->addcolumn('current_employer', function (Candidates $candidate) {
-                    $emp = $candidate->employments->first();
-                    return ($emp) ? $emp['company_name'] : '';
-                })
-                ->editcolumn('department', function (Candidates $candidate) {
-                    return ($candidate->department) ? Candidates::$departments[$candidate->department] : '';
-                })
-                ->editcolumn('created_at', function ($row) {
-                    return date('d M, Y', strtotime($row->created_at));
-                })
-                ->editcolumn('date_of_interview', function ($row) {
-                    return ($row->date_of_interview) ? date('d M, Y', strtotime($row->date_of_interview)) : '';
-                })
-                ->addColumn('action', function ($row) {
-                    $role = loginUserRole();
-                    $id = Auth::user()->id;
-                    $created_by = $row->created_by;
-                    $manager =  Employees::where('id', $created_by)->first();
-                    $permission_role = Roles::where('id', Auth::user()->user_role)->first();
-                    $btn = '<div class="btn-group btn-group-sm">';
-                    $btn .= '<a class="btn btn-info site-icon eye-icon" title="View" href="' . route('candidateProfileView', $row->profile_id) . '" target="_blank" ><figure><img src="' . asset("/dist/img/2021/icons/eye-icon-lg.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/eye-icon-lg-white.png") . '" alt="editor"></figure></a> ';
-                    //comment
-                    $btn .= '<a class="btn btn-success site-icon comment-icon " style="color:#707070;" data-toggle="tooltip"
-                        data-html="true"  data-original-title="Name:' . $row->full_name . '& Remarks:' . $row->remarks . '" title="Name:' . $row->full_name . '& Remarks:' . $row->remarks . '" ><figure><i class="fa fa-comment"></i></figure></a> ';
-
-                    if ($permission_role->edit == '2') {
-                        if ($id == $created_by) {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
-                        }
-                    } elseif ($permission_role->edit == '3') {
-                        if ($id == $manager->manager_id) {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
-                        }
-                    } elseif ($permission_role->edit == '4') {
-                        if ($id == $manager->manager_id || $id == $created_by) {
-                            $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
-                        }
-                    } elseif ($permission_role->edit == '5') {
-
-                        $btn .= '<a class="btn btn-success site-icon pencil-icon" title="Edit" href="' . route('candidateedit', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/pencil.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/pencil-white.png") . '" alt="editor"></figure></a> ';
-                    }
-                    if ($role == User::ROLE_RECRUITER) {
-
-                        $btn .= '<a class="btn site-icon delete-icon title="Delete" style="background-color: #808080;border-color: #808080;color:#fff;" href="#" onclick="return confirm(\'You are not authorized with this permission please contact to HR for further.\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
-                    } else {
-                        if ($permission_role->delete == '2') {
-                            if ($id == $created_by) {
-                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
-                            }
-                        } elseif ($permission_role->delete == '3') {
-                            if ($id == $manager->manager_id) {
-                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
-                            }
-                        } elseif ($permission_role->delete == '4') {
-                            if ($id == $manager->manager_id || $id == $created_by) {
-                                $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
-                            }
-                        } elseif ($permission_role->delete == '5') {
-                            $btn .= '<a class="btn btn-danger delete-icon site-icon" title="Delete" href="' . route('candidatedelete', $row->id) . '" onclick="return confirm(\'Are you sure you want to delete this candidate?\')" ><figure><img src="' . asset("/dist/img/2021/icons/delete.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/delete-white.png") . '" alt="editor"></figure></a> ';
-                        }
-
-                        $dis = 'javascript:void(0)';
-                        $onclck = '';
-                        if ($row->status == 7) {
-                            $dis = route('startOnboarding', $row->id);
-                            $onclck = 'onclick="return confirm(\'Are you sure You want to start Onboarding?\')"';
-                        }
-                        $btn .= '<a class="btn btn-success site-icon menu-icon" title="Start Onboarding" href="' . $dis . '"   ' . $onclck . ' ><figure><img src="' . asset("/dist/img/2021/icons/menu.png") . '" alt="editor">
-                        <img src="' . asset("/dist/img/2021/icons/menu-overlay.png") . '" alt="editor">
-                        </figure></a> ';
-                    }
-                    $btn .= ' <a class="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"  title="Send Apptitute Test" href="javascript:void(0)"data-link="' . route('generateTest', $row->id) . '" ><figure><img src="' . asset("/dist/img/2021/icons/paper-plane.png") . '" alt="editor"><img src="' . asset("/dist/img/2021/icons/paper-plane-white.png") . '" alt="editor"></figure></a> ';
-
-                    // $btn .= ' <a title="View Candidate" href="' . route('sendEmailCandidateProfile', $row->id) . '" class="edit btn btn-info btn-sm">Send Profile</a> ';
-
-                    $btn .= '</div>';
-
-                    return $btn;
-                })
-                ->rawColumns([
-                    'action',
-                    'select'
-                ])
-                ->make(true);
-            $res = (array) $results;
-            if ($request->get('export') != '-') {
-
-                $res['original']['status'] = 'download';
-                $items = $res['original']['data'];
-
-                $name = 'candidates-' . time() . '.' . $request->get('export');
-                $file = Excel::store(new CandidateCsvExport($items), $name);
-
-                $res['original']['download_link'] = route('exportdownload', $name);
-                return $res['original'];
-            } else {
-                $res['original']['status'] = '';
-                return $res['original'];
-            }
-        }
-        return view('users.candidates.list');
-    }
-
-
-    public function allCandidatesNN(Request $request)
-    {
-
-        Log::info('My jkjkkkkkkkk >>>>');
-        $user = Auth::user();
-        $role = $user->user_role;
-        $permission_role = Roles::find($role);
-        // $permission_role =Roles::where('id',Auth::user()->user_role)->first();
-        // if (!in_array('all_candidates', $user->permissions())) {
-        //     return response()->json(['error' => 'Unauthorized'], 403);
-        // }
-        Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
-        // Permission checks based on the role
-        $candidatesQuery = Candidates::query();
-        // Log::info('My candidatesQuery >>>>', ['candidatesQuery' => $candidatesQuery->toSql()]);
-
-        if ($permission_role->view == '2') {
-            // View own candidates
-            $candidatesQuery->where('created_by', $user->id);
-            Log::info('My 2 >>>>');
-        } elseif ($permission_role->view == '3') {
-            // View candidates managed by the user
-            $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
-            $candidatesQuery->whereIn('created_by', $employees);
-            Log::info('My 3 >>>>');
-        } elseif ($permission_role->view == '4') {
-            // View candidates managed by the user or the user itself
-            $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
-            $candidatesQuery->whereIn('created_by', $employees);
-            Log::info('My 4 >>>>');
-        } elseif ($permission_role->view == '5') {
-            // No restrictions
-            Log::info('My 5 >>>>');
-        } elseif ($permission_role->view == '1') {
-            // No restrictions
-            Log::info('My 1 >>>>');
-        }
-
-        // Get candidates
-        $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
-
-        // If it's an AJAX request (for DataTables)
-        if ($request->ajax()) {
-            $results = DataTables::of($candidates)
-                ->addIndexColumn()
-                ->addColumn('select', function (Candidates $candidate) {
-                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
-                })
-                ->editColumn('id', function (Candidates $candidate) {
-                    return 'HRM' . $candidate->id;
-                })
-                ->editColumn('gender', function (Candidates $candidate) {
-                    return $candidate->gender ? Candidates::$gender[$candidate->gender] : '';
-                })
-                ->editColumn('status', function (Candidates $candidate) {
-                    return $candidate->candidate_status ? $candidate->candidate_status->status_name : '';
-                })
-                ->addColumn('education', function (Candidates $candidate) {
-                    return $candidate->educations->first() ? $candidate->educations->first()->professional_qualification : '';
-                })
-                ->addColumn('current_employer', function (Candidates $candidate) {
-                    return $candidate->employments->first() ? $candidate->employments->first()->company_name : '';
-                })
-                ->editColumn('department', function (Candidates $candidate) {
-                    return $candidate->department ? Candidates::$departments[$candidate->department] : '';
-                })
-                ->editColumn('created_at', function ($candidate) {
-                    return $candidate->created_at->format('d M, Y');
-                })
-                ->editColumn('date_of_interview', function ($candidate) {
-                    return $candidate->date_of_interview ? $candidate->date_of_interview->format('d M, Y') : '';
-                })
-                ->addColumn('action', function ($candidate) use ($role, $permission_role, $user) {
-                    $actions = '';
-                    // Add action buttons (View, Edit, Delete, etc.)
-                    if ($permission_role->edit == '2' && $candidate->created_by == $user->id) {
-                        $actions .= '<a href="' . route('candidateedit', $candidate->id) . '">Edit</a>';
-                    }
-                    if ($permission_role->delete == '2' && $candidate->created_by == $user->id) {
-                        $actions .= '<a href="' . route('candidatedelete', $candidate->id) . '" onclick="return confirm(\'Are you sure?\')">Delete</a>';
-                    }
-                    return $actions;
-                })
-                ->rawColumns(['select', 'action'])
-                ->make(true);
-
-            return response()->json($results);
-        }
-
-        // Export functionality (CSV)
-        if ($request->get('export') != '-') {
-            $items = $candidates->toArray();
-            $name = 'candidates-' . time() . '.' . $request->get('export');
-            $file = Excel::store(new CandidateCsvExport($items), $name);
-            return response()->json(['download_link' => route('exportdownload', $name)]);
-        }
-
-        // Return candidates data in JSON format
-        return response()->json($candidates);
-    }
-
-    public function allCandidates30725(Request $request)
-    {
-
-        $user = Auth::user();
-        $role = $user->user_role;
-        $permission_role = Roles::find($role);
-
-        // Log::info('My 2 >>>>', ['permission_role' => $permission_role]);
-
-        $candidatesQuery = Candidates::query();
-        // $candidatesQuery->where('status', '7');
-        $candidatesQuery->whereIn('status', [2, 3, 4, 5, 7]);
-
-        if ($permission_role->view == '2') {
-            $candidatesQuery->where('created_by', $user->id);
-        } elseif ($permission_role->view == '3') {
-            $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
-            $candidatesQuery->whereIn('created_by', $employees);
-        } elseif ($permission_role->view == '4') {
-            $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id')->toArray();
-            $candidatesQuery->whereIn('created_by', $employees);
-        } elseif ($permission_role->view == '5') {
-        }
-
-
-        // Get pagination params from query
-        $perPage = $request->query('limit', 10);
-        $page = $request->query('page', 1);
-
-        // Paginate the results
-        $paginatedCandidates = $candidatesQuery
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
-
-        $currentItems = $paginatedCandidates->items();
-
-
-
-        // $candidates = $candidatesQuery->orderBy('created_at', 'desc')->get();
-
-        if ($request->ajax()) {
-            $results = DataTables::of($currentItems)
-                ->addIndexColumn()
-                ->addColumn('select', function (Candidates $candidate) {
-                    return '<input type="checkbox" class="checkBoxClass" value="' . $candidate->email . '" />';
-                })
-                ->editColumn('id', function (Candidates $candidate) {
-                    return 'HRM' . $candidate->id;
-                })
-                ->editColumn('gender', function (Candidates $candidate) {
-                    return $candidate->gender ? Candidates::$gender[$candidate->gender] : '';
-                })
-                ->editColumn('status', function (Candidates $candidate) {
-                    return $candidate->candidate_status ? $candidate->candidate_status->status_name : '';
-                })
-                ->addColumn('education', function (Candidates $candidate) {
-                    return $candidate->educations->first() ? $candidate->educations->first()->professional_qualification : '';
-                })
-                ->addColumn('current_employer', function (Candidates $candidate) {
-                    return $candidate->employments->first() ? $candidate->employments->first()->company_name : '';
-                })
-                ->editColumn('department', function (Candidates $candidate) {
-                    return $candidate->department ? Candidates::$departments[$candidate->department] : '';
-                })
-                ->editColumn('created_at', function ($candidate) {
-                    return $candidate->created_at->format('d M, Y');
-                })
-                ->editColumn('date_of_interview', function ($candidate) {
-                    return $candidate->date_of_interview ? $candidate->date_of_interview->format('d M, Y') : '';
-                })
-                ->addColumn('action', function ($candidate) use ($role, $permission_role, $user) {
-                    $actions = '';
-                    // Add action buttons (View, Edit, Delete, etc.)
-                    if ($permission_role->edit == '2' && $candidate->created_by == $user->id) {
-                        $actions .= '<a href="' . route('candidateedit', $candidate->id) . '">Edit</a>';
-                    }
-                    if ($permission_role->delete == '2' && $candidate->created_by == $user->id) {
-                        $actions .= '<a href="' . route('candidatedelete', $candidate->id) . '" onclick="return confirm(\'Are you sure?\')">Delete</a>';
-                    }
-                    return $actions;
-                })
-                ->rawColumns(['select', 'action'])
-                ->make(true);
-
-            return response()->json([
-                'data' => $results->getData(),
-                'total' => $paginatedCandidates->total(),
-                'current_page' => $paginatedCandidates->currentPage(),
-                'last_page' => $paginatedCandidates->lastPage(),
-            ]);
-        }
-
-        return response()->json([
-            'data' => $paginatedCandidates->items(),
-            'total' => $paginatedCandidates->total(),
-            'current_page' => $paginatedCandidates->currentPage(),
-            'last_page' => $paginatedCandidates->lastPage(),
-        ]);
-    }
-
-
+   
 
     public function allCandidates(Request $request)
     {
@@ -3615,28 +2978,25 @@ class UserController extends Controller
 
     public function candidateProfileView($profile_id)
     {
-        // $candidate = Candidates::with([
-        //     'skills_section',
-        //     'languages',
-        //     'educations',
-        //     'employments',
-        //     'families',
-        //     'assessment_section',
-        //     'other_informations',
-        // ])->where('profile_id', $profile_id)->first();
-        $candidate = Candidates::where('profile_id', $profile_id)->first();
-        
-        Log::info('My >>>>', ['candidate' => $candidate]);
+        $candidate = Candidates::with([
+            'skills_section',
+            'languages',
+            'educations',
+            'employments',
+            'families',
+            'assessment_section'
+        ])->where('profile_id', $profile_id)->first();
+         Log::info('My candidate >>>>',[' candidates are >', $candidate]);
 
         if (!$candidate) {
-            return response()->json(['message' => 'Candidate not found'], 404);
+            return response()->json(['message' => 'Not found'], 404);
         }
 
         return response()->json([
             'candidate' => $candidate,
             'candidate_questions' => CandidateQuestions::all(),
             'candidate_relationship' => Candidates::$relationship,
-            'candidate_status' => CandidateStatus::all(),
+            'candidate_status' => CandidateStatus::all()
         ]);
     }
 

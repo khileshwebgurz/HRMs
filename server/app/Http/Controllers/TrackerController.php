@@ -333,6 +333,7 @@ class TrackerController extends Controller
 
         $candidate = Candidates::findOrFail($candidate_id);
         $candidate->profile_token = Str::random(32);
+        $candidate->profile_id = Str::random(16);
         $candidate->profile_token_date = now()->addHours(48);
         $candidate->save();
 
@@ -343,7 +344,7 @@ class TrackerController extends Controller
         $data = [
             'url' => env('FRONTEND_URL') . '/tracker/candidate/profile/' . $candidate->profile_token . '/edit',
             // 'url' => route('candidateProfile', $candidate->profile_token),
-            'candidate_view_url' => env('FRONTEND_URL') . '/tracker/candidate/profile/' . $candidate->profile_token . '/view',
+            'candidate_view_url' => env('FRONTEND_URL') . '/tracker/candidate/profile/' . $candidate->profile_id . '/view',
             // 'candidate_view_url' => route('candidateProfileView', $candidate->profile_id),
             'name' => $to_name,
         ];
