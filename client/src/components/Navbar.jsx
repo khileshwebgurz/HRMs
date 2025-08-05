@@ -20,6 +20,7 @@ const Navbar = () => {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [todayWorkingHour, setTodayWorkingHour] = useState("");
   const [hasClockedInData, setHasClockedInData] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
@@ -89,6 +90,11 @@ const Navbar = () => {
 
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
+  };
+
+  const handleToggle = () => {
+    setIsAdminMode((prev) => !prev);
+    console.log("Admin toggle is now:", !isAdminMode);
   };
 
   return (
@@ -178,6 +184,42 @@ const Navbar = () => {
                   </div>
                 </div>
               </li>
+
+              {(user.user_role == 1 ||
+                user.user_role == 5 ||
+                user.user_role == 7) && (
+                <li className="nav-item">
+                  <div
+                    className="admin-toggle-btn"
+                    onClick={handleToggle}
+                    id="js-admin-toggle-btn"
+                    style={{
+                      cursor: "pointer",
+
+                      border: "1px solid #ccc",
+                      borderRadius: "20px",
+
+                      backgroundColor: isAdminMode ? "red" : "#ddd",
+
+                      position: "relative",
+                    }}
+                  >
+                    <div
+                      className=""
+                      style={{
+                        height: "16px",
+                        width: "16px",
+                        backgroundColor: "#fff",
+                        borderRadius: "50%",
+                        position: "absolute",
+                        top: "2px",
+                        left: isAdminMode ? "22px" : "2px",
+                        transition: "left 0.2s ease",
+                      }}
+                    ></div>
+                  </div>
+                </li>
+              )}
 
               <li className="nav-item dropdown">
                 <div className="dropdown-menu dropdown-menu-lg dropdown-menu-right">

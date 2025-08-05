@@ -1,62 +1,93 @@
 {
-    "candidate_token": "yNrXDt5TRyFhQ2icjU8wfujsnIXZ5xaO",
-    "technicalSkills": "[\"Dahlia Frank\"]",
-    "educationRows": [
-        {
-            "institute": "Aperiam vitae et ips",
-            "from": "2015",
-            "to": "2016",
-            "qualification": "Reprehenderit quis a"
-        }
-    ],
-    "languages": [
-        {
-            "language": "English",
-            "speak": "1",
-            "write": "0",
-            "understand": "1"
-        }
-    ],
-    "employments": [
-        {
-            "company_name": "Temporibus saepe qui",
-            "address": "Cillum praesentium e",
-            "contact_details": "Beatae illo commodo",
-            "from": "Delectus reiciendis",
-            "to": "Adipisicing facilis",
-            "position": "Voluptatem esse exe",
-            "reason_of_leaving": "Growth Prospects"
-        }
-    ],
-    "familyMembers": [
-        {
-            "name": "Corrupti dolorem cu",
-            "relationship": "Daughter",
-            "age": "53",
-            "occupation": "Voluptas tempor pers",
-            "employer": "Adipisicing unde non"
-        }
-    ],
-    "otherInfo": [
-        {
-            "id": "1",
-            "status": "1",
-            "reason": "Eiusmod commodi et d"
+    "App\\Models\\Candidates": {
+        "id": 82,
+        "user_id": 1,
+        "full_name": "hekahdkjsbfdjsdf",
+        "mobile_number": "8521479222",
+        "email": "sukhssp@gmail.com",
+        "position": "Sr PHP developer",
+        "gender": "1",
+        "marital_status": "2",
+        "residence_address": "#mohali",
+        "passport_number": "78452163",
+        "nationality": "Indian",
+        "dob": "2020-11-04",
+        "age": "30",
+        "place_of_birth": "Malout",
+        "hobbies": "Playing cricket",
+        "current_salary": "20000",
+        "expected_salary": "25000",
+        "remarks": null,
+        "profile_token": null,
+        "profile_id": "6AcD94WW",
+        "profile_token_date": null,
+        "test_status": "",
+        "department": "4",
+        "total_experience": "1.00",
+        "total_relevant_experience": "1.20",
+        "sourcing": null,
+        "date_of_interview": null,
+        "interviewed_by": null,
+        "interview_score": null,
+        "notice_period": null,
+        "current_location": null,
+        "cv_file": null,
+        "status": 1,
+        "created_at": "2020-11-04T13:11:06.000000Z",
+        "updated_at": "2025-08-01T11:32:17.000000Z",
+        "offered_salary": null,
+        "link_status": "0",
+        "country_id": null,
+        "state_id": null,
+        "city_id": null,
+        "created_by": 478,
+        "linked_in": null,
+        "candidate_status": {
+            "id": 1,
+            "status_name": "New",
+            "created_at": null,
+            "updated_at": null
         },
-        {
-            "id": "2",
-            "status": "0",
-            "reason": "Eum animi amet sol"
-        },
-        {
-            "id": "3",
-            "status": "0",
-            "reason": "Cumque ullam rerum e"
-        },
-        {
-            "id": "4",
-            "status": "1",
-            "reason": "Voluptatibus ut labo"
-        }
-    ]
+        "educations": [
+            {
+                "id": 1888,
+                "candidate_id": 82,
+                "institute_name": null,
+                "from": "1984",
+                "to": "1984",
+                "professional_qualification": null,
+                "created_at": "2025-08-01T11:32:44.000000Z",
+                "updated_at": "2025-08-01T11:32:44.000000Z"
+            }
+        ],
+        "employments": [
+            {
+                "id": 1808,
+                "candidate_id": 82,
+                "company_name": "Richestsoft",
+                "address": "10phase",
+                "contact_details": "12635468",
+                "date_from": null,
+                "date_to": null,
+                "position": "Sr PHP Developer",
+                "reason_of_leaving": "Nope",
+                "created_at": "2025-08-01T11:32:44.000000Z",
+                "updated_at": "2025-08-01T11:32:44.000000Z"
+            },
+            {
+                "id": 1809,
+                "candidate_id": 82,
+                "company_name": "Imminent Software",
+                "address": "null",
+                "contact_details": "null",
+                "date_from": null,
+                "date_to": null,
+                "position": "Team Leader PHP",
+                "reason_of_leaving": "test",
+                "created_at": "2025-08-01T11:32:44.000000Z",
+                "updated_at": "2025-08-01T11:32:44.000000Z"
+            }
+        ]
+    }
+}
 }

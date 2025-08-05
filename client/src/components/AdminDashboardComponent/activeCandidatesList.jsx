@@ -9,15 +9,15 @@ function ActiveCandidatesList() {
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState({});
   const [statuses, setStatuses] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedGender, setSelectedGender] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
   const [showAptitudeModal, setShowAptitudeModal] = useState(false);
-  const [aptitudeLink, setAptitudeLink] = useState('');
+  const [aptitudeLink, setAptitudeLink] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
-  const [searchTerm, setSearchTerm] = useState('');
+  const [itemsPerPage, setItemPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
   const [checkedEmails, setCheckedEmails] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -31,16 +31,19 @@ function ActiveCandidatesList() {
             limit: itemsPerPage,
             department: selectedDepartment,
             status: selectedStatus,
-            gender: selectedGender
+            gender: selectedGender,
+            search: searchTerm
           },
           withCredentials: true,
           headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         }
       );
-     
+
+      console.log("my response is >>> ", response.data);
+
       if (response.data) {
         setData(Array.isArray(response.data.data) ? response.data.data : []);
         setDepartments(response.data.departments || {});
@@ -62,7 +65,14 @@ function ActiveCandidatesList() {
 
   useEffect(() => {
     fetchData(currentPage);
-  }, [currentPage, selectedDepartment, selectedStatus, selectedGender]);
+  }, [
+    currentPage,
+    selectedDepartment,
+    selectedStatus,
+    selectedGender,
+    itemsPerPage,
+    searchTerm,
+  ]);
 
   useEffect(() => {
     setCheckedEmails([]);
@@ -71,9 +81,14 @@ function ActiveCandidatesList() {
 
   const handleDownload = async (type) => {
     // Determine which candidates to export
-    const candidatesToExport = checkedEmails.length > 0 
-      ? filteredData.filter(candidate => checkedEmails.includes(candidate.email))
-      : filteredData;
+    const candidatesToExport =
+      checkedEmails.length > 0
+        ? data.filter((candidate) =>
+            checkedEmails.includes(candidate.email)
+          )
+        : data;
+
+    console.log("candidate to export >>>", candidatesToExport);
 
     if (candidatesToExport.length === 0) {
       alert("No candidates to export");
@@ -81,55 +96,71 @@ function ActiveCandidatesList() {
     }
 
     try {
-      if (type === 'csv') {
+      if (type === "csv") {
         // CSV Export
         const headers = [
-          'ID', 'Name', 'Email', 'Status', 'Department', 
-          'Position', 'Date Applied', 'Gender'
+          "ID",
+          "Name",
+          "Email",
+          "Status",
+          "Department",
+          "Position",
+          "Date Applied",
+          "Gender",
         ];
-        
-        const rows = candidatesToExport.map(candidate => [
+
+        const rows = candidatesToExport.map((candidate) => [
           candidate.id,
           candidate.full_name,
           candidate.email,
-          candidate.candidate_status?.status_name || candidate.status || '',
-          candidate.department || '',
-          candidate.position || '',
-          new Date(candidate.created_at).toLocaleDateString('en-GB'),
-          candidate.gender === '1' ? 'Male' : 'Female'
+          candidate.candidate_status?.status_name || candidate.status || "",
+          candidate.department || "",
+          candidate.position || "",
+          new Date(candidate.created_at).toLocaleDateString("en-GB"),
+          candidate.gender === "1" ? "Male" : "Female",
         ]);
 
         const csvContent = [
-          headers.join(','),
-          ...rows.map(row => 
-            row.map(field => `"${(field || '').toString().replace(/"/g, '""')}"`).join(',')
-          )
-        ].join('\n');
+          headers.join(","),
+          ...rows.map((row) =>
+            row
+              .map(
+                (field) => `"${(field || "").toString().replace(/"/g, '""')}"`
+              )
+              .join(",")
+          ),
+        ].join("\n");
 
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const blob = new Blob([csvContent], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.setAttribute('download', `candidates-${Date.now()}.csv`);
+        link.setAttribute("download", `candidates-${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
         // XLSX Export
         const headers = [
-          'ID', 'Name', 'Email', 'Status', 'Department', 
-          'Position', 'Date Applied', 'Gender'
+          "ID",
+          "Name",
+          "Email",
+          "Status",
+          "Department",
+          "Position",
+          "Date Applied",
+          "Gender",
         ];
-        
-        const rows = candidatesToExport.map(candidate => [
+
+        const rows = candidatesToExport.map((candidate) => [
           candidate.id,
           candidate.full_name,
           candidate.email,
-          candidate.candidate_status?.status_name || candidate.status || '',
-          candidate.department || '',
-          candidate.position || '',
-          new Date(candidate.created_at).toLocaleDateString('en-GB'),
-          candidate.gender === '1' ? 'Male' : 'Female'
+          candidate.candidate_status?.status_name || candidate.status || "",
+          candidate.department || "",
+          candidate.position || "",
+          new Date(candidate.created_at).toLocaleDateString("en-GB"),
+          candidate.gender === "1" ? "Male" : "Female",
         ]);
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -138,20 +169,22 @@ function ActiveCandidatesList() {
         XLSX.writeFile(workbook, `candidates-${Date.now()}.xlsx`);
       }
     } catch (error) {
-      console.error('Download error:', error);
-      alert('Failed to export candidates');
+      console.error("Download error:", error);
+      alert("Failed to export candidates");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this candidate?')) return;
+    if (!confirm("Are you sure you want to delete this candidate?")) return;
     try {
       const numericId = id.replace(/^HRM/, "");
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/candidate/deleteCandidate/${numericId}`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/candidate/deleteCandidate/${numericId}`,
         { withCredentials: true }
       );
-      fetchData(currentPage); 
+      fetchData(currentPage);
     } catch (error) {
       console.error("Error while deleting Candidate", error);
     }
@@ -163,7 +196,7 @@ function ActiveCandidatesList() {
   };
 
   const handleStartOnboarding = async (candidateId) => {
-    if (confirm('Are you sure You want to start Onboarding?')) {
+    if (confirm("Are you sure You want to start Onboarding?")) {
       const numericId = candidateId.replace("HRM", "");
       try {
         await axios.get(
@@ -179,38 +212,42 @@ function ActiveCandidatesList() {
   };
 
   const handleCheckboxChange = (email) => {
-    setCheckedEmails(prev =>
-      prev.includes(email) 
-        ? prev.filter(e => e !== email) 
-        : [...prev, email]
+    setCheckedEmails((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
     );
   };
 
   const handleCheckAll = (e) => {
     const isChecked = e.target.checked;
     setSelectAll(isChecked);
-    
+
     if (isChecked) {
-      const allEmails = filteredData.map(c => c.email);
+      const allEmails = data.map((c) => c.email);
       setCheckedEmails(allEmails);
     } else {
       setCheckedEmails([]);
     }
   };
 
-  const filteredData = data.filter(candidate => {
-    const candidateStatus = candidate.candidate_status?.status_name || candidate.status;
-    const selectedStatusObj = statuses.find(s => s.id == selectedStatus);
-    
-    return (
-      (!selectedDepartment || candidate.department === selectedDepartment) &&
-      (!selectedStatus || candidateStatus === selectedStatusObj?.status_name) &&
-      (!selectedGender || candidate.gender?.toString() === selectedGender) &&
-      (!searchTerm || 
-        candidate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.id.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  });
+  // const filteredData = data.filter((candidate) => {
+  //   const candidateStatus =
+  //     candidate.candidate_status?.status_name || candidate.status;
+  //   const selectedStatusObj = statuses.find((s) => s.id == selectedStatus);
+
+  //   return (
+  //     (!selectedDepartment || candidate.department === selectedDepartment) &&
+  //     (!selectedStatus || candidateStatus === selectedStatusObj?.status_name) &&
+  //     (!selectedGender || candidate.gender?.toString() === selectedGender) &&
+  //     (!searchTerm ||
+  //       candidate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //       candidate.id.toLowerCase().includes(searchTerm.toLowerCase()))
+  //   );
+  // });
+
+  const handleRecordsPerPage = (e) => {
+    setItemPerPage(parseInt(e.target.value));
+    setCurrentPage(1);
+  };
 
   return (
     <div className="container-fluid">
@@ -219,6 +256,17 @@ function ActiveCandidatesList() {
           <div className="row mb-2">
             <div className="col-sm-4">
               <h1>All Candidates</h1>
+
+              <div>
+                Show{" "}
+                <select value={itemsPerPage} onChange={handleRecordsPerPage}>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>{" "}
+                entries
+              </div>
             </div>
             <div className="col-sm-8 text-right all-btn-group">
               {checkedEmails.length > 0 && (
@@ -226,19 +274,23 @@ function ActiveCandidatesList() {
                   {checkedEmails.length} selected
                 </span>
               )}
-              <button 
+              <button
                 className="btn btn-success btn-sm"
-                onClick={() => handleDownload('csv')}
+                onClick={() => handleDownload("csv")}
               >
-                <i className="fas fa-download"></i> 
-                {checkedEmails.length > 0 ? 'Export Selected (CSV)' : 'Export All (CSV)'}
+                <i className="fas fa-download"></i>
+                {checkedEmails.length > 0
+                  ? "Export Selected (CSV)"
+                  : "Export All (CSV)"}
               </button>
-              <button 
+              <button
                 className="btn btn-success btn-sm ml-2"
-                onClick={() => handleDownload('xlsx')}
+                onClick={() => handleDownload("xlsx")}
               >
-                <i className="fas fa-download"></i> 
-                {checkedEmails.length > 0 ? 'Export Selected (XLSX)' : 'Export All (XLSX)'}
+                <i className="fas fa-download"></i>
+                {checkedEmails.length > 0
+                  ? "Export Selected (XLSX)"
+                  : "Export All (XLSX)"}
               </button>
             </div>
             <div className="col-md-3 mt-2">
@@ -258,25 +310,33 @@ function ActiveCandidatesList() {
         <div className="card-body">
           <div className="row mb-3">
             <div className="col-md-3">
-              <select 
+              <select
                 className="form-control form-control-sm"
                 value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDepartment(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 <option value="">All Departments</option>
-                {Object.values(departments).map((deptName, index) => (
-                  <option key={index} value={deptName}>{deptName}</option>
+                {Object.entries(departments).map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="col-md-3">
-              <select 
+              <select
                 className="form-control form-control-sm"
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => {
+                  setSelectedStatus(e.target.value);
+                  setCurrentPage(1)
+                }}
               >
                 <option value="">All Status</option>
-                {statuses.map(status => (
+                {statuses.map((status) => (
                   <option key={status.id} value={status.id}>
                     {status.status_name}
                   </option>
@@ -284,10 +344,13 @@ function ActiveCandidatesList() {
               </select>
             </div>
             <div className="col-md-3">
-              <select 
+              <select
                 className="form-control form-control-sm"
                 value={selectedGender}
-                onChange={(e) => setSelectedGender(e.target.value)}
+                onChange={(e) => {
+                  setSelectedGender(e.target.value),
+                  setCurrentPage(1)
+                }}
               >
                 <option value="">All Gender</option>
                 <option value="1">Male</option>
@@ -314,20 +377,39 @@ function ActiveCandidatesList() {
                   <th>Date Applied</th>
                   <th>Position</th>
                   <th>Department</th>
+
+                  <th>Total Experience</th>
+                  <th>Relevant Experience</th>
+                  <th>Age</th>
+                  <th>Gender</th>
+                  <th>Education</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Current Employer</th>
+                  <th>Current Salary</th>
+                  <th>Expected Salary</th>
+                  <th>Sourcing</th>
+                  <th>Date of Interview</th>
+                  <th>Interviewed</th>
+                  <th>Interview Score</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="text-center">Loading candidates...</td>
+                    <td colSpan="8" className="text-center">
+                      Loading candidates...
+                    </td>
                   </tr>
-                ) : filteredData.length === 0 ? (
+                ) : data.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center">No candidates found matching your criteria</td>
+                    <td colSpan="8" className="text-center">
+                      No candidates found matching your criteria
+                    </td>
                   </tr>
                 ) : (
-                  filteredData.map((candidate) => (
+                  data.map((candidate) => (
                     <tr key={candidate.id}>
                       <td>
                         <input
@@ -339,25 +421,50 @@ function ActiveCandidatesList() {
                       </td>
                       <td>{candidate.full_name}</td>
                       <td>{candidate.id}</td>
-                      <td>{candidate.candidate_status?.status_name || candidate.status || ''}</td>
-                      <td>{new Date(candidate.created_at).toLocaleDateString('en-GB')}</td>
-                      <td>{candidate.position || ''}</td>
-                      <td>{candidate.department || ''}</td>
                       <td>
-                         <div className="btn-group btn-group-sm">
-                          <a 
-                            className="btn btn-info site-icon eye-icon" 
-                            title="View" 
-                            href={`/candidate-profile/${candidate.profile_id}`} 
+                        {candidate.candidate_status?.status_name ||
+                          candidate.status ||
+                          ""}
+                      </td>
+                      <td>
+                        {new Date(candidate.created_at).toLocaleDateString(
+                          "en-GB"
+                        )}
+                      </td>
+                      <td>{candidate.position || ""}</td>
+                      <td>{candidate.department || ""}</td>
+
+                      <td>{candidate.total_experience || ""}</td>
+                      <td>{candidate.total_relevant_experience || ""}</td>
+                      <td>{candidate.age || ""}</td>
+                      <td>{candidate.gender || ""}</td>
+                      <td>{candidate.education || ""}</td>
+                      <td>{candidate.mobile_number || ""}</td>
+                      <td>{candidate.email || ""}</td>
+                      <td>{candidate.current_employer || ""}</td>
+                      <td>{candidate.current_salary || ""}</td>
+                      <td>{candidate.expected_salary || ""}</td>
+                      <td>{candidate.sourcing || ""}</td>
+                      <td>{candidate.date_of_interview || ""}</td>
+                      <td>{candidate.interviewed_by || ""}</td>
+                      <td>{candidate.interview_score || ""}</td>
+
+                      <td>
+                        <div className="btn-group btn-group-sm">
+                          <a
+                            className="btn btn-info site-icon eye-icon"
+                            title="View"
+                            // /profile/:profile_id/view
+                            href={`/profile/${candidate.profile_id}/view`}
                             target="_blank"
                           >
                             <i className="fas fa-eye"></i>
                           </a>
-                          
-                          <button 
-                            className="btn btn-success site-icon comment-icon" 
-                            style={{color: '#707070'}} 
-                            title={`Name: ${candidate.full_name}\nRemarks: ${candidate.remarks}`}
+
+                          <button
+                            className="btn btn-success site-icon comment-icon"
+                            style={{ color: "#707070" }}
+                            title={`Name: ${candidate.full_name}\nRemarks: ${candidate.status}`}
                           >
                             <i className="fa fa-comment"></i>
                           </button>
@@ -366,46 +473,63 @@ function ActiveCandidatesList() {
                             <button
                               className="btn btn-success site-icon pencil-icon"
                               title="Edit"
-                              style={{color: '#707070'}} 
+                              style={{ color: "#707070" }}
                               onClick={() => handleEdit(candidate.id)}
                             >
                               <i className="fas fa-pencil-alt"></i>
-                           </button>
-
-                          
+                            </button>
                           )}
 
                           {candidate.is_recruiter ? (
-                            <button 
-                              className="btn site-icon delete-icon" 
-                              style={{backgroundColor: '#808080', borderColor: '#808080', color: '#fff'}}
-                              title="Delete"
-                              onClick={() => alert('You are not authorized with this permission please contact to HR for further.')}
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          ) : candidate.can_delete && (
                             <button
-                              className="btn btn-danger delete-icon site-icon"
+                              className="btn site-icon delete-icon"
+                              style={{
+                                backgroundColor: "#808080",
+                                borderColor: "#808080",
+                                color: "#fff",
+                              }}
                               title="Delete"
-                               style={{color: '#707070'}} 
-                              onClick={() => handleDelete(candidate.id)}
+                              onClick={() =>
+                                alert(
+                                  "You are not authorized with this permission please contact to HR for further."
+                                )
+                              }
                             >
                               <i className="fas fa-trash"></i>
                             </button>
+                          ) : (
+                            candidate.can_delete && (
+                              <button
+                                className="btn btn-danger delete-icon site-icon"
+                                title="Delete"
+                                style={{ color: "#707070" }}
+                                onClick={() => handleDelete(candidate.id)}
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            )
                           )}
 
                           <button
-                            className={`btn btn-success site-icon menu-icon ${!candidate.can_onboard ? 'disabled' : ''}`}
-                            title={candidate.can_onboard ? "Start Onboarding" : "Not ready for onboarding"}
-                            onClick={() => candidate.can_onboard && handleStartOnboarding(candidate.id)}
+                            className={`btn btn-success site-icon menu-icon ${
+                              !candidate.can_onboard ? "disabled" : ""
+                            }`}
+                            title={
+                              candidate.can_onboard
+                                ? "Start Onboarding"
+                                : "Not ready for onboarding"
+                            }
+                            onClick={() =>
+                              candidate.can_onboard &&
+                              handleStartOnboarding(candidate.id)
+                            }
                             style={{
-                              backgroundColor: '#28a745', 
-                              color: 'white',
-                              borderColor: '#28a745',
-                              opacity: candidate.can_onboard ? 1 : 0.35, 
-                              padding: '0.25rem 0.5rem', 
-                              margin: '0 2px' 
+                              backgroundColor: "#28a745",
+                              color: "white",
+                              borderColor: "#28a745",
+                              opacity: candidate.can_onboard ? 1 : 0.35,
+                              padding: "0.25rem 0.5rem",
+                              margin: "0 2px",
                             }}
                           >
                             <i className="fas fa-clipboard-check"></i>
@@ -415,7 +539,11 @@ function ActiveCandidatesList() {
                             className="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"
                             title="Send Aptitude Test"
                             onClick={() => {
-                              setAptitudeLink(`${import.meta.env.VITE_API_BASE_URL}/generate-test/${candidate.id}`);
+                              setAptitudeLink(
+                                `${
+                                  import.meta.env.VITE_API_BASE_URL
+                                }/generate-test/${candidate.id}`
+                              );
                               setShowAptitudeModal(true);
                             }}
                           >
@@ -438,14 +566,14 @@ function ActiveCandidatesList() {
               <button
                 className="btn btn-outline-secondary me-2"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => prev - 1)}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
               >
                 Previous
               </button>
               <button
                 className="btn btn-outline-secondary"
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => prev + 1)}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
               >
                 Next
               </button>
@@ -455,20 +583,29 @@ function ActiveCandidatesList() {
       </div>
 
       {showAptitudeModal && (
-        <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-sm">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Send Aptitude Test</h5>
-                <button type="button" className="close" onClick={() => setShowAptitudeModal(false)}>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowAptitudeModal(false)}
+                >
                   <span>&times;</span>
                 </button>
               </div>
               <div className="modal-body">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  window.location.href = aptitudeLink;
-                }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    window.location.href = aptitudeLink;
+                  }}
+                >
                   <div className="form-group">
                     <label>Aptitude test from</label>
                     <div className="form-check">
@@ -480,7 +617,9 @@ function ActiveCandidatesList() {
                         defaultChecked
                         className="form-check-input"
                       />
-                      <label htmlFor="type_office" className="form-check-label">Office</label>
+                      <label htmlFor="type_office" className="form-check-label">
+                        Office
+                      </label>
                     </div>
                     <div className="form-check">
                       <input
@@ -490,7 +629,9 @@ function ActiveCandidatesList() {
                         value="2"
                         className="form-check-input"
                       />
-                      <label htmlFor="type_home" className="form-check-label">Home</label>
+                      <label htmlFor="type_home" className="form-check-label">
+                        Home
+                      </label>
                     </div>
                     <div className="form-check">
                       <input
@@ -500,7 +641,9 @@ function ActiveCandidatesList() {
                         value="3"
                         className="form-check-input"
                       />
-                      <label htmlFor="type_skip" className="form-check-label">Skip Test</label>
+                      <label htmlFor="type_skip" className="form-check-label">
+                        Skip Test
+                      </label>
                     </div>
                   </div>
                   <div className="text-right">
