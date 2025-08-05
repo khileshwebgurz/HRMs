@@ -1258,7 +1258,7 @@ class UserController extends Controller
             'total' => $can_test->questions->count(),
             'percentage' => $percentage
         ], function ($message) use ($can_test) {
-            $message->to('hr-sandeep@yopmail.')
+            $message->to('hr-sandeep@yopmail.com')
                    ->subject($can_test->candidate->full_name.' Completed Aptitude Test Round 1 - ' .$can_test->candidate->position);
         });
 
