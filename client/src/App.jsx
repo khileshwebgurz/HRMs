@@ -50,6 +50,7 @@ import NewTicket from "./components/DashboardComponent/TicketComponent/ItAdminTi
 import ViewCandidateProfile from "./components/CandidateProfileComp/ViewCandidateProfile";
 import EditCandidateProfile from "./components/CandidateProfileComp/EditCandidateProfile";
 import TicketDetails from "./components/DashboardComponent/TicketComponent/ItAdminTicket/TicketDetails";
+import Test from "./components/TestComponent/Test";
 
 function App() {
   return (
@@ -62,7 +63,7 @@ function App() {
 
            <Route path="/tracker/candidate/profile/:profile_token/edit"  element={<EditCandidateProfile/>}/>
            <Route path="/tracker/candidate/profile/:profile_id/view" element={<ViewCandidateProfile/>}/>
-         
+           <Route path="/test/:test_id" element={<Test />} />
         <Route
           path="/"
           element={

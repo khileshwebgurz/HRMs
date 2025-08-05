@@ -68,8 +68,7 @@ use App\Models\CandidateEmployment;
 use App\Models\CandidateLanguage;
 use App\Models\CandidateOtherInformation;
 use App\Models\CandidateFamily;
-use App\Mail\TestResultMail;
-use App\Mail\TestCompletedMail;
+
 
 class UserController extends Controller
 {
@@ -115,7 +114,7 @@ class UserController extends Controller
          * $event->startDateTime = \Carbon\Carbon::now()->addDay(1);
          * $event->endDateTime = \Carbon\Carbon::now()->addDay(5)->addHour();
          *
-         * $event->location = 'testguruz Technologies (P) Ltd. IT C-2 Dibon Building - 4th Floor, Sector 67, Sahibzada Ajit Singh Nagar, Punjab 160062 ';
+         * $event->location = 'Webguruz Technologies (P) Ltd. IT C-2 Dibon Building - 4th Floor, Sector 67, Sahibzada Ajit Singh Nagar, Punjab 160062 ';
          *
          * $optParams['sendUpdates'] = 'all';
          * $optParams['sendNotifications'] = true;
@@ -466,7 +465,7 @@ class UserController extends Controller
         $employee = new Employees();
         $employee->name       = $request->name;
         $employee->email      = $request->email;
-        $employee->password   = bcrypt('#testguruz#'); // temp placeholder
+        $employee->password   = bcrypt('#WEBGURUZ#'); // temp placeholder
         $employee->token      = Str::random(32);
         $employee->created_by = $created_by;
 
@@ -607,7 +606,7 @@ class UserController extends Controller
 
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->password = bcrypt('#testguruz#');
+        $user->password = bcrypt('#WEBGURUZ#');
         $user->token = Str::random(32);
         $user->created_by = $created_by;
 
@@ -1059,359 +1058,327 @@ class UserController extends Controller
         // }
     }
 
-  
-        // 5-aug-25
-     public function showTest($test_id)
+    public function showTestOLD($test_id)
     {
-        $can_test = CandidateTest::with(['questions.question', 'questions.options', 'candidate'])
-            ->where('token', $test_id)
-            ->first();
-
-            Log::info('testtt', ['can_test' => $can_test]);
-
-        if (!$can_test) {
-            return response()->json(['error' => 'Test not found'], 404);
-        }
-
+        $can_test = CandidateTest::where('token', $test_id)->first();
         if ($can_test->status == '2') {
-            return response()->json([
-                'status' => 'expired',
-                'message' => 'Link has been expired. Please contact support.'
-            ]);
+            echo 'Link has been expired. Please contact support.';
+        } else if ($can_test->status == '3') {
+            return view('front.test-view', compact('can_test', 'test_id'));
+        } else {
+            if (! empty($can_test->otp)) {
+                return view('front.testotp', compact('can_test', 'test_id'));
+            } else {
+                return view('front.test', compact('can_test', 'test_id'));
+            }
         }
-
-        if ($can_test->status == '3') {
-            return response()->json([
-                'status' => 'completed',
-                'test' => $can_test,
-                'total_percentage' => ($can_test->result * 100) / count($can_test->questions)
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'active',
-            'test' => $can_test,
-            'has_otp' => !empty($can_test->otp)
-        ]);
     }
 
-   public function checkTestOtp(Request $request)
+
+
+    public function showTest($test_id)
+        {
+            $can_test = CandidateTest::where('token', $test_id)->first();
+            
+            if (!$can_test) {
+                return response()->json(['error' => 'Test not found'], 404);
+            }
+            
+            return response()->json([
+                'test' => $can_test,
+                'status' => $can_test->status,
+                'has_otp' => !empty($can_test->otp)
+            ]);
+        }
+            
+
+    public function checkTestOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'test_token' => 'required',
-            'otp' => 'required|digits:4'
+            'otp' => 'required|min:4|max:4'
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        $can_test = CandidateTest::where('token', $request->test_token)->first();
-
-        if (!$can_test) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Test not found'
-            ], 404);
-        }
-
-        if ($can_test->otp == $request->otp) {
-            $can_test->otp = null;
-            $can_test->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'OTP verified successfully'
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
             ]);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid OTP. Please try again.'
-        ], 401);
+        $test_id = $request->test_token;
+        $otp = $request->otp;
+        $can_test = CandidateTest::where('token', $test_id)->first();
+        if ($can_test) {
+            if ($can_test->otp == $otp) {
+                $can_test->otp = null;
+                if ($can_test->save()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Your otp verified you test will be start in few seconds.'
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 401,
+                        'message' => 'Something Wrong. Try Again.'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Invalid OTP. Please try another!'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
+            ]);
+        }
     }
 
+    public function saveFinalTest(Request $request) {}
+
+    /**
+     * Save test result and send email notification to candidate.
+     */
     public function saveTestResult(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'test_token' => 'required',
-        //    // 'pending_time' => 'sometimes|required',
-        //    'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
-        //     'question_page' => 'sometimes|required|integer',
-        //     'finalsave' => 'sometimes|boolean'
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'test_token' => 'required'
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => $validator->errors()->first()
-        //     ], 422);
-        // }
-
-
-         $validator = Validator::make($request->all(), [
-                 'test_token' => 'required',
-                'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
-                'question_page' => 'required|integer|min:0',
-                'finalsave' => 'required|boolean',
-                'ans' => 'sometimes|array'
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
             ]);
+        }
 
-            if ($validator->fails()) {
+        $test_id = $request->test_token;
+        $can_test = CandidateTest::where('token', $test_id)->first();
+        $candidate = Candidates::findOrFail($can_test->candidate_id);
+        $can_test->pending_time = $request->pending_time;
+
+        if ($request->TimeSave == 1) {
+            if ($can_test->save()) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
-
-        $can_test = CandidateTest::with(['questions', 'candidate'])
-            ->where('token', $request->test_token)
-            ->first();
-
-        if (!$can_test) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Test not found'
-            ], 404);
-        }
-
-        // Update time and page
-        if ($request->has('pending_time')) {
-            $can_test->pending_time = $request->pending_time;
-        }
-
-        if ($request->has('question_page')) {
-            $can_test->question_page = $request->question_page;
-        }
-
-        // Handle answers
-        if ($request->has('ans')) {
-            foreach ($request->ans as $qid => $answer) {
-                $question = $can_test->questions->firstWhere('id', $qid);
-                if ($question) {
-                    $question->candidate_answer = $answer;
-                    $question->save();
-                }
+                    'status' => 200,
+                    'message' => ''
+                ]);
             }
         }
 
-        // Handle final submission
-        if ($request->finalsave) {
+        $can_test->question_page = ($can_test->question_page) + 1;
+
+        if ($request->finalsave == 1) {
             $can_test->status = 3;
-            
-            // Calculate result
-            $correctAnswers = $can_test->questions->filter(function($question) {
-                return $question->candidate_answer == $question->correct_answer;
-            })->count();
-
-            $can_test->result = $correctAnswers;
-            $can_test->save();
-
-            $totalPercentage = ($correctAnswers / $can_test->questions->count()) * 100;
-
-            // Send emails
-            $this->sendCompletionEmails($can_test, $totalPercentage);
-
-            // Update candidate status
-            $candidate = $can_test->candidate;
-            $candidateStatus = $totalPercentage >= 90 ? 3 : 8; // 3=Passed, 8=Failed
-            $candidate->status = $candidateStatus;
-            $candidate->save();
-
-            // Create notification
-            $this->createNotification($can_test);
-
-            // Create interview records
-            $this->createInterviewRecords($can_test, $totalPercentage);
-
-            return response()->json([
-                'status' => 'completed',
-                'message' => $totalPercentage >= 90 
-                    ? 'Congratulations, you are shortlisted for next round.' 
-                    : 'Better luck next time. Please connect with HR.',
-                'result' => [
-                    'score' => $correctAnswers,
-                    'total' => $can_test->questions->count(),
-                    'percentage' => $totalPercentage
-                ]
-            ]);
         }
 
         $can_test->save();
 
-        return response()->json([
-            'status' => 'progress_saved',
-            'message' => 'Progress saved successfully'
-        ]);
-    }
+        $finalResult = array();
+        if (count($request->ans)) {
+            foreach ($request->ans as $qid => $ans) {
+                $testopt = CandidateTestOptions::where('id', $qid)->first();
+                $testopt->candidate_answer = $ans;
+                $testopt->save();
+                if ($testopt->candidate_answer == $testopt->correct_answer) {
+                    $finalResult[] = 1;
+                }
+            }
+        }
+        $can_test->result = count($finalResult);
+        $can_test->save();
 
-    protected function sendCompletionEmails($can_test, $percentage)
-    {
-        // Email to HR
-        Mail::send('emails.completed-aptitude-test', [
-            'candidate_name' => $can_test->candidate->full_name,
-            'position' => $can_test->candidate->position,
-            'score' => $can_test->result,
-            'total' => $can_test->questions->count(),
-            'percentage' => $percentage
-        ], function ($message) use ($can_test) {
-            $message->to('hr-sandeep@yopmail.')
-                   ->subject($can_test->candidate->full_name.' Completed Aptitude Test Round 1 - ' .$can_test->candidate->position);
-        });
+        if ($request->finalsave == 1) {
 
-        // Email to candidate
-        $statusMessage = $percentage >= 90 
-            ? 'Congratulations, you are shortlisted for next round.'
-            : 'Better luck next time. Please connect with HR.';
+            $to_name = 'Manika';
+            $to_email = 'hr@yopmail.in';
+            $candidate_name = $can_test->candidate->full_name;
+            $candidate_position = $can_test->candidate->position;
+            $data = array(
+                'name' => $to_name,
+                'email' => $to_email,
+                'candidate_name' => $can_test->candidate->full_name
 
-        Mail::send('emails.send-test-result', [
-            'name' => $can_test->candidate->full_name,
-            'msg' => $statusMessage,
-            'status' => $percentage >= 90 ? 1 : 2,
-            'test_url' => route('showTest', $can_test->token)
-        ], function ($message) use ($can_test) {
-            $message->to($can_test->candidate->email)
-                   ->subject('Message from HRM');
-        });
-    }
+            );
 
-    protected function createNotification($can_test)
-    {
-        Notifications::create([
-            'type_id' => 'test_complete',
-            'message' => $can_test->candidate->full_name . ' has been completed assigned aptitude test.',
-            'page_id' => $can_test->id,
-            'notify_type' => 1
-        ]);
-    }
+            print_r($can_test->candidate->full_name);
 
-    protected function createInterviewRecords($can_test, $percentage)
-    {
-        $interview = CandidateInterviews::create([
-            'candidate_id' => $can_test->candidate_id
-        ]);
+            Mail::send('emails.completed-aptitude-test', $data, function ($message) use ($to_name, $to_email, $candidate_name, $candidate_position) {
+                $message->to($to_email, $to_name)->subject($candidate_name . ' Completed Aptitude Test Round 1 - ' . $candidate_position);
+            });
+            $noti = new Notifications();
+            $noti->type_id = 'test_complete';
+            $noti->message = $can_test->candidate->full_name . ' has been completed assigned aptitude test.';
+            $noti->page_id = $can_test->id;
+            $noti->notify_type = 1;
+            $noti->save();
 
-        $interStatus = $percentage >= 90 ? 2 : 3; // 2=Passed, 3=Failed
-        $message = $percentage >= 90 
-            ? 'Congratulations, you are shortlisted for next round.'
-            : 'Better luck next time. Please connect HR';
+            $totalp = $can_test->result * 100;
+            $totalp = $totalp / count($can_test->questions);
 
-        CandidateInterviewRounds::create([
-            'interview_id' => $interview->id,
-            'interview_time' => now(),
-            'status' => $interStatus,
-            'remarks' => $message,
-            'score' => $can_test->result,
-            'weight_age' => $percentage
-        ]);
+            /*
+             * Create new interview session
+             */
+            $canInterview = new CandidateInterviews();
+            $canInterview->candidate_id = $can_test->candidate_id;
+            // $canInterview->created_by = Auth::user()->id;
+            $canInterview->save();
+
+            $interStatus = 2;
+            $candidate_status = 1;
+            $message = 'Congratulations, you are shortlisted for next round.';
+            $candidate->status = 3;
+            $candidate->save();
+            if ($totalp < 60) {
+                $candidate_status = 2;
+                $message = 'Better Luck next time. Please connect HR';
+                $interStatus = 3;
+                $candidate->status = 8;
+                $candidate->save();
+            }
+
+            /*
+             * Create interview 1st round
+             */
+            $canInterviewRound = new CandidateInterviewRounds();
+            $canInterviewRound->interview_id = $canInterview->id;
+            $canInterviewRound->interview_time = date('Y-m-d H:i:s');
+            $canInterviewRound->status = $interStatus;
+            $canInterviewRound->remarks = $message;
+            $canInterviewRound->score = $can_test->result;
+            $canInterviewRound->weight_age = $totalp;
+            $canInterviewRound->save();
+
+            $can_test->test_status = $candidate_status;
+            $can_test->save();
+
+            $candidate = Candidates::findOrFail($can_test->candidate_id);
+            $candidate->test_status = $candidate_status;
+            $candidate->save();
+
+            $to_name = $candidate->full_name;
+            $to_email = $candidate->email;
+            $data = array(
+                'name' => $to_name,
+                'msg' => $message,
+                'status' => $candidate_status,
+                'test_url' => route('showTest', $can_test->token)
+            );
+            Mail::send('emails.send-test-result', $data, function ($message) use ($to_name, $to_email) {
+                $message->to($to_email, $to_name)->subject('Message from HRM');
+            });
+
+            if (! Mail::failures()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => $message
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Something Wrong. Try Again.'
+                ]);
+            }
+        }
     }
 
     public function generateTest(Request $request, $candidate_id)
     {
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:1,2,3'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
         $candidate = Candidates::findOrFail($candidate_id);
+        if ($candidate) {
 
-        if ($request->type == 3) {
-            return $this->skipTest($candidate);
+            if ($request->type == 3) {
+
+                /*
+                 * Create new interview session
+                 */
+                $canInterview = new CandidateInterviews();
+                $canInterview->candidate_id = $candidate_id;
+                $canInterview->save();
+
+                /*
+                 * Create interview 1st round
+                 */
+                $canInterviewRound = new CandidateInterviewRounds();
+                $canInterviewRound->interview_id = $canInterview->id;
+                $canInterviewRound->interview_time = date('Y-m-d H:i:s');
+                $canInterviewRound->status = 2;
+                $canInterviewRound->remarks = 'Skip Test';
+                $canInterviewRound->score = 0;
+                $canInterviewRound->weight_age = 2;
+
+                if ($canInterviewRound->save()) {
+                    return redirect()->route('allInterviews')->with('success', 'Candidate aptitude test skipped.');
+                } else {
+                    return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
+                }
+            } else {
+
+                $can_test = new CandidateTest();
+                $can_test->candidate_id = $candidate_id;
+                $can_test->token = Str::random(32);
+                $can_test->status = 1;
+                $can_test->pending_time = '00:00';
+                $can_test->type = $request->type;
+
+                if ($request->type == 1) {
+                    $can_test->otp = rand(1000, 9999);
+                }
+                // $can_test->interview_type = $can_test->type;
+                $can_test->save();
+
+                $questions = Questions::where('status', '1')->where('question_type', '1')->get()->random($this->questionLimit);
+                if ($questions) {
+                    foreach ($questions as $question) {
+                        $can_test_ques = new CandidateTestOptions();
+                        $can_test_ques->candidate_test_id = $can_test->id;
+                        $can_test_ques->question_id = $question->id;
+                        $can_test_ques->correct_answer = $question->answer;
+
+                        $can_test_ques->save();
+                    }
+                }
+
+                $to_name = $candidate->full_name;
+                $to_email = $candidate->email;
+                $data = array(
+                    'name' => $to_name,
+                    'addresslink' => ($can_test->type == 1) ? get_options('office_address_link') : '',
+                    'otp' => $can_test->otp,
+                    'test_url' => route('showTest', $can_test->token)
+                );
+
+                Mail::send('emails.test-invite', $data, function ($message) use ($to_name, $to_email) {
+                    $message->to($to_email, $to_name)->subject('HRM Aptitude Quiz');
+                });
+
+                // Mail::send('emails.test-invite', $data, function ($message) use ($to_name, $to_email) {
+                //     $message->to('sukhpal@yopmail.in', $to_name)->subject('HRM Aptitude Quiz');
+                // });
+
+                if (! Mail::failures()) {
+                    $noti = new Notifications();
+                    $noti->type_id = 'aptitude_sent';
+                    $noti->message = 'Aptitude test sent to ' . $candidate->full_name . ' <a target="_blank" style="margin-left: 23px;" href=' . route('showTest', $can_test->token) . '>Click Here</a>';
+                    $noti->page_id = $can_test->id;
+                    $noti->save();
+                    return redirect()->route('allcandidates')->with('success', 'Test sent to candidate email address.');
+                } else {
+                    return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
+                }
+
+                return redirect()->route('allcandidates')->with('success', 'Test sent to candidate email address.');
+            }
+        } else {
+            return redirect()->route('allcandidates')->with('error', 'Something wrong. Try again.');
         }
-
-        return $this->createTest($candidate, $request->type);
     }
-
-    protected function skipTest($candidate)
-    {
-        $interview = CandidateInterviews::create([
-            'candidate_id' => $candidate->id
-        ]);
-
-        CandidateInterviewRounds::create([
-            'interview_id' => $interview->id,
-            'interview_time' => now(),
-            'status' => 2,
-            'remarks' => 'Skip Test',
-            'score' => 0,
-            'weight_age' => 0
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Candidate aptitude test skipped.'
-        ]);
-    }
-
-    protected function createTest($candidate, $type)
-    {
-        $can_test = CandidateTest::create([
-            'candidate_id' => $candidate->id,
-            'token' => Str::random(32),
-            'status' => 1,
-            'pending_time' => '00:00',
-            'type' => $type,
-            'otp' => $type == 1 ? rand(1000, 9999) : null
-        ]);
-
-        // Attach random questions
-        $questions = Questions::where('status', '1')
-            ->where('question_type', '1')
-            ->inRandomOrder()
-            ->limit(get_options('aptitude_question_limit'))
-            ->get();
-
-        foreach ($questions as $question) {
-            CandidateTestOptions::create([
-                'candidate_test_id' => $can_test->id,
-                'question_id' => $question->id,
-                'correct_answer' => $question->answer
-            ]);
-        }
-
-        // Send email
-        $this->sendTestInviteEmail($candidate, $can_test);
-
-        // Create notification
-        Notifications::create([
-            'type_id' => 'aptitude_sent',
-            'message' => 'Aptitude test sent to '.$candidate->full_name.' <a target="_blank" style="margin-left: 23px;" href='.route('showTest', $can_test->token).'>Click Here</a>',
-            'page_id' => $can_test->id
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Test sent to candidate email address.',
-            'test_id' => $can_test->id
-        ]);
-    }
-
-    protected function sendTestInviteEmail($candidate, $test)
-    {
-        $data = [
-            'name' => $candidate->full_name,
-            'addresslink' => ($test->type == 1) ? get_options('office_address_link') : '',
-            'otp' => $test->otp,
-            'test_url' => route('showTest', $test->token)
-        ];
-
-        Mail::send('emails.test-invite', $data, function ($message) use ($candidate) {
-            $message->to($candidate->email, $candidate->full_name)
-                   ->subject('HRM Aptitude Quiz');
-        });
-    }
-
-
-    
 
     public function addCandidate()
     {
@@ -2244,51 +2211,16 @@ class UserController extends Controller
             $query->whereIn('created_by', $employees);
         }
 
-        // 🌐 Server-side filters
-        $department = $request->input('department');
-        $status = $request->input('status');
-        $gender = $request->input('gender');
-        $search = $request->input('search');
-
-        Log::info('department', ['department' => $department]);
-        Log::info('status', ['status' => $status]);
-        Log::info('gender', ['gender' => $gender]);
-        Log::info('search', ['search' => $department]);
-
-
-        if ($department && ($department)) {
-            $query->where('department', $department);
-        }
-
-        if ($status && ($status)) {
-            $query->where('status', $status);
-        }
-        if ($gender && ($gender)) {
-            $query->where('gender', $gender);
-        }
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%$search%")
-                    ->orWhere('profile_id', 'like', "%$search%");
-            });
-        }
-
-        Log::info('my query is ', ['query' => $query]);
-
+        // Handle AJAX/React requests
         if ($request->expectsJson() || $request->ajax()) {
-            $perPage = $request->input('limit', 10);
+            $perPage = $request->input('per_page', 10);
             $paginatedData = $query->paginate($perPage);
-
-            // Log::info('my paginatedData is ', ['paginatedData' => $paginatedData]);
-
 
             // Transform data with null-safe checks
             $transformedData = $paginatedData->getCollection()->map(function ($candidate) use ($permission_role) {
                 $manager = optional($candidate->created_by_user)->manager;
                 $currentUserId = Auth::id();
                 $createdBy = $candidate->created_by;
-
 
                 return [
                     'id' => 'HRM' . $candidate->id,
@@ -2307,21 +2239,12 @@ class UserController extends Controller
                     'can_delete' => $this->checkDeletePermission($permission_role, $currentUserId, $createdBy, $manager),
                     'can_onboard' => $candidate->status == 7,
                     'is_recruiter' => loginUserRole() === User::ROLE_RECRUITER,
-                    'total_experience' => $candidate->total_experience,
-                    'total_relevant_experience' => $candidate->total_relevant_experience,
-                    'age' => $candidate->age,
-                    'mobile_number' => $candidate->mobile_number,
-                    'current_salary' => $candidate->current_salary,
-                    'expected_salary' => $candidate->expected_salary,
-                    'sourcing' => $candidate->sourcing,
-                    'interviewed_by' => $candidate->interviewed_by,
-                    'interview_score' => $candidate->interview_score,
                     'actions' => $this->generateActionButtons($candidate, $permission_role)
                 ];
             })->values()->toArray();
 
-             Log::info('my transformedData is ', ['transformedData' => $transformedData]);
 
+            //  Log::info('testtst', ['tscsc0' => $transformedData]);
             return response()->json([
                 'data' => $transformedData,
                 'current_page' => $paginatedData->currentPage(),
@@ -2535,8 +2458,8 @@ class UserController extends Controller
                     }
                 })
                 ->editcolumn('id', function ($row) {
-                    $input = '<input type ="text" style="width:160px;" value ="https://hrm.testguruz.in/public/test/' . $row->token . '" readonly><button class="btn btn-primary edit"  data-id="https://hrm.testguruz.in/public/test/' . $row->token . '" > copy</button>';
-                    $link = '<a style="cursor: pointer;" class="edit" title="click to copy" data-id="https://hrm.testguruz.in/public/test/' . $row->token . '" >https://hrm.testguruz.in/public/test/' . $row->token . '</a>';
+                    $input = '<input type ="text" style="width:160px;" value ="https://hrm.webguruz.in/public/test/' . $row->token . '" readonly><button class="btn btn-primary edit"  data-id="https://hrm.webguruz.in/public/test/' . $row->token . '" > copy</button>';
+                    $link = '<a style="cursor: pointer;" class="edit" title="click to copy" data-id="https://hrm.webguruz.in/public/test/' . $row->token . '" >https://hrm.webguruz.in/public/test/' . $row->token . '</a>';
                     return $input;
                 })
                 ->addColumn('action', function ($row) {
@@ -3057,8 +2980,8 @@ class UserController extends Controller
 
             Mail::send('emails.test-invite', [
                 'name'     => $candidate->full_name,
-                //'test_url' => route('showTest', $test->token),
-                'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
+                'test_url' => route('showTest', $test->token),
+                
             ], function ($message) use ($candidate) {
                 $message->to($candidate->email, $candidate->full_name)
                         ->subject('HRM Aptitude Quiz');

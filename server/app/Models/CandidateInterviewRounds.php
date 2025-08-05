@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class CandidateInterviewRounds extends Model
 {
+
+    
+    protected $fillable = [
+        'interview_id',
+       
+    ]; 
     public function interview()
     {
         return $this->hasOne('App\Models\CandidateInterviews', 'id', 'interview_id');

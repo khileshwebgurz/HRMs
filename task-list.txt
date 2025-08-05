@@ -20,7 +20,11 @@ Candidate :
 point-1. save
 point-2. save and email -
 (a. view candidate profile - )
+4-aug-2025
 (b. edit candidate profile -) in progress - remain test mail apptitue
 2. Edit Candidate
 3. Delete  Candidate
 4. Listing Candidate (All candidates)
+
+5-aug-2025
+4. send apptitue test  -start 

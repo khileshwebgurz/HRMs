@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 class CandidateInterviews extends Model
 {
 
+    protected $fillable = [
+        'candidate_id',
+       
+    ];
+
     static $interviewStatus = [
         3 => 'Round 1',
         4 => 'Round 2',
