@@ -55,6 +55,7 @@ const TrainingInfo = ({ employeedata }) => {
     }
 
     setTrainingRows([...parsedTraining]);
+
     setFormData({
       ...employeedata.candidate,
       on_candidate_id: onCandidateId,

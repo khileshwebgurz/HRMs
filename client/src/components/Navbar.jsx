@@ -29,7 +29,7 @@ const Navbar = () => {
   const handleClockIN = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/clockIn",
+        `${import.meta.env.VITE_API_BASE_URL}/clockIn`,
         {},
         { withCredentials: true }
       );
@@ -49,7 +49,7 @@ const Navbar = () => {
   const handleClockOut = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/clockOut",
+        `${import.meta.env.VITE_API_BASE_URL}/clockOut`,
         {},
         { withCredentials: true }
       );

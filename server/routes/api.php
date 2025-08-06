@@ -21,6 +21,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\API\ForgotPasswordController;
+use App\Http\Controllers\ImportController;
 
 use App\Http\Controllers\Employee\OnboardProcessController;
 
@@ -183,6 +184,9 @@ Route::post('/candidate-update-profile',[UserController::class,'candidateProfile
 
         Route::get('/get-excel', [UserController::class, 'exportCandidates']);
         Route::get('/delete-employee/{user_id}', [UserController::class, 'deleteEmployee']);
+        Route::post('/import-candidates-post', [ImportController::class,'importCandidatesPost']);
+        Route::get('/import-candidates', [ImportController::class,'importCandidates']);
+
 
         
         // helpdesk search
@@ -192,6 +196,8 @@ Route::post('/candidate-update-profile',[UserController::class,'candidateProfile
     //  Employee-only routes (for future)
     Route::middleware('role:2')->group(function () {
         // Add employee-specific routes if needed
+         Route::get('/import-candidates', [ImportController::class,'importCandidates']);
+
 
     });
 
@@ -226,7 +232,15 @@ Route::middleware([])->prefix('tracker')->group(function () {
     Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
 });
    // Test 
+// Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
+// //Route::post('/check-test-otp', [UserController::class, 'checkTestOtp']);
+// //Route::post('/save-test-result', [UserController::class, 'saveTestResult']);
+// Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
+// Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);
+// Route::post('/save-test-result', [UserController::class, 'saveTestResult']);
+
 //Route::middleware('api')->group(function () {
+    // Make sure these routes are properly defined
     Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
     Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
     Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);

@@ -51,8 +51,8 @@ import ViewCandidateProfile from "./components/CandidateProfileComp/ViewCandidat
 import EditCandidateProfile from "./components/CandidateProfileComp/EditCandidateProfile";
 import TicketDetails from "./components/DashboardComponent/TicketComponent/ItAdminTicket/TicketDetails";
 import Test from "./components/TestComponent/Test";
+import ImportCandidate from "./components/AdminDashboardComponent/ImportCandidate";
 import TestComplete from "./components/TestComponent/TestComplete";
-
 function App() {
   return (
     <Router>
@@ -126,6 +126,7 @@ function App() {
             element={<PersonalDetail />}
           />
           <Route path="/edit-employee/:userId" element={<EditEmployeeForm />} />
+          <Route path="/import-candidates" element={<ImportCandidate/>}/>
 
           <Route
             path="/employee/account/salary-slip"

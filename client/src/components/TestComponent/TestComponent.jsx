@@ -13,7 +13,7 @@ const TestComponent = ({ testId }) => {
     useEffect(() => {
         const fetchTestData = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/test/${testId}`);
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/test/${testId}`);
                 setTestData(response.data);
             } catch (err) {
                 setError(err.response?.data?.error || 'Failed to load test');

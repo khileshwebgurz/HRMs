@@ -10,7 +10,7 @@ useEffect(() => {
   const attendancebyDate = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/get-attendance-by-date",
+        `${import.meta.env.VITE_API_BASE_URL}/get-attendance-by-date`,
         { date: selectedDate },
         { withCredentials: true }
       );

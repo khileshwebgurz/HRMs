@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import TestView from './TestView';
-import TestForm from './TestForm';
-import TestOtp from './TestOtp';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import TestView from "./TestView";
+import TestForm from "./TestForm";
+import TestOtp from "./TestOtp";
 
 const Test = () => {
     const { test_id } = useParams();

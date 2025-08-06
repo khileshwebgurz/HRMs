@@ -23,7 +23,7 @@ const TestOtp = ({ testId }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/verify-otp', {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/verify-otp`, {
                 test_token: testId,
                 otp: otp.join('')
             });

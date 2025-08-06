@@ -44,7 +44,7 @@ const EditCandidateProfile = () => {
     fetchData();
   }, []);
 
-  console.log("my candiates are dsfsfgdff>>>", formDatas);
+  
   const handleCandidateProfileChange = (field, value) => {
     setFormDatas((prev) => ({
       ...prev,
