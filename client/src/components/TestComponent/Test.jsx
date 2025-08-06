@@ -15,7 +15,6 @@ const Test = () => {
         const fetchTestData = async () => {
             try {
                 const response = await axios.get(`http://localhost:8000/api/test/${test_id}`);
-                console.log(response,'responseresponseresponse');
                 setTestData(response.data);
             } catch (err) {
                 setError(err.response?.data?.error || 'Failed to load test');
@@ -30,21 +29,22 @@ const Test = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
-    if (testData.status === '2') {
-        console.log('1');
+    if (testData.status === '2' || testData.status === 'expired') {
         return <div>Link has been expired. Please contact support.</div>;
     }
 
-    if (testData.status === '3') {
-           console.log('12');
-        return <TestView test={testData.test} />;
+    if (testData.status === '3' || testData.status === 'completed') {
+        const percentage = testData.total_percentage || 0;
+        return <TestView test={testData.test} percentage={percentage} />;
     }
 
-    if (testData.has_otp) {
-           console.log('13');
+    // if (testData.has_otp) {
+    //     return <TestOtp testId={test_id} />;
+    // }
+    if ((testData.has_otp || (testData.test?.type === 1)) && !testData.test?.otp_verified) {
         return <TestOtp testId={test_id} />;
     }
-           console.log(testData.test);
+
     return <TestForm test={testData.test} testId={test_id} />;
 };
 

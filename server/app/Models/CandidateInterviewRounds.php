@@ -12,6 +12,7 @@ class CandidateInterviewRounds extends Model
         'interview_id',
        
     ]; 
+    
     public function interview()
     {
         return $this->hasOne('App\Models\CandidateInterviews', 'id', 'interview_id');

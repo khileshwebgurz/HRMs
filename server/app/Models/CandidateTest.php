@@ -14,7 +14,8 @@ class CandidateTest extends Model
         'status',
         'created_by',
         'pending_time',
-        'type'
+        'type',
+        'otp'
     ];
 
     static $status = [

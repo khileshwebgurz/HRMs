@@ -28,3 +28,15 @@ point-2. save and email -
 
 5-aug-2025
 4. send apptitue test  -start 
+
+=======pending task
+link_status not update
+send email from all candidate listing not working
+
+send apptitue test from active candidate listing
+
+send double mail issue from apptitue test and quiz 
+otp not setup
+otp verification to test page redirection issue
+
+

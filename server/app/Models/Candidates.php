@@ -87,7 +87,9 @@ class Candidates extends Model
         'expected_salary',
         'remarks',
         'profile_id',
-        'status'
+        'status',
+        'link_status'
+        
     ];
 
     public function candidate_status()

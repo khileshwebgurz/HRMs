@@ -226,19 +226,9 @@ Route::middleware([])->prefix('tracker')->group(function () {
     Route::get('candidate/profile/{token}/edit', [UserController:: class, 'candidateProfile']);
 });
    // Test 
-// Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
-// //Route::post('/check-test-otp', [UserController::class, 'checkTestOtp']);
-// //Route::post('/save-test-result', [UserController::class, 'saveTestResult']);
-// Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
-// Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);
-// Route::post('/save-test-result', [UserController::class, 'saveTestResult']);
-
 //Route::middleware('api')->group(function () {
-    // Make sure these routes are properly defined
     Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
     Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
     Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);
-    
-    // This is the key route that needs to match your frontend request
     Route::post('/test/save', [UserController::class, 'saveTestResult'])->name('saveTestResult');
 //});

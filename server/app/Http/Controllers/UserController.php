@@ -1087,6 +1087,7 @@ class UserController extends Controller
                 'total_percentage' => ($can_test->result * 100) / count($can_test->questions)
             ]);
         }
+        
 
         return response()->json([
             'status' => 'active',
@@ -1136,36 +1137,22 @@ class UserController extends Controller
 
     public function saveTestResult(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'test_token' => 'required',
-        //    // 'pending_time' => 'sometimes|required',
-        //    'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
-        //     'question_page' => 'sometimes|required|integer',
-        //     'finalsave' => 'sometimes|boolean'
-        // ]);
+        Log::info('test', ['testtw' => $request]);
+      
+        $validator = Validator::make($request->all(), [
+            'test_token' => 'required',
+            'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
+            'question_page' => 'required|integer|min:0',
+            'finalsave' => 'required|boolean',
+            'ans' => 'sometimes|array'
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => $validator->errors()->first()
-        //     ], 422);
-        // }
-
-
-         $validator = Validator::make($request->all(), [
-                 'test_token' => 'required',
-                'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
-                'question_page' => 'required|integer|min:0',
-                'finalsave' => 'required|boolean',
-                'ans' => 'sometimes|array'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
 
         $can_test = CandidateTest::with(['questions', 'candidate'])
             ->where('token', $request->test_token)
@@ -1178,7 +1165,15 @@ class UserController extends Controller
             ], 404);
         }
 
-        // Update time and page
+        // If test already completed, don't allow changes or resend emails
+        if ($can_test->status == 3) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Test has already been submitted.'
+            ], 400);
+        }
+
+        // Update time and page if provided
         if ($request->has('pending_time')) {
             $can_test->pending_time = $request->pending_time;
         }
@@ -1187,7 +1182,7 @@ class UserController extends Controller
             $can_test->question_page = $request->question_page;
         }
 
-        // Handle answers
+        // Save answers if provided
         if ($request->has('ans')) {
             foreach ($request->ans as $qid => $answer) {
                 $question = $can_test->questions->firstWhere('id', $qid);
@@ -1200,8 +1195,9 @@ class UserController extends Controller
 
         // Handle final submission
         if ($request->finalsave) {
+
             $can_test->status = 3;
-            
+
             // Calculate result
             $correctAnswers = $can_test->questions->filter(function($question) {
                 return $question->candidate_answer == $question->correct_answer;
@@ -1212,7 +1208,7 @@ class UserController extends Controller
 
             $totalPercentage = ($correctAnswers / $can_test->questions->count()) * 100;
 
-            // Send emails
+            // Send emails only once on final submission
             $this->sendCompletionEmails($can_test, $totalPercentage);
 
             // Update candidate status
@@ -1240,6 +1236,7 @@ class UserController extends Controller
             ]);
         }
 
+        // Save progress for non-final submission
         $can_test->save();
 
         return response()->json([
@@ -1247,6 +1244,7 @@ class UserController extends Controller
             'message' => 'Progress saved successfully'
         ]);
     }
+
 
     protected function sendCompletionEmails($can_test, $percentage)
     {
@@ -1354,6 +1352,21 @@ class UserController extends Controller
 
     protected function createTest($candidate, $type)
     {
+      
+        Log::info('test', ['testtw' => $candidate . $type]);
+        $existingTest = CandidateTest::where('candidate_id', $candidate->id)
+            ->where('status', 1) // 1 = active
+            ->first();
+
+        if ($existingTest) {
+            return response()->json([
+                'status' => 'already_exists',
+                'message' => 'A test is already assigned to this candidate.',
+                'test_id' => $existingTest->id
+            ]);
+        }
+
+        // ✅ If no existing test, create new one
         $can_test = CandidateTest::create([
             'candidate_id' => $candidate->id,
             'token' => Str::random(32),
@@ -1361,6 +1374,8 @@ class UserController extends Controller
             'pending_time' => '00:00',
             'type' => $type,
             'otp' => $type == 1 ? rand(1000, 9999) : null
+
+           
         ]);
 
         // Attach random questions
@@ -1394,6 +1409,7 @@ class UserController extends Controller
             'test_id' => $can_test->id
         ]);
     }
+
 
     protected function sendTestInviteEmail($candidate, $test)
     {
@@ -2320,7 +2336,7 @@ class UserController extends Controller
                 ];
             })->values()->toArray();
 
-             Log::info('my transformedData is ', ['transformedData' => $transformedData]);
+            // Log::info('my transformedData is ', ['transformedData' => $transformedData]);
 
             return response()->json([
                 'data' => $transformedData,
@@ -2734,161 +2750,6 @@ class UserController extends Controller
         ]);
     }
 
-
-    
-
-    public function candidateProfilePostNEW(Request $request)
-    {
-        Log::info('Full Candidate Profile POST Request >>>> ' . json_encode($request->all()));
-
-        $candidate_token = $request->get('candidate_token');
-        $candidate = Candidates::where('profile_token', $candidate_token)->first();
-
-        if (! $candidate) {
-            return response()->json(['status' => 404, 'message' => 'Candidate not found.']);
-        }
-
-        // Validate basic required fields
-        // $validator = Validator::make($request->all(), [
-        //     'candidateProfile.full_name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
-        //     'candidateProfile.gender' => 'required',
-        //     'candidateProfile.residence_address' => 'required',
-        //     'candidateProfile.nationality' => 'required',
-        //     'candidateProfile.dob' => 'required',
-        //     'candidateProfile.place_of_birth' => 'required',
-        // ], [
-        //     'candidateProfile.full_name.required' => 'Please enter fullname',
-        //     'candidateProfile.gender.required' => 'Please select gender'
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
-        // }
-
-        $profile = $request->input('candidateProfile');
-
-        $candidate->fill([
-            'full_name' => $profile['full_name'] ?? '',
-            'gender' => $profile['gender'] ?? '',
-            'marital_status' => $profile['marital_status'] ?? '',
-            'residence_address' => $profile['residence_address'] ?? '',
-            'passport_number' => $profile['passport_number'] ?? '',
-            'nationality' => $profile['nationality'] ?? '',
-            'dob' => $profile['dob'] ?? '',
-            'age' => $profile['age'] ?? '',
-            'country_id' => $profile['country'] ?? '',
-            'city_id' => $profile['city'] ?? '',
-            'state_id' => $profile['state'] ?? '',
-            'place_of_birth' => $profile['place_of_birth'] ?? '',
-            'hobbies' => $profile['hobbies'] ?? '',
-            'link_status' => '1',
-        ])->save();
-
-        $candidate_id = $candidate->id;
-
-        // Save Skills
-        $skills = json_decode($request->get('technicalSkills'), true);
-        $skillIds = [];
-        if (!empty($skills)) {
-            foreach ($skills as $skill) {
-                $c_skill = CandidateSkills::updateOrCreate([
-                    'candidate_id' => $candidate_id,
-                    'skill_name' => $skill
-                ]);
-                $skillIds[] = $c_skill->id;
-            }
-            CandidateSkills::where('candidate_id', $candidate_id)->whereNotIn('id', $skillIds)->delete();
-        }
-
-        // Save Education
-        $educationRows = $request->input('educationRows', []);
-        $eduIds = [];
-        foreach ($educationRows as $edu) {
-            if (!empty($edu['institute']) || !empty($edu['qualification'])) {
-                $c_edu = CandidateEducations::create([
-                    'candidate_id' => $candidate_id,
-                    'institute_name' => $edu['institute'],
-                    'from' => $edu['from'],
-                    'to' => $edu['to'],
-                    'professional_qualification' => $edu['qualification'],
-                ]);
-                $eduIds[] = $c_edu->id;
-            }
-        }
-        CandidateEducations::where('candidate_id', $candidate_id)->whereNotIn('id', $eduIds)->delete();
-
-        // Save Employment History
-        $employments = $request->input('employments', []);
-        $empIds = [];
-        foreach ($employments as $emp) {
-            if (!empty($emp['company_name'])) {
-                $c_emp = CandidateEmployments::create([
-                    'candidate_id' => $candidate_id,
-                    'company_name' => $emp['company_name'],
-                    'address' => $emp['address'],
-                    'contact_details' => $emp['contact_details'],
-                    'date_from' => $emp['from'],
-                    'date_to' => $emp['to'],
-                    'position' => $emp['position'],
-                    'reason_of_leaving' => $emp['reason_of_leaving']
-                ]);
-                $empIds[] = $c_emp->id;
-            }
-        }
-        CandidateEmployments::where('candidate_id', $candidate_id)->whereNotIn('id', $empIds)->delete();
-
-        // Save Languages
-        $languages = $request->input('languages', []);
-        $langIds = [];
-        foreach ($languages as $lang) {
-            if (!empty($lang['language'])) {
-                $c_lang = CandidateLanguages::create([
-                    'candidate_id' => $candidate_id,
-                    'language_id' => $lang['language'],
-                    'speak' => $lang['speak'],
-                    'write' => $lang['write'],
-                    'understand' => $lang['understand']
-                ]);
-                $langIds[] = $c_lang->id;
-            }
-        }
-        CandidateLanguages::where('candidate_id', $candidate_id)->whereNotIn('id', $langIds)->delete();
-
-        // Save Family Members
-        $familyMembers = $request->input('familyMembers', []);
-        $famIds = [];
-        foreach ($familyMembers as $fm) {
-            if (!empty($fm['name'])) {
-                $c_fam = CandidateFamilies::create([
-                    'candidate_id' => $candidate_id,
-                    'name' => $fm['name'],
-                    'relationship' => $fm['relationship'],
-                    'age' => $fm['age'],
-                    'occupation' => $fm['occupation'],
-                    'name_of_employer' => $fm['employer']
-                ]);
-                $famIds[] = $c_fam->id;
-            }
-        }
-        CandidateFamilies::where('candidate_id', $candidate_id)->whereNotIn('id', $famIds)->delete();
-
-        // Save Other Info
-        $otherInfo = $request->input('otherInfo', []);
-        $otherIds = [];
-        foreach ($otherInfo as $info) {
-            $c_other = CandidateOtherInformations::create([
-                'candidate_id' => $candidate_id,
-                'question_id' => $info['id'],
-                'status' => $info['status'],
-                'reason' => $info['status'] ? $info['reason'] : ''
-            ]);
-            $otherIds[] = $c_other->id;
-        }
-        CandidateOtherInformations::where('candidate_id', $candidate_id)->whereNotIn('id', $otherIds)->delete();
-
-        return response()->json(['status' => 200, 'message' => 'Candidate updated successfully.']);
-    }
-
     public function candidateProfilePost(Request $request)
     {
         Log::info('Candidate Profile Post Request >>> ' . json_encode($request->all()));
@@ -2930,7 +2791,7 @@ class UserController extends Controller
                 'city_id'           => $request->city,
                 'place_of_birth'    => $request->place_of_birth,
                 'hobbies'           => $request->hobbies,
-                'link_status'       => 1
+                'link_status'       => '1'
             ]);
 
             if ($request->get('upload_cv_remove')) {
@@ -3022,6 +2883,9 @@ class UserController extends Controller
                 ]);
             }
 
+             $candidate->otp = rand(1000, 9999);
+
+             Log::info('otp0', ['otp0' => $candidate->otp]);
             // --- Test Creation ---
             $test = CandidateTest::create([
                 'candidate_id' => $candidate->id,
@@ -3029,9 +2893,12 @@ class UserController extends Controller
                 'status'       => 1,
                 'created_by'   => Auth::id(),
                 'pending_time' => '00:00',
-                'type'         => 2
+               // 'type'         => 2,
+                'type'         => 1,
+                'otp'          => $candidate->otp
+                
             ]);
-
+              Log::info('otp0', ['otp0' => $test]);
             // --- Assign random questions ---
             $questions = Questions::where('status', 1)
                                 ->inRandomOrder()
@@ -3058,6 +2925,7 @@ class UserController extends Controller
             Mail::send('emails.test-invite', [
                 'name'     => $candidate->full_name,
                 //'test_url' => route('showTest', $test->token),
+                'otp'     => $candidate->otp,
                 'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
             ], function ($message) use ($candidate) {
                 $message->to($candidate->email, $candidate->full_name)

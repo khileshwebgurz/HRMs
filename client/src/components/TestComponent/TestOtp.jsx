@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-
+import '../../assets/css/TestComplete.css'; 
 const TestOtp = ({ testId }) => {
     const [otp, setOtp] = useState(['', '', '', '']);
     const [loading, setLoading] = useState(false);
@@ -36,7 +36,8 @@ const TestOtp = ({ testId }) => {
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    navigate(`/test/${testId}`); // Redirect to test page
+                    window.location.reload();
+                    navigate(`/test/${testId}`);
                 });
             } else {
                 throw new Error(response.data.message);
@@ -53,11 +54,11 @@ const TestOtp = ({ testId }) => {
     };
 
     return (
-        <div className="otp-verification">
-            <h2>OTP Verification</h2>
-            <p>Enter the 4-digit code sent to your email</p>
-            
-            <form onSubmit={handleSubmit}>
+        <div className="otp-container">
+            <h2 className="otp-title">OTP Verification</h2>
+            <p className="otp-subtitle">Enter the 4-digit code sent to your email</p>
+
+            <form onSubmit={handleSubmit} className="otp-form">
                 <div className="otp-inputs">
                     {[0, 1, 2, 3].map((index) => (
                         <input
@@ -72,9 +73,9 @@ const TestOtp = ({ testId }) => {
                         />
                     ))}
                 </div>
-                
-                <button 
-                    type="submit" 
+
+                <button
+                    type="submit"
                     disabled={loading || otp.some(digit => !digit)}
                     className="verify-button"
                 >
