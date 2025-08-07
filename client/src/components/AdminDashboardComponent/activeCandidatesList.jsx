@@ -297,7 +297,7 @@ function ActiveCandidatesList() {
               <input
                 type="text"
                 className="form-control form-control-sm"
-                placeholder="Search by name or ID"
+                placeholder="Search by name or Email"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

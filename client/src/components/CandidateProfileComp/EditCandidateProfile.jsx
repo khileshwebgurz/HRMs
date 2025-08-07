@@ -8,11 +8,12 @@ import TechnicalSkill from "./EditCandidateProf/TechnicalSkill";
 import EmploymentHistory from "./EditCandidateProf/EmploymentHistory";
 import FamilyDetail from "./EditCandidateProf/FamilyDetail";
 import OtherInfo from "./EditCandidateProf/OtherInfo";
-import UploadCV from "./EditCandidateProf/UploadCV";
+// import UploadCV from "./EditCandidateProf/UploadCV";
 
 const EditCandidateProfile = () => {
   const { profile_token } = useParams();
   const [formDatas, setFormDatas] = useState(null);
+  const [profileLocked, setProfileLocked] = useState(false);
 
   const [educationRows, setEducationRows] = useState([
     {
@@ -24,36 +25,6 @@ const EditCandidateProfile = () => {
   ]);
 
   const [otherInfo, setOtherInfo] = useState([]);
-
-  const fetchData = async () => {
-    //candidate/profile/{token}/edit
-    const res = await axios.get(
-      `${
-        import.meta.env.VITE_API_BASE_URL
-      }/tracker/candidate/profile/${profile_token}/edit`,
-      { withCredentials: true }
-    );
-    setFormDatas(res?.data || {});
-    setEducationRows(res?.data.candidate_education);
-    setOtherInfo(res?.data.candidate_questions);
-    setEmployments(res?.data.candidate_employment_history)
-    setTechnicalSkills(res?.data.candidate_skills)
-    setFamilyMembers(res?.data.candidate_families)
-  };
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  
-  const handleCandidateProfileChange = (field, value) => {
-    setFormDatas((prev) => ({
-      ...prev,
-      candidate: {
-        ...prev.candidate,
-        [field]: value,
-      },
-    }));
-  };
 
   const [familyMembers, setFamilyMembers] = useState([
     {
@@ -87,28 +58,62 @@ const EditCandidateProfile = () => {
     },
   ]);
 
+  const fetchData = async () => {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/tracker/candidate/profile/${profile_token}/edit`,
+      { withCredentials: true }
+    );
+
+    setFormDatas(res?.data || {});
+    setEducationRows(res?.data.candidate_education);
+    setOtherInfo(res?.data.candidate_questions);
+    setEmployments(res?.data.candidate_employment_history);
+    setTechnicalSkills(res?.data.candidate_skills);
+    setFamilyMembers(res?.data.candidate_families);
+
+    // ✅ Check for link_status
+    if (res?.data?.candidate?.link_status == 1) {
+      setProfileLocked(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleCandidateProfileChange = (field, value) => {
+    setFormDatas((prev) => ({
+      ...prev,
+      candidate: {
+        ...prev.candidate,
+        [field]: value,
+      },
+    }));
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    if (profileLocked) {
+      alert("This profile has already been submitted and cannot be updated again.");
+      return;
+    }
+
     try {
       const formData = new FormData();
-
       formData.append("candidate_token", profile_token);
 
       for (const key in formDatas?.candidate) {
-         formData.append(key, formDatas?.candidate[key]);
+        formData.append(key, formDatas?.candidate[key]);
       }
 
-     
-
-
       // Technical Skills
-      // formData.append("technicalSkills", technicalSkills);
       formData.append(
         "technicalSkills",
         JSON.stringify(
           Array.isArray(technicalSkills)
-            ? technicalSkills.map((s) => s.skill_name) // from array of objects
-            : technicalSkills.split(",").map((s) => s.trim()) // from string input
+            ? technicalSkills.map((s) => s.skill_name)
+            : technicalSkills.split(",").map((s) => s.trim())
         )
       );
 
@@ -191,7 +196,14 @@ const EditCandidateProfile = () => {
               encType="multipart/form-data"
             >
               <input type="hidden" name="candidate_token" />
+
               <div className="col-lg-12">
+                {profileLocked && (
+                  <div className="alert alert-warning">
+                    <strong>Note:</strong> This profile has already been submitted and cannot be updated again.
+                  </div>
+                )}
+
                 <PersonalParticular
                   formData={formDatas?.candidate}
                   onChange={handleCandidateProfileChange}
@@ -222,7 +234,11 @@ const EditCandidateProfile = () => {
                   setFamilyMembers={setFamilyMembers}
                 />
 
-                <OtherInfo otherInfo={otherInfo} setOtherInfo={setOtherInfo} />
+                <OtherInfo
+                  otherInfo={otherInfo}
+                  setOtherInfo={setOtherInfo}
+                />
+
                 {/* <UploadCV /> */}
 
                 <div className="row">
@@ -231,6 +247,7 @@ const EditCandidateProfile = () => {
                       className="btn btn-success float-right wgz-submit"
                       type="submit"
                       onClick={handleFormSubmit}
+                      disabled={profileLocked}
                     >
                       Submit
                     </button>

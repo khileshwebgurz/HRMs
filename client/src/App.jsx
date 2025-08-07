@@ -153,7 +153,8 @@ function App() {
 
            {/* email redirection urls for candidate creation*/}
            
-         
+           <Route path="/import-candidates" element={<ImportCandidate/>}/>
+
 
           <Route path="*" element={<NotFound />} />
         </Route>

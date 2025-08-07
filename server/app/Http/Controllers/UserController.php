@@ -1135,7 +1135,7 @@ class UserController extends Controller
         ], 401);
     }
 
-    public function saveTestResult(Request $request)
+    public function saveTestResultOLd(Request $request)
     {
         Log::info('test', ['testtw' => $request]);
       
@@ -1238,6 +1238,208 @@ class UserController extends Controller
 
         // Save progress for non-final submission
         $can_test->save();
+
+        return response()->json([
+            'status' => 'progress_saved',
+            'message' => 'Progress saved successfully'
+        ]);
+    }
+
+    public function saveTestResult(Request $request)
+    {
+        Log::info('test', ['testtw' => $request->all()]);
+    
+        $validator = Validator::make($request->all(), [
+            'test_token' => 'required',
+            'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
+            'question_page' => 'required|integer|min:0',
+            'finalsave' => 'required|boolean',
+            'ans' => 'sometimes|array',
+            'auto_save' => 'sometimes|boolean'  // Add auto_save to validation
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $can_test = CandidateTest::with(['questions', 'candidate'])
+            ->where('token', $request->test_token)
+            ->first();
+
+        if (!$can_test) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Test not found'
+            ], 404);
+        }
+
+        // If test already completed, don't allow changes or resend emails
+        if ($can_test->status == 3) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Test has already been submitted.'
+            ], 400);
+        }
+
+        // Handle auto-save separately for better performance and logging
+        if (!$request->finalsave && $request->has('auto_save') && $request->auto_save) {
+            // Update time and page for auto-save
+            if ($request->has('pending_time')) {
+                $can_test->pending_time = $request->pending_time;
+            }
+
+            if ($request->has('question_page')) {
+                $can_test->question_page = $request->question_page;
+            }
+
+            // Save answers if provided
+            if ($request->has('ans')) {
+                foreach ($request->ans as $question_id => $answer_id) {
+                    // Find the candidate test option record by question_id, not the question record itself
+                    $testOption = CandidateTestOptions::where('candidate_test_id', $can_test->id)
+                        ->where('question_id', $question_id)
+                        ->first();
+                    
+                    if ($testOption) {
+                        $testOption->candidate_answer = $answer_id;
+                        $testOption->save();
+                    }
+                }
+            }
+
+            $can_test->save();
+            
+            Log::info('Auto-save completed', [
+                'test_id' => $can_test->id,
+                'candidate_id' => $can_test->candidate_id,
+                'pending_time' => $request->pending_time,
+                'question_page' => $request->question_page
+            ]);
+
+            return response()->json([
+                'status' => 'auto_saved',
+                'message' => 'Progress auto-saved successfully'
+            ]);
+        }
+
+        // Update time and page if provided (for manual saves)
+        if ($request->has('pending_time')) {
+            $can_test->pending_time = $request->pending_time;
+        }
+
+        if ($request->has('question_page')) {
+            $can_test->question_page = $request->question_page;
+        }
+
+        // Save answers if provided (for manual saves)
+        if ($request->has('ans')) {
+            foreach ($request->ans as $question_id => $answer_id) {
+                // Find the candidate test option record by question_id
+                $testOption = CandidateTestOptions::where('candidate_test_id', $can_test->id)
+                    ->where('question_id', $question_id)
+                    ->first();
+                
+                if ($testOption) {
+                    $testOption->candidate_answer = $answer_id;
+                    $testOption->save();
+                }
+            }
+        }
+
+        // Handle final submission
+        if ($request->finalsave) {
+            // Double-check test status before final submission
+            $can_test->refresh(); // Refresh from database to get latest status
+            
+            if ($can_test->status == 3) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Test has already been submitted.'
+                ], 400);
+            }
+
+            $can_test->status = 3;
+
+            // Calculate result - count correct answers from CandidateTestOptions
+            $correctAnswers = CandidateTestOptions::where('candidate_test_id', $can_test->id)
+                ->whereColumn('candidate_answer', 'correct_answer')
+                ->count();
+
+            $totalQuestions = CandidateTestOptions::where('candidate_test_id', $can_test->id)->count();
+
+            $can_test->result = $correctAnswers;
+            $can_test->save();
+
+            $totalPercentage = $totalQuestions > 0 ? ($correctAnswers / $totalQuestions) * 100 : 0;
+
+            // Send emails only once on final submission
+            try {
+                $this->sendCompletionEmails($can_test, $totalPercentage);
+            } catch (\Exception $e) {
+                Log::error('Failed to send completion emails', [
+                    'test_id' => $can_test->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Update candidate status
+            $candidate = $can_test->candidate;
+            $candidateStatus = $totalPercentage >= 90 ? 3 : 8; // 3=Passed, 8=Failed
+            $candidate->status = $candidateStatus;
+            $candidate->save();
+
+            // Create notification
+            try {
+                $this->createNotification($can_test);
+            } catch (\Exception $e) {
+                Log::error('Failed to create notification', [
+                    'test_id' => $can_test->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Create interview records
+            try {
+                $this->createInterviewRecords($can_test, $totalPercentage);
+            } catch (\Exception $e) {
+                Log::error('Failed to create interview records', [
+                    'test_id' => $can_test->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            Log::info('Test completed successfully', [
+                'test_id' => $can_test->id,
+                'candidate_id' => $can_test->candidate_id,
+                'score' => $correctAnswers,
+                'percentage' => $totalPercentage
+            ]);
+
+            return response()->json([
+                'status' => 'completed',
+                'message' => $totalPercentage >= 90 
+                    ? 'Congratulations, you are shortlisted for next round.' 
+                    : 'Better luck next time. Please connect with HR.',
+                'result' => [
+                    'score' => $correctAnswers,
+                    'total' => $totalQuestions,
+                    'percentage' => round($totalPercentage, 2)
+                ]
+            ]);
+        }
+
+        // Save progress for non-final submission (manual save)
+        $can_test->save();
+
+        Log::info('Manual progress saved', [
+            'test_id' => $can_test->id,
+            'candidate_id' => $can_test->candidate_id,
+            'pending_time' => $request->pending_time,
+            'question_page' => $request->question_page
+        ]);
 
         return response()->json([
             'status' => 'progress_saved',
@@ -2286,7 +2488,8 @@ class UserController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%$search%")
-                    ->orWhere('profile_id', 'like', "%$search%");
+                    ->orWhere('profile_id', 'like', "%$search%")
+                      ->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -2750,7 +2953,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function candidateProfilePost(Request $request)
+    public function candidateProfilePostOld(Request $request)
     {
         Log::info('Candidate Profile Post Request >>> ' . json_encode($request->all()));
 
@@ -2932,6 +3135,204 @@ class UserController extends Controller
                         ->subject('HRM Aptitude Quiz');
             });
 
+
+            // --- Notification ---
+            Notifications::create([
+                'type_id' => 'profile_updated',
+                'message' => $candidate->full_name . ' has updated profile',
+                'page_id' => $candidate->id,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['status' => 200, 'message' => 'Profile updated successfully.']);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Profile Update Error: ' . $e->getMessage());
+            return response()->json(['status' => 500, 'message' => 'Server error. Please try again.']);
+        }
+    }
+
+    public function candidateProfilePost(Request $request)
+    {
+        Log::info('Candidate Profile Post Request >>> ' . json_encode($request->all()));
+
+        $validator = Validator::make($request->all(), [
+            'candidate_token'     => 'required|string|exists:candidates,profile_token',
+            'full_name'           => 'required|max:25|regex:/^[a-zA-Z\s]+$/',
+            'gender'              => 'required',
+            'residence_address'   => 'required',
+            'nationality'         => 'required',
+            'dob'                 => 'required|date',
+            'place_of_birth'      => 'required',
+            'upload_cv'           => 'nullable|file|mimes:pdf,doc,docx'
+        ], [
+            'full_name.required' => 'Please enter fullname',
+            'gender.required'    => 'Please select gender',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'message' => $validator->errors()->first()]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $candidate = Candidates::where('profile_token', $request->candidate_token)->first();
+
+            if (!$candidate) {
+                return response()->json(['status' => 404, 'message' => 'Candidate not found']);
+            }
+
+            // ✅ Block further updates
+            if ($candidate->link_status == 1) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Profile has already been submitted and cannot be updated again.'
+                ]);
+            }
+
+            $candidate->update([
+                'full_name'         => $request->full_name,
+                'gender'            => $request->gender,
+                'marital_status'    => $request->marital_status,
+                'residence_address' => $request->residence_address,
+                'passport_number'   => $request->passport_number,
+                'nationality'       => $request->nationality,
+                'dob'               => $request->dob,
+                'age'               => $request->age,
+                'country_id'        => $request->country,
+                'state_id'          => $request->state,
+                'city_id'           => $request->city,
+                'place_of_birth'    => $request->place_of_birth,
+                'hobbies'           => $request->hobbies,
+                'link_status'       => '1' // Mark as submitted
+            ]);
+
+            if ($request->get('upload_cv_remove')) {
+                $candidate->cv_file = null;
+            }
+
+            if ($request->hasFile('upload_cv')) {
+                $file = $request->file('upload_cv');
+                $filename = time() . '-' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/cv/'), $filename);
+                $candidate->cv_file = $filename;
+            }
+
+            $candidate->save();
+
+            // --- Skills ---
+            $skillNames = explode(',', $request->input('technicalSkills', ''));
+            $candidate->skills_section()->delete();
+            foreach ($skillNames as $skill) {
+                $skill = trim($skill);
+                if (!empty($skill)) {
+                    $candidate->skills_section()->create(['skill_name' => $skill]);
+                }
+            }
+
+            // --- Educations ---
+            CandidateEducations::where('candidate_id', $candidate->id)->delete();
+            foreach ($request->input('educationRows', []) as $edu) {
+                CandidateEducations::create([
+                    'candidate_id'               => $candidate->id,
+                    'institute_name'             => $edu['institute_name'] ?? '',
+                    'from'                       => $edu['from'] ?? '',
+                    'to'                         => $edu['to'] ?? '',
+                    'professional_qualification' => $edu['professional_qualification'] ?? ''
+                ]);
+            }
+
+            // --- Employments ---
+            CandidateEmployments::where('candidate_id', $candidate->id)->delete();
+            foreach ($request->input('employments', []) as $emp) {
+                CandidateEmployments::create([
+                    'candidate_id'     => $candidate->id,
+                    'company_name'     => $emp['company_name'] ?? '',
+                    'address'          => $emp['address'] ?? '',
+                    'contact_details'  => $emp['contact_details'] ?? '',
+                    'date_from'        => $emp['date_from'] ?? '',
+                    'date_to'          => $emp['date_to'] ?? '',
+                    'position'         => $emp['position'] ?? '',
+                    'reason_of_leaving'=> $emp['reason_of_leaving'] ?? ''
+                ]);
+            }
+
+            // --- Languages ---
+            CandidateLanguages::where('candidate_id', $candidate->id)->delete();
+            foreach ($request->input('languages', []) as $lang) {
+                CandidateLanguages::create([
+                    'candidate_id' => $candidate->id,
+                    'language_id'  => $lang['language_id'] ?? 1,
+                    'speak'        => $lang['speak'] ?? 0,
+                    'write'        => $lang['write'] ?? 0,
+                    'understand'   => $lang['understand'] ?? 0
+                ]);
+            }
+
+            // --- Other Information ---
+            CandidateOtherInformations::where('candidate_id', $candidate->id)->delete();
+            foreach ($request->input('otherInfo', []) as $info) {
+                CandidateOtherInformations::create([
+                    'candidate_id' => $candidate->id,
+                    'question_id'  => $info['question_id'] ?? 1,
+                    'status'       => $info['status'] ?? 0,
+                    'reason'       => $info['reason'] ?? ''
+                ]);
+            }
+
+            // --- Families ---
+            CandidateFamilies::where('candidate_id', $candidate->id)->delete();
+            foreach ($request->input('familyMembers', []) as $fam) {
+                CandidateFamilies::create([
+                    'candidate_id'     => $candidate->id,
+                    'name'             => $fam['name'] ?? '',
+                    'relationship'     => $fam['relationship'] ?? '',
+                    'age'              => $fam['age'] ?? 12,
+                    'occupation'       => $fam['occupation'] ?? '',
+                    'name_of_employer' => $fam['name_of_employer'] ?? ''
+                ]);
+            }
+
+            // --- OTP & Test Creation ---
+            $candidate->otp = rand(1000, 9999);
+            Log::info('Generated OTP', ['otp' => $candidate->otp]);
+
+            $test = CandidateTest::create([
+                'candidate_id' => $candidate->id,
+                'token'        => Str::random(32),
+                'status'       => 1,
+                'created_by'   => Auth::id(),
+                'pending_time' => '00:00',
+                'type'         => 1,
+                'otp'          => $candidate->otp
+            ]);
+
+            // --- Assign Questions ---
+            $questions = Questions::where('status', 1)
+                                ->inRandomOrder()
+                                ->limit(10)
+                                ->get();
+
+            foreach ($questions as $question) {
+                CandidateTestOptions::create([
+                    'candidate_test_id' => $test->id,
+                    'question_id'       => $question->id,
+                    'correct_answer'    => $question->answer
+                ]);
+            }
+
+            // --- Send Email ---
+            Mail::send('emails.test-invite', [
+                'name'     => $candidate->full_name,
+                'otp'      => $candidate->otp,
+                'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
+            ], function ($message) use ($candidate) {
+                $message->to($candidate->email, $candidate->full_name)
+                        ->subject('HRM Aptitude Quiz');
+            });
 
             // --- Notification ---
             Notifications::create([

@@ -33,96 +33,136 @@ const ViewCandidateProfile = () => {
     fetchCandidate();
   }, [profile_id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (errorMsg) return <p className="text-danger">{errorMsg}</p>;
+  if (loading) return <p className="text-center mt-4">Loading...</p>;
+  if (errorMsg) return <p className="text-danger text-center mt-4">{errorMsg}</p>;
 
   const { candidate: c } = candidate;
 
   return (
-    <div className="container mt-4">
-      <h2>Candidate Profile: {c?.full_name}</h2>
-      <hr />
+    <div className="container mt-5 mb-5">
+      <h2 className="mb-4">Candidate Profile</h2>
 
-      <section>
-        <h4>Personal Information</h4>
-        <p><strong>Email:</strong> {c?.email}</p>
-        <p><strong>Mobile:</strong> {c?.mobile_number}</p>
-        <p><strong>Gender:</strong> {c?.gender}</p>
-        <p><strong>Date of Birth:</strong> {c?.dob}</p>
-      </section>
+      {/* Personal Information */}
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white">
+          Personal Information
+        </div>
+        <div className="card-body row">
+          <div className="col-md-6 mb-2">
+            <strong>Full Name:</strong> {c?.full_name}
+          </div>
+          <div className="col-md-6 mb-2">
+            <strong>Email:</strong> {c?.email}
+          </div>
+          <div className="col-md-6 mb-2">
+            <strong>Mobile:</strong> {c?.mobile_number}
+          </div>
+          <div className="col-md-6 mb-2">
+            <strong>Gender:</strong> {c?.gender}
+          </div>
+          <div className="col-md-6 mb-2">
+            <strong>Date of Birth:</strong> {c?.dob}
+          </div>
+        </div>
+      </div>
 
-      <section>
-        <h4>Education</h4>
-        <ul>
-          {c?.educations?.map((edu, idx) => (
-            <li key={idx}>
-              {edu.degree} at {edu.institute} ({edu.year})
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Education */}
+      {c?.educations?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Education</div>
+          <ul className="list-group list-group-flush">
+            {c.educations.map((edu, idx) => (
+              <li className="list-group-item" key={idx}>
+                <strong>{edu.degree}</strong> at {edu.institute} ({edu.year})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Skills</h4>
-        <ul>
-          {c?.skills_section?.map((skill, idx) => (
-            <li key={idx}>{skill.skill_name}</li>
-          ))}
-        </ul>
-      </section>
+      {/* Skills */}
+      {c?.skills_section?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Skills</div>
+          <ul className="list-group list-group-flush">
+            {c.skills_section.map((skill, idx) => (
+              <li className="list-group-item" key={idx}>
+                {skill.skill_name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Languages</h4>
-        <ul>
-          {c?.languages?.map((lang, idx) => (
-            <li key={idx}>{lang.language_name}</li>
-          ))}
-        </ul>
-      </section>
+      {/* Languages */}
+      {c?.languages?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Languages</div>
+          <ul className="list-group list-group-flush">
+            {c.languages.map((lang, idx) => (
+              <li className="list-group-item" key={idx}>
+                {lang.language_name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Employment History</h4>
-        <ul>
-          {c?.employments?.map((job, idx) => (
-            <li key={idx}>
-              {job.company_name} – {job.designation} ({job.from} to {job.to})
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Employment History */}
+      {c?.employments?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Employment History</div>
+          <ul className="list-group list-group-flush">
+            {c.employments.map((job, idx) => (
+              <li className="list-group-item" key={idx}>
+                <strong>{job.company_name}</strong> – {job.designation} ({job.from} to {job.to})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Family Information</h4>
-        <ul>
-          {c?.families?.map((member, idx) => (
-            <li key={idx}>
-              {member.name} – {member.relationship} ({member.age} years old)
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Family Information */}
+      {c?.families?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Family Information</div>
+          <ul className="list-group list-group-flush">
+            {c.families.map((member, idx) => (
+              <li className="list-group-item" key={idx}>
+                <strong>{member.name}</strong> – {member.relationship} ({member.age} years old)
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Assessment</h4>
-        <ul>
-          {c?.assessment_section?.map((assess, idx) => (
-            <li key={idx}>
-              {assess.parameter_name}: {assess.rating}/5
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Assessment */}
+      {c?.assessment_section?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Assessment</div>
+          <ul className="list-group list-group-flush">
+            {c.assessment_section.map((assess, idx) => (
+              <li className="list-group-item" key={idx}>
+                {assess.parameter_name}: {assess.rating}/5
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <section>
-        <h4>Other Information</h4>
-        <ul>
-          {c?.other_informations?.map((info, idx) => (
-            <li key={idx}>
-              {info.question}: {info.answer}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Other Information */}
+      {c?.other_informations?.length > 0 && (
+        <div className="card mb-4">
+          <div className="card-header bg-secondary text-white">Other Information</div>
+          <ul className="list-group list-group-flush">
+            {c.other_informations.map((info, idx) => (
+              <li className="list-group-item" key={idx}>
+                <strong>{info.question}</strong>: {info.answer}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

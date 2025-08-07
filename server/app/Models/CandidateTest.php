@@ -9,7 +9,7 @@ class CandidateTest extends Model
     protected $table = 'candidate_test';
 
      protected $fillable = [
-        'candidate_id',   // <-- Add this
+        'candidate_id',  
         'token',
         'status',
         'created_by',

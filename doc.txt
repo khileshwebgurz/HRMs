@@ -66,3 +66,7 @@ SELECT setval('ob_candidates_id_seq', (SELECT MAX(id) FROM ob_candidates));
 +++++++++++++++++++++++++++++++++++++ you can use the regexp_replace() or substring() function with UPDATE.
 UPDATE users
 SET email = regexp_replace(email, '@.*$', '@yopmail.com');
+
+===
+
+php artisan schedule:run

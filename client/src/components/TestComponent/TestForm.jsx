@@ -10,40 +10,85 @@ const TestForm = ({ test = {}, testId }) => {
     const [pendingTime, setPendingTime] = useState(() => test?.pending_time || '20:00');
     const [currentPage, setCurrentPage] = useState(test?.question_page || 0);
     const [submitting, setSubmitting] = useState(false);
+    const [isTestCompleted, setIsTestCompleted] = useState(false);
     const timerRef = useRef(null);
+    const totalSecondsRef = useRef(null);
+    const isTimerInitialized = useRef(false);
+    const lastSavedTime = useRef(null);
 
     useEffect(() => {
         if (test?.questions) {
             const initialAnswers = {};
-            test.questions.forEach(q => {
-                if (q.candidate_answer) {
-                    initialAnswers[q.id] = q.candidate_answer;
+            test.questions.forEach(testOption => {
+                if (testOption.candidate_answer) {
+                    // Use the actual question ID for consistency
+                    const questionId = testOption.question?.id || testOption.question_id;
+                    initialAnswers[questionId] = testOption.candidate_answer;
                 }
             });
             setAnswers(initialAnswers);
         }
 
-        if (test?.pending_time && test.pending_time !== '00:00') {
-            const [mins, secs] = test.pending_time.split(':').map(Number);
-            startTimer(mins * 60 + secs);
-        } else {
-            startTimer(20 * 60);
+        // Initialize timer only once and handle resume correctly
+        if (!isTimerInitialized.current) {
+            isTimerInitialized.current = true;
+            
+            if (test?.pending_time && test.pending_time !== '00:00') {
+                const [mins, secs] = test.pending_time.split(':').map(Number);
+                const remainingSeconds = mins * 60 + secs;
+                totalSecondsRef.current = remainingSeconds;
+                startTimer(remainingSeconds);
+            } else {
+                totalSecondsRef.current = 20 * 60; // 20 minutes default
+                startTimer(20 * 60);
+            }
         }
+
+        // Handle page visibility change to prevent timer reset on window focus/blur
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                // Save current time when page becomes hidden
+                lastSavedTime.current = totalSecondsRef.current;
+            } else {
+                // Resume with saved time when page becomes visible
+                if (lastSavedTime.current !== null && !isTestCompleted) {
+                    totalSecondsRef.current = lastSavedTime.current;
+                    if (timerRef.current) clearInterval(timerRef.current);
+                    startTimer(totalSecondsRef.current);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Auto-save progress every 30 seconds
+        const autoSaveInterval = setInterval(() => {
+            if (!isTestCompleted && !submitting) {
+                saveProgress(false, true); // Silent auto-save
+            }
+        }, 30000);
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            clearInterval(autoSaveInterval);
         };
     }, [test]);
 
-    const startTimer = (totalSeconds) => {
+    const startTimer = (initialSeconds) => {
         if (timerRef.current) clearInterval(timerRef.current);
-        let remainingSeconds = totalSeconds;
+        let remainingSeconds = initialSeconds;
+        totalSecondsRef.current = remainingSeconds;
 
         timerRef.current = setInterval(() => {
             remainingSeconds--;
+            totalSecondsRef.current = remainingSeconds;
+            
             if (remainingSeconds <= 0) {
                 clearInterval(timerRef.current);
-                handleTimeout();
+                if (!isTestCompleted) {
+                    handleTimeout();
+                }
                 return;
             }
 
@@ -53,15 +98,19 @@ const TestForm = ({ test = {}, testId }) => {
         }, 1000);
     };
 
-    const saveProgress = async (isFinal = false) => {
+    const saveProgress = async (isFinal = false, silent = false) => {
+        if (isTestCompleted && !isFinal) return; // Prevent multiple saves after completion
+        
         try {
-            setSubmitting(true);
-            await axios.post('http://localhost:8000/api/test/save', {
+            if (!silent) setSubmitting(true);
+            
+            const response = await axios.post('http://localhost:8000/api/test/save', {
                 test_token: testId,
                 ans: answers,
                 pending_time: pendingTime,
                 question_page: currentPage,
-                finalsave: isFinal
+                finalsave: isFinal,
+                auto_save: silent // Send auto_save flag when it's a silent save
             }, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,72 +120,154 @@ const TestForm = ({ test = {}, testId }) => {
             });
 
             if (isFinal) {
+                setIsTestCompleted(true);
+                if (timerRef.current) clearInterval(timerRef.current);
+                
+                const result = response.data;
+                let message = 'Your answers have been successfully submitted.';
+                let icon = 'success';
+                
+                if (result.status === 'completed') {
+                    message = result.message || message;
+                }
+
                 Swal.fire({
-                    icon: 'success',
+                    icon: icon,
                     title: 'Test Submitted!',
-                    text: 'Your answers have been successfully submitted.',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => navigate('/test-completed'));
+                    text: message,
+                    timer: 3000,
+                    showConfirmButton: true
+                }).then(() => {
+                    navigate('/test-completed');
+                });
             }
         } catch (error) {
             console.error('Save error:', error);
-            let msg = 'Failed to save progress';
-            if (error.response?.status === 404) msg = 'Endpoint not found - please contact support';
-            else if (error.response?.data?.message) msg = error.response.data.message;
-            Swal.fire('Error', msg, 'error');
+            if (!silent) {
+                let msg = 'Failed to save progress';
+                if (error.response?.status === 404) msg = 'Endpoint not found - please contact support';
+                else if (error.response?.data?.message) msg = error.response.data.message;
+                Swal.fire('Error', msg, 'error');
+            }
         } finally {
-            setSubmitting(false);
+            if (!silent) setSubmitting(false);
         }
     };
 
     const handleTimeout = async () => {
+        if (isTestCompleted) return;
+        
         const result = await Swal.fire({
             icon: 'warning',
-            title: 'Timeout!',
-            text: "Your test will be automatically submitted.",
+            title: 'Time Up!',
+            text: "Your test time has expired. The test will be automatically submitted.",
             showConfirmButton: true,
-            allowOutsideClick: false
+            allowOutsideClick: false,
+            allowEscapeKey: false
         });
 
-        if (result.isConfirmed) await saveProgress(true);
+        if (result.isConfirmed) {
+            await saveProgress(true);
+        }
     };
 
     const handleAnswerChange = (questionId, answerId) => {
-        setAnswers(prev => ({ ...prev, [questionId]: answerId }));
+        if (isTestCompleted) return;
+        // Use the actual question ID from the question object, not the test option ID
+        const actualQuestionId = test.questions.find(q => q.id === questionId)?.question?.id || questionId;
+        setAnswers(prev => ({ ...prev, [actualQuestionId]: answerId }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await saveProgress(true);
+        if (isTestCompleted || submitting) return;
+
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            icon: 'question',
+            title: 'Submit Test?',
+            text: 'Are you sure you want to submit your test? You cannot change your answers after submission.',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Submit',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            await saveProgress(true);
+        }
     };
+
+    const handleNavigation = (direction) => {
+        if (isTestCompleted) return;
+        
+        if (direction === 'next' && currentPage < test.questions.length - 1) {
+            setCurrentPage(prev => prev + 1);
+        } else if (direction === 'prev' && currentPage > 0) {
+            setCurrentPage(prev => prev - 1);
+        }
+        
+        // Auto-save progress when navigating
+        saveProgress(false, true);
+    };
+
+    // Prevent accidental page refresh/close
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!isTestCompleted) {
+                e.preventDefault();
+                e.returnValue = 'Are you sure you want to leave? Your test progress may be lost.';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isTestCompleted]);
 
     if (!test?.questions) return <div className="loading">Loading test questions...</div>;
 
     const currentQuestion = test.questions[currentPage];
     const [mins, secs] = pendingTime.split(':');
+    const isLastQuestion = currentPage === test.questions.length - 1;
 
     return (
         <div className="test-container">
             <div className="timer-box">
                 <span className="timer-label">Time Remaining:</span>
-                <div className="timer-value">{mins}:{secs}</div>
+                <div className={`timer-value ${parseInt(mins) < 5 ? 'timer-warning' : ''}`}>
+                    {mins}:{secs}
+                </div>
+            </div>
+
+            <div className="progress-bar">
+                <div 
+                    className="progress-fill" 
+                    style={{ width: `${((currentPage + 1) / test.questions.length) * 100}%` }}
+                ></div>
+                <span className="progress-text">
+                    Question {currentPage + 1} of {test.questions.length}
+                </span>
             </div>
 
             <form onSubmit={handleSubmit} className="test-form">
                 <div className="question-box">
-                    <h3 className="question-title">Q{currentPage + 1}. {currentQuestion.question.question}</h3>
+                    <h3 className="question-title">
+                        Q{currentPage + 1}. {currentQuestion.question.question}
+                    </h3>
 
                     <ul className="options-list">
                         {currentQuestion.options.map(option => (
                             <li key={option.id} className="option-item">
-                                <label className={`option-label ${answers[currentQuestion.id] === option.id ? 'selected' : ''}`}>
+                                <label className={`option-label ${answers[currentQuestion.question.id] === option.id ? 'selected' : ''}`}>
                                     <input
                                         type="radio"
-                                        name={`q_${currentQuestion.id}`}
+                                        name={`q_${currentQuestion.question.id}`}
                                         value={option.id}
-                                        checked={answers[currentQuestion.id] === option.id}
+                                        checked={answers[currentQuestion.question.id] === option.id}
                                         onChange={() => handleAnswerChange(currentQuestion.id, option.id)}
+                                        disabled={isTestCompleted}
                                     />
                                     <span>{option.option_name}</span>
                                 </label>
@@ -147,20 +278,55 @@ const TestForm = ({ test = {}, testId }) => {
 
                 <div className="nav-buttons">
                     {currentPage > 0 && (
-                        <button type="button" className="btn" onClick={() => setCurrentPage(p => p - 1)}>
+                        <button 
+                            type="button" 
+                            className="btn" 
+                            onClick={() => handleNavigation('prev')}
+                            disabled={isTestCompleted}
+                        >
                             Previous
                         </button>
                     )}
 
-                    {currentPage < test.questions.length - 1 ? (
-                        <button type="button" className="btn primary" onClick={() => setCurrentPage(p => p + 1)}>
-                            Next
-                        </button>
-                    ) : (
-                        <button type="submit" className="btn primary" disabled={submitting}>
-                            {submitting ? 'Submitting...' : 'Submit Test'}
-                        </button>
-                    )}
+                    <div className="right-buttons">
+                        {!isLastQuestion ? (
+                            <button 
+                                type="button" 
+                                className="btn primary" 
+                                onClick={() => handleNavigation('next')}
+                                disabled={isTestCompleted}
+                            >
+                                Next
+                            </button>
+                        ) : (
+                            <button 
+                                type="submit" 
+                                className="btn submit-btn" 
+                                disabled={submitting || isTestCompleted}
+                            >
+                                {submitting ? 'Submitting...' : 'Submit Test'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Answer summary */}
+                <div className="answer-summary">
+                    <p>Answered: {Object.keys(answers).length} / {test.questions.length} questions</p>
+                    <div className="question-indicators">
+                        {test.questions.map((testOption, index) => {
+                            const questionId = testOption.question?.id || testOption.question_id;
+                            return (
+                                <span 
+                                    key={index}
+                                    className={`indicator ${index === currentPage ? 'current' : ''} ${answers[questionId] ? 'answered' : 'unanswered'}`}
+                                    onClick={() => !isTestCompleted && setCurrentPage(index)}
+                                >
+                                    {index + 1}
+                                </span>
+                            );
+                        })}
+                    </div>
                 </div>
             </form>
         </div>
