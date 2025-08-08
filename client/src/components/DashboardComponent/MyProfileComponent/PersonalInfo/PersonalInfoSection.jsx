@@ -396,4 +396,3 @@ const PersonalInfoSection = ({ employeedata }) => {
 };
 
 export default PersonalInfoSection;
-
