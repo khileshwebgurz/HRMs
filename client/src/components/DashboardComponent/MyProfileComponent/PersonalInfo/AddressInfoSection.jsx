@@ -17,11 +17,9 @@ const AddressInfoSection = ({ employeedata }) => {
     }
   }, [employeedata]);
 
-
-
   const handleEditClick = () => setIsEditing(true);
 
- const handleCancelClick = () => {
+  const handleCancelClick = () => {
     setIsEditing(false);
     const candidateId = employeedata?.candidate?.candidate_id;
     const onCandidateId = candidateId;
@@ -38,7 +36,6 @@ const AddressInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
-  
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
@@ -60,12 +57,12 @@ const AddressInfoSection = ({ employeedata }) => {
         { withCredentials: true }
       );
 
-     
-    
       setIsEditing(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert(error.response?.data?.message || "An error occurred. Please try again.");
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
 
@@ -130,7 +127,7 @@ const AddressInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value ">
-                   {formData?.current_address || ""}
+                    {formData?.current_address || ""}
                   </div>
                 )}
               </div>

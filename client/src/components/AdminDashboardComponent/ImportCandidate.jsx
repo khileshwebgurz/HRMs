@@ -193,4 +193,3 @@ const ImportCandidate = () => {
 export default ImportCandidate;
 
 
-// http://localhost:8000/storage/app/private/public/uploads/csv-import/1754467991-Job%20search%20platform%20(1).xlsx

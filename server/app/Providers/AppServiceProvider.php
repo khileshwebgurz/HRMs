@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
         {
             if ($this->app->runningInConsole()) {
-                $this->app->register(\App\Providers\ConsoleServiceProvider::class);
+               $this->app->register(\App\Providers\ConsoleServiceProvider::class);
             }
         }
 

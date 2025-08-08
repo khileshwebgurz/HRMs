@@ -104,7 +104,7 @@ const TestForm = ({ test = {}, testId }) => {
         try {
             if (!silent) setSubmitting(true);
             
-            const response = await axios.post('http://localhost:8000/api/test/save', {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/test/save`, {
                 test_token: testId,
                 ans: answers,
                 pending_time: pendingTime,

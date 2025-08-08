@@ -198,7 +198,7 @@ Route::middleware(['auth:api'])->group(function () {
     //  Employee-only routes (for future)
     Route::middleware('role:2')->group(function () {
         // Add employee-specific routes if needed
-         Route::get('/import-candidates', [ImportController::class,'importCandidates']);
+       
 
 
     });

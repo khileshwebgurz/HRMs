@@ -137,8 +137,7 @@ const Navbar = () => {
                 <div className="clock-in-container">
                   <div id="clockInWrapper" className="no-gutters clockInUser">
                     <div className="clockInAction d-flex flex-column align-items-center">
-                      {/* {!hasClockedInData ? ( */}
-
+                     
                       {new Date()
                         .toLocaleDateString("en-US", {
                           weekday: "short",
@@ -185,7 +184,7 @@ const Navbar = () => {
                 </div>
               </li>
 
-              {(user.user_role == 1 ||
+              {/* {(user.user_role == 1 ||
                 user.user_role == 5 ||
                 user.user_role == 7) && (
                 <li className="nav-item">
@@ -219,7 +218,7 @@ const Navbar = () => {
                     ></div>
                   </div>
                 </li>
-              )}
+              )} */}
 
               <li className="nav-item dropdown">
                 <div className="dropdown-menu dropdown-menu-lg dropdown-menu-right">

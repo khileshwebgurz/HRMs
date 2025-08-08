@@ -148,7 +148,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.name || "N/A"}
+                    {formData?.name || "N/A"}
                   </div>
                 )}
               </div>
@@ -171,7 +171,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.job_title || "N/A"}
+                    {formData?.job_title || "N/A"}
                   </div>
                 )}
               </div>
@@ -195,7 +195,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.grade || "N/A"}
+                    {formData?.grade || "N/A"}
                   </div>
                 )}
               </div>
@@ -219,7 +219,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.blood_group || "N/A"}
+                    {formData?.blood_group || "N/A"}
                   </div>
                 )}
               </div>
@@ -245,8 +245,8 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.location
-                      ? employeedata.candidate.location === "1"
+                    {formData?.location
+                      ? formData.location === "1"
                         ? "Office"
                         : "Remote"
                       : "N/A"}
@@ -273,7 +273,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.dob || "N/A"}
+                    {formData?.dob || "N/A"}
                   </div>
                 )}
               </div>
@@ -296,7 +296,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.nationality || "N/A"}
+                    {formData?.nationality || "N/A"}
                   </div>
                 )}
               </div>
@@ -319,7 +319,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidate?.email || "N/A"}
+                    {formData?.email || "N/A"}
                   </div>
                 )}
               </div>
@@ -353,7 +353,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {departmentMap[employeedata?.candidate?.department] || "N/A"}
+                    {departmentMap[formData?.department] || "N/A"}
                   </div>
                 )}
               </div>
@@ -379,9 +379,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                   </div>
                 ) : (
                   <div className="wgz_value">
-                    {employeedata?.candidateData?.gender === "1"
+                    {formData?.gender === "1"
                       ? "Male"
-                      : employeedata?.candidateData?.gender === "2"
+                      : formData?.gender === "2"
                       ? "Female"
                       : "N/A"}
                   </div>

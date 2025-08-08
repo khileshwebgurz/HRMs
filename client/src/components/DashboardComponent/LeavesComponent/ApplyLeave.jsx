@@ -29,6 +29,7 @@ const ApplyLeave = ({
     setIsModalActive(true);
   };
 
+
   const handleCloseBtn = () => {
     setIsModalActive(false);
   };
@@ -36,7 +37,7 @@ const ApplyLeave = ({
   const handleLeaveSubmit = async (e) => {
     e.preventDefault();
 
-    if (isSubmitting) return; // prevent duplicate clicks
+    if (isSubmitting) return; 
     setIsSubmitting(true);
 
     try {
