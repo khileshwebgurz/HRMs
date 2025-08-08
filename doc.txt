@@ -67,6 +67,19 @@ SELECT setval('ob_candidates_id_seq', (SELECT MAX(id) FROM ob_candidates));
 UPDATE users
 SET email = regexp_replace(email, '@.*$', '@yopmail.com');
 
-===
+===----=====
 
+Steps 
+step-1. add  app/console/commands/condidateImport.php
+Using artisan cmd
+
+st2.
+Add  provider eg. app/Provider/consoleServiceProvider.php
+st3. pass in register function in app/Provider/appServiceProvider.php
+
+
+st4. run cmd
 php artisan schedule:run
+
+=============---======
+

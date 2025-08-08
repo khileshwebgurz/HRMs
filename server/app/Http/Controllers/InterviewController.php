@@ -1,0 +1,209 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Candidates;
+use App\Models\Employees;
+use App\Models\CandidateInterviews;
+use App\Models\CandidateInterviewRounds;
+use App\Models\ObCandidates;
+use App\Models\Roles;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Spatie\GoogleCalendar\Event;
+
+class InterviewController extends Controller
+{
+    public function allInterviews(Request $request)
+    {
+        $user = Auth::user();
+        $permission_role = Roles::find($user->user_role);
+
+        $query = CandidateInterviews::with('candidate');
+
+        if ($permission_role) {
+            switch ($permission_role->view) {
+                case '2':
+                    $query->where('created_by', $user->id);
+                    break;
+                case '3':
+                    $employees = Employees::where('manager_id', $user->id)->pluck('id');
+                    $query->whereIn('created_by', $employees);
+                    break;
+                case '4':
+                    $employees = Employees::where('manager_id', $user->id)->orWhere('id', $user->id)->pluck('id');
+                    $query->whereIn('created_by', $employees);
+                    break;
+                case '5':
+                default:
+                    // full access
+                    break;
+            }
+        }
+
+        $data = $query->latest()->get();
+
+        $result = $data->map(function ($item) {
+            $round = CandidateInterviewRounds::where('interview_id', $item->id)->latest()->first();
+
+            return [
+                'id' => $item->id,
+                'candidate_name' => $item->candidate->full_name ?? '',
+                'candidate_email' => $item->candidate->email ?? '',
+                'candidate_phone' => $item->candidate->mobile_number ?? '',
+                'interview_time' => $round ? date("d M,Y H:i A", strtotime($round->interview_time)) : null,
+                'interview_status' => CandidateInterviews::$interviewStatus[$item->interview_status] ?? '',
+            ];
+        });
+
+        return response()->json(['data' => $result]);
+    }
+
+    public function viewInterview($interview_id)
+    {
+        $interview = CandidateInterviews::with('rounds')->find($interview_id);
+
+        if (!$interview) {
+            return response()->json(['message' => 'Interview not found'], 404);
+        }
+
+        $employees = Employees::orderBy('name')->get();
+        $ob_candidates = ObCandidates::where('is_interviewer', '1')->get();
+
+        return response()->json([
+            'interview' => $interview,
+            'employees' => $employees,
+            'ob_candidates' => $ob_candidates
+        ]);
+    }
+
+    public function rescheduleInterview($id)
+    {
+        $round = CandidateInterviewRounds::find($id);
+
+        if (!$round) {
+            return response()->json(['message' => 'Round not found'], 404);
+        }
+
+        $round->hr_resecdule_status = '1';
+        $round->save();
+
+        $interview = CandidateInterviews::find($round->interview_id);
+
+        $status = match ($round->round) {
+            '1' => 3,
+            '2' => 4,
+            '3' => 5,
+            '4' => 6,
+            default => 3,
+        };
+
+        $interview->interview_status = $status;
+        $interview->save();
+
+        $candidate = Candidates::find($interview->candidate_id);
+        $candidate->status = $status;
+        $candidate->save();
+
+        $startDateTime = Carbon::parse($round->employee_suggested_date);
+        $endDateTime = $startDateTime->copy()->addHour();
+        $location = 'C-205, 4th Floor, SM Heights, Sector 74, Sahibzada Ajit Singh Nagar, Punjab 160071';
+
+        // Candidate Calendar Invite
+        $event1 = new Event();
+        $event1->name = 'Interview reschedule for Round ' . $round->round;
+        $event1->startDateTime = $startDateTime;
+        $event1->endDateTime = $endDateTime;
+        $event1->location = $location;
+        $event1->addAttendee(['email' => $interview->candidate->email]);
+        $event1->save(null, ['sendUpdates' => 'all', 'sendNotifications' => true]);
+
+        // Employee Calendar Invite
+        $event2 = new Event();
+        $event2->name = 'Interview reschedule';
+        $event2->startDateTime = $startDateTime;
+        $event2->endDateTime = $endDateTime;
+        $event2->location = $location;
+        $event2->addAttendee(['email' => $round->employee->email]);
+        $event2->save(null, ['sendUpdates' => 'all', 'sendNotifications' => true]);
+
+        return response()->json(['message' => 'Interview rescheduled and calendar invites sent.']);
+    }
+
+    public function scheduleInterview(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'round' => 'required',
+            'employee_id' => 'required|exists:employees,id',
+            'interview_id' => 'required|exists:candidate_interviews,id',
+            'interview_time' => 'required|date_format:Y-m-d H:i|after:' . now(),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $interview = CandidateInterviews::find($request->interview_id);
+
+        if ($request->hasFile('cv')) {
+            $file = $request->file('cv');
+            $filename = time() . '-' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/cv/'), $filename);
+            $interview->cv_file = $filename;
+            $interview->save();
+        }
+
+        $employee = Employees::find($request->employee_id);
+
+        $round = new CandidateInterviewRounds();
+        $round->round = $request->round;
+        $round->interview_time = $request->interview_time;
+        $round->interview_id = $interview->id;
+        $round->employee_id = $employee->id;
+        $round->employee_name = $employee->name;
+        $round->save();
+
+        $status = match ($round->round) {
+            '1' => 3,
+            '2' => 4,
+            '3' => 5,
+            '4' => 6,
+            default => 3,
+        };
+
+        $interview->interview_status = $status;
+        $interview->save();
+
+        $candidate = Candidates::find($interview->candidate_id);
+        $candidate->status = $status;
+        $candidate->save();
+
+        $startDateTime = Carbon::parse($request->interview_time);
+        $endDateTime = $startDateTime->copy()->addHour();
+        $location = 'C-205, 4th Floor, SM Heights, Sector 74, Sahibzada Ajit Singh Nagar, Punjab 160071';
+
+        // Candidate Calendar Invite
+        $event1 = new Event();
+        $event1->name = 'Interview schedule for Round ' . $round->round;
+        $event1->startDateTime = $startDateTime;
+        $event1->endDateTime = $endDateTime;
+        $event1->description = $request->message_candidate ?? '';
+        $event1->location = $location;
+        $event1->addAttendee(['email' => $candidate->email]);
+        $event1->save(null, ['sendUpdates' => 'all', 'sendNotifications' => true]);
+
+        // Employee Calendar Invite
+        $event2 = new Event();
+        $event2->name = 'Interview schedule';
+        $event2->startDateTime = $startDateTime;
+        $event2->endDateTime = $endDateTime;
+        $event2->location = $location;
+        $event2->addAttendee(['email' => $employee->email]);
+        $event2->save(null, ['sendUpdates' => 'all', 'sendNotifications' => true]);
+
+        return response()->json(['message' => 'Interview scheduled and calendar invites sent.']);
+    }
+}
