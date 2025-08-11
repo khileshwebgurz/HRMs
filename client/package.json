@@ -26,6 +26,7 @@
     "react-data-table-component": "^7.7.0",
     "react-datepicker": "^8.4.0",
     "react-daterangepicker": "^0.1.2",
+    "react-datetime": "^3.3.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0",
     "react-toastify": "^11.0.5",

@@ -22,6 +22,7 @@ use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\InterviewController;
 
 use App\Http\Controllers\Employee\OnboardProcessController;
 
@@ -161,6 +162,12 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::delete('/roles/{id}', [RoleController::class, 'deleteRole']);
             Route::get('/roles/{id}', [RoleController::class, 'getRoleById']);
             Route::put('/roles/{id}', [RoleController::class, 'updateRole']);
+
+
+            // Interviews
+            Route::get('/all-interviews',[InterviewController::class,'allInterviews']);
+            Route::get('/view-interview/{interview_id}',[InterviewController::class,'viewInterview']);
+            Route::post('/schedule-interview',[InterviewController::class, 'scheduleInterview']);
 
             // Permissions
 

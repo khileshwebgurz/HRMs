@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,12 +15,20 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event;
 
+
+use Illuminate\Support\Facades\Log;
+
 class InterviewController extends Controller
 {
     public function allInterviews(Request $request)
     {
         $user = Auth::user();
         $permission_role = Roles::find($user->user_role);
+
+
+
+        $limit = $request->input('limit', 10); // default 10
+        $search = $request->input('search', '');
 
         $query = CandidateInterviews::with('candidate');
 
@@ -44,9 +52,26 @@ class InterviewController extends Controller
             }
         }
 
-        $data = $query->latest()->get();
+        Log::info('My status >>>>', ['status code' => $request->status]);
+        
+        // Search filter
+        if (!empty($search)) {
+            $query->whereHas('candidate', function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile_number', 'like', "%{$search}%");
+            });
+        }
 
-        $result = $data->map(function ($item) {
+        if (!empty($request->status)) {
+            $query->where("interview_status", $request->status);
+        }
+        // Paginate
+        $paginated = $query->latest()->paginate($limit);
+
+
+
+        $result = $paginated->getCollection()->map(function ($item) {
             $round = CandidateInterviewRounds::where('interview_id', $item->id)->latest()->first();
 
             return [
@@ -59,7 +84,13 @@ class InterviewController extends Controller
             ];
         });
 
-        return response()->json(['data' => $result]);
+        return response()->json([
+            'data' => $result,
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'total' => $paginated->total(),
+            'per_page' => $paginated->perPage(),
+        ]);
     }
 
     public function viewInterview($interview_id)
@@ -70,11 +101,13 @@ class InterviewController extends Controller
             return response()->json(['message' => 'Interview not found'], 404);
         }
 
+        $candidate = Candidates::find($interview->candidate_id);
         $employees = Employees::orderBy('name')->get();
         $ob_candidates = ObCandidates::where('is_interviewer', '1')->get();
 
         return response()->json([
             'interview' => $interview,
+            'candidate' => $candidate,
             'employees' => $employees,
             'ob_candidates' => $ob_candidates
         ]);
@@ -135,6 +168,7 @@ class InterviewController extends Controller
 
     public function scheduleInterview(Request $request)
     {
+        Log::info('finlly inside the function.');
         $validator = Validator::make($request->all(), [
             'round' => 'required',
             'employee_id' => 'required|exists:employees,id',
@@ -147,6 +181,7 @@ class InterviewController extends Controller
         }
 
         $interview = CandidateInterviews::find($request->interview_id);
+        Log::info('my interview id is ',['interview id'=>$request->interview_id ]);
 
         if ($request->hasFile('cv')) {
             $file = $request->file('cv');

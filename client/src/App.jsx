@@ -53,6 +53,8 @@ import TicketDetails from "./components/DashboardComponent/TicketComponent/ItAdm
 import Test from "./components/TestComponent/Test";
 import ImportCandidate from "./components/AdminDashboardComponent/ImportCandidate";
 import TestComplete from "./components/TestComponent/TestComplete";
+import ScheduleInterview from "./components/ScheduleInterview/viewInterview";
+import ViewInterviewInfo from "./components/ScheduleInterview/ViewInterview/ViewInterviewInfo";
 function App() {
   return (
     <Router>
@@ -154,6 +156,10 @@ function App() {
            {/* email redirection urls for candidate creation*/}
            
            <Route path="/import-candidates" element={<ImportCandidate/>}/>
+
+           {/* Interview Schedule */}
+           <Route path="/public/interview/all-interviews" element={<ScheduleInterview/>}/>
+           <Route path="/public/interview/view/:id" element={<ViewInterviewInfo/>}/>
 
 
           <Route path="*" element={<NotFound />} />
