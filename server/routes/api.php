@@ -22,7 +22,9 @@ use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\InterviewController;
 
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\Employee\OnboardProcessController;
 
 
