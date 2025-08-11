@@ -55,6 +55,7 @@ import ImportCandidate from "./components/AdminDashboardComponent/ImportCandidat
 import TestComplete from "./components/TestComponent/TestComplete";
 import ScheduleInterview from "./components/ScheduleInterview/viewInterview";
 import ViewInterviewInfo from "./components/ScheduleInterview/ViewInterview/ViewInterviewInfo";
+import WarmLeads from "./components/JobApplicationComponent/WarmLeads";
 function App() {
   return (
     <Router>
@@ -161,7 +162,7 @@ function App() {
            <Route path="/public/interview/all-interviews" element={<ScheduleInterview/>}/>
            <Route path="/public/interview/view/:id" element={<ViewInterviewInfo/>}/>
 
-
+           <Route path="/career" element={<WarmLeads/>}/>
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

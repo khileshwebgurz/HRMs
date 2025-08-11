@@ -22,9 +22,9 @@ use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\ImportController;
-use App\Http\Controllers\InterviewController;
 
 use App\Http\Controllers\Employee\OnboardProcessController;
+
 
         //  Public (Unauthenticated) Routes
         Route::post('/login', [AuthController::class, 'login']);
@@ -209,6 +209,10 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::get('start-onboarding/{candidate_id}', [OnboardProcessController::class, 'startOnboarding'])->name('startOnboarding');
             Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
 
+
+            // job applications
+            Route::get('/career', [LeadController::class, 'warmLeads']);
+          
         });
 
         Route::middleware('auth:api')->prefix('tracker')->group(function () {

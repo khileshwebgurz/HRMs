@@ -196,7 +196,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/job-applications" className="nav-link">
+                    <Link to="/career" className="nav-link">
                       <i className="nav-icon fas fa-file-alt"></i>
                       Job Applications
                     </Link>
@@ -208,7 +208,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/schedule-interview" className="nav-link">
+                    <Link to="/public/interview/all-interviews" className="nav-link">
                       <i className="nav-icon fas fa-calendar-alt"></i>
                       Schedule Interview
                     </Link>
