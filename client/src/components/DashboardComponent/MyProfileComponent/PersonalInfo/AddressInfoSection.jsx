@@ -4,6 +4,7 @@ import axios from "axios";
 const AddressInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (employeedata?.candidate) {
@@ -17,6 +18,41 @@ const AddressInfoSection = ({ employeedata }) => {
     }
   }, [employeedata]);
 
+  // ✅ Frontend validation matching Laravel rules
+  const validatePersonalInfo = (data) => {
+    const errors = {};
+
+    // current_address: required, string, max 1000
+    if (!data.current_address?.trim()) {
+      errors.current_address = "Current address is required.";
+    } else if (data.current_address.length > 1000) {
+      errors.current_address = "Current address cannot exceed 1000 characters.";
+    }
+
+    // permanent_address: required, string, max 1000
+    if (!data.permanent_address?.trim()) {
+      errors.permanent_address = "Permanent address is required.";
+    } else if (data.permanent_address.length > 1000) {
+      errors.permanent_address = "Permanent address cannot exceed 1000 characters.";
+    }
+
+    // current_phone: required, digits:10
+    if (!data.current_phone) {
+      errors.current_phone = "Current phone number is required.";
+    } else if (!/^\d{10}$/.test(data.current_phone)) {
+      errors.current_phone = "Current phone number must be exactly 10 digits.";
+    }
+
+    // permanent_phone: required, digits:10
+    if (!data.permanent_phone) {
+      errors.permanent_phone = "Permanent phone number is required.";
+    } else if (!/^\d{10}$/.test(data.permanent_phone)) {
+      errors.permanent_phone = "Permanent phone number must be exactly 10 digits.";
+    }
+
+    return errors;
+  };
+
   const handleEditClick = () => setIsEditing(true);
 
   const handleCancelClick = () => {
@@ -28,6 +64,7 @@ const AddressInfoSection = ({ employeedata }) => {
       on_candidate_id: onCandidateId,
       updated_by: "hr-emp",
     });
+    setErrors({});
   };
 
   const handleInputChange = (e) => {
@@ -36,10 +73,19 @@ const AddressInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
+    // ✅ Run validation before sending request
+    const validationErrors = validatePersonalInfo(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
+
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
     }
+
     try {
       const filteredFormData = {
         section: "address",
@@ -124,6 +170,9 @@ const AddressInfoSection = ({ employeedata }) => {
                       value={formData?.current_address || ""}
                       onChange={handleInputChange}
                     ></textarea>
+                    {errors.current_address && (
+                      <small className="text-danger">{errors.current_address}</small>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value ">
@@ -146,6 +195,9 @@ const AddressInfoSection = ({ employeedata }) => {
                       value={formData?.permanent_address || ""}
                       onChange={handleInputChange}
                     ></textarea>
+                    {errors.permanent_address && (
+                      <small className="text-danger">{errors.permanent_address}</small>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value ">
@@ -173,6 +225,9 @@ const AddressInfoSection = ({ employeedata }) => {
                       value={formData?.current_phone || ""}
                       onChange={handleInputChange}
                     />
+                    {errors.current_phone && (
+                      <small className="text-danger">{errors.current_phone}</small>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value mt-2">
@@ -199,6 +254,9 @@ const AddressInfoSection = ({ employeedata }) => {
                       id="permanent_phone"
                       name="permanent_phone"
                     />
+                    {errors.permanent_phone && (
+                      <small className="text-danger">{errors.permanent_phone}</small>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value  mt-2">

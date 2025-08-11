@@ -4,6 +4,7 @@ import axios from "axios";
 const ContactInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+ const [errors, setErrors] = useState({});
 
  useEffect(() => {
     if (employeedata?.candidate) {
@@ -16,6 +17,35 @@ const ContactInfoSection = ({ employeedata }) => {
       });
     }
   }, [employeedata]);
+
+    const validateContactInfo = (data) => {
+    const errors = {};
+
+    // Helper to validate string fields (nullable)
+    const validateString = (field, label) => {
+      if (data[field] && data[field].length > 255) {
+        errors[field] = `${label} cannot exceed 255 characters.`;
+      }
+    };
+
+    // Helper to validate digits fields (nullable)
+    const validateDigits = (field, label) => {
+      if (data[field] && !/^\d{10}$/.test(data[field])) {
+        errors[field] = `${label} must be exactly 10 digits.`;
+      }
+    };
+
+    validateString("emergency_name", "Emergency Name");
+    validateString("emergency_relation", "Emergency Relation");
+    validateDigits("emergency_contact", "Emergency Contact");
+
+    validateString("emergency_name_2", "Emergency Name 2");
+    validateString("emergency_relation_2", "Emergency Relation 2");
+    validateDigits("emergency_contact_2", "Emergency Contact 2");
+
+    return errors;
+  };
+
 
 
   const handleEditClick = () => {
@@ -31,6 +61,7 @@ const ContactInfoSection = ({ employeedata }) => {
       on_candidate_id: onCandidateId,
       updated_by: "hr-emp",
     });
+    setErrors({});
   };
 
   const handleInputChange = (e) => {
@@ -39,7 +70,14 @@ const ContactInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
-    console.log("my form data is >>", formData);
+
+    const validationErrors = validateContactInfo(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
+    
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
@@ -78,17 +116,14 @@ const ContactInfoSection = ({ employeedata }) => {
 
 
   return (
-    <>
+  <>
       <div className="card wgz-contactinfo">
         <div className="card-header">
           <h3 className="card-title form-header">Contact info</h3>
 
           {!isEditing ? (
             <div className="card-tools wgz_value">
-              <button
-                className="btn btn-tool wgz-edit-form"
-                onClick={handleEditClick}
-              >
+              <button className="btn btn-tool wgz-edit-form" onClick={handleEditClick}>
                 <i className="fas fa-edit"></i>
               </button>
             </div>
@@ -114,21 +149,22 @@ const ContactInfoSection = ({ employeedata }) => {
             <div className="col-sm-6 col-md-4">
               <h5>In case of emergency contacts</h5>
               <div className="form-group">
-                <label htmlFor="emergency_name" className="col-form-label">
-                  Name
-                </label>
+                <label htmlFor="emergency_name" className="col-form-label">Name</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_name"
-                    value={formData.emergency_name || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_name"
+                      value={formData.emergency_name || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_name && (
+                      <small className="text-danger">{errors.emergency_name}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_name || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_name || "—"}</div>
                 )}
               </div>
             </div>
@@ -136,21 +172,22 @@ const ContactInfoSection = ({ employeedata }) => {
             <div className="col-sm-6 col-md-4">
               <h5>&nbsp;</h5>
               <div className="form-group">
-                <label htmlFor="emergency_relation" className="col-form-label">
-                  Relation
-                </label>
+                <label htmlFor="emergency_relation" className="col-form-label">Relation</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_relation"
-                    value={formData.emergency_relation || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_relation"
+                      value={formData.emergency_relation || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_relation && (
+                      <small className="text-danger">{errors.emergency_relation}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_relation || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_relation || "—"}</div>
                 )}
               </div>
             </div>
@@ -158,22 +195,23 @@ const ContactInfoSection = ({ employeedata }) => {
             <div className="col-sm-6 col-md-4">
               <h5>&nbsp;</h5>
               <div className="form-group">
-                <label htmlFor="emergency_contact" className="col-form-label">
-                  Contact No.
-                </label>
+                <label htmlFor="emergency_contact" className="col-form-label">Contact No.</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_contact"
-                    maxLength="10"
-                    value={formData.emergency_contact || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_contact"
+                      maxLength="10"
+                      value={formData.emergency_contact || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_contact && (
+                      <small className="text-danger">{errors.emergency_contact}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_contact || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_contact || "—"}</div>
                 )}
               </div>
             </div>
@@ -183,67 +221,67 @@ const ContactInfoSection = ({ employeedata }) => {
             {/* Second Emergency Contact */}
             <div className="col-sm-6 col-md-4">
               <div className="form-group">
-                <label htmlFor="emergency_name_2" className="col-form-label">
-                  Name
-                </label>
+                <label htmlFor="emergency_name_2" className="col-form-label">Name</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_name_2"
-                    value={formData.emergency_name_2 || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_name_2"
+                      value={formData.emergency_name_2 || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_name_2 && (
+                      <small className="text-danger">{errors.emergency_name_2}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_name_2 || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_name_2 || "—"}</div>
                 )}
               </div>
             </div>
 
             <div className="col-sm-6 col-md-4">
               <div className="form-group">
-                <label
-                  htmlFor="emergency_relation_2"
-                  className="col-form-label"
-                >
-                  Relation
-                </label>
+                <label htmlFor="emergency_relation_2" className="col-form-label">Relation</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_relation_2"
-                    value={formData.emergency_relation_2 || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_relation_2"
+                      value={formData.emergency_relation_2 || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_relation_2 && (
+                      <small className="text-danger">{errors.emergency_relation_2}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_relation_2 || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_relation_2 || "—"}</div>
                 )}
               </div>
             </div>
 
             <div className="col-sm-6 col-md-4">
               <div className="form-group">
-                <label htmlFor="emergency_contact_2" className="col-form-label">
-                  Contact No.
-                </label>
+                <label htmlFor="emergency_contact_2" className="col-form-label">Contact No.</label>
                 {isEditing ? (
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="emergency_contact_2"
-                    maxLength="10"
-                    value={formData.emergency_contact_2 || ""}
-                    onChange={handleInputChange}
-                  />
+                  <>
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="emergency_contact_2"
+                      maxLength="10"
+                      value={formData.emergency_contact_2 || ""}
+                      onChange={handleInputChange}
+                    />
+                    {errors.emergency_contact_2 && (
+                      <small className="text-danger">{errors.emergency_contact_2}</small>
+                    )}
+                  </>
                 ) : (
-                  <div className="wgz_value">
-                    {formData.emergency_contact_2 || "—"}
-                  </div>
+                  <div className="wgz_value">{formData.emergency_contact_2 || "—"}</div>
                 )}
               </div>
             </div>
@@ -255,3 +293,5 @@ const ContactInfoSection = ({ employeedata }) => {
 };
 
 export default ContactInfoSection;
+// 283-111 =  172
+// 290 - 120 = 170

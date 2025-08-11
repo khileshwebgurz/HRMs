@@ -4,7 +4,7 @@ import axios from "axios";
 const PersonalInfoSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
-
+  const [errors, setErrors] = useState({});
   const departmentMap = {
     1: "Digital Marketing",
     2: "Business Development",
@@ -18,6 +18,97 @@ const PersonalInfoSection = ({ employeedata }) => {
     10: "Content Writing",
   };
 
+  // Error Validation
+
+  const validatePersonalInfo = (data) => {
+    const errors = {};
+
+    // Name: required, max:25, only letters & spaces
+    if (!data.name?.trim()) {
+      errors.name = "Name is required.";
+    } else if (data.name.length > 25) {
+      errors.name = "Name cannot exceed 25 characters.";
+    } else if (!/^[a-zA-Z\s]+$/.test(data.name)) {
+      errors.name = "Name can only contain letters and spaces.";
+    }
+
+    // Job Title: required, string, max:255
+    if (!data.job_title?.trim()) {
+      errors.job_title = "Job Title is required.";
+    } else if (data.job_title.length > 255) {
+      errors.job_title = "Job Title cannot exceed 255 characters.";
+    }
+
+    // Grade: optional, max:50
+    if (data.grade && data.grade.length > 50) {
+      errors.grade = "Grade cannot exceed 50 characters.";
+    }
+
+    // Blood Group: optional, max:10
+    if (data.blood_group && data.blood_group.length > 10) {
+      errors.blood_group = "Blood Group cannot exceed 10 characters.";
+    }
+
+    // Location: required
+    if (!data.location) {
+      errors.location = "Location is required.";
+    }
+
+    // DOB: required, valid date
+    if (!data.dob) {
+      errors.dob = "Date of Birth is required.";
+    }
+
+    // Nationality: optional, max:100
+    if (data.nationality && data.nationality.length > 100) {
+      errors.nationality = "Nationality cannot exceed 100 characters.";
+    }
+
+    // Email: required, regex match
+    if (!data.email) {
+      errors.email = "Email is required.";
+    } else if (!/(.+)@(.+)\.(.+)/i.test(data.email)) {
+      errors.email = "Invalid email format.";
+    }
+
+    // Department: required
+    if (!data.department) {
+      errors.department = "Department is required.";
+    }
+
+    // Gender: required, in 1 or 2
+    if (!data.gender) {
+      errors.gender = "Gender is required.";
+    } else if (!["1", "2"].includes(data.gender.toString())) {
+      errors.gender = "Invalid gender selection.";
+    }
+
+    // Social URLs: optional, must match regex if present
+    if (
+      data.facebook &&
+      !/^https?:\/\/(?:www\.)facebook\.com\/.+/i.test(data.facebook)
+    ) {
+      errors.facebook = "Invalid Facebook URL.";
+    }
+    if (
+      data.linkedin &&
+      !/^https?:\/\/(?:www\.)linkedin\.com\/.+/i.test(data.linkedin)
+    ) {
+      errors.linkedin = "Invalid LinkedIn URL.";
+    }
+    if (data.twitter && !/^https?:\/\/twitter\.com\/.+/i.test(data.twitter)) {
+      errors.twitter = "Invalid Twitter URL.";
+    }
+    if (
+      data.instagram &&
+      !/^https?:\/\/(?:www\.)instagram\.com\/.+/i.test(data.instagram)
+    ) {
+      errors.instagram = "Invalid Instagram URL.";
+    }
+
+    return errors;
+  };
+
   useEffect(() => {
     if (employeedata?.candidate) {
       // Construct on_candidate_id from candidate_id
@@ -27,7 +118,7 @@ const PersonalInfoSection = ({ employeedata }) => {
         ...employeedata.candidate,
         gender: employeedata?.candidateData?.gender || "",
         on_candidate_id: onCandidateId,
-        updated_by: "hr-emp", 
+        updated_by: "hr-emp",
       });
     }
   }, [employeedata]);
@@ -36,6 +127,7 @@ const PersonalInfoSection = ({ employeedata }) => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
+    setErrors({});
     const candidateId = employeedata?.candidate?.candidate_id;
     const onCandidateId = candidateId;
     setFormData({
@@ -52,11 +144,16 @@ const PersonalInfoSection = ({ employeedata }) => {
   };
 
   const handleSubmit = async () => {
-   
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
     }
+    const validationErrors = validatePersonalInfo(formData);
+    setErrors(validationErrors); // ✅ Save errors to state
+    if (Object.keys(validationErrors).length > 0) {
+      return; // Stop submit if errors
+    }
+
     try {
       const filteredFormData = {
         section: "personal",
@@ -80,12 +177,10 @@ const PersonalInfoSection = ({ employeedata }) => {
         { withCredentials: true }
       );
 
-      const data = await response.data;
-      console.log("Success:", data);
+      console.log("Success:", response.data);
       setIsEditing(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert(error.response?.data?.message || "An error occurred. Please try again.");
     }
   };
 
@@ -145,11 +240,10 @@ const PersonalInfoSection = ({ employeedata }) => {
                       maxLength="25"
                       onChange={handleInputChange}
                     />
+                    {errors.name && <p className="error">{errors.name}</p>}
                   </div>
                 ) : (
-                  <div className="wgz_value">
-                    {formData?.name || "N/A"}
-                  </div>
+                  <div className="wgz_value">{formData?.name || "N/A"}</div>
                 )}
               </div>
             </div>
@@ -168,6 +262,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="job_title"
                       name="job_title"
                     />
+                    {errors.job_title && (
+                      <p className="error">{errors.job_title}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -192,11 +289,10 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="grade"
                       name="grade"
                     />
+                    {errors.grade && <p className="error">{errors.grade}</p>}
                   </div>
                 ) : (
-                  <div className="wgz_value">
-                    {formData?.grade || "N/A"}
-                  </div>
+                  <div className="wgz_value">{formData?.grade || "N/A"}</div>
                 )}
               </div>
             </div>
@@ -216,6 +312,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="blood_group"
                       name="blood_group"
                     />
+                    {errors.blood_group && (
+                      <p className="error">{errors.blood_group}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -230,10 +329,13 @@ const PersonalInfoSection = ({ employeedata }) => {
                 <label htmlFor="location" className="col-form-label">
                   Location<span className="req">*</span>
                 </label>
+
                 {isEditing ? (
                   <div className="wgz_field">
                     <select
-                      className="form-control"
+                      className={`form-control ${
+                        errors?.location ? "is-invalid" : ""
+                      }`}
                       name="location"
                       value={formData?.location || ""}
                       onChange={handleInputChange}
@@ -242,6 +344,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                       <option value="1">Office</option>
                       <option value="2">Remote</option>
                     </select>
+                    {errors?.location && (
+                      <div className="invalid-feedback">{errors.location}</div>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -270,11 +375,10 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="dob"
                       name="dob"
                     />
+                    {errors.dob && <p className="error">{errors.dob}</p>}
                   </div>
                 ) : (
-                  <div className="wgz_value">
-                    {formData?.dob || "N/A"}
-                  </div>
+                  <div className="wgz_value">{formData?.dob || "N/A"}</div>
                 )}
               </div>
             </div>
@@ -293,6 +397,9 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="nationality"
                       name="nationality"
                     />
+                    {errors.nationality && (
+                      <p className="error">{errors.nationality}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -316,11 +423,10 @@ const PersonalInfoSection = ({ employeedata }) => {
                       id="email"
                       name="email"
                     />
+                    {errors.email && <p className="error">{errors.email}</p>}
                   </div>
                 ) : (
-                  <div className="wgz_value">
-                    {formData?.email || "N/A"}
-                  </div>
+                  <div className="wgz_value">{formData?.email || "N/A"}</div>
                 )}
               </div>
             </div>
@@ -330,10 +436,13 @@ const PersonalInfoSection = ({ employeedata }) => {
                 <label htmlFor="department" className="col-form-label">
                   Department<span className="req">*</span>
                 </label>
+
                 {isEditing ? (
                   <div className="wgz_field">
                     <select
-                      className="form-control"
+                      className={`form-control ${
+                        errors?.department ? "is-invalid" : ""
+                      }`}
                       value={formData?.department || ""}
                       onChange={handleInputChange}
                       name="department"
@@ -350,6 +459,12 @@ const PersonalInfoSection = ({ employeedata }) => {
                       <option value="9">Other</option>
                       <option value="10">Content Writing</option>
                     </select>
+
+                    {errors?.department && (
+                      <div className="invalid-feedback">
+                        {errors.department}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -376,6 +491,7 @@ const PersonalInfoSection = ({ employeedata }) => {
                       <option value="1">Male</option>
                       <option value="2">Female</option>
                     </select>
+                    {errors.gender && <p className="error">{errors.gender}</p>}
                   </div>
                 ) : (
                   <div className="wgz_value">

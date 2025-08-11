@@ -9,7 +9,7 @@ const Attendance = () => {
   const [activeTab, setActiveTab] = useState("logs");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10); // or let user change it
+  const perPage = 10; 
   const [totalPages, setTotalPages] = useState(1);
 
   const getAttendance = async (page = 1, startDate = "", endDate = "") => {

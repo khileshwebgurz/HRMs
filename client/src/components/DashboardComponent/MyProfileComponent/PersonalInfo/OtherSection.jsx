@@ -4,6 +4,7 @@ import axios from "axios";
 const OtherSection = ({ employeedata }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (employeedata?.candidate) {
@@ -16,6 +17,80 @@ const OtherSection = ({ employeedata }) => {
       });
     }
   }, [employeedata]);
+
+  const validateContactInfo = (data) => {
+    const errors = {};
+
+    // Marital Status: nullable | in:1,2
+    if (data.marital_status && !["1", "2"].includes(data.marital_status)) {
+      errors.marital_status = "Marital status must be Single or Married.";
+    }
+
+    // Spouse Name Profession: nullable | string | max:255
+    if (
+      data.spouse_name_profession &&
+      data.spouse_name_profession.length > 255
+    ) {
+      errors.spouse_name_profession =
+        "Spouse name/profession must be at most 255 characters.";
+    }
+
+    // No of children: nullable | integer | min:0
+    if (
+      data.no_of_children &&
+      (!/^\d+$/.test(data.no_of_children) || parseInt(data.no_of_children) < 0)
+    ) {
+      errors.no_of_children = "Number of children must be a positive integer.";
+    }
+
+    // Father name: nullable | string | max:255
+    if (data.father_name && data.father_name.length > 255) {
+      errors.father_name = "Father's name must be at most 255 characters.";
+    }
+
+    // Father profession: nullable | string | max:255
+    if (data.father_profession && data.father_profession.length > 255) {
+      errors.father_profession =
+        "Father's profession must be at most 255 characters.";
+    }
+
+    // Father age: nullable | integer | min:0
+    if (
+      data.father_age &&
+      (!/^\d+$/.test(data.father_age) || parseInt(data.father_age) < 0)
+    ) {
+      errors.father_age = "Father's age must be a positive integer.";
+    }
+
+    // Mother name: nullable | string | max:255
+    if (data.mother_name && data.mother_name.length > 255) {
+      errors.mother_name = "Mother's name must be at most 255 characters.";
+    }
+
+    // Mother profession: nullable | string | max:255
+    if (data.mother_profession && data.mother_profession.length > 255) {
+      errors.mother_profession =
+        "Mother's profession must be at most 255 characters.";
+    }
+
+    // Mother age: nullable | integer | min:0
+    if (
+      data.mother_age &&
+      (!/^\d+$/.test(data.mother_age) || parseInt(data.mother_age) < 0)
+    ) {
+      errors.mother_age = "Mother's age must be a positive integer.";
+    }
+
+    // Date of marriage anniversary: nullable | date
+    if (
+      data.date_of_marriage_anniversary &&
+      isNaN(Date.parse(data.date_of_marriage_anniversary))
+    ) {
+      errors.date_of_marriage_anniversary = "Invalid date format.";
+    }
+
+    return errors;
+  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -32,7 +107,6 @@ const OtherSection = ({ employeedata }) => {
     });
   };
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -42,8 +116,13 @@ const OtherSection = ({ employeedata }) => {
     setFormData((prev) => ({ ...prev, marital_status: e.target.value }));
   };
 
- const handleSubmit = async () => {
-    console.log("my form data is >>", formData);
+  const handleSubmit = async () => {
+    const validationErrors = validateContactInfo(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     if (!formData.on_candidate_id) {
       alert("Candidate ID is missing. Please contact support.");
       return;
@@ -79,7 +158,9 @@ const OtherSection = ({ employeedata }) => {
       }
     } catch (error) {
       console.error("Error submitting other info:", error);
-      alert(error.response?.data?.message || "An error occurred. Please try again.");
+      alert(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
   return (
@@ -141,6 +222,11 @@ const OtherSection = ({ employeedata }) => {
                       />
                       <label className="form-check-label">Married</label>
                     </div>
+                    {errors.marital_status && (
+                      <div className="text-danger small">
+                        {errors.marital_status}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="wgz_value">
@@ -181,6 +267,9 @@ const OtherSection = ({ employeedata }) => {
                     />
                   ) : (
                     <div className="wgz_value">{formData[key] || "—"}</div>
+                  )}
+                  {isEditing && errors[key] && (
+                    <div className="text-danger small">{errors[key]}</div>
                   )}
                 </div>
               </div>

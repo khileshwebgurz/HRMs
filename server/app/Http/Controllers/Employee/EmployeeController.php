@@ -10,21 +10,44 @@ use App\Models\Settings;
 use App\Models\User;
 use App\Models\ObCandidates;
 use App\Models\Candidates;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 use App\Models\CandidateQuestions;
 
 
 class EmployeeController extends Controller
 {
-    public function directory()
+    public function directory(Request $request)
     {
-        // You can filter by role if needed, or return all
-        $employees = Employees::all();
+        $sortField = $request->get('sort_field', 'id');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $perPage = $request->get('per_page', 10);
+        $search = $request->get('search', '');
 
-        return response()->json($employees);
+        $query = Employees::query();
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    //   ->orWhere('designation', 'like', "%$search%")
+                    //   ->orWhere('department', 'like', "%$search%")
+                    //   ->orWhere('location', 'like', "%$search%") till now location  column is not present
+                    ->orWhere('manager_id', 'like', "%$search%")
+                    ->orWhere('id', 'like', "%$search%");
+            });
+        }
+
+        $employees = $query->orderBy($sortField, $sortOrder)
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $employees->items(),
+            'total' => $employees->total()
+        ]);
     }
 
-    
+
+
     public function CompanyProfileView(Request $request)
     {
         $company = CompanyData::find(1);
@@ -76,6 +99,4 @@ class EmployeeController extends Controller
             'candidate_id' => $candidate_id,
         ]);
     }
-
-
 }

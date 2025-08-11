@@ -7,6 +7,15 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
   const handleFilter = () => {
     getAttendance(1, fromDate, toDate);
   };
+
+  const clearFilter = () => {
+    setFromDate("")
+    setToDate("")
+    getAttendance(1);
+    
+  };
+
+  console.log('the data is ',data)
   return (
     <>
       {/* inside MOnthly logs */}
@@ -59,6 +68,16 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
                 >
                   Filter
                 </button>
+              </div>
+
+              <div className="col-sm-2">
+                 <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary ml-3"
+                      onClick={clearFilter}
+                    >
+                      Clear Filter
+                    </button>
               </div>
             </div>
           </div>

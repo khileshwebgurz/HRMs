@@ -168,7 +168,7 @@ const NewTicket = () => {
                     id="submit"
                     value="Submit"
                   />
-                  <button
+                  {/* <button
                     className="btn primary-site-main-btn text-uppercase border-radius-0"
                     id="loader"
                     type="button"
@@ -180,7 +180,7 @@ const NewTicket = () => {
                       aria-hidden="true"
                     ></span>
                     Loading...
-                  </button>
+                  </button> */}
                 </form>
               </div>
             </div>

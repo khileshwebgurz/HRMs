@@ -193,7 +193,8 @@ class AccountController extends Controller
         $shift_start = $shiftTime[0];
         $shift_end = $shiftTime[1];
 
-        $data = EmployeeAttendance::where('employee_id', $user_id);
+        $data = EmployeeAttendance::where('employee_id', $user_id)
+            ->orderBy('clock_date', 'desc');
 
 
         if (!empty($request->startdate) && !empty($request->enddate)) {
@@ -736,7 +737,7 @@ class AccountController extends Controller
         }
     }
 
-     public function getAttendanceByDate(Request $request)
+    public function getAttendanceByDate(Request $request)
     {
         // $res = getWorkingHoursByDate('2021-01-15', 1);  commented by me as it is not being used
         $loginuser = Auth::user();
@@ -754,15 +755,15 @@ class AccountController extends Controller
         $atHtml = '';
         if ($todayAttendance) {
             $sno = 1;
-            foreach($todayAttendance as $attendance) {
+            foreach ($todayAttendance as $attendance) {
                 $type = ($attendance->type == 1) ? "In" : "Out";
                 $ip_address = ($attendance->ip_address) ? $attendance->ip_address : "-";
                 $address = ($attendance->address) ? $attendance->address : "-";
                 $clock_time = date("H:i A", strtotime(date('Y-m-d') . ' ' . $attendance->clock_time));
 
                 $atHtml .= '<tr><td>' . $sno . '</td><td>' . $clock_time . '</td><td>' . $type . '</td><td>' . $ip_address . '</td><td>' . $address . '</td></tr>';
-                $sno ++;
-         }
+                $sno++;
+            }
         }
 
         return response()->json([
