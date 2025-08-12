@@ -214,7 +214,19 @@ use App\Http\Controllers\Employee\OnboardProcessController;
 
             // job applications
             Route::get('/career', [LeadController::class, 'warmLeads']);
-          
+            Route::get('/export-career', [LeadController::class, 'exportCareer'])->name('exportcareer');
+
+            Route::get('/latecommers', [AttendanceController::class, 'latecommers'])->name('latecommers');
+           // Route::get('/export-warm-leads', [LeadController::class, 'exportCareer'])->name('exportcareer');
+            Route::post('/view-forms', [LeadController::class, 'viewForm'])->name('form-view');
+            Route::post('/followup', [LeadController::class, 'followUp'])->name('followup');
+            Route::post('/bulk-email', [LeadController::class, 'bulkSendEmail'])->name('bulkSendEmail');
+            Route::post('/bulk-send-email-submit', [LeadController::class, 'bulkSendEmailSubmit'])->name('bulkSendEmailSubmit');
+            Route::post('/reject', [LeadController::class, 'rejectPost'])->name('reject');
+            Route::post('/shortlist', [LeadController::class, 'shortlistedPost'])->name('shortlisted');
+            Route::post('/notinterested', [LeadController::class, 'notinterestedPost'])->name('notinterested');
+            Route::post('/follow-up-post', [LeadController::class, 'FollowUpPost'])->name('followUpPost');
+
         });
 
         Route::middleware('auth:api')->prefix('tracker')->group(function () {
