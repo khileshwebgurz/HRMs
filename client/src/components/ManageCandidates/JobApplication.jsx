@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const WarmLeads = () => {
+const JobApplication = () => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -315,4 +315,4 @@ const WarmLeads = () => {
   );
 };
 
-export default WarmLeads;
+export default JobApplication;

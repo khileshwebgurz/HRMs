@@ -1,73 +1,64 @@
-import React from "react";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
-import { Link } from "react-router-dom";
-const viewInterview = () => {
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const ReviewAptitudeTest = () => {
   const user = useUser();
-  const [data, setData] = useState([]);
-  const [itemsPerPage, setItemPerPage] = useState(10);
+  const navigate = useNavigate();
+  const [testData, setTestData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemPerPage] = useState(10);
 
-  const statusMap = {
-    round1: "1",
-    round2: "2",
-    round3: "3",
-    final: "4",
-    offered: "5",
-    rejected: "6",
-  };
-
-
-  const fetchData = async (
+  const fetchTest = async (
     page = 1,
     term = searchTerm,
     limit = itemsPerPage
   ) => {
     const res = await axios.get(
-      `http://localhost:8000/api/all-interviews?page=${page}&limit=${limit}&search=${encodeURIComponent(
+      `http://localhost:8000/api/all-candidate-test?page=${page}&limit=${limit}&search=${encodeURIComponent(
         term
       )}`,
-      {
-        params: {
-          status: statusMap[statusFilter] || "",
-        },
-        withCredentials: true,
-      }
+      { withCredentials: true }
     );
-    setData(res.data.data);
+    setTestData(res.data.data);
     setTotalPages(res.data.last_page);
   };
   useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage, statusFilter, itemsPerPage]);
+    fetchTest(currentPage);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      fetchData(1, searchTerm);
+      fetchTest(1, searchTerm);
     }, 500);
 
     return () => clearTimeout(delay);
   }, [searchTerm]);
+
+  const status = {
+    1: "Active",
+    2: "Link Expired",
+    3: "Completed",
+  };
 
   const handleRecordsPerPage = (e) => {
     setItemPerPage(parseInt(e.target.value));
     setCurrentPage(1);
   };
 
-  // console.log('the data is >>',data)
+  console.log("khgsdsd", testData);
   return (
     <>
       {user.user_role !== "1" ? (
         <>
-          <section className="content-header all-candidate-page">
+          <section className="content-header">
             <div className="container-fluid">
               <div className="row mb-2">
-                <div className="col-sm-4">
-                  <h1>All Interviews</h1>
+                <div className="col-sm-6">
+                  <h1>All Candidates</h1>
                 </div>
               </div>
             </div>
@@ -88,7 +79,7 @@ const viewInterview = () => {
             <div className="container-fluid">
               <div className="row mb-2">
                 <div className="col-sm-6">
-                  <h1>All Interviews</h1>
+                  <h1>All Candidates</h1>
                   <div>
                     Show{" "}
                     <select
@@ -113,61 +104,46 @@ const viewInterview = () => {
                     className="form-control my-3"
                   />
                 </div>
-                <select
-                  id="changestatus"
-                  className="form-control ml-2"
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setCurrentPage(1);
-                    setStatusFilter(e.target.value);
-                  }}
-                >
-                  <option value="">All Status</option>
-                  <option value="round1">Round 1</option>
-                  <option value="round2">Round 2</option>
-                  <option value="round3">Round 3</option>
-                  <option value="final">Final</option>
-                  <option value="offered">Offered</option>
-                  <option value="rejected">Rejected</option>
-                </select>
                 <div className="col-sm-6 text-right"></div>
               </div>
             </div>
           </section>
-
-          <div className="card interview-card">
+          <div className="card test-table">
             <div className="card-body">
               <div className="table-responsive">
                 <table
                   id="example1"
-                  className="table table-striped wg_allusers"
+                  className="table table-bordered table-striped wg_allusers"
                 >
                   <thead>
                     <tr>
                       <th>#</th>
                       <th>Candidate Name</th>
-                      <th>Candidate Email</th>
-                      <th>Candidate Phone</th>
-                      <th>Date/Time</th>
-                      <th>Interview Status</th>
+                      <th>Token</th>
+                      <th>Link</th>
+                      <th>OTP</th>
+                      <th>Result</th>
+                      <th>Status</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.length > 0 ? (
-                      data.map((result, index) => (
+                    {testData?.length > 0 ? (
+                      testData.map((result, index) => (
                         <tr key={result.id}>
                           <td>{index + 1}</td>
-                          <td>{result.candidate_name}</td>
-                          <td>{result.candidate_email}</td>
-                          <td>{result.candidate_phone}</td>
-                          <td>{result.interview_time}</td>
-                          <td>{result.interview_status}</td>
+                          <td>{result?.candidate?.full_name}</td>
+                          <td>{result?.token}</td>
                           <td>
-                            <Link to={`/public/interview/view/${result.id}`}>
-                              <i className="fas fa-eye"></i>
-                            </Link>
-                            {/* <i className="fas fa-eye"></i> */}
+                            {`https://hrm.webguruz.in/public/test/${result?.token}`}
+                          </td>
+                          <td>{result?.otp}</td>
+                          <td>{result?.status}</td>
+                          <td>{status[result?.status] ?? "Unknown"}</td>
+                          <td>
+                            {status[result?.status] === "Completed" && (
+                              <i onClick={()=>navigate(`/public/users/candidate-test/${result.id}`)} className="fas fa-eye"></i>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -194,8 +170,6 @@ const viewInterview = () => {
                       Prev
                     </button>
 
-               
-
                     <button
                       className="btn btn-outline-secondary"
                       disabled={currentPage === totalPages}
@@ -214,4 +188,4 @@ const viewInterview = () => {
   );
 };
 
-export default viewInterview;
+export default ReviewAptitudeTest;

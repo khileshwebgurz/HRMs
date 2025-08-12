@@ -155,6 +155,9 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::post('/clockOut', [AuthController::class, 'clockOut']);
             Route::get('/clockApi', [AuthController::class, 'clockApi']);
 
+            // Review Aptitude Test
+            Route::get('all-candidate-test', [UserController::class, 'allCandidateTest']);
+
 
             //roles
             Route::get('/permissions', [RoleController::class, 'getPermissions']);

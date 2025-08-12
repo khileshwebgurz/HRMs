@@ -203,6 +203,7 @@ Thanks! Team Webguruz`
                         className="close"
                         data-dismiss="modal"
                         aria-label="Close"
+                        onClick={()=>setShowModal(false)}
                       >
                         <span aria-hidden="true">&times;</span>
                       </button>

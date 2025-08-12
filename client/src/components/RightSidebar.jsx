@@ -202,7 +202,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/review-aptitude-test" className="nav-link">
+                    <Link to="/public/users/all-candidate-test" className="nav-link">
                       <i className="nav-icon fas fa-clipboard-check"></i>
                       Review Aptitude Test
                     </Link>
