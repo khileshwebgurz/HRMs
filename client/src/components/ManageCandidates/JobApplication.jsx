@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BulkEmailModal from "./BulkEmailModal"; 
+
 import axios from 'axios';
 
 const JobApplication = () => {
@@ -12,6 +14,8 @@ const JobApplication = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [perPage, setPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showBulkEmail, setShowBulkEmail] = useState(false);
+const [bulkEmailList, setBulkEmailList] = useState("");
   const navigate = useNavigate();
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -50,18 +54,20 @@ const JobApplication = () => {
   };
 
   const handleBulkAction = (action) => {
-    if (selectedIds.length === 0) {
-      alert('Please select at least one lead');
-      return;
-    }
+  if (selectedIds.length === 0) {
+    alert('Please select at least one lead');
+    return;
+  }
 
-    if (action === 'send_email') {
-      const selectedLeads = leads.filter((lead) => selectedIds.includes(lead.id));
-      const emailsToSend = selectedLeads.map((lead) => lead.email);
-      console.log('Sending email to:', emailsToSend);
-      // Add email logic here
-    }
+  if (action === 'send_email') {
+    const selectedLeads = leads.filter((lead) => selectedIds.includes(lead.id));
+    const emailsToSend = selectedLeads.map((lead) => lead.email);
+    
+    setBulkEmailList(emailsToSend.join(", ")); // store as string or array depending on your modal
+    setShowBulkEmail(true); // open modal
+  }
   };
+
 
     const handleExport = async () => {
     try {
@@ -117,6 +123,14 @@ const JobApplication = () => {
   ];
 
   return (
+<>
+<BulkEmailModal
+  show={showBulkEmail}
+  onClose={() => setShowBulkEmail(false)}
+  emails={bulkEmailList}
+  refreshList={() => fetchLeads(currentPage, searchTerm, statusFilter)}
+/>
+
     <div className="content-wrapper p-4">
       <header className="content-header mb-3">
         <div className="container-fluid">
@@ -312,6 +326,8 @@ const JobApplication = () => {
         </section>
       </main>
     </div>
+</>
+    
   );
 };
 

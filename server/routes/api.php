@@ -157,7 +157,7 @@ use App\Http\Controllers\Employee\OnboardProcessController;
 
             // Review Aptitude Test
             Route::get('all-candidate-test', [UserController::class, 'allCandidateTest']);
-
+            Route::get('candidate-test/{test_id}', [UserController::class,'viewCandidateTest']);
 
             //roles
             Route::get('/permissions', [RoleController::class, 'getPermissions']);
@@ -218,6 +218,10 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             // job applications
             Route::get('/career', [LeadController::class, 'warmLeads']);
             Route::get('/export-career', [LeadController::class, 'exportCareer'])->name('exportcareer');
+            Route::post('/bulk-email', [LeadController::class, 'bulkSendEmail'])->name('bulkSendEmail');
+            Route::post('/bulk-send-email-submit', [LeadController::class, 'bulkSendEmailSubmit'])->name('bulkSendEmailSubmit');
+
+
 
             Route::get('/latecommers', [AttendanceController::class, 'latecommers'])->name('latecommers');
            // Route::get('/export-warm-leads', [LeadController::class, 'exportCareer'])->name('exportcareer');

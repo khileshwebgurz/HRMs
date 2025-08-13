@@ -11,7 +11,7 @@ use App\Models\Roles;
 use App\Models\Candidates;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CareerDataExport;
 
@@ -194,57 +194,49 @@ class LeadController extends Controller
     }
 
     public function bulkSendEmailSubmit(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email_to' => 'required',
-            'email_subject' => 'required',
-            'email_content' => 'required',
-            'attachment' => 'file|max:5000', // max size 5MB
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'email_to' => 'required',
+        'email_subject' => 'required',
+        'email_content' => 'required',
+        'attachment' => 'nullable',
+        'attachment.*' => 'file|max:5000', // allow multiple, optional
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 422,
-                'message' => $validator->errors()->first(),
-            ]);
-        }
-
-        $email_to = explode(',', $request->input('email_to'));
-        $email_subject = $request->input('email_subject');
-        $email_content = $request->input('email_content');
-        $attachments = $request->file('attachment');
-
-        foreach ($email_to as $to_email) {
-            $data = [
-                'email_subject' => $email_subject,
-                'email_content' => $email_content,
-            ];
-
-            Mail::send('emails.bulk-email', $data, function ($message) use ($email_subject, $to_email, $attachments) {
-                $message->to($to_email)->subject($email_subject);
-                if ($attachments) {
-                    if (is_array($attachments)) {
-                        foreach ($attachments as $attachment) {
-                            $message->attach($attachment->getRealPath(), [
-                                'as' => $attachment->getClientOriginalName(),
-                                'mime' => $attachment->getMimeType(),
-                            ]);
-                        }
-                    } else {
-                        $message->attach($attachments->getRealPath(), [
-                            'as' => $attachments->getClientOriginalName(),
-                            'mime' => $attachments->getMimeType(),
-                        ]);
-                    }
-                }
-            });
-        }
-
+    if ($validator->fails()) {
         return response()->json([
-            'status' => 200,
-            'message' => "Email sent to selected users.",
+            'status' => 422,
+            'message' => $validator->errors()->first(),
         ]);
     }
+
+    $email_to = explode(',', $request->input('email_to'));
+    $email_subject = $request->input('email_subject');
+    $email_content = $request->input('email_content');
+    $attachments = $request->file('attachment'); // array or null
+
+    foreach ($email_to as $to_email) {
+        Mail::raw($email_content, function ($message) use ($email_subject, $to_email, $attachments) {
+            $message->to($to_email)->subject($email_subject);
+
+            if (!empty($attachments)) {
+                foreach ((array) $attachments as $attachment) {
+                    $message->attach($attachment->getRealPath(), [
+                        'as' => $attachment->getClientOriginalName(),
+                        'mime' => $attachment->getMimeType(),
+                    ]);
+                }
+            }
+        });
+    }
+
+
+    return response()->json([
+        'status' => 200,
+        'message' => "Email sent to selected users.",
+    ]);
+}
+
 
     public function shortlistedPost(Request $request)
     {
