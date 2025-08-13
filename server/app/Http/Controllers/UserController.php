@@ -1532,6 +1532,18 @@ class UserController extends Controller
         return $this->createTest($candidate, $request->type);
     }
 
+
+    public function viewGenerateTest($candidate_id)
+            {
+                $candidate = Candidates::findOrFail($candidate_id);
+
+                return response()->json([
+                    'status' => 'success',
+                    'candidate' => $candidate
+                ]);
+            }
+
+
     protected function skipTest($candidate)
     {
         $interview = CandidateInterviews::create([
@@ -1620,7 +1632,8 @@ class UserController extends Controller
             'name' => $candidate->full_name,
             'addresslink' => ($test->type == 1) ? get_options('office_address_link') : '',
             'otp' => $test->otp,
-            'test_url' => route('showTest', $test->token)
+           // 'test_url' => route('showTest', $test->token)
+            'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
         ];
 
         Mail::send('emails.test-invite', $data, function ($message) use ($candidate) {

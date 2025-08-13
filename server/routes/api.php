@@ -234,6 +234,10 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::post('/notinterested', [LeadController::class, 'notinterestedPost'])->name('notinterested');
             Route::post('/follow-up-post', [LeadController::class, 'FollowUpPost'])->name('followUpPost');
 
+              Route::post('generate-test/{candidate_id}', [UserController::class, 'generateTest'])
+                ->name('generateTest');
+
+
         });
 
         Route::middleware('auth:api')->prefix('tracker')->group(function () {
@@ -242,7 +246,6 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
             Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
             Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
-            Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
             Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
             Route::post('/addTicket', [TicketController::class, 'addTicket']);
             Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
@@ -260,7 +263,7 @@ use App\Http\Controllers\Employee\OnboardProcessController;
         //Route::middleware('api')->group(function () {
             // Make sure these routes are properly defined
             Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
-            Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
+           // Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
             Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);
             Route::post('/test/save', [UserController::class, 'saveTestResult'])->name('saveTestResult');
         //});
