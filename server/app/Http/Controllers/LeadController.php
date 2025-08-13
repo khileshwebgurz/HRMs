@@ -152,7 +152,7 @@ class LeadController extends Controller
 
     public function rejectPost(Request $request)
     {
-        $id = $request->input('formid');
+        $id = $request->input('lead_id');
         if (!$id) {
             return response()->json(['error' => 'Missing formid'], 400);
         }
@@ -240,7 +240,7 @@ class LeadController extends Controller
 
     public function shortlistedPost(Request $request)
     {
-        $id = $request->input('formid');
+        $id = $request->input('lead_id');
         if (!$id) {
             return response()->json(['error' => 'Missing formid'], 400);
         }
@@ -302,7 +302,7 @@ class LeadController extends Controller
 
     public function notInterestedPost(Request $request)
     {
-        $id = $request->input('formid');
+        $id = $request->input('lead_id');
         if (!$id) {
             return response()->json(['error' => 'Missing formid'], 400);
         }

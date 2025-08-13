@@ -1,6 +1,6 @@
 import React from "react";
 
-const PersonalParticular = ({ candidateProfile, onChange }) => {
+const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
   return (
     <>
       <div className="card">
@@ -20,6 +20,9 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                 id="full_name"
                 maxLength="25"
               />
+              {errors.full_name && (
+                <div className="text-danger">{errors.full_name}</div>
+              )}
             </div>
           </div>
           <div className="row">
@@ -38,6 +41,9 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                     name="mobile_number"
                     id="mobile_number"
                   />
+                  {errors.mobile_number && (
+                    <div className="text-danger">{errors.mobile_number}</div>
+                  )}
                 </div>
               </div>
 
@@ -57,6 +63,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                         checked={candidateProfile.gender === "1"}
                         onChange={() => onChange("gender", "1")}
                       />
+                      
                       Male
                     </label>
                   </div>
@@ -166,6 +173,10 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                   id="email"
                   name="email"
                 />
+                 {errors.email && (
+                    <div className="text-danger">{errors.email}</div>
+                  )}
+                
               </div>
             </div>
 
