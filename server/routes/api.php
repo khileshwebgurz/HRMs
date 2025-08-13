@@ -220,6 +220,9 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::get('/export-career', [LeadController::class, 'exportCareer'])->name('exportcareer');
             Route::post('/bulk-email', [LeadController::class, 'bulkSendEmail'])->name('bulkSendEmail');
             Route::post('/bulk-send-email-submit', [LeadController::class, 'bulkSendEmailSubmit'])->name('bulkSendEmailSubmit');
+            Route::post('/career/reject',[LeadController::class, 'rejectPost']);
+            Route::post('/career/shortlist',[LeadController::class,'shortlistedPost']);
+            Route::post('/career/not-interested',[LeadController::class,'notInterestedPost']);
 
 
 
