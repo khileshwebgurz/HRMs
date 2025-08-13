@@ -70,6 +70,7 @@ use App\Models\CandidateOtherInformation;
 use App\Models\CandidateFamily;
 use App\Mail\TestResultMail;
 use App\Mail\TestCompletedMail;
+use Google\Service\CivicInfo\Candidate;
 
 class UserController extends Controller
 {
@@ -2776,59 +2777,59 @@ class UserController extends Controller
     }
 
     // updated allcandidateTest
-   public function allCandidateTest(Request $request)
-{
-    $permission_role = Roles::find(Auth::user()->user_role);
+    public function allCandidateTest(Request $request)
+    {
+        $permission_role = Roles::find(Auth::user()->user_role);
 
-    if (!$permission_role) {
-        return response()->json(['error' => 'Role not found'], 404);
+        if (!$permission_role) {
+            return response()->json(['error' => 'Role not found'], 404);
+        }
+
+        // Get pagination and search parameters
+        $limit = $request->input('limit', 10);
+        $search = $request->input('search', '');
+
+        // Base query
+        $query = CandidateTest::with('candidate');
+
+        // Apply role-based restrictions
+        if ($permission_role->view == '2') {
+            $query->where('created_by', Auth::id());
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::id())->pluck('id');
+            $query->whereIn('created_by', $employees);
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::id())
+                ->orWhere('id', Auth::id())
+                ->pluck('id');
+            $query->whereIn('created_by', $employees);
+        } elseif ($permission_role->view == '5') {
+            // no restriction
+        } else {
+            return response()->json([
+                'data' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'total' => 0
+            ]);
+        }
+
+        // Search filter (by full_name from related candidate)
+        if (!empty($search)) {
+            $query->whereHas('candidate', function ($q) use ($search) {
+                $q->where('full_name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply pagination
+        $data = $query->latest()->paginate($limit);
+
+        return response()->json($data);
     }
 
-    // Get pagination and search parameters
-    $limit = $request->input('limit', 10);
-    $search = $request->input('search', '');
-    
-    // Base query
-    $query = CandidateTest::with('candidate');
-
-    // Apply role-based restrictions
-    if ($permission_role->view == '2') {
-        $query->where('created_by', Auth::id());
-    } elseif ($permission_role->view == '3') {
-        $employees = Employees::where('manager_id', Auth::id())->pluck('id');
-        $query->whereIn('created_by', $employees);
-    } elseif ($permission_role->view == '4') {
-        $employees = Employees::where('manager_id', Auth::id())
-            ->orWhere('id', Auth::id())
-            ->pluck('id');
-        $query->whereIn('created_by', $employees);
-    } elseif ($permission_role->view == '5') {
-        // no restriction
-    } else {
-        return response()->json([
-            'data' => [],
-            'current_page' => 1,
-            'last_page' => 1,
-            'total' => 0
-        ]);
-    }
-
-    // Search filter (by full_name from related candidate)
-    if (!empty($search)) {
-        $query->whereHas('candidate', function ($q) use ($search) {
-            $q->where('full_name', 'LIKE', "%{$search}%");
-        });
-    }
-
-    // Apply pagination
-    $data = $query->latest()->paginate($limit);
-
-    return response()->json($data);
-}
 
 
-
-    public function viewCandidateTest($test_id)
+    public function viewCandidateTestOLD($test_id)
     {
         $can_test = CandidateTest::where('id', $test_id)->where('status', '3')
             ->with('questions')
@@ -2839,6 +2840,32 @@ class UserController extends Controller
             abort(404);
         }
     }
+
+    public function viewCandidateTest($test_id)
+    {
+        // added the with -> questions.question.options to get the list of question and its option
+        $can_test = CandidateTest::where('id', $test_id)
+            ->where('status', '3')
+            ->with([
+                'candidate',
+                'questions.question.options'
+            ])
+            ->first();
+        Log::info('my candidate is >>',['candiate '=>$can_test]);
+
+        if ($can_test) {
+            return response()->json([
+                'success' => true,
+                'data' => $can_test
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Test not found or not completed'
+            ], 404);
+        }
+    }
+
 
     public function testStatusCandidate(Request $request)
     {
