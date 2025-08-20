@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+
 const AptitudeTestComplete = () => {
   const { testid } = useParams();
   const [usertestData, setUsertestData] = useState([]);
+  const [message, setMessage] = useState("");
+
   const fetchuserTest = async () => {
     const res = await axios.get(
       `http://localhost:8000/api/candidate-test/${testid}`,
@@ -12,10 +15,44 @@ const AptitudeTestComplete = () => {
     );
     setUsertestData(res.data);
   };
+
+
   useEffect(() => {
     fetchuserTest();
   }, []);
   console.log("ksjsagdjs", usertestData);
+
+
+  const handleSendMessage = async (e) => {
+  e.preventDefault();
+
+  if (!message.trim()) {
+    alert("Please enter a message.");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:8000/api/send-message-candidate",
+      {
+        candidate_id: usertestData?.data?.candidate_id,
+        message: message
+      },
+      { withCredentials: true }
+    );
+
+    if (res.data.status === 200) {
+      alert("Message sent to candidate.");
+      setMessage("");
+    } else {
+      alert("Failed: " + res.data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred while sending the message.");
+  }
+};
+
 
   const totalQuestions = usertestData?.data?.questions?.length || 0;
   const totalPoints = usertestData?.data?.questions?.filter(
@@ -170,16 +207,11 @@ const AptitudeTestComplete = () => {
               </form> */}
 
               {/* Send Message Form */}
-              <form method="post" id="wgz_user_form">
-                <input
-                  type="hidden"
-                  name="candidate_id"
-                  value={usertestData?.data?.candidate_id}
-                />
+             <form onSubmit={handleSendMessage}>
                 <div className="card card-primary card-outline">
                   <div className="card-header">
-                    <h3 className="card-title">Send Message to 
-                      { usertestData?.data?.candidate?.full_name ?? "Candidate Name"}
+                    <h3 className="card-title">
+                      Send Message to {usertestData?.data?.candidate?.full_name ?? "Candidate"}
                     </h3>
                   </div>
                   <div className="card-body">
@@ -189,7 +221,9 @@ const AptitudeTestComplete = () => {
                         className="form-control"
                         name="message"
                         rows="6"
-                      ></textarea>
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                      />
                     </div>
                   </div>
                   <div className="card-footer">
@@ -201,6 +235,7 @@ const AptitudeTestComplete = () => {
                   </div>
                 </div>
               </form>
+
             </div>
           </div>
         </div>

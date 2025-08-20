@@ -1625,6 +1625,7 @@ class UserController extends Controller
         ]);
     }
 
+    
 
     protected function sendTestInviteEmail($candidate, $test)
     {
@@ -2940,40 +2941,40 @@ class UserController extends Controller
     public function sendMessagetoCandidate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'message' => 'required'
+            'message' => 'required',
+            'candidate_id' => 'required|exists:candidates,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 401,
-                'message' => $validator->errors()
-                    ->first()
+                'message' => $validator->errors()->first(),
             ]);
         }
-        $candidate_id = $request->get('candidate_id');
-        $message = $request->get('message');
 
-        $candidate = Candidates::findOrFail($candidate_id);
+        try {
+            $candidate = Candidates::findOrFail($request->candidate_id);
+            $to_email = $candidate->email;
+            $to_name = $candidate->full_name;
 
-        $to_name = $candidate->full_name;
-        $to_email = $candidate->email;
-        $data = array(
-            'messagedata' => $message,
-            'name' => $to_name
-        );
-        Mail::send('emails.send-message-candidate', $data, function ($message) use ($to_name, $to_email) {
-            $message->to($to_email, $to_name)->subject('Message from HRM');
-        });
+            $data = [
+                'messagedata' => $request->message,
+                'name' => $to_name,
+            ];
 
-        if (! Mail::failures()) {
+            Mail::send('emails.send-message-candidate', $data, function ($message) use ($to_email, $to_name) {
+                $message->to($to_email, $to_name)->subject('Message from HRM');
+            });
+
             return response()->json([
                 'status' => 200,
-                'message' => "Message sent to candidate."
+                'message' => 'Message sent to candidate.'
             ]);
-        } else {
+
+        } catch (\Exception $e) {
             return response()->json([
-                'status' => 401,
-                'message' => 'Something Wrong. Try Again.'
+                'status' => 500,
+                'message' => 'Failed to send email: ' . $e->getMessage(),
             ]);
         }
     }

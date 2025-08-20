@@ -158,6 +158,9 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             // Review Aptitude Test
             Route::get('all-candidate-test', [UserController::class, 'allCandidateTest']);
             Route::get('candidate-test/{test_id}', [UserController::class,'viewCandidateTest']);
+            Route::post('send-message-candidate', [UserController::class,'sendMessagetoCandidate']);
+            
+             //Route::post('send-message-candidate', 'UserController@sendMessagetoCandidate')->name('sendMessagetoCandidate');
 
             //roles
             Route::get('/permissions', [RoleController::class, 'getPermissions']);
