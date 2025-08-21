@@ -111,7 +111,7 @@ const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
                   htmlFor="residence_address"
                   className="col-4 col-form-label"
                 >
-                  Address<span className="req">*</span>
+                  Address
                 </label>
                 <div className="col-8">
                   <input
@@ -129,7 +129,7 @@ const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
 
               <div className="form-group row">
                 <label htmlFor="nationality" className="col-4 col-form-label">
-                  Nationality<span className="req">*</span>
+                  Nationality
                 </label>
                 <div className="col-8">
                   <input
@@ -147,7 +147,8 @@ const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
                   htmlFor="place_of_birth"
                   className="col-4 col-form-label"
                 >
-                  Place of Birth<span className="req">*</span>
+                  {/* <span className="req">*</span> */}
+                  Place of Birth
                 </label>
                 <div className="col-8">
                   <input
@@ -184,7 +185,7 @@ const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
               <div className="col-lg-6">
                 <div className="form-group row">
                   <label htmlFor="dob" className="col-4 col-form-label">
-                    Date of Birth<span className="req">*</span>
+                    Date of Birth
                   </label>
                   <div className="col-8">
                     <input
@@ -201,7 +202,7 @@ const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
               <div className="col-lg-6">
                 <div className="form-group row">
                   <label htmlFor="age" className="col-4 col-form-label">
-                    Age<span className="req">*</span>
+                    Age
                   </label>
                   <div className="col-8">
                     <input

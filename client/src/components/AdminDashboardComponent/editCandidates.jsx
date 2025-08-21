@@ -203,6 +203,7 @@ const CandidateEditForm = () => {
         );
 
         // setCandidateProfile(response.data.candidate);
+        console.log('my response s>>',response.data)
         setCandidateProfile({
           position: response.data.candidate.position || "",
           department: response.data.candidate.department || "",
@@ -230,6 +231,7 @@ const CandidateEditForm = () => {
         setAssessmentSectionData(
           response?.data?.candidate?.assessment_section || []
         );
+        setAssessmentData(response?.data?.candidate?.assessments)
 
         setRecommendation({
           status: response.data?.candidate.status ?? "",
@@ -244,6 +246,7 @@ const CandidateEditForm = () => {
           cv_file: response.data.candidate.cv_file ?? "",
         });
 
+            // my other info should be -> response?.data?.candidate?.other_informations
         setOtherInfo(
           (response.data.candidate_questions || []).map((q) => ({
             ...q,
@@ -266,7 +269,7 @@ const CandidateEditForm = () => {
     }));
   };
 
-  console.log("my other info is >>>>", otherInfo);
+
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();

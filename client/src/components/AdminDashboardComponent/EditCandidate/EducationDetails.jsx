@@ -36,7 +36,7 @@ const EducationDetails = ({ educationRows, setEducationRows }) => {
     <>
       <div className="card">
         <div className="card-header">
-          Education Details<span className="req">*</span>
+          Education Details
           <button
             type="button"
             className="btn btn-primary btn-sm float-right"

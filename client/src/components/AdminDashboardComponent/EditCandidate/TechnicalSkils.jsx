@@ -1,12 +1,12 @@
 import React from "react";
 
 const TechnicalSkils = ({ technicalSkills, setTechnicalSkills }) => {
-  console.log("my technical skills are >>>", technicalSkills);
+  
   return (
     <>
       <div className="card">
         <div className="card-header">
-          Technical Skills<span className="req">*</span>
+          Technical Skills
         </div>
         <div className="card-body">
           <div className="form-group row">

@@ -9,7 +9,6 @@ const Hod = ({ recommendation, setRecommendation }) => {
     }));
   };
 
-  console.log("my recommendations are >>>", recommendation);
   return (
     <>
       <div className="card">

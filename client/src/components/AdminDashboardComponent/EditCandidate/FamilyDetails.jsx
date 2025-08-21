@@ -49,7 +49,7 @@ const FamilyDetails = ({familyMembers, setFamilyMembers}) => {
     <>
       <div className="card">
       <div className="card-header">
-        FAMILY DETAILS <span className="req">*</span>
+        FAMILY DETAILS 
         <button
           type="button"
           className="btn btn-primary btn-sm float-right"

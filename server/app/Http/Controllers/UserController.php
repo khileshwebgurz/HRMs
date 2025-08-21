@@ -1936,12 +1936,15 @@ class UserController extends Controller
     {
         $candidate = Candidates::with([
             'skills_section',
+            'candidate_status',
             'languages',
             'educations',
             'employments',
             'families',
             'assessment_section',
+            'assessments',
             'other_informations',
+            'skills_section',
         ])->find($candidate_id);
         // $candidate = Candidates::where('id', $candidate_id)->first();
 

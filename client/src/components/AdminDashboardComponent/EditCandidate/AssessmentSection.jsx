@@ -1,4 +1,4 @@
-import React from "react";
+
 
 const AssessmentSection = ({
   assessmentSectionData,
@@ -15,6 +15,8 @@ const AssessmentSection = ({
     { label: "Average", value: "2" },
     { label: "Above Average", value: "3" },
   ];
+
+  console.log('assesekfkf',assessmentSectionData)
   return (
     <>
       <div className="card">

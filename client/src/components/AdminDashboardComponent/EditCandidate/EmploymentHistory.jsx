@@ -49,7 +49,7 @@ const EmploymentHistory = ({employments, setEmployments}) => {
     <>
          <div className="card">
       <div className="card-header">
-        Employment History <span className="req">*</span>
+        Employment History  
         <button
           type="button"
           className="btn btn-primary btn-sm float-right"

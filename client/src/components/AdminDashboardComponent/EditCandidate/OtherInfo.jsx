@@ -12,6 +12,8 @@ const OtherInfo = ({ otherInfo, setOtherInfo }) => {
     updated[index].reason = value;
     setOtherInfo(updated);
   };
+
+  console.log('my other info is >>',otherInfo)
   return (
     <>
       <div className="card">
