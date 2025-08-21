@@ -17,7 +17,7 @@ const EditCandidateProfile = () => {
 
   const [educationRows, setEducationRows] = useState([
     {
-      institute: "",
+      institute_name: "",
       from: "",
       to: "",
       qualification: "",

@@ -12,7 +12,7 @@ const EducationDetail = ({ educationRows, setEducationRows }) => {
     setEducationRows([
       ...educationRows,
       {
-        institute: "",
+        institute_name: "",
         from: "",
         to: "",
         qualification: "",
@@ -70,7 +70,7 @@ const EducationDetail = ({ educationRows, setEducationRows }) => {
                       rows="2"
                       value={row.institute_name}
                       onChange={(e) =>
-                        handleChange(index, "institute", e.target.value)
+                        handleChange(index, "institute_name", e.target.value)
                       }
                     ></textarea>
                   </td>

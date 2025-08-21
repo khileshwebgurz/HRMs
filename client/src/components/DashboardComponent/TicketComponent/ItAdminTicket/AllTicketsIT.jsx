@@ -108,7 +108,7 @@ const AllTicketsIT = () => {
                             );
                           }
                         }}
-                        monthsShown={5}
+                        monthsShown={2}
                         showTimeSelect // ✅ show time pickers
                         timeIntervals={30} // optional: 30-min intervals
                         dateFormat="yyyy-MM-dd h:mm aa"

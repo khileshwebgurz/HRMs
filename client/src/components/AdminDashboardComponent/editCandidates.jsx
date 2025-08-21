@@ -75,7 +75,7 @@ const CandidateEditForm = () => {
   const [technicalSkills, setTechnicalSkills] = useState("");
   const [educationRows, setEducationRows] = useState([
     {
-      institute: "",
+      institute_name: "",
       from: "",
       to: "",
       qualification: "",
@@ -117,24 +117,21 @@ const CandidateEditForm = () => {
 
   const [assessmentSectionData, setAssessmentSectionData] = useState([
     {
-      title: "Aptitude Test Score",
       assessment_by: "",
       weight_age: "",
       score: "",
     },
     {
-      title: "Technical Test (Theoretical)",
       assessment_by: "",
       weight_age: "",
       score: "",
     },
     {
-      title: "Technical Test (Practical)",
       assessment_by: "",
       weight_age: "",
       score: "",
     },
-    { title: "HR Round", assessment_by: "", weight_age: "", score: "" },
+    { assessment_by: "", weight_age: "", score: "" },
   ]);
 
   const [recommendation, setRecommendation] = useState({
@@ -186,7 +183,6 @@ const CandidateEditForm = () => {
     if (!recommendation.status) {
       newErrors.status = "Please select a status";
     }
-    
 
     setErrors(newErrors);
 
@@ -203,7 +199,7 @@ const CandidateEditForm = () => {
         );
 
         // setCandidateProfile(response.data.candidate);
-        console.log('my response s>>',response.data)
+        console.log("my response s>>", response.data);
         setCandidateProfile({
           position: response.data.candidate.position || "",
           department: response.data.candidate.department || "",
@@ -231,7 +227,7 @@ const CandidateEditForm = () => {
         setAssessmentSectionData(
           response?.data?.candidate?.assessment_section || []
         );
-        setAssessmentData(response?.data?.candidate?.assessments)
+        setAssessmentData(response?.data?.candidate?.assessments);
 
         setRecommendation({
           status: response.data?.candidate.status ?? "",
@@ -246,7 +242,7 @@ const CandidateEditForm = () => {
           cv_file: response.data.candidate.cv_file ?? "",
         });
 
-            // my other info should be -> response?.data?.candidate?.other_informations
+        // my other info should be -> response?.data?.candidate?.other_informations
         setOtherInfo(
           (response.data.candidate_questions || []).map((q) => ({
             ...q,
@@ -268,8 +264,6 @@ const CandidateEditForm = () => {
       [field]: value,
     }));
   };
-
-
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();

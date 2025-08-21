@@ -3,7 +3,7 @@ import '../../../public/plugins/datatables-buttons/css/buttons.bootstrap4.min.cs
 import '../../assets/css/directory.css'
 import '../../../public/css/fixedColumns.dataTables.min.css'
 import '../../../public/css/sweetalert2.min.css'
-import businessmen from '../../../public/dist/img/buisnessmen.png'
+// import businessmen from '../../../public/dist/img/buisnessmen.png'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
@@ -96,7 +96,7 @@ const Directory = () => {
                 <h3 className="card-title">Directory</h3>
                 <h5 style={{ fontSize: "17px" }}>
                   <figure>
-                      <img src={businessmen} alt="Businessmen" className="directory-icon" />
+                      {/* <img src={businessmen} alt="Businessmen" className="directory-icon" /> */}
                   </figure>
                   No. of Employees: {totalRecords}
                 </h5>

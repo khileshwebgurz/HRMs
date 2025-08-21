@@ -1,6 +1,5 @@
-import React from "react";
 import "../assets/css/navbar.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 // import '../../public/css/admin-panel.css'
 import { Link } from "react-router-dom";
 import webgurzLogo from "../../public/dist/img/webguruz-logo-white.png";
@@ -11,7 +10,6 @@ import axios from "axios";
 import NotifyDropdown from "./Notification/NotifyDropdown";
 import { notificationdata } from "./Notification/notificationdata";
 
-
 const Navbar = () => {
   const navigate = useNavigate();
   const user = useUser();
@@ -20,27 +18,45 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [todayWorkingHour, setTodayWorkingHour] = useState("");
-  const [hasClockedInData, setHasClockedInData] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+
+  const [timer, setTimer] = useState("00:00:00");
+  const intervalRef = useRef(null);
+
+  const startTimer = (startTime) => {
+    clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(() => {
+      const diff = Math.floor(
+        (Date.now() - new Date(startTime).getTime()) / 1000
+      );
+      const h = String(Math.floor(diff / 3600)).padStart(2, "0");
+      const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+      const s = String(diff % 60).padStart(2, "0");
+      setTimer(`${h}:${m}:${s}`);
+    }, 1000);
+  };
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
 
-  const handleClockIN = async () => {
+  const handleClockIn = async () => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/clockIn`,
-        {},
+        {
+          ip: "127.0.0.1",
+          latitude: null,
+          longitude: null,
+        },
         { withCredentials: true }
       );
 
-      const data = res.data;
-      console.log("Clock In response >>>>", data);
-
-      if (data.attendance?.alreadyLoggedIn === "yes") {
+      if (res.data.status === 200) {
         setIsClockedIn(true);
-        setTodayWorkingHour(data.today_working_hour || "00:00:00");
+        const clockInTime = res.data.data.attendance.a_final;
+        startTimer(clockInTime);
       }
     } catch (err) {
       console.error("Clock-In failed", err);
@@ -51,16 +67,29 @@ const Navbar = () => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/clockOut`,
-        {},
+        {
+          ip: "127.0.0.1",
+          latitude: null,
+          longitude: null,
+          type: "manual",
+        },
         { withCredentials: true }
       );
 
-      console.log("Clock Out response >>>", res.data);
-      setIsClockedIn(false);
-      setTodayWorkingHour("");
-      setHasClockedInData(false);
+      console.log("the clock out response is >>> ", res.data);
+      if (res.data.status === 200) {
+        setIsClockedIn(false);
+        clearInterval(intervalRef.current);
+
+        const todayHour = res.data.data.today_working_hour;
+        const weeklyHour = res.data.data.weeklyWorkingHour;
+
+        setTodayWorkingHour(todayHour);
+
+        console.log("Clock-out success:", todayHour, weeklyHour);
+      }
     } catch (err) {
-      console.error("Clock-Out failed", err);
+      console.error("Clock-out failed", err);
     }
   };
 
@@ -76,6 +105,32 @@ const Navbar = () => {
     };
 
     fetchNotification();
+  }, []);
+
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
+          { withCredentials: true }
+        );
+
+        console.log("the alreadyLogged in are >>>", res.data);
+
+        if (res.data.a_final) {
+          setIsClockedIn(true);
+
+           startTimer(res.data.a_final);
+        } else {
+          setIsClockedIn(false);
+        }
+      } catch (err) {
+        console.error("Clock-In failed", err);
+      }
+    };
+    fetchAttendance();
+
+    return () => clearInterval(intervalRef.current);
   }, []);
 
   const handleLogout = async () => {
@@ -95,7 +150,6 @@ const Navbar = () => {
 
   const handleToggle = () => {
     setIsAdminMode((prev) => !prev);
-    console.log("Admin toggle is now:", !isAdminMode);
   };
 
   return (
@@ -104,73 +158,54 @@ const Navbar = () => {
         <nav className="main-header navbar navbar-expand-md navbar-light navbar-dark dark-header">
           <div className="container">
             <Link to="/dashboard" className="brand-link wgz_main_logo">
-               <img
+              <img
                 src={webgurzLogo}
                 alt="AdminLTE Logo"
                 className="brand-image elevation-3"
               />
             </Link>
             <ul className="navbar-time-notification">
-              {/* <li className="nav-item nav-icon">
-                <Link to="/dashboard" className="nav-link">
-                  <i className="fas fa-home"></i>
-                </Link>
-              </li> */}
               <li className="nav-item dropdown">
                 <div className="clock-in-container">
                   <div id="clockInWrapper" className="no-gutters clockInUser">
                     <div className="clockInAction d-flex align-items-center">
                       <div className="clockdatetime">
-                     <div className="clockInDate" id="clockInDate">
-                      {new Date()
-                        .toLocaleDateString("en-US", {
-                          weekday: "short",
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                        .replace(",", "")}
+                        <div className="clockInDate" id="clockInDate">
+                          {new Date()
+                            .toLocaleDateString("en-US", {
+                              weekday: "short",
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                            .replace(",", "")}
+                        </div>
                       </div>
-                    </div>
                       <button
                         id="clockInBtn"
-                        data-clocked-in={isClockedIn.toString()}
+                        onClick={isClockedIn ? handleClockOut : handleClockIn}
                         className={`clockInBtn btn custom-btn clockInBigAct waves-effect waves-light ${
                           isClockedIn ? "btn-success" : "btn-danger"
                         }`}
                       >
                         {isClockedIn ? (
-                          <span onClick={handleClockOut} className="outLabel">
-                            <i class="fa-regular fa-clock"></i>
-                            CLOCK-OUT
-                          </span>
+                          <>
+                            <span className="outLabel">
+                              <i className="fa-regular fa-clock"></i> CLOCK-OUT
+                            </span>
+                            <div className="timer-text">{timer}</div>
+                          </>
                         ) : (
-                          <span
-                            onClick={handleClockIN}
-                            className="inLabel"
-                            id="clock_in"
-                          >
-                            <i class="fa-regular fa-clock"></i>
-                            CLOCK-IN
+                          <span className="inLabel">
+                            <i className="fa-regular fa-clock"></i> CLOCK-IN
                           </span>
                         )}
                       </button>
-                      {/* ) : ( */}
-                      <span className="inLabel" id="clock_in">
-                        {todayWorkingHour}
-                      </span>
-                      {/* )} */}
-
-                      {isClockedIn && todayWorkingHour && !hasClockedInData && (
-                        <div className="mt-2 text-muted">
-                          Today Working Hour: {todayWorkingHour}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
               </li>
-              </ul>
+            </ul>
 
             <ul className="navbar-nav ml-auto wgz_notification">
               {(user.user_role == 1 ||
@@ -219,7 +254,7 @@ const Navbar = () => {
                   </a>
                 </div>
               </li>
-          {/* <div className="user-profile-div">
+              {/* <div className="user-profile-div">
               <span className="user-name">{user.name}</span>
               <a className="nav-link user-profile" style={{ fontSize: "20px" }} onClick={handleLogout}>
                 &nbsp;
@@ -243,22 +278,46 @@ const Navbar = () => {
 
                 {showDropdown && <NotifyDropdown notification={notification} />}
               </li>
-             <div className="dropdown text-end user-login ml-4">
-              <a href="#" className="d-flex text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://html.bdevs.net/manez.prev/assets/images/avatar/avatar.png" alt="profile" width="40" height="40" className="rounded-circle me-2"/>
-                <div className="text-start">
-                  <span className="user-name">{user.name}</span>
-                  <span className="text-success small">● online</span>
-                </div>
-                <i class="fa-solid fa-angle-down"></i>
-              </a>
-              <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
-                <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i> Profile</a></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><a className="log-out" onClick={handleLogout}><i className="bi bi-box-arrow-right me-2"></i> Log Out</a></li>
-              </ul>
-            </div>
-
+              <div className="dropdown text-end user-login ml-4">
+                <a
+                  href="#"
+                  className="d-flex text-decoration-none dropdown-toggle"
+                  id="dropdownUser"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <img
+                    src="https://html.bdevs.net/manez.prev/assets/images/avatar/avatar.png"
+                    alt="profile"
+                    width="40"
+                    height="40"
+                    className="rounded-circle me-2"
+                  />
+                  <div className="text-start">
+                    <span className="user-name">{user.name}</span>
+                    <span className="text-success small">● online</span>
+                  </div>
+                  <i class="fa-solid fa-angle-down"></i>
+                </a>
+                <ul
+                  className="dropdown-menu dropdown-menu-end shadow"
+                  aria-labelledby="dropdownUser"
+                >
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      <i className="bi bi-person me-2"></i> Profile
+                    </a>
+                  </li>
+                  <li>
+                    <hr className="dropdown-divider" />
+                  </li>
+                  <li>
+                    <a className="log-out" onClick={handleLogout}>
+                      <i className="bi bi-box-arrow-right me-2"></i> Log Out
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
               {/* <button >Logout</button> */}
             </ul>

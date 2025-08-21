@@ -27,7 +27,7 @@ class DashboardController extends Controller
             $role = $this->loginUserRole(); 
             $loginUser = Auth::user();
 
-            //Log::info('My >>>>', ['loginUser' => $loginUser]);
+           // Log::info('My >>>>', ['loginUser' => $loginUser]);
 
             $total_candidates = Candidates::count();
 
@@ -49,6 +49,7 @@ class DashboardController extends Controller
                     'total_active_candidates' => $total_active_candidates,
                     'total_questions' => $total_questions,
                     'total_users' => $total_users,
+                    'logged_in' => $loginUser
                 ]
             ]);
         }
