@@ -9,16 +9,16 @@ const SalarySlip = () => {
     setShowForm((prev) => !prev);
   };
 
-  const handleMonthChange = (e) => {
-    const options = e.target.options;
-    const values = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        values.push(options[i].value);
-      }
-    }
-    setSelectedMonths(values);
-  };
+  // const handleMonthChange = (e) => {
+  //   const options = e.target.options;
+  //   const values = [];
+  //   for (let i = 0; i < options.length; i++) {
+  //     if (options[i].selected) {
+  //       values.push(options[i].value);
+  //     }
+  //   }
+  //   setSelectedMonths(values);
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,8 +34,8 @@ const SalarySlip = () => {
       );
 
       console.log("my res i s>>", res.data);
-    } catch (err) {
-      console.log("kjbsdjfbsjdf");
+    } catch (error) {
+      console.log("kjbsdjfbsjdf", error);
     }
   };
 
