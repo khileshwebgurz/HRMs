@@ -23,7 +23,7 @@ const OfficialUse = ({ assessmentData, setAssessmentData }) => {
   ];
 
 
-
+console.log('my interview assessment >>>',assessmentData)
 const handleOfficialChange = (interviewerId, field, value) => {
     setAssessmentData((prev) => ({
       ...prev,
@@ -58,7 +58,9 @@ const handleOfficialChange = (interviewerId, field, value) => {
             </thead>
             <tbody>
               {criteria.map((criterion) => (
+
                 <tr key={criterion.key}>
+                  
                   <td>{criterion.label}</td>
                   {Object.keys(interviewerLabels).map((id) => (
                     <td key={id}>
@@ -68,7 +70,7 @@ const handleOfficialChange = (interviewerId, field, value) => {
                         min={criterion.type === "number" ? 0 : undefined}
                         max={criterion.type === "number" ? 5 : undefined}
                         step={criterion.type === "number" ? 0.5 : undefined}
-                        value={assessmentData[id]?.[criterion.key] || ""}
+                        value={assessmentData[id-1]?.[criterion.key] || ""}
                         onChange={(e) =>
                           handleOfficialChange(
                             id,

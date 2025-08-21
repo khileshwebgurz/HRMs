@@ -1,6 +1,6 @@
 import React from "react";
 
-const JobParticular = ({ candidateProfile, onChange }) => {
+const JobParticular = ({ candidateProfile, onChange, errors }) => {
   const departments = [
     { id: "1", name: "Digital Marketing" },
     { id: "2", name: "Business Development" },
@@ -31,6 +31,9 @@ const JobParticular = ({ candidateProfile, onChange }) => {
                 id="position"
                 required
               />
+              {errors.position && (
+                <div className="text-danger">{errors.position}</div>
+              )}
             </div>
           </div>
 
@@ -53,6 +56,9 @@ const JobParticular = ({ candidateProfile, onChange }) => {
                   </option>
                 ))}
               </select>
+              {errors.department && (
+                <div className="text-danger">{errors.department}</div>
+              )}
             </div>
           </div>
         </div>

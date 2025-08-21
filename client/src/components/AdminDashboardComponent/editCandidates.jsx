@@ -16,6 +16,9 @@ import Hod from "./EditCandidate/Hod";
 const CandidateEditForm = () => {
   const { candidate_id } = useParams();
 
+  // error validation
+  const [errors, setErrors] = useState({});
+
   const [candidateProfile, setCandidateProfile] = useState({
     // job Particular
     position: "",
@@ -147,6 +150,50 @@ const CandidateEditForm = () => {
     upload_cv: null,
   });
 
+  const validateForm = () => {
+    let newErrors = {};
+
+    // Candidate Profile
+    if (!candidateProfile.position) {
+      newErrors.position = "Please enter position";
+    }
+    if (!candidateProfile.department) {
+      newErrors.department = "Please select the department";
+    }
+    if (!candidateProfile.full_name.trim()) {
+      newErrors.full_name = "Please fill the name";
+    } else if (!/^[a-zA-Z\s]+$/.test(candidateProfile.full_name)) {
+      newErrors.full_name = "Name must contain only letters and spaces";
+    }
+
+    if (!candidateProfile.email) {
+      newErrors.email = "Please fill the email";
+    } else if (!/(.+)@(.+)\.(.+)/i.test(candidateProfile.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!candidateProfile.gender) {
+      newErrors.gender = "Please select gender";
+    }
+
+    if (candidateProfile.mobile_number) {
+      if (!/^\d{10}$/.test(candidateProfile.mobile_number)) {
+        newErrors.mobile_number = "Mobile number must be 10 digits";
+      }
+    }
+
+    // Recommendation
+    if (!recommendation.status) {
+      newErrors.status = "Please select a status";
+    }
+    
+
+    setErrors(newErrors);
+
+    // If no errors, return true
+    return Object.keys(newErrors).length === 0;
+  };
+
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
@@ -156,6 +203,7 @@ const CandidateEditForm = () => {
         );
 
         // setCandidateProfile(response.data.candidate);
+        console.log('my response s>>',response.data)
         setCandidateProfile({
           position: response.data.candidate.position || "",
           department: response.data.candidate.department || "",
@@ -183,6 +231,7 @@ const CandidateEditForm = () => {
         setAssessmentSectionData(
           response?.data?.candidate?.assessment_section || []
         );
+        setAssessmentData(response?.data?.candidate?.assessments)
 
         setRecommendation({
           status: response.data?.candidate.status ?? "",
@@ -197,6 +246,7 @@ const CandidateEditForm = () => {
           cv_file: response.data.candidate.cv_file ?? "",
         });
 
+            // my other info should be -> response?.data?.candidate?.other_informations
         setOtherInfo(
           (response.data.candidate_questions || []).map((q) => ({
             ...q,
@@ -219,10 +269,14 @@ const CandidateEditForm = () => {
     }));
   };
 
-  console.log('my other info is >>>>', otherInfo)
+
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return; // Stop submit if errors
+    }
     try {
       const formData = new FormData();
 
@@ -331,11 +385,13 @@ const CandidateEditForm = () => {
       <JobParticular
         candidateProfile={candidateProfile}
         onChange={handleCandidateProfileChange}
+        errors={errors}
       />
 
       <PersonalParticular
         candidateProfile={candidateProfile}
         onChange={handleCandidateProfileChange}
+        errors={errors}
       />
 
       <EducationDetails

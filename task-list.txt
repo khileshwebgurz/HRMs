@@ -40,3 +40,15 @@ otp not setup
 otp verification to test page redirection issue
 
 
+====================
+1.
+Pending (Oauth uisng google api)
+
+Spatie\GoogleCalendar\Event 
+
+for 
+interview module
+
+=========================
+
+corn not for import candidate in local

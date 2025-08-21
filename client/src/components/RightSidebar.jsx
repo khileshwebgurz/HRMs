@@ -159,7 +159,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/all-candidates" className="nav-link">
+                    <Link to="/users/candidate/all-candidates" className="nav-link">
                       <i className="nav-icon fas fa-list"></i>
                       All Candidates
                     </Link>
@@ -172,7 +172,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
 
                   </li>
                   <li className="nav-item">
-                    <Link to="/candidate-tracker" className="nav-link">
+                    <Link to="/tracker/candidates" className="nav-link">
                       <i className="nav-icon fas fa-chart-line"></i>
                       Candidate Tracker
                     </Link>
@@ -190,7 +190,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/review-aptitude-test" className="nav-link">
+                    <Link to="/public/users/all-candidate-test" className="nav-link">
                       <i className="nav-icon fas fa-clipboard-check"></i>
                       Review Aptitude Test
                     </Link>

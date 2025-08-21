@@ -13,7 +13,9 @@ function ActiveCandidatesList() {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [showAptitudeModal, setShowAptitudeModal] = useState(false);
-  const [aptitudeLink, setAptitudeLink] = useState("");
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null);
+  const [testType, setTestType] = useState("1");
+  const [isSendingTest, setIsSendingTest] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemPerPage] = useState(10);
@@ -41,8 +43,6 @@ function ActiveCandidatesList() {
           },
         }
       );
-
-      console.log("my response is >>> ", response.data);
 
       if (response.data) {
         setData(Array.isArray(response.data.data) ? response.data.data : []);
@@ -80,15 +80,12 @@ function ActiveCandidatesList() {
   }, [data]);
 
   const handleDownload = async (type) => {
-    // Determine which candidates to export
     const candidatesToExport =
       checkedEmails.length > 0
         ? data.filter((candidate) =>
             checkedEmails.includes(candidate.email)
           )
         : data;
-
-    console.log("candidate to export >>>", candidatesToExport);
 
     if (candidatesToExport.length === 0) {
       alert("No candidates to export");
@@ -97,7 +94,6 @@ function ActiveCandidatesList() {
 
     try {
       if (type === "csv") {
-        // CSV Export
         const headers = [
           "ID",
           "Name",
@@ -140,7 +136,6 @@ function ActiveCandidatesList() {
         link.click();
         document.body.removeChild(link);
       } else {
-        // XLSX Export
         const headers = [
           "ID",
           "Name",
@@ -229,24 +224,36 @@ function ActiveCandidatesList() {
     }
   };
 
-  // const filteredData = data.filter((candidate) => {
-  //   const candidateStatus =
-  //     candidate.candidate_status?.status_name || candidate.status;
-  //   const selectedStatusObj = statuses.find((s) => s.id == selectedStatus);
-
-  //   return (
-  //     (!selectedDepartment || candidate.department === selectedDepartment) &&
-  //     (!selectedStatus || candidateStatus === selectedStatusObj?.status_name) &&
-  //     (!selectedGender || candidate.gender?.toString() === selectedGender) &&
-  //     (!searchTerm ||
-  //       candidate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       candidate.id.toLowerCase().includes(searchTerm.toLowerCase()))
-  //   );
-  // });
-
   const handleRecordsPerPage = (e) => {
     setItemPerPage(parseInt(e.target.value));
     setCurrentPage(1);
+  };
+
+  const handleSendAptitudeTest = async () => {
+    if (!selectedCandidateId) return;
+    
+    setIsSendingTest(true);
+    try {
+      const numericId = selectedCandidateId.replace(/^HRM/, "");
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/generate-test/${numericId}`,
+        { type: testType },
+        { withCredentials: true }
+      );
+
+      if (response.data.status === 'success') {
+        alert('Test sent to candidate successfully!');
+        setShowAptitudeModal(false);
+        fetchData(currentPage);
+      } else if (response.data.status === 'already_exists') {
+        alert('A test is already assigned to this candidate.');
+      }
+    } catch (error) {
+      console.error('Error sending test:', error);
+      alert('Failed to send test. Please try again.');
+    } finally {
+      setIsSendingTest(false);
+    }
   };
 
   return (
@@ -377,7 +384,6 @@ function ActiveCandidatesList() {
                   <th>Date Applied</th>
                   <th>Position</th>
                   <th>Department</th>
-
                   <th>Total Experience</th>
                   <th>Relevant Experience</th>
                   <th>Age</th>
@@ -398,13 +404,13 @@ function ActiveCandidatesList() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="text-center">
+                    <td colSpan="21" className="text-center">
                       Loading candidates...
                     </td>
                   </tr>
                 ) : data.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center">
+                    <td colSpan="21" className="text-center">
                       No candidates found matching your criteria
                     </td>
                   </tr>
@@ -433,11 +439,10 @@ function ActiveCandidatesList() {
                       </td>
                       <td>{candidate.position || ""}</td>
                       <td>{candidate.department || ""}</td>
-
                       <td>{candidate.total_experience || ""}</td>
                       <td>{candidate.total_relevant_experience || ""}</td>
                       <td>{candidate.age || ""}</td>
-                      <td>{candidate.gender || ""}</td>
+                      <td>{candidate.gender === "1" ? "Male" : "Female"}</td>
                       <td>{candidate.education || ""}</td>
                       <td>{candidate.mobile_number || ""}</td>
                       <td>{candidate.email || ""}</td>
@@ -448,13 +453,11 @@ function ActiveCandidatesList() {
                       <td>{candidate.date_of_interview || ""}</td>
                       <td>{candidate.interviewed_by || ""}</td>
                       <td>{candidate.interview_score || ""}</td>
-
                       <td>
                         <div className="btn-group btn-group-sm">
                           <a
                             className="btn btn-info site-icon eye-icon"
                             title="View"
-                            // /profile/:profile_id/view
                             href={`/profile/${candidate.profile_id}/view`}
                             target="_blank"
                           >
@@ -539,11 +542,7 @@ function ActiveCandidatesList() {
                             className="btn btn-warning wgz_send_aptutude site-icon paper-plane-icon"
                             title="Send Aptitude Test"
                             onClick={() => {
-                              setAptitudeLink(
-                                `${
-                                  import.meta.env.VITE_API_BASE_URL
-                                }/generate-test/${candidate.id}`
-                              );
+                              setSelectedCandidateId(candidate.id);
                               setShowAptitudeModal(true);
                             }}
                           >
@@ -594,64 +593,78 @@ function ActiveCandidatesList() {
                 <button
                   type="button"
                   className="close"
-                  onClick={() => setShowAptitudeModal(false)}
+                  onClick={() => {
+                    setShowAptitudeModal(false);
+                    setSelectedCandidateId(null);
+                  }}
                 >
                   <span>&times;</span>
                 </button>
               </div>
               <div className="modal-body">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    window.location.href = aptitudeLink;
-                  }}
+                <div className="form-group">
+                  <label>Aptitude test type</label>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      id="type_office"
+                      name="type"
+                      value="1"
+                      checked={testType === "2"}
+                      onChange={() => setTestType("2")}
+                      className="form-check-input"
+                    />
+                    <label htmlFor="type_office" className="form-check-label">
+                      Office (No OTP)
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      id="type_home"
+                      name="type"
+                      value="2"
+                      checked={testType === "1"}
+                      onChange={() => setTestType("1")}
+                      className="form-check-input"
+                    />
+                    <label htmlFor="type_home" className="form-check-label">
+                      Home (without OTP verification)
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      type="radio"
+                      id="type_skip"
+                      name="type"
+                      value="3"
+                      checked={testType === "3"}
+                      onChange={() => setTestType("3")}
+                      className="form-check-input"
+                    />
+                    <label htmlFor="type_skip" className="form-check-label">
+                      Skip Test
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAptitudeModal(false)}
+                  disabled={isSendingTest}
                 >
-                  <div className="form-group">
-                    <label>Aptitude test from</label>
-                    <div className="form-check">
-                      <input
-                        type="radio"
-                        id="type_office"
-                        name="type"
-                        value="1"
-                        defaultChecked
-                        className="form-check-input"
-                      />
-                      <label htmlFor="type_office" className="form-check-label">
-                        Office
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        type="radio"
-                        id="type_home"
-                        name="type"
-                        value="2"
-                        className="form-check-input"
-                      />
-                      <label htmlFor="type_home" className="form-check-label">
-                        Home
-                      </label>
-                    </div>
-                    <div className="form-check">
-                      <input
-                        type="radio"
-                        id="type_skip"
-                        name="type"
-                        value="3"
-                        className="form-check-input"
-                      />
-                      <label htmlFor="type_skip" className="form-check-label">
-                        Skip Test
-                      </label>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <button type="submit" className="btn btn-primary">
-                      Submit
-                    </button>
-                  </div>
-                </form>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSendAptitudeTest}
+                  disabled={isSendingTest}
+                >
+                  {isSendingTest ? 'Sending...' : 'Send Test'}
+                </button>
               </div>
             </div>
           </div>

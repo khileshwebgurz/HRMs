@@ -1,6 +1,6 @@
 import React from "react";
 
-const PersonalParticular = ({ candidateProfile, onChange }) => {
+const PersonalParticular = ({ candidateProfile, onChange, errors }) => {
   return (
     <>
       <div className="card">
@@ -20,6 +20,9 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                 id="full_name"
                 maxLength="25"
               />
+              {errors.full_name && (
+                <div className="text-danger">{errors.full_name}</div>
+              )}
             </div>
           </div>
           <div className="row">
@@ -38,6 +41,9 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                     name="mobile_number"
                     id="mobile_number"
                   />
+                  {errors.mobile_number && (
+                    <div className="text-danger">{errors.mobile_number}</div>
+                  )}
                 </div>
               </div>
 
@@ -57,6 +63,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                         checked={candidateProfile.gender === "1"}
                         onChange={() => onChange("gender", "1")}
                       />
+                      
                       Male
                     </label>
                   </div>
@@ -104,7 +111,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                   htmlFor="residence_address"
                   className="col-4 col-form-label"
                 >
-                  Address<span className="req">*</span>
+                  Address
                 </label>
                 <div className="col-8">
                   <input
@@ -122,7 +129,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
 
               <div className="form-group row">
                 <label htmlFor="nationality" className="col-4 col-form-label">
-                  Nationality<span className="req">*</span>
+                  Nationality
                 </label>
                 <div className="col-8">
                   <input
@@ -140,7 +147,8 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                   htmlFor="place_of_birth"
                   className="col-4 col-form-label"
                 >
-                  Place of Birth<span className="req">*</span>
+                  {/* <span className="req">*</span> */}
+                  Place of Birth
                 </label>
                 <div className="col-8">
                   <input
@@ -166,6 +174,10 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
                   id="email"
                   name="email"
                 />
+                 {errors.email && (
+                    <div className="text-danger">{errors.email}</div>
+                  )}
+                
               </div>
             </div>
 
@@ -173,7 +185,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
               <div className="col-lg-6">
                 <div className="form-group row">
                   <label htmlFor="dob" className="col-4 col-form-label">
-                    Date of Birth<span className="req">*</span>
+                    Date of Birth
                   </label>
                   <div className="col-8">
                     <input
@@ -190,7 +202,7 @@ const PersonalParticular = ({ candidateProfile, onChange }) => {
               <div className="col-lg-6">
                 <div className="form-group row">
                   <label htmlFor="age" className="col-4 col-form-label">
-                    Age<span className="req">*</span>
+                    Age
                   </label>
                   <div className="col-8">
                     <input

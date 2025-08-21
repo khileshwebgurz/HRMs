@@ -155,6 +155,12 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::post('/clockOut', [AuthController::class, 'clockOut']);
             Route::get('/clockApi', [AuthController::class, 'clockApi']);
 
+            // Review Aptitude Test
+            Route::get('all-candidate-test', [UserController::class, 'allCandidateTest']);
+            Route::get('candidate-test/{test_id}', [UserController::class,'viewCandidateTest']);
+            Route::post('send-message-candidate', [UserController::class,'sendMessagetoCandidate']);
+            
+             //Route::post('send-message-candidate', 'UserController@sendMessagetoCandidate')->name('sendMessagetoCandidate');
 
             //roles
             Route::get('/permissions', [RoleController::class, 'getPermissions']);
@@ -214,7 +220,30 @@ use App\Http\Controllers\Employee\OnboardProcessController;
 
             // job applications
             Route::get('/career', [LeadController::class, 'warmLeads']);
-          
+            Route::get('/export-career', [LeadController::class, 'exportCareer'])->name('exportcareer');
+            Route::post('/bulk-email', [LeadController::class, 'bulkSendEmail'])->name('bulkSendEmail');
+            Route::post('/bulk-send-email-submit', [LeadController::class, 'bulkSendEmailSubmit'])->name('bulkSendEmailSubmit');
+            Route::post('/career/reject',[LeadController::class, 'rejectPost']);
+            Route::post('/career/shortlist',[LeadController::class,'shortlistedPost']);
+            Route::post('/career/not-interested',[LeadController::class,'notInterestedPost']);
+
+
+
+            Route::get('/latecommers', [AttendanceController::class, 'latecommers'])->name('latecommers');
+           // Route::get('/export-warm-leads', [LeadController::class, 'exportCareer'])->name('exportcareer');
+            Route::post('/view-forms', [LeadController::class, 'viewForm'])->name('form-view');
+            Route::post('/followup', [LeadController::class, 'followUp'])->name('followup');
+            Route::post('/bulk-email', [LeadController::class, 'bulkSendEmail'])->name('bulkSendEmail');
+            Route::post('/bulk-send-email-submit', [LeadController::class, 'bulkSendEmailSubmit'])->name('bulkSendEmailSubmit');
+            Route::post('/reject', [LeadController::class, 'rejectPost'])->name('reject');
+            Route::post('/shortlist', [LeadController::class, 'shortlistedPost'])->name('shortlisted');
+            Route::post('/notinterested', [LeadController::class, 'notinterestedPost'])->name('notinterested');
+            Route::post('/follow-up-post', [LeadController::class, 'FollowUpPost'])->name('followUpPost');
+
+              Route::post('generate-test/{candidate_id}', [UserController::class, 'generateTest'])
+                ->name('generateTest');
+
+
         });
 
         Route::middleware('auth:api')->prefix('tracker')->group(function () {
@@ -223,7 +252,6 @@ use App\Http\Controllers\Employee\OnboardProcessController;
             Route::get('/editCandidates/{candidate_id}', [TrackerController::class, 'editCandidates']);
             Route::get('edit-candidate/{candidate_id}', 'UserController@editCandidate')->name('candidateedit');
             Route::get('delete-candidate/{candidate_id}', 'UserController@deleteCandidate')->name('candidatedelete');
-            Route::get('generate-test/{candidate_id}', 'UserController@generateTest')->name('generateTest');
             Route::get('/ticketViewByEmployee', [TicketController::class, 'ticketViewByEmployee']);
             Route::post('/addTicket', [TicketController::class, 'addTicket']);
             Route::get('/ticket-system/{tab}', [TicketController::class, 'ticketViewByITteam']);
@@ -241,7 +269,7 @@ use App\Http\Controllers\Employee\OnboardProcessController;
         //Route::middleware('api')->group(function () {
             // Make sure these routes are properly defined
             Route::get('test/{test_id}', [UserController::class, 'showTest'])->name('showTest');
-            Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
+           // Route::post('/generate-test/{candidate_id}', [UserController::class, 'generateTest']);
             Route::post('/verify-otp', [UserController::class, 'checkTestOtp']);
             Route::post('/test/save', [UserController::class, 'saveTestResult'])->name('saveTestResult');
         //});

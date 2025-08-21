@@ -70,6 +70,7 @@ use App\Models\CandidateOtherInformation;
 use App\Models\CandidateFamily;
 use App\Mail\TestResultMail;
 use App\Mail\TestCompletedMail;
+use Google\Service\CivicInfo\Candidate;
 
 class UserController extends Controller
 {
@@ -1059,15 +1060,15 @@ class UserController extends Controller
         // }
     }
 
-  
-        // 5-aug-25
-     public function showTest($test_id)
+
+    // 5-aug-25
+    public function showTest($test_id)
     {
         $can_test = CandidateTest::with(['questions.question', 'questions.options', 'candidate'])
             ->where('token', $test_id)
             ->first();
 
-            Log::info('testtt', ['can_test' => $can_test]);
+        Log::info('testtt', ['can_test' => $can_test]);
 
         if (!$can_test) {
             return response()->json(['error' => 'Test not found'], 404);
@@ -1087,7 +1088,7 @@ class UserController extends Controller
                 'total_percentage' => ($can_test->result * 100) / count($can_test->questions)
             ]);
         }
-        
+
 
         return response()->json([
             'status' => 'active',
@@ -1096,7 +1097,7 @@ class UserController extends Controller
         ]);
     }
 
-   public function checkTestOtp(Request $request)
+    public function checkTestOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'test_token' => 'required',
@@ -1138,7 +1139,7 @@ class UserController extends Controller
     public function saveTestResultOLd(Request $request)
     {
         Log::info('test', ['testtw' => $request]);
-      
+
         $validator = Validator::make($request->all(), [
             'test_token' => 'required',
             'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
@@ -1199,7 +1200,7 @@ class UserController extends Controller
             $can_test->status = 3;
 
             // Calculate result
-            $correctAnswers = $can_test->questions->filter(function($question) {
+            $correctAnswers = $can_test->questions->filter(function ($question) {
                 return $question->candidate_answer == $question->correct_answer;
             })->count();
 
@@ -1225,8 +1226,8 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => 'completed',
-                'message' => $totalPercentage >= 90 
-                    ? 'Congratulations, you are shortlisted for next round.' 
+                'message' => $totalPercentage >= 90
+                    ? 'Congratulations, you are shortlisted for next round.'
                     : 'Better luck next time. Please connect with HR.',
                 'result' => [
                     'score' => $correctAnswers,
@@ -1248,7 +1249,7 @@ class UserController extends Controller
     public function saveTestResult(Request $request)
     {
         Log::info('test', ['testtw' => $request->all()]);
-    
+
         $validator = Validator::make($request->all(), [
             'test_token' => 'required',
             'pending_time' => 'required|regex:/^\d{2}:\d{2}$/',
@@ -1302,7 +1303,7 @@ class UserController extends Controller
                     $testOption = CandidateTestOptions::where('candidate_test_id', $can_test->id)
                         ->where('question_id', $question_id)
                         ->first();
-                    
+
                     if ($testOption) {
                         $testOption->candidate_answer = $answer_id;
                         $testOption->save();
@@ -1311,7 +1312,7 @@ class UserController extends Controller
             }
 
             $can_test->save();
-            
+
             Log::info('Auto-save completed', [
                 'test_id' => $can_test->id,
                 'candidate_id' => $can_test->candidate_id,
@@ -1341,7 +1342,7 @@ class UserController extends Controller
                 $testOption = CandidateTestOptions::where('candidate_test_id', $can_test->id)
                     ->where('question_id', $question_id)
                     ->first();
-                
+
                 if ($testOption) {
                     $testOption->candidate_answer = $answer_id;
                     $testOption->save();
@@ -1353,7 +1354,7 @@ class UserController extends Controller
         if ($request->finalsave) {
             // Double-check test status before final submission
             $can_test->refresh(); // Refresh from database to get latest status
-            
+
             if ($can_test->status == 3) {
                 return response()->json([
                     'status' => 'error',
@@ -1420,8 +1421,8 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => 'completed',
-                'message' => $totalPercentage >= 90 
-                    ? 'Congratulations, you are shortlisted for next round.' 
+                'message' => $totalPercentage >= 90
+                    ? 'Congratulations, you are shortlisted for next round.'
                     : 'Better luck next time. Please connect with HR.',
                 'result' => [
                     'score' => $correctAnswers,
@@ -1459,11 +1460,11 @@ class UserController extends Controller
             'percentage' => $percentage
         ], function ($message) use ($can_test) {
             $message->to('hr-sandeep@yopmail.com')
-                   ->subject($can_test->candidate->full_name.' Completed Aptitude Test Round 1 - ' .$can_test->candidate->position);
+                ->subject($can_test->candidate->full_name . ' Completed Aptitude Test Round 1 - ' . $can_test->candidate->position);
         });
 
         // Email to candidate
-        $statusMessage = $percentage >= 90 
+        $statusMessage = $percentage >= 90
             ? 'Congratulations, you are shortlisted for next round.'
             : 'Better luck next time. Please connect with HR.';
 
@@ -1474,7 +1475,7 @@ class UserController extends Controller
             'test_url' => route('showTest', $can_test->token)
         ], function ($message) use ($can_test) {
             $message->to($can_test->candidate->email)
-                   ->subject('Message from HRM');
+                ->subject('Message from HRM');
         });
     }
 
@@ -1495,7 +1496,7 @@ class UserController extends Controller
         ]);
 
         $interStatus = $percentage >= 90 ? 2 : 3; // 2=Passed, 3=Failed
-        $message = $percentage >= 90 
+        $message = $percentage >= 90
             ? 'Congratulations, you are shortlisted for next round.'
             : 'Better luck next time. Please connect HR';
 
@@ -1531,6 +1532,18 @@ class UserController extends Controller
         return $this->createTest($candidate, $request->type);
     }
 
+
+    public function viewGenerateTest($candidate_id)
+            {
+                $candidate = Candidates::findOrFail($candidate_id);
+
+                return response()->json([
+                    'status' => 'success',
+                    'candidate' => $candidate
+                ]);
+            }
+
+
     protected function skipTest($candidate)
     {
         $interview = CandidateInterviews::create([
@@ -1554,7 +1567,7 @@ class UserController extends Controller
 
     protected function createTest($candidate, $type)
     {
-      
+
         Log::info('test', ['testtw' => $candidate . $type]);
         $existingTest = CandidateTest::where('candidate_id', $candidate->id)
             ->where('status', 1) // 1 = active
@@ -1577,7 +1590,7 @@ class UserController extends Controller
             'type' => $type,
             'otp' => $type == 1 ? rand(1000, 9999) : null
 
-           
+
         ]);
 
         // Attach random questions
@@ -1601,7 +1614,7 @@ class UserController extends Controller
         // Create notification
         Notifications::create([
             'type_id' => 'aptitude_sent',
-            'message' => 'Aptitude test sent to '.$candidate->full_name.' <a target="_blank" style="margin-left: 23px;" href='.route('showTest', $can_test->token).'>Click Here</a>',
+            'message' => 'Aptitude test sent to ' . $candidate->full_name . ' <a target="_blank" style="margin-left: 23px;" href=' . route('showTest', $can_test->token) . '>Click Here</a>',
             'page_id' => $can_test->id
         ]);
 
@@ -1612,6 +1625,7 @@ class UserController extends Controller
         ]);
     }
 
+    
 
     protected function sendTestInviteEmail($candidate, $test)
     {
@@ -1619,17 +1633,18 @@ class UserController extends Controller
             'name' => $candidate->full_name,
             'addresslink' => ($test->type == 1) ? get_options('office_address_link') : '',
             'otp' => $test->otp,
-            'test_url' => route('showTest', $test->token)
+           // 'test_url' => route('showTest', $test->token)
+            'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
         ];
 
         Mail::send('emails.test-invite', $data, function ($message) use ($candidate) {
             $message->to($candidate->email, $candidate->full_name)
-                   ->subject('HRM Aptitude Quiz');
+                ->subject('HRM Aptitude Quiz');
         });
     }
 
 
-    
+
 
     public function addCandidate()
     {
@@ -1921,12 +1936,15 @@ class UserController extends Controller
     {
         $candidate = Candidates::with([
             'skills_section',
+            'candidate_status',
             'languages',
             'educations',
             'employments',
             'families',
             'assessment_section',
+            'assessments',
             'other_informations',
+            'skills_section',
         ])->find($candidate_id);
         // $candidate = Candidates::where('id', $candidate_id)->first();
 
@@ -2489,7 +2507,7 @@ class UserController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%$search%")
                     ->orWhere('profile_id', 'like', "%$search%")
-                      ->orWhere('email', 'like', "%$search%");
+                    ->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -2721,7 +2739,7 @@ class UserController extends Controller
         return Excel::download(new CandidateCsvExport($candidates), 'candidates-' . time() . '.xlsx');
     }
 
-    public function allCandidateTest(Request $request)
+    public function allCandidateTestOLD(Request $request)
     {
         if (!in_array('review_aptitude_test', Session::get('permission')[0])) {
             abort(404);
@@ -2775,7 +2793,60 @@ class UserController extends Controller
         return view('users.candidates.test.list');
     }
 
-    public function viewCandidateTest($test_id)
+    // updated allcandidateTest
+    public function allCandidateTest(Request $request)
+    {
+        $permission_role = Roles::find(Auth::user()->user_role);
+
+        if (!$permission_role) {
+            return response()->json(['error' => 'Role not found'], 404);
+        }
+
+        // Get pagination and search parameters
+        $limit = $request->input('limit', 10);
+        $search = $request->input('search', '');
+
+        // Base query
+        $query = CandidateTest::with('candidate');
+
+        // Apply role-based restrictions
+        if ($permission_role->view == '2') {
+            $query->where('created_by', Auth::id());
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::id())->pluck('id');
+            $query->whereIn('created_by', $employees);
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::id())
+                ->orWhere('id', Auth::id())
+                ->pluck('id');
+            $query->whereIn('created_by', $employees);
+        } elseif ($permission_role->view == '5') {
+            // no restriction
+        } else {
+            return response()->json([
+                'data' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'total' => 0
+            ]);
+        }
+
+        // Search filter (by full_name from related candidate)
+        if (!empty($search)) {
+            $query->whereHas('candidate', function ($q) use ($search) {
+                $q->where('full_name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply pagination
+        $data = $query->latest()->paginate($limit);
+
+        return response()->json($data);
+    }
+
+
+
+    public function viewCandidateTestOLD($test_id)
     {
         $can_test = CandidateTest::where('id', $test_id)->where('status', '3')
             ->with('questions')
@@ -2786,6 +2857,32 @@ class UserController extends Controller
             abort(404);
         }
     }
+
+    public function viewCandidateTest($test_id)
+    {
+        // added the with -> questions.question.options to get the list of question and its option
+        $can_test = CandidateTest::where('id', $test_id)
+            ->where('status', '3')
+            ->with([
+                'candidate',
+                'questions.question.options'
+            ])
+            ->first();
+        Log::info('my candidate is >>',['candiate '=>$can_test]);
+
+        if ($can_test) {
+            return response()->json([
+                'success' => true,
+                'data' => $can_test
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Test not found or not completed'
+            ], 404);
+        }
+    }
+
 
     public function testStatusCandidate(Request $request)
     {
@@ -2847,40 +2944,40 @@ class UserController extends Controller
     public function sendMessagetoCandidate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'message' => 'required'
+            'message' => 'required',
+            'candidate_id' => 'required|exists:candidates,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 401,
-                'message' => $validator->errors()
-                    ->first()
+                'message' => $validator->errors()->first(),
             ]);
         }
-        $candidate_id = $request->get('candidate_id');
-        $message = $request->get('message');
 
-        $candidate = Candidates::findOrFail($candidate_id);
+        try {
+            $candidate = Candidates::findOrFail($request->candidate_id);
+            $to_email = $candidate->email;
+            $to_name = $candidate->full_name;
 
-        $to_name = $candidate->full_name;
-        $to_email = $candidate->email;
-        $data = array(
-            'messagedata' => $message,
-            'name' => $to_name
-        );
-        Mail::send('emails.send-message-candidate', $data, function ($message) use ($to_name, $to_email) {
-            $message->to($to_email, $to_name)->subject('Message from HRM');
-        });
+            $data = [
+                'messagedata' => $request->message,
+                'name' => $to_name,
+            ];
 
-        if (! Mail::failures()) {
+            Mail::send('emails.send-message-candidate', $data, function ($message) use ($to_email, $to_name) {
+                $message->to($to_email, $to_name)->subject('Message from HRM');
+            });
+
             return response()->json([
                 'status' => 200,
-                'message' => "Message sent to candidate."
+                'message' => 'Message sent to candidate.'
             ]);
-        } else {
+
+        } catch (\Exception $e) {
             return response()->json([
-                'status' => 401,
-                'message' => 'Something Wrong. Try Again.'
+                'status' => 500,
+                'message' => 'Failed to send email: ' . $e->getMessage(),
             ]);
         }
     }
@@ -3021,7 +3118,7 @@ class UserController extends Controller
                     $candidate->skills_section()->create(['skill_name' => $skill]);
                 }
             }
-            
+
 
             // --- Educations ---
             CandidateEducations::where('candidate_id', $candidate->id)->delete();
@@ -3046,7 +3143,7 @@ class UserController extends Controller
                     'date_from'        => $emp['date_from'] ?? '',
                     'date_to'          => $emp['date_to'] ?? '',
                     'position'         => $emp['position'] ?? '',
-                    'reason_of_leaving'=> $emp['reason_of_leaving'] ?? ''
+                    'reason_of_leaving' => $emp['reason_of_leaving'] ?? ''
                 ]);
             }
 
@@ -3086,9 +3183,9 @@ class UserController extends Controller
                 ]);
             }
 
-             $candidate->otp = rand(1000, 9999);
+            $candidate->otp = rand(1000, 9999);
 
-             Log::info('otp0', ['otp0' => $candidate->otp]);
+            Log::info('otp0', ['otp0' => $candidate->otp]);
             // --- Test Creation ---
             $test = CandidateTest::create([
                 'candidate_id' => $candidate->id,
@@ -3096,17 +3193,17 @@ class UserController extends Controller
                 'status'       => 1,
                 'created_by'   => Auth::id(),
                 'pending_time' => '00:00',
-               // 'type'         => 2,
+                // 'type'         => 2,
                 'type'         => 1,
                 'otp'          => $candidate->otp
-                
+
             ]);
-              Log::info('otp0', ['otp0' => $test]);
+            Log::info('otp0', ['otp0' => $test]);
             // --- Assign random questions ---
             $questions = Questions::where('status', 1)
-                                ->inRandomOrder()
-                                ->limit(10) // You can use config('settings.quiz_question_limit') if dynamic
-                                ->get();
+                ->inRandomOrder()
+                ->limit(10) // You can use config('settings.quiz_question_limit') if dynamic
+                ->get();
 
             foreach ($questions as $question) {
                 CandidateTestOptions::create([
@@ -3116,7 +3213,7 @@ class UserController extends Controller
                 ]);
             }
 
-           // --- Send Email ---
+            // --- Send Email ---
             // Mail::send('emails.test-invite', [
             //     'name'     => $candidate->full_name,
             //     'test_url' => route('showTest', $test->token)
@@ -3132,7 +3229,7 @@ class UserController extends Controller
                 'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
             ], function ($message) use ($candidate) {
                 $message->to($candidate->email, $candidate->full_name)
-                        ->subject('HRM Aptitude Quiz');
+                    ->subject('HRM Aptitude Quiz');
             });
 
 
@@ -3146,7 +3243,6 @@ class UserController extends Controller
             DB::commit();
 
             return response()->json(['status' => 200, 'message' => 'Profile updated successfully.']);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Profile Update Error: ' . $e->getMessage());
@@ -3256,7 +3352,7 @@ class UserController extends Controller
                     'date_from'        => $emp['date_from'] ?? '',
                     'date_to'          => $emp['date_to'] ?? '',
                     'position'         => $emp['position'] ?? '',
-                    'reason_of_leaving'=> $emp['reason_of_leaving'] ?? ''
+                    'reason_of_leaving' => $emp['reason_of_leaving'] ?? ''
                 ]);
             }
 
@@ -3312,9 +3408,9 @@ class UserController extends Controller
 
             // --- Assign Questions ---
             $questions = Questions::where('status', 1)
-                                ->inRandomOrder()
-                                ->limit(10)
-                                ->get();
+                ->inRandomOrder()
+                ->limit(10)
+                ->get();
 
             foreach ($questions as $question) {
                 CandidateTestOptions::create([
@@ -3331,7 +3427,7 @@ class UserController extends Controller
                 'test_url' => env('FRONTEND_URL') . '/test/' . $test->token,
             ], function ($message) use ($candidate) {
                 $message->to($candidate->email, $candidate->full_name)
-                        ->subject('HRM Aptitude Quiz');
+                    ->subject('HRM Aptitude Quiz');
             });
 
             // --- Notification ---
@@ -3344,7 +3440,6 @@ class UserController extends Controller
             DB::commit();
 
             return response()->json(['status' => 200, 'message' => 'Profile updated successfully.']);
-
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Profile Update Error: ' . $e->getMessage());
@@ -3352,7 +3447,7 @@ class UserController extends Controller
         }
     }
 
-   
+
 
     public function candidateProfileView($profile_id)
     {
