@@ -299,6 +299,14 @@ function ActiveCandidatesList() {
                   ? "Export Selected (XLSX)"
                   : "Export All (XLSX)"}
               </button>
+               <select
+                name=""
+                className="btn btn-success btn-sm site-main-btn-2"
+                id="wgz_action"
+              >
+                <option value="">Bulk Action</option>
+                <option value="send_email">Send Email</option>
+              </select>
             </div>
             <div className="col-md-3 mt-2">
               <input

@@ -47,17 +47,52 @@ Thanks! Team Webguruz`
   };
 
 
+  // const handleScheduleInterview = async (e) => {
+  //     e.preventDefault();
+
+  //   const formData = new FormData();
+  //   formData.append("round", selectedRound); 
+  //   formData.append("employee_id", selectedEmployee); 
+  //   formData.append("interview_id", id); 
+  //   formData.append("interview_time", moment(interviewTime).format("YYYY-MM-DD HH:mm"));
+  //   formData.append("message_candidate", message);
+
+  //   // If CV file is selected
+  //   if (cvFile) {
+  //     formData.append("cv", cvFile);
+  //   }
+
+
+  // try {
+  //   const res = await axios.post(
+  //     "http://localhost:8000/api/schedule-interview",
+  //     formData,
+  //     {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //       withCredentials: true,
+  //     }
+  //   );
+  //   console.log(res.data);
+  //   alert(res.data.message);
+  // } catch (error) {
+  //   console.error(error);
+  //   alert(error.response?.data?.message || "Something went wrong");
+  // }
+  // };
+
   const handleScheduleInterview = async (e) => {
-      e.preventDefault();
+  e.preventDefault();
 
   const formData = new FormData();
-  formData.append("round", selectedRound); 
-  formData.append("employee_id", selectedEmployee); 
-  formData.append("interview_id", id); 
-  formData.append("interview_time", moment(interviewTime).format("YYYY-MM-DD HH:mm"));
+  formData.append("round", selectedRound);
+  formData.append("employee_id", selectedEmployee);
+  formData.append("interview_id", id);
+  formData.append(
+    "interview_time",
+    moment(interviewTime).format("YYYY-MM-DD HH:mm")
+  );
   formData.append("message_candidate", message);
 
-  // If CV file is selected
   if (cvFile) {
     formData.append("cv", cvFile);
   }
@@ -71,13 +106,19 @@ Thanks! Team Webguruz`
         withCredentials: true,
       }
     );
-    console.log(res.data);
+
     alert(res.data.message);
+
+    if (res.data.calendar_link) {
+      // Open Google Calendar in new tab
+      window.open(res.data.calendar_link, "_blank");
+    }
   } catch (error) {
     console.error(error);
     alert(error.response?.data?.message || "Something went wrong");
   }
-  };
+};
+
 
   return (
     <>

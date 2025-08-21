@@ -166,7 +166,7 @@ class InterviewController extends Controller
         return response()->json(['message' => 'Interview rescheduled and calendar invites sent.']);
     }
 
-    public function scheduleInterview(Request $request)
+    public function scheduleInterviewOLD(Request $request)
     {
         Log::info('finlly inside the function.');
         $validator = Validator::make($request->all(), [
@@ -241,4 +241,82 @@ class InterviewController extends Controller
 
         return response()->json(['message' => 'Interview scheduled and calendar invites sent.']);
     }
+
+
+    public function scheduleInterview(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'round' => 'required',
+            'employee_id' => 'required|exists:employees,id',
+            'interview_id' => 'required|exists:candidate_interviews,id',
+            'interview_time' => 'required|date_format:Y-m-d H:i|after:' . now(),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $interview = CandidateInterviews::find($request->interview_id);
+
+        if ($request->hasFile('cv')) {
+            $file = $request->file('cv');
+            $filename = time() . '-' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/cv/'), $filename);
+            $interview->cv_file = $filename;
+            $interview->save();
+        }
+
+        $employee = Employees::find($request->employee_id);
+
+        // Save round in DB
+        $round = new CandidateInterviewRounds();
+        $round->round = $request->round;
+        $round->interview_time = $request->interview_time;
+        $round->interview_id = $interview->id;
+        $round->employee_id = $employee->id;
+        $round->employee_name = $employee->name;
+        $round->save();
+
+        // Update statuses
+        $status = match ($round->round) {
+            '1' => 3,
+            '2' => 4,
+            '3' => 5,
+            '4' => 6,
+            default => 3,
+        };
+
+        $interview->interview_status = $status;
+        $interview->save();
+
+        $candidate = Candidates::find($interview->candidate_id);
+        $candidate->status = $status;
+        $candidate->save();
+
+        // Prepare Calendar Invite Link
+        $startDateTime = Carbon::parse($request->interview_time);
+        $endDateTime = $startDateTime->copy()->addHour();
+
+        $title = "Interview Round {$request->round} - " . $candidate->full_name;
+        $details = $request->message_candidate ?? "Interview scheduled.";
+        $location = "C-205, 4th Floor, SM Heights, Sector 74, Sahibzada Ajit Singh Nagar, Punjab 160071";
+
+        // Format datetime for Google Calendar (YYYYMMDDTHHMMSS)
+        $start = $startDateTime->format('Ymd\THis');
+        $end   = $endDateTime->format('Ymd\THis');
+
+        $calendarUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE" .
+            "&text=" . urlencode($title) .
+            "&details=" . urlencode($details) .
+            "&location=" . urlencode($location) .
+            "&dates={$start}/{$end}";
+
+        return response()->json([
+            'message' => 'Interview scheduled successfully!',
+            'calendar_link' => $calendarUrl,
+            'candidate_email' => $candidate->email,
+            'employee_email' => $employee->email
+        ]);
+    }
+
 }

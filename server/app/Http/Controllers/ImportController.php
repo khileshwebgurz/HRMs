@@ -136,57 +136,54 @@ class ImportController extends Controller
     }
 
 
+    public function importCandidatesPost(Request $request)
+    {
+        $user = Auth::user();
 
+        if (!$request->hasFile('file')) {
+            return response()->json(['status' => 'error', 'message' => 'Please upload the file first.'], 400);
+        }
 
+        $file = $request->file('file');
 
-   public function importCandidatesPost(Request $request)
-{
-    $user = Auth::user();
+        $validator = Validator::make([
+            'file' => $file,
+            'extension' => strtolower($file->getClientOriginalExtension()),
+        ], [
+            'file' => 'required|file',
+            'extension' => 'required|in:csv,xlsx',
+        ]);
 
-    if (!$request->hasFile('file')) {
-        return response()->json(['status' => 'error', 'message' => 'Please upload the file first.'], 400);
-    }
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Please upload CSV or XLSX format file only.',
+            ], 422);
+        }
 
-    $file = $request->file('file');
+        // Destination: public/uploads/csv-import
+        $destinationPath = public_path('uploads/csv-import');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
 
-    $validator = Validator::make([
-        'file' => $file,
-        'extension' => strtolower($file->getClientOriginalExtension()),
-    ], [
-        'file' => 'required|file',
-        'extension' => 'required|in:csv,xlsx',
-    ]);
+        $fileName = time() . '-' . $file->getClientOriginalName();
+        $file->move($destinationPath, $fileName);
 
-    if ($validator->fails()) {
+        // Save import record
+        $import = new CandidateImports();
+        $import->file = $fileName;
+        $import->user_id = $user->id;
+        $import->save();
+
         return response()->json([
-            'status' => 'error',
-            'message' => 'Please upload CSV or XLSX format file only.',
-        ], 422);
+            'status' => 'success',
+            'message' => 'Candidate import file uploaded successfully.',
+            'data' => [
+                'file' => $fileName,
+                'path' => url('uploads/csv-import/' . $fileName),
+            ]
+        ]);
     }
-
-    // Destination: public/uploads/csv-import
-    $destinationPath = public_path('uploads/csv-import');
-    if (!file_exists($destinationPath)) {
-        mkdir($destinationPath, 0755, true);
-    }
-
-    $fileName = time() . '-' . $file->getClientOriginalName();
-    $file->move($destinationPath, $fileName);
-
-    // Save import record
-    $import = new CandidateImports();
-    $import->file = $fileName;
-    $import->user_id = $user->id;
-    $import->save();
-
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Candidate import file uploaded successfully.',
-        'data' => [
-            'file' => $fileName,
-            'path' => url('uploads/csv-import/' . $fileName),
-        ]
-    ]);
-}
 
 }

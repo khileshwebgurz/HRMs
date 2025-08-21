@@ -201,8 +201,8 @@ use App\Http\Controllers\Employee\OnboardProcessController;
 
                 // helpdesk search
                 Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
-                Route::post('/import-candidates-post', [ImportController::class,'importCandidatesPost']);
-                Route::get('/import-candidates', [ImportController::class,'importCandidates']);
+                // Route::post('/import-candidates-post', [ImportController::class,'importCandidatesPost']);
+                // Route::get('/import-candidates', [ImportController::class,'importCandidates']);
             });
 
             //  Employee-only routes (for future)
