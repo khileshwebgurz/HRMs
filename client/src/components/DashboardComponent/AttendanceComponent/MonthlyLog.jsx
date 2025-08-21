@@ -27,7 +27,7 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
       >
         <br />
         <div className="row input-daterange px-2 monthly-inputs">
-          <div className="col-md-8">
+          <div className="col-md-12 col-lg-8">
             <div className="row">
               {/* <div className="col-sm-4">
                 <select
@@ -58,7 +58,7 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
                   onChange={(e) => setToDate(e.target.value)}
                 />
               </div>
-               <div className="col-sm-2">
+               <div className="col-sm-5 filter-and-clear-btns">
                 <button
                   type="button"
                   name="filter"
@@ -68,12 +68,9 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
                 >
                   Filter
                 </button>
-              </div>
-
-              <div className="col-sm-2">
-                 <button
+                <button
                       type="button"
-                      className="btn btn-sm btn-outline-secondary ml-3"
+                      className="btn btn-sm btn-outline-secondary ml-3 clear-btn"
                       onClick={clearFilter}
                     >
                       Clear Filter
@@ -91,15 +88,15 @@ const MonthlyLog = ({ data, currentPage, totalPages, getAttendance }) => {
           >
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Time In</th>
-                <th>Time Out</th>
-                <th>Work Duration</th>
-                <th>Stay late reason</th>
-                <th>Breaks</th>
-                <th>Break duration</th>
-                <th>Action</th>
+                <th className="sorting">Date </th>
+                <th className="sorting">Status </th>
+                <th>Time In </th>
+                <th>Time Out </th>
+                <th>Work Duration </th>
+                <th>Stay late reason </th>
+                <th className="sorting">Breaks </th>
+                <th className="sorting">Break duration </th>
+                <th>Action </th>
               </tr>
             </thead>
             <tbody>

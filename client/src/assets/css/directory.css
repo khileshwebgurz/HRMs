@@ -1,68 +1,233 @@
 table.dataTable {
-  margin: 0 !important;
+margin: 0 !important;
 }
-
 .DTFC_LeftBodyWrapper,
 .DTFC_RightBodyWrapper {
-  background-color: #fff;
+background-color: #fff;
 }
-
 #timeline .form-group {
-  margin-bottom: 0;
+margin-bottom: 0;
 }
 .dt-button.buttons-collection.buttons-colvis {
-  border: hidden;
+border: hidden;
 }
 .dt-button.buttons-columnVisibility.active {
-  border: hidden;
+border: hidden;
+}
+.search-bar {
+display: flex;
+align-items: center;
+gap: 7px;
+}
+.records-per-page {
+display: inline-flex;
+align-items: center;
+gap: 5px;
+}
+select.custom-select {
+padding: 4px 28px 4px 8px;
+font-size: 12px;
+}
+body .cstm-table-outer th{
+position: relative;
+border: 1px solid #ccc !important;
+cursor: pointer;
+}
+.sorting:after {
+content: "" !important;
+background: url(../dist/img/2021/icons/sort-list.png);
+width: 15px;
+height: 15px;
+background-size: contain !important;
+display: inline-block;
+background-repeat: no-repeat;
+vertical-align: middle;
+}
+.sorting span{
+display: none;
+}
+.pagination .page-link {
+padding: 8px 12px;
+color: #001e36;
+}
+.pagination .page-item.active .page-link  {
+background: #001e36;
+border-color: #001e36;
+color: #fff;
+}
+.pagination .page-item .page-link:hover{
+background: #26c6da !important;
+border-color: #26c6da !important;
+color: #fff;
+}
+ul.pagination {
+margin: 0;
+}
+.table thead th, .table td {
+padding: 20px 10px;
+color: #686868;
+}
+.table thead th{
+color: #000;
+}
+.nav-pills .nav-link {
+border-radius: 0;
+padding: 15px 20px;
+}
+.table-section .show-date-wrap {
+padding: 20px 0;
+}
+.cstm-table-outer .nav-tabs {
+background: #ededed;
+padding: 0 10px;
+border-bottom: 1px solid #dee2e6;
+}
+.cstm-table-outer .nav-item {
+margin-bottom: -1px;
+} 
+.cstm-table-outer .nav-tabs button{
+padding: 12px 16px;
+border: none;
+border-bottom: 3px solid transparent;
+}
+.cstm-table-outer .nav-tabs button.active{
+border-color: #26c6da;
+}
+.clear-btn {
+background: #002035;
+color: #fff;
+padding: 7px 12px !important;
+font-size: 12px !important;
+margin-left: 10px !important;
+}
+body .date-picker-daily.attendance-date {
+flex-direction: row;
+justify-content: flex-end;
+align-items: flex-end;
+}
+.date-input {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+justify-content: center;
+}
+label.sub-heading {
+width: 100%;
+text-align: center;
+}
+.attendance-logs-section .logs-table-wrapper {
+padding: 0;
+}
+.monthly-inputs .row {
+margin: 0;
+}
+.monthly-inputs .row>* {
+padding: 0 5px;
+}
+.monthly-inputs .clear-btn {
+font-size: 14px !important;
+padding: 8px 12px !important;
+margin: 0 !important;
+}
+div#monthlylog .pagination {
+justify-content: end;
+margin: 16px 0;
+}
+div#monthlylog .pagination  button {
+border: none;
+background: transparent;
+padding: 0px 16px;
+}
+div#monthlylog .pagination  button[disabled] {
+color: #666 !important;
 }
 
-/* Sidebar Navmenu  */
-.sidebar-navmenu .close-sidebar-navmenu {
-  position: absolute;
-  top: 5px;
-  z-index: 9;
-  right: 8px;
-  cursor: pointer;
+
+
+
+
+
+
+
+@media (max-width:1024px) {
+.table thead th, .table td {
+padding: 15px 10px;
 }
-.sidebar-navmenu .close-sidebar-navmenu:hover i {
-  color: #26c6da;
+.table thead th {
+min-width: 110px;
 }
-.sidebar-navmenu {
-  position: fixed;
-  right: -260px;
-  left: auto;
-  top: 0px;
-  max-width: 260px;
-  width: 100%;
-  transition: 0.3s all;
-  z-index: 9999;
-  bottom: 0;
-  overflow-y: scroll;
-  border-left: 1px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
-  background: #fff;
+.table thead th:first-child{
+min-width: inherit
 }
-.sidebar-navmenu.show {
-  right: 0;
 }
-.sidebar-navmenu .card-primary {
-  border-color: #26c6da !important;
-}
-.sidebar-navmenu .wgz-employee-menu .nav-pills .nav-link:not(.active):hover {
-  background-color: #26c6da;
-}
+
 
 @media (max-width: 767px) {
-  .dashboard-options .dashboard-option i {
-    font-size: 48px;
-  }
+.dashboard-options .dashboard-option i {
+font-size: 48px;
 }
+.directory-card .card-title {
+margin-bottom: 15px !important;
+font-size: 16px;
+}
+.records-per-page {
+margin-bottom: 10px;
+}
+.cstm-table-outer .form-control {
+height: 32px;
+}
+.cstm-table-outer  .pagination.d-flex {
+flex-direction: column;
+gap: 15px;
+margin-top: 10px !important;
+}
+.page-item:first-child .page-link, .page-item:last-child .page-link {
+font-size: 0;
+height: 100%;
+position: relative;
+}
+.page-item:first-child .page-link:after, .page-item:last-child .page-link::after{
+position: absolute;
+top: 50%;
+right: 0;
+bottom: 0;
+left: 0;
+font-size: 20px;
+-webkit-transform: translateY(-70%);
+transform: translateY(-70%);
+content: ">";
+}
+.page-item:first-child .page-link:after{
+content: "<";
+}
+.pagination .page-link{
+min-width: 34px;
+}
+.cstm-table-outer .card-header h5 figure:before {
+width: 32px;
+height: 32px;
+}
+.cstm-table-outer .card-header h5 figure img {
+width: 22px;
+}
+body .date-picker-daily.attendance-date {
+justify-content: start;
+}
+.attendance-date label.sub-heading {
+margin-top: 0;
+}
+div#monthlylog .pagination {
+justify-content: center;
+}
+}
+
+
+
 @media (max-width: 414px) {
-  .dashboard-options .dashboard-option {
-    margin-bottom: 1rem;
-  }
-  .dashboard-options .dashboard-option .option-icon {
-    padding: 20px 0px;
-  }
+.dashboard-options .dashboard-option {
+margin-bottom: 1rem;
+}
+.dashboard-options .dashboard-option .option-icon {
+padding: 20px 0px;
+}
 }

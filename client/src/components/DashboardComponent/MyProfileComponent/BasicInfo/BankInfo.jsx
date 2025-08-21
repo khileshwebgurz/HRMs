@@ -82,7 +82,7 @@ const BankInfo = ({ employeeData }) => {
 
   return (
     <>
-      <div className="card wgz-bankinfo card-panel shadow-none">
+      <div className="card wgz-bankinfo card-panel">
         <div className="card-header">
           <h3 className="card-title form-header">Salary Account Details</h3>
 

@@ -54,14 +54,16 @@ const Calendar = () => {
 
   return (
     <section className="content mt-4">
-      <div className="container-fluid">
+      <div className="container">
+         <div className="card card-primary calendar-main">
         <div className="row">
           {/* Calendar */}
+           <div className="col-lg-12">
+            <div className="card-header main-header">
+              <h3 className="card-title m-0">Calendar</h3>
+            </div>
+          </div>
           <div className="col-lg-9">
-            <div className="card card-primary">
-              <div className="card-header">
-                <h3 className="card-title">Calendar</h3>
-              </div>
               <div className="card-body p-0">
                 <FullCalendar
                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrapPlugin]}
@@ -77,7 +79,6 @@ const Calendar = () => {
                   }}
                 />
               </div>
-            </div>
           </div>
 
           {/* Notification Sidebar */}
@@ -111,6 +112,7 @@ const Calendar = () => {
             </div>
           </div>
           {/* End Sidebar */}
+        </div>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-form {
+.create-role-form {
   max-width: 500px;
   margin: 20px auto;
   padding: 20px 30px;
@@ -8,26 +8,26 @@ form {
   font-family: Arial, sans-serif;
 }
 
-form h3 {
+.create-role-form h3 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
 }
 
-form div {
+.create-role-form div {
   margin-bottom: 15px;
 }
 
-form label {
+.create-role-form label {
   display: block;
   margin-bottom: 6px;
   font-weight: bold;
   color: #333;
 }
 
-form input[type="text"],
-form input[type="number"],
-form select {
+.create-role-form input[type="text"],
+.create-role-form input[type="number"],
+.create-role-form select {
   width: 100%;
   padding: 8px 10px;
   font-size: 14px;
@@ -35,11 +35,11 @@ form select {
   border-radius: 4px;
 }
 
-form input[type="checkbox"] {
+.create-role-form input[type="checkbox"] {
   margin-right: 8px;
 }
 
-form .permissions-list {
+.create-role-form .permissions-list {
   max-height: 150px;
   overflow-y: auto;
   border: 1px solid #ccc;
@@ -47,11 +47,11 @@ form .permissions-list {
   background-color: #fff;
 }
 
-form .permissions-list div {
+.create-role-form .permissions-list div {
   margin-bottom: 6px;
 }
 
-form button[type="submit"] {
+.create-role-form button[type="submit"] {
   width: 100%;
   padding: 10px;
   background-color: #0069d9;
@@ -63,11 +63,11 @@ form button[type="submit"] {
   transition: background-color 0.3s ease;
 }
 
-form button[type="submit"]:hover {
+.create-role-form button[type="submit"]:hover {
   background-color: #0053b3;
 }
 
-form .error {
+.create-role-form .error {
   margin-top: 10px;
   color: red;
   font-weight: bold;

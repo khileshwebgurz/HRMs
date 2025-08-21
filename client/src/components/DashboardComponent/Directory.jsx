@@ -1,8 +1,9 @@
-import '../../assets/css/directory.css'
 import '../../../public/plugins/datatables-responsive/css/responsive.bootstrap4.min.css'
 import '../../../public/plugins/datatables-buttons/css/buttons.bootstrap4.min.css'
+import '../../assets/css/directory.css'
 import '../../../public/css/fixedColumns.dataTables.min.css'
 import '../../../public/css/sweetalert2.min.css'
+import businessmen from '../../../public/dist/img/buisnessmen.png'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
@@ -87,23 +88,27 @@ const Directory = () => {
 
   return (
     <section className="content mt-4">
-      <div className="container-fluid">
+      <div className="container">
         <div className="row">
           <div className="col-md-12">
-            <div className="card card-primary directory-card">
+            <div className="card card-primary directory-card cstm-table-outer">
               <div className="card-header d-flex justify-content-between align-items-center">
                 <h3 className="card-title">Directory</h3>
                 <h5 style={{ fontSize: "17px" }}>
+                  <figure>
+                      <img src={businessmen} alt="Businessmen" className="directory-icon" />
+                  </figure>
                   No. of Employees: {totalRecords}
                 </h5>
               </div>
               <div className="card-body">
 
                 {/* Filters */}
-                <div className="d-flex justify-content-between mb-3">
-                  <div>
+                <div className="row justify-content-between mb-3">
+                  <div className='col-sm-12 col-md-6'>
+                  <div className='records-per-page'>
                     Show{" "}
-                    <select value={recordsPerPage} onChange={handleRecordsPerPage}>
+                    <select value={recordsPerPage} onChange={handleRecordsPerPage} class="custom-select custom-select-sm form-control form-control-sm">
                       <option value={10}>10</option>
                       <option value={25}>25</option>
                       <option value={50}>50</option>
@@ -111,10 +116,13 @@ const Directory = () => {
                     </select>{" "}
                     entries
                   </div>
+                </div>
 
-                  <div>
+                <div className='col-sm-12 col-md-6'>
+                  <div className="search-bar">
                     Search:{" "}
                     <input
+                    class="form-control form-control-sm"
                       type="text"
                       value={searchTerm}
                       onChange={handleSearch}
@@ -122,21 +130,22 @@ const Directory = () => {
                     />
                   </div>
                 </div>
+                </div>
 
                 {/* Table */}
-                <div className="table-responsive_">
+                <div className="table-responsive">
                   <table className="table table-striped wg_allinterviews">
                     <thead>
                       <tr>
-                        <th>#</th>
-                        <th onClick={() => handleSort('id')}>Employee Id <SortIcon field="id" /></th>
-                        <th onClick={() => handleSort('name')}>Name <SortIcon field="name" /></th>
-                        <th onClick={() => handleSort('email')}>Email <SortIcon field="email" /></th>
-                        <th >Designation <SortIcon field="designation" /></th>
-                        <th >Department <SortIcon field="department" /></th>
-                        <th onClick={() => handleSort('manager_id')}>Manager <SortIcon field="manager_id" /></th>
+                        <th className='sorting'>#</th>
+                        <th onClick={() => handleSort('id')} className='sorting'>Employee Id <SortIcon field="id" /></th>
+                        <th onClick={() => handleSort('name')} className='sorting'>Name <SortIcon field="name" /></th>
+                        <th onClick={() => handleSort('email')} className='sorting'>Email <SortIcon field="email" /></th>
+                        <th className='sorting'>Designation <SortIcon field="designation" /></th>
+                        <th className='sorting'>Department <SortIcon field="department" /></th>
+                        <th onClick={() => handleSort('manager_id')} className='sorting'>Manager <SortIcon field="manager_id" /></th>
                         {/* <th onClick={() => handleSort('location')}>Location <SortIcon field="location" /></th> */}
-                        <th >Location <SortIcon field="location" /></th>
+                        <th className='sorting'>Location <SortIcon field="location" /></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -166,7 +175,10 @@ const Directory = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="pagination mt-3 d-flex justify-content-center">
+                  <div className="pagination mt-3 d-flex justify-content-between align-items-center gx-3">
+                    <div className='page-showing'>
+                      Showing {((currentPage - 1) * recordsPerPage) + 1} to {Math.min(currentPage * recordsPerPage, totalRecords)} of {totalRecords} entries
+                    </div>
                     <nav>
                       <ul className="pagination">
                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>

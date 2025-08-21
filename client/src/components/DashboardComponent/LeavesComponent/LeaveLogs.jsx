@@ -14,7 +14,7 @@ const LeaveLogs = ({
   }
 
   return (
-    <div className="table-responsive mt-3">
+    <div className="table-responsive cstm-table-outer mt-3">
       {/* <input
         type="text"
         placeholder="Search by leave type..."
@@ -25,16 +25,16 @@ const LeaveLogs = ({
         }}
         className="form-control my-3"
       /> */}
-      <table className="table table-bordered table-striped">
-        <thead className="thead-dark">
+      <table className="table table-bordered table-striped leave-logs-table">
+        <thead>
           <tr>
-            <th>Leave Type</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Total Applied</th>
-            <th>Status</th>
-            <th>Applied On</th>
-            <th>Action</th>
+            <th class="sorting">Leave Type </th>
+            <th class="sorting">Start Date </th>
+            <th class="sorting">End Date </th>
+            <th class="sorting">Total Applied </th>
+            <th class="sorting">Status </th>
+            <th class="sorting">Applied On </th>
+            <th class="sorting">Action </th>
           </tr>
         </thead>
         <tbody>
@@ -64,18 +64,19 @@ const LeaveLogs = ({
       </table>
 
       <div className="d-flex justify-content-between align-items-center mt-3">
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="pagination">
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary page-link"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
         >
           Previous
         </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary page-link"
           onClick={() =>
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
@@ -83,6 +84,7 @@ const LeaveLogs = ({
         >
           Next
         </button>
+        </div>
       </div>
     </div>
   );

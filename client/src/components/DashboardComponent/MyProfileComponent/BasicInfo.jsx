@@ -8,13 +8,10 @@ const BasicInfo = ({ employeedata }) => {
   console.log('basic info empojsjsjhfbsd', employeedata)
   return (
     <>
-      <div className="card card-primary  shadow-none">
-        <div className="card-header">
-          <h3 className="card-title">Official Information</h3>
-        </div>
-        <div className="card-body1" id="personalForm">
+      <section className="content info-sec">
+        <div className="container-fluid" id="personalForm">
           {/* <div className="tab-content" id="custom-tabs-four-tabContent"></div> */}
-          <div id="custom-tabs-four-tabContent">
+          <div id="custom-tabs-four-tabContent" className="row">
             <div className="col-lg-12">
               <BasicInfoSection  employeeData={employeedata}/>
 
@@ -24,7 +21,7 @@ const BasicInfo = ({ employeedata }) => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </>
   );
 };

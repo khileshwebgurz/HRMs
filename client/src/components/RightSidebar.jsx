@@ -24,22 +24,19 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
 
   return (
     <>
+    <div className={`sidebar-navmenu ${isOpen ? "open" : ""}`}>
       <div
         className="card card-primary card-outline Dashboard-card"
-        style={{
-          width: isOpen ? "250px" : "0",
-          transition: "0.3s",
-          overflow: "hidden",
-          background: "#333",
-
-          position: "fixed",
-          top: 10,
-          right: 0,
-        }}
+        // style={{
+        //   width: isOpen ? "260px" : "0",
+        //   transition: "0.3s",
+        //   overflow: "hidden",
+        //   right: 0,
+        // }}
       >
         <div className="card-body box-profile">
-          <span onClick={toggleSidebar} style={{ color: "white",  }}>
-            X
+          <span className="close-sidebar-navmenu" onClick={toggleSidebar}>
+           <i class="fas fa-times"></i>
           </span>
 
           <div className="text-center">
@@ -64,24 +61,15 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
           </div>
 
           <h3 className="profile-username p-user text-center">
+            {user?.name || "User Name"}
             <button onClick={handleLogout}>
               <i
                 className="fas fa-power-off"
-                style={{
-                  fontSize: "17px",
-                  marginTop: "7px",
-                  marginLeft: "3px",
-                }}
               ></i>
             </button>
           </h3>
           <Link
             to="/change-password"
-            style={{
-              textAlign: "center",
-              marginLeft: "41px",
-              fontSize: "13px",
-            }}
           >
             Change Password
           </Link>
@@ -331,6 +319,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
             </ul>
           </nav>
         </div>
+      </div>
       </div>
     </>
   );

@@ -1,175 +1,286 @@
-
 .navbar-nav {
-	align-items: center;
+align-items: center;
 }
-
-.clockInRed {
-	background-color: #ff002a;
+.clockInRed, .clockInBtn.btn-danger {
+background-color: #ff002a;
 }
-
 .clockInOrange {
-	background-color: #525252 !important;
-	color: #fff !important;
+background-color: #525252 !important;
+color: #fff !important;
 }
-
 #clockInBtn, #clockInDD {
-	margin: 0;
-	padding: 6px 10px;
-	font-size: 14px;
+margin: 0;
+padding: 5px 10px;
+font-size: 13px;
+border-radius: 4px;
+font-weight: 500;
 }
-
 #clockInBtn {
-	/* height: 38px; */
-	width: 100%;
-	/* border-top-right-radius: 0;
-    border-bottom-right-radius: 0; */
+/* height: 38px; */
+/* width: 100%; */
+/* border-top-right-radius: 0;
+border-bottom-right-radius: 0; */
 }
-
 #clockInDD {
-	padding: 10px 7px;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
+padding: 10px 7px;
+border-top-left-radius: 0;
+border-bottom-left-radius: 0;
 }
-
 /* #clockInWrapper {
-    margin-top: 18px;
-    padding-bottom: 10px;
+margin-top: 18px;
+padding-bottom: 10px;
 } */
 #clockInDate, .clockInDropdown, .clockedOutTitle {
-	font-size: 13px;
+font-size: 13px;
 }
-
 .clockInClock {
-	font-size: 16px;
+font-size: 16px;
 }
-
 .clockInSmall, .clockedOutData {
-	font-size: 12px;
+font-size: 12px;
 }
-
 #clockInDate, #period, .clockedOutTitle {
-	font-weight: bold;
+font-weight: 500;
 }
-
 .clockInAction {
-	margin-top: 4px;
-	justify-content: end;
+margin-top: 4px;
+justify-content: end;
 }
-
 #clockInWrapper.clockInUser {
-	align-items: center;
-	align-content: center;
+align-items: center;
+align-content: center;
 }
-
 #clockInWrapper.clockInUser .clockInAction {
-	margin-top: 0;
+margin-top: 0;
 }
-
 .clockInActive #clockInBtn {
-	min-width: 100%;
-	border-top-right-radius: 2px;
-	border-bottom-right-radius: 2px;
-	background: #f85797;
-	/* height: 38px; */
+border-top-right-radius: 2px;
+border-bottom-right-radius: 2px;
+background: #f85797;
+/* height: 38px; */
 }
-
 .clockInActive.firstTime #clockInBtn:hover {
-	background: #525252 !important;
+background: #525252 !important;
 }
-
 .clockInAction.clockedOut {
-	flex-direction: column;
-	margin-top: 0;
+flex-direction: column;
+margin-top: 0;
 }
-
 #clockInBtn .inTime, #clockInBtn .outLabel, .clockInActive #clockInDD,
-	.clockInActive #clockInBtn .inLabel, .clockInAction .clockedOutData,
-	.clockInAction.clockedOut #clockInBtn, .clockInAction.clockedOut #clockInDD,
-	#clockInBtn .clockedInLabel {
-	display: none;
+.clockInActive #clockInBtn .inLabel, .clockInAction .clockedOutData,
+.clockInAction.clockedOut #clockInBtn, .clockInAction.clockedOut #clockInDD,
+#clockInBtn .clockedInLabel {
+display: none;
 }
-
 .clockInActive #clockInBtn .inTime, .clockInAction.clockedOut .clockedOutTitle,
-	.clockInAction.clockedOut .clockedOutData, .clockInActive #clockInBtn .clockedInLabel
-	{
-	display: block;
+.clockInAction.clockedOut .clockedOutData, .clockInActive #clockInBtn .clockedInLabel
+{
+display: block;
 }
-
 .clockedOutTitle, .clockedOutData {
-	white-space: nowrap;
+white-space: nowrap;
 }
-
 .clockedOutData {
-	font-size: 14px;
-	display: block;
+font-size: 14px;
+display: block;
 }
-
 /* .inTime {
-    position: relative;
-    top: 5px;
-    font-size: 14px;
-    white-space: nowrap
+position: relative;
+top: 5px;
+font-size: 14px;
+white-space: nowrap
 } */
 .clockedInLabel {
-	position: absolute;
-	top: 3px;
-	left: 4px;
-	font-size: 10px;
+position: absolute;
+top: 3px;
+left: 4px;
+font-size: 10px;
 }
-
 .new-main-header .global-container .clock-in-container #clockInWrapper {
-	margin: 0;
-	padding-bottom: 0;
+margin: 0;
+padding-bottom: 0;
 }
-
 #clockInWrapper.clockInUser {
-	align-items: center;
-	align-content: center;
+align-items: center;
+align-content: center;
 }
-
-
-
 
 /* hamburger csss */
-
-
-
 button.hamburger {
-	background: none;
-	padding: 0;
-	border: 0;
-	cursor: pointer;
-	margin: 0 16px;
+background: none;
+padding: 0;
+border: 0;
+cursor: pointer;
+margin-left: 15px;
 }
 button.hamburger:focus{
-	outline: none;
+outline: none;
 }
-
 button.hamburger span {
-	background: #fff;
-	height: 3px;
-	width: 25px;
-	position: relative;
-	display: inline-block;
-	top: -3px;        
+background: #fff;
+height: 3px;
+width: 25px;
+position: relative;
+display: inline-block;
+top: -4px;   
+border-radius: 50px;     
 }
-
 button.hamburger:hover span,
 button.hamburger:focus span {
-	background: #26c6da !important;
+background: #26c6da !important;
 }
-
 button.hamburger span:before,
 button.hamburger span:after {
-	content: '';
-	position: absolute;
-	top: -8px;
-	left: 0;
-	right: 0;
-	background: inherit;
-	height: inherit;
+content: '';
+position: absolute;
+top: -8px;
+left: 0;
+right: 0;
+background: inherit;
+height: inherit;
+border-radius: 50px;
+}
+button.hamburger span:after {
+top: 8px;
+}
+.main-header .brand-link {
+padding: 0;
+}
+.navbar-dark .navbar-nav .nav-link {
+cursor: pointer;
+}
+.user-profile-div {
+display: flex;
+align-items: center;
+}
+div#clockInDate {
+color: #fff;
+text-transform: uppercase;
+letter-spacing: 0.3px
+}
+.clockInBtn.btn-danger{
+color: #fff;
+}
+.clockInBtn span {
+display: flex;
+align-items: center;
+gap: 4px;
+justify-content: center;
+}
+.clockInBtn span i {
+font-size: 13px;
+}
+ul.navbar-nav.ml-auto.wgz_notification li:nth-child(3) {
+order: inherit !important;
+}
+.navbar-badge {
+font-size: .6rem !important;
+font-weight: 300 !important;
+padding: 2px 4px !important;
+color: #1f2d3d !important;
+border-radius: 4px !important;
+right: 0px;
+top: 4px;
+}
+.nav-item.nav-icon {
+margin-right: 15px !important;
+}
+.navbar-expand-md .navbar-nav .dropdown-menu {
+padding: 0;
+}
+body .clockInBtn.btn-danger:hover{
+background-color: #c82333;
+border-color: #bd2130;
+}
+.sidebar-navmenu.open {
+    right: 0;
+}
+.sidebar-navmenu .card {
+    border-radius: 0;
+    box-shadow: none;
+}
+.wgz-employee-menu .nav-pills .nav-link:not(.active):hover,
+.wgz-employee-menu .nav-pills .nav-link.active,
+.wgz-employee-menu .nav-pills .nav-link:focus {
+    background-color: #26c6da !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+.nav-sidebar li.nav-item a.nav-link:hover i,
+.nav-sidebar li.nav-item a.nav-link:focus i,
+.nav-sidebar li.nav-item a.nav-link:hover p,
+.nav-sidebar li.nav-item a.nav-link:focus p,
+.nav-sidebar li.nav-item a.nav-link.active i,
+.nav-sidebar li.nav-item a.nav-link.active p{
+    color: #fff !important;
+}
+.box-profile a {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    text-decoration: none;
+}
+.profile-username button {
+    border: none;
+    background: transparent;
+    color: var(--primary-color) !important;
+    font-size: 17px;
+    margin-left: 5px;
 }
 
-button.hamburger span:after {
-	top: 8px;
+
+
+
+
+@media (max-width:767px) {
+body nav.main-header.dark-header {
+padding: 10px 14px !important;
 }
+button.hamburger {
+margin: 0 0 0 15px;
+}
+body .wgz_notification {
+margin-top: 10px;
+}
+body nav.main-header ul.navbar-nav.wgz_notification > * {
+margin: 0;
+}
+.nav-item.nav-icon {
+margin-right: 6px !important;
+flex: unset;
+}
+.wgz_notification > li > a.nav-link {
+padding-right: 5px !important;
+}
+ul.navbar-nav.ml-auto.wgz_notification li:nth-child(3) {
+order: 0 !important;
+flex: unset;
+}
+div#clockInDate {
+letter-spacing: 0;
+font-size: 10px;
+}
+.clockInAction {
+min-width: auto;
+}
+.clockInBtn span i {
+font-size: 10px;
+}
+body #clockInBtn, body #clockInDD {
+padding: 3px 5px !important;
+font-size: 10px !important;
+}
+.clock-in-container {
+margin-left: 5px;
+}
+a.nav-link.user-profile {
+padding-right: 0 !important;
+}
+.navbar-badge {
+right: -1px;
+top: 2px;
+}
+}
+
+
+

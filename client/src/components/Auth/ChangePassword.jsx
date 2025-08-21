@@ -20,10 +20,10 @@ const ChangePassword = () => {
   };
   return (
     <section className="content mt-4">
-      <div className="container-fluid">
+      <div className="container">
         <div className="row">
           <div className="col-md-12">
-            <div className="card card-primary">
+            <div className="card card-primary change-password">
               <div className="card-header">
                 <h3 className="card-title">Change Password</h3>
               </div>

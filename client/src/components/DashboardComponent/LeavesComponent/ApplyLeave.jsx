@@ -85,15 +85,14 @@ const ApplyLeave = ({
 
   return (
     <>
-      <div className="tab-content-1" id="myTabContent">
+      <div className="tab-content-1 leave-tabs cstm-table-outer" id="myTabContent">
         <div
           className="tab-pane fade active show"
           id="home"
           role="tabpanel"
           aria-labelledby="home-tab"
         >
-          <br />
-          <div className="row">
+          <div className="row align-items-center">
             <div className="col-sm-6">
               <h5>Apply Leave</h5>
             </div>
@@ -110,7 +109,7 @@ const ApplyLeave = ({
             </div>
           </div>
           <div className="table-responsive">
-            <table className="table mt-4">
+            <table className="table table-striped mt-4">
               <thead>
                 <tr>
                   <th>Details</th>
@@ -134,7 +133,6 @@ const ApplyLeave = ({
               </tbody>
             </table>
           </div>
-          <br />
           <div className="losspay ">
             <h4>Loss Of Pay</h4>
             <p>Credited Leaves: {totalCredit}</p>
@@ -176,7 +174,7 @@ const ApplyLeave = ({
                   </button>
                 </div>
 
-                <div className="modal-body">
+                <div className="modal-body-outer">
                   <form id="apply_leave" onSubmit={handleLeaveSubmit}>
                     <div className="modal-body">
                       <div className="row">
@@ -284,7 +282,7 @@ const ApplyLeave = ({
 
                       <div className="row">
                         <div className="col-sm-12">
-                          <p>Write your Reason</p>
+                          <label>Write your Reason</label>
                           <textarea
                             className="form-control"
                             id="reason"

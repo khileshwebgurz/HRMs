@@ -4,6 +4,7 @@ import { useUser } from "../../context/UserContext";
 import PersonalInfo from "./MyProfileComponent/PersonalInfo";
 import BasicInfo from "./MyProfileComponent/BasicInfo";
 import AppraisalInfo from "./MyProfileComponent/AppraisalInfo";
+import ProfilePic from "../DashboardComponent/MyProfileComponent/PersonalInfo/ProfilePic";
 
 const MyProfile = ({path}) => {
   const user = useUser(); 
@@ -35,33 +36,34 @@ const MyProfile = ({path}) => {
 
 
   return (
-    <div>
+    <div className="my-profile-main mt-4">
       {/* Tab Navigation */}
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          borderBottom: "2px solid #ccc",
-          marginBottom: "20px",
-        }}
-      >
-        <button onClick={() => handleTabClick("personal")}>
-          Personal Info
-        </button>
-        <button onClick={() => handleTabClick("basic")}>Basic Info</button>
-        <button onClick={() => handleTabClick("appraisal")}>
-          Appraisal Info
-        </button>
+    <div className="container">
+      <div className="card card-primary card-sec">
+       <div class="card-header">
+				<h3 class="card-title">Personal Information</h3>
+			</div>
+      <div className="profile-top">
+        <ProfilePic employeedata={employee}/>
+      </div>
+      <div className="container-fluid">
+        <div className="tab-navigation">
+           <button className={activeTab === "personal" ? "active" : ""} onClick={() => handleTabClick("personal")}>Personal Info</button>
+           <button className={activeTab === "basic" ? "active" : ""} onClick={() => handleTabClick("basic")}>Basic Info</button>
+           <button className={activeTab === "appraisal" ? "active" : ""} onClick={() => handleTabClick("appraisal")}>Appraisal Info</button>
+       </div>
       </div>
 
-      
-
       {/* Tab Content */}
-      <div>
+      <div className="profile-tab-content">
         {activeTab === "personal" && <PersonalInfo employeedata={employee}/>}
         {activeTab === "basic" && <BasicInfo employeedata={employee} />}
         {activeTab === "appraisal" && <AppraisalInfo employeedata={employee} />}
       </div>
+     </div>
+
+
+     </div>
     </div>
   );
 };

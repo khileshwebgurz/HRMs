@@ -27,8 +27,7 @@ const Rules = () => {
   return (
     <div id="pills-rules" role="tabpanel" aria-labelledby="pills-rules-tab">
       <h4 className="pl-2">Rule List</h4>
-      <hr />
-      <div className="row w-100 m-0">
+      <div className="row w-100 m-0 rule-side-tabs">
         <div className="col-md-3 wrapper shadow bg-white rounded rules attendance-rule py-1">
           <label style={{ color: "#f95697" }}>General Rule</label>
           <br />
@@ -36,7 +35,7 @@ const Rules = () => {
           <span>30-08-2020</span>
         </div>
         <div className="col-md-8 mb-md-2 shadow bg-white rounded ml-auto">
-          <div className="container my-4">
+          <div className="my-4">
             <div className="row">
               <div className="col-xl-12 mb-4 mb-xl-0">
                 <section>
@@ -44,7 +43,7 @@ const Rules = () => {
                     <li className="nav-item waves-effect waves-light pt-3">
                       <label className="mb-0">General Rule</label>
                       <a
-                        className="nav-link active pl-0"
+                        className="nav-link active"
                         id="general-tab"
                         data-toggle="tab"
                         href="#general"
@@ -71,7 +70,7 @@ const Rules = () => {
                         This is default system provided option for all users in case of low leave balance.
                       </p>
 
-                      <div className="shifttimings pl-0 mb-3">
+                      <div className="shifttimings pl-0 mb-3 rules-heading">
                         <h5>
                           <b>Shift Timings</b>
                         </h5>
@@ -87,7 +86,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                              <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -103,7 +102,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                              <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -138,7 +137,7 @@ const Rules = () => {
                         </li>
                       </ul>
 
-                      <div className="anomalysetting mb-3">
+                      <div className="anomalysetting mb-3 rules-heading">
                         <h5>
                           <b>Anomaly Settings</b>
                         </h5>
@@ -164,7 +163,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                              <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -190,7 +189,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                              <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -216,7 +215,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                             <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -242,7 +241,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <span className="fa fa-clock-o"></span>
+                              <i class="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>

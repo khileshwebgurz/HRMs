@@ -1,0 +1,20 @@
+
+
+Empolyee
+ID : khilesh@yopmail.com
+Pwd : 123456 
+
+
+Admin
+ID : jp@yopmail.com
+pwd : welcome
+
+
+React 
+HRM-> cd client
+HRM client-> npm run dev
+
+
+PHp
+HRM-> cd server
+HRM server-> php artisan serve

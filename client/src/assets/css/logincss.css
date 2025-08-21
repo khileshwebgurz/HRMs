@@ -1,49 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 .login-page {
-    background: url("/dist/img/2021/login-bg-5-blur.jpg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    justify-content: center !important;
-    align-items: flex-end !important;
-    z-index: 1;
+    font-family: "Source Sans 3", sans-serif !important;
+}
+.login-page {
+background: url("/dist/img/2021/login-bg-5-blur.jpg");
+background-repeat: no-repeat;
+background-size: cover;
+background-position: center;
+position: relative;
+justify-content: center !important;
+align-items: flex-end !important;
+z-index: 1;
 } 
-
+.form-control::placeholder {
+color: #a7a7a7;
+}
+.input-group-text {
+background: #f2f3f3;
+}
 .login-page::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: #26c6da;
-    opacity: .3;
-    z-index: -1;
+content: "";
+position: absolute;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+background: var(--primary-color);
+opacity: .3;
+z-index: -1;
 }
 .login-box {
-    width: 478px !important;
-    margin-right: 6%;
+width: 478px !important;
+margin-right: 6%;
 }
 .login-box .card{
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgb(0 0 0 / 20%);
+border-radius: 10px;
+box-shadow: 0 0 20px rgb(0 0 0 / 20%);
 }
-.login-box .card-outline {
-    border-color: #26c6da !important;        
-}    
-.login-box button.btn-primary {
-    background-color: #26c6da;
-    border-color: #26c6da;
-    font-weight: bold;
+body .login-box button.btn-primary {
+background-color: var(--primary-color) !important;
+border-color: var(--primary-color);
+font-weight: 700;
+font-size: 16px;
+padding: 10px 20px;
+margin: 15px auto 0;
+min-width: 130px;
 }
-.login-box button.btn-primary:hover,
-.login-box button.btn-primary:focus{
-    background-color: #001e36;
-    border-color: #001e36;
+body .login-box button.btn-primary:hover,
+body .login-box button.btn-primary:focus{
+background-color: #001e36 !important;
+border-color: #001e36 !important;
 }
+.login-box .card-header {
+background: transparent;
+padding: 12px 20px;
+justify-content: center;
+}
+.login-box .card-body {
+padding: 20px;
+}
+.forgot-password a {
+text-decoration: none;
+}
+.custom-checkbox {
+margin: 0;
+position: relative;
+padding-left: 0px;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+cursor: pointer;
+}
+.cstm-checkbox {
+width: 22px;
+height: 22px;
+border: 1px solid #D3CFC8;
+display: flex;
+position: relative;
+border-radius: 3px;
+align-items: center;
+justify-content: center;
+}
+.cstm-checkbox input {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+margin: 0 !important;
+opacity: 0;
+z-index: 2;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+.cstm-checkbox:after {
+content: '\f00c';
+display: flex;
+font-family: 'FontAwesome';
+font-size: 14px;
+color: #fff;
+background: var(--primary-color);
+width: 100%;
+align-items: center;
+justify-content: center;
+opacity: 0;
+transition: all 0.3s ease;
+}
+.cstm-checkbox:has(input:checked){
+border-color: var(--primary-color);
+}
+.cstm-checkbox:has(input:checked):after {
+opacity: 1;
+}
+
+
+
+
+
+
+/*-------------------Responsive---------------*/
+@media (max-width: 767px) {
+.login-box {
+font-size: 15px;
+}
+.cstm-checkbox {
+width: 20px;
+height: 20px;
+}
+.cstm-checkbox:after {
+font-size: 12px;
+height: 100%;
+}
+.custom-checkbox {
+min-height: auto;
+line-height: normal;
+}
+body .login-box button.btn-primary {
+font-size: 16px !important;
+padding: 8px 20px !important;
+min-width: 120px;
+}
+.input-group-text {
+background: #f2f3f3;
+font-size: 16px;
+}
+.form-control {
+    height: 38px;
+}
+}
+
 @media only screen and (max-width: 576px) {
-    .login-box {
-        width: 95% !important;
-           margin: 0 auto;
-    }
+.login-box {
+width: 95% !important;
+margin: 0 auto;
+}
 }

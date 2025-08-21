@@ -97,8 +97,9 @@ const Login = () => {
               </div>
 
               <div className="row">
-                <div className="col-8">
-                  <div className="form-check">
+                <div className="col-6">
+                  <div className="form-check custom-checkbox">
+                   <span className="cstm-checkbox">
                     <input
                       className="form-check-input"
                       type="checkbox"
@@ -106,22 +107,24 @@ const Login = () => {
                       checked={remember}
                       onChange={() => setRemember(!remember)}
                     />
+                    </span>
                     <label className="form-check-label" htmlFor="remember">
                       Remember Me
                     </label>
                   </div>
                 </div>
-                <div className="col-4">
-                  <button type="submit" className="btn btn-primary btn-block">
+                <div className="col-6 forgot-password text-end">
+                    <Link to="/forgot-password">Forgot Password?</Link>
+                </div>
+                 <div className="col-12 text-center">
+                  <button type="submit" className="btn btn-primary btn-block w-auto">
                     Login
                   </button>
-                </div>
+                  </div>
               </div>
             </form>
 
-            <p className="mb-1">
-              <Link to="/forgot-password">I forgot my password</Link>
-            </p>
+
 
           </div>
         </div>

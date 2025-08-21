@@ -210,12 +210,12 @@ const AddressInfoSection = ({ employeedata }) => {
 
           <div className="row">
             <div className="col-lg-6">
-              <div className="form-group row">
-                <label htmlFor="current_phone" className="col-3 col-form-label">
+              <div className="form-group">
+                <label htmlFor="current_phone" className="col-form-label">
                   Contact No.<span className="req">*</span>
                 </label>
                 {isEditing ? (
-                  <div className="col-8 wgz_field">
+                  <div className="wgz_field">
                     <input
                       className="form-control"
                       type="number"
@@ -237,15 +237,15 @@ const AddressInfoSection = ({ employeedata }) => {
               </div>
             </div>
             <div className="col-lg-6">
-              <div className="form-group row">
+              <div className="form-group">
                 <label
                   htmlFor="permanent_phone"
-                  className="col-3 col-form-label"
+                  className=" col-form-label"
                 >
                   Contact No.<span className="req">*</span>
                 </label>
                 {isEditing ? (
-                  <div className="col-8 wgz_field">
+                  <div className=" wgz_field">
                     <input
                       className="form-control"
                       type="number"

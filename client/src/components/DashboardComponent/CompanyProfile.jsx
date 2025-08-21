@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../assets/css/companyprofile.css";
+import companylogo from "../../../public/dist/img/2021/logo-background.png";
 import axios from "axios";
 
 const CompanyProfile = () => {
@@ -30,13 +31,13 @@ const CompanyProfile = () => {
 
   return (
     <section className="content mt-4 company-page">
-    <div className="container-fluid">
+    <div className="container">
       <div className="row">
         <div className="col-md-12">
           <div className="card card-primary company-profile-card">
             <div className="card-header company-main-header">
               <figure className="card-logo mb-0">
-                {/* Add logo if needed */}
+                <img src={companylogo}  alt="Company Logo" className="img-fluid" />
               </figure>
               <h3 className="card-title main-title">Company Profile</h3>
             </div>
@@ -145,7 +146,7 @@ const CompanyProfile = () => {
                       <h3 className="card-title">Company Policies</h3>
                     </div>
                     <div className="card-body">
-                      <div className="panel-group" id="accordion">
+                      {/* <div className="panel-group" id="accordion">
                         <div className="panel panel-default">
                           <div className="panel-heading">
                             <h4 className="panel-title">HR Policy</h4>
@@ -164,7 +165,47 @@ const CompanyProfile = () => {
                           </div>
                           <div className="panel-body" dangerouslySetInnerHTML={{ __html: travel_policy }} />
                         </div>
+                      </div> */}
+
+                    <div class="accordion profile-accordian" id="accordionExample">
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                           HR Policy
+                          </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            <div className="panel-body" dangerouslySetInnerHTML={{ __html: hr_policy }} />
+                          </div>
+                        </div>
                       </div>
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                           Leave Policy
+                          </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            <div className="panel-body" dangerouslySetInnerHTML={{ __html: leave_policy }} />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Travel & Food Allowance
+                          </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                          <div class="accordion-body">
+                            <div className="panel-body" dangerouslySetInnerHTML={{ __html: travel_policy }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     </div>
                   </div>
                 </div>

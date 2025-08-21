@@ -1,5 +1,13 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import '../../../public/plugins/datatables-responsive/css/responsive.bootstrap4.min.css'
+import '../../../public/plugins/datatables-buttons/css/buttons.bootstrap4.min.css'
+import "../../../public/css/employee-panel.css";
+import '../../assets/css/directory.css'
+import "../../../public/css/attendance/attendance_logs_new.css";
+import "../../../public/css/attendance/date.css";
+import '../../../public/css/fixedColumns.dataTables.min.css'
+import '../../../public/css/sweetalert2.min.css'
 import axios from "axios";
 import Rules from "./AttendanceComponent/Rules";
 import Logs from "./AttendanceComponent/Logs";
@@ -46,7 +54,7 @@ const Attendance = () => {
       <div className="container attendance-page">
         <div className="row profile">
           <div className="col-md-12">
-            <div className="card card-primary attendance-card mt-4">
+            <div className="card card-primary attendance-card mt-4 cstm-table-outer">
               <div className="card-header">
                 <h3 className="card-title">Attendance</h3>
               </div>

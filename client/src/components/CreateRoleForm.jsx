@@ -69,7 +69,7 @@ const CreateRoleForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className='create-role-form'>
       <h3>Create New Role</h3>
 
       <div>

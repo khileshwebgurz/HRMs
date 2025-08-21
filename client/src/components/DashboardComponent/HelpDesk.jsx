@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import "../../../src/assets/css/helpdesk.css"; 
 const HelpDesk = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -37,7 +38,7 @@ const HelpDesk = () => {
   return (
     <>
       <section className="content mt-4">
-        <div className="container-fluid">
+        <div className="container">
           <div className="row">
             <div className="col-md-12">
               <div className="helpDesk-card">

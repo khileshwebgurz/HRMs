@@ -75,7 +75,7 @@ const SupportTicket = () => {
   return (
     <>
       <section className="content mt-4 support-ticket">
-        <div className="container-fluid">
+        <div className="container">
           <div className="row">
             <div className="col-lg-3">
               <div className="support-ticket-sidebar">
@@ -105,7 +105,7 @@ const SupportTicket = () => {
             </div>
             {tab === "myticket" && (
               <div className="col-lg-9">
-                <div className="support-ticket-content">
+                <div className="support-ticket-content cstm-table-outer">
                   <div id="tab-1" className="tab-content current">
                     <div className="card card-primary">
                       <div className="main-header card-header d-flex align-items-center">
@@ -138,7 +138,7 @@ const SupportTicket = () => {
                         </div>
                       </div>
                       <div className="card-body">
-                        <div className="table-responsive mt-1">
+                        <div className="table-responsive table-striped mt-1">
                           <table className="table m wg_allinterviews tickets-list">
                             <thead>
                               <tr>

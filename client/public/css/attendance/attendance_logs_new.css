@@ -139,7 +139,7 @@
   cursor: pointer; 
 }
 .attendance-logs-section .table-section .show-date-wrap {
-  padding: 20px 0; 
+  padding: 10px 0; 
 }
 .attendance-logs-section .table-section .show-date-txt {
   font-size: 13px;
@@ -596,6 +596,24 @@
     top: -5px;
     border-radius: 5px;
 }
+body .table-responsive table.table  thead th, body .table-responsive table.table  td {
+    padding: 10px 10px;
+}
+.rule-side-tabs {
+    align-items: flex-start;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 @media screen and (max-width: 768px) {
   .attendance-logs-section .timeline-section {
     overflow: scroll; 
@@ -613,6 +631,9 @@
     text-align: left;
     margin-top: 15px; 
   }
-
+.attendance-logs-section .row {
+    margin-right: calc(-.7 * var(--bs-gutter-x));
+    margin-left: calc(-.7 * var(--bs-gutter-x));
+}
 
 }

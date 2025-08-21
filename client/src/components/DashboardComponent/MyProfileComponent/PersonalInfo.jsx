@@ -16,13 +16,13 @@ const PersonalInfo = ({ employeedata }) => {
   
   return (
     <>
-      <section className="content mt-4 info-sec">
+      <section className="content info-sec">
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
 
               {/* Profile Pic & DP */}
-              <ProfilePic employeedata={employeedata}/>
+              {/* <ProfilePic employeedata={employeedata}/> */}
 
 
 

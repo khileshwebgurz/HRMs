@@ -108,8 +108,7 @@ const ContactInfo = ({ employeeData }) => {
                   data-id="wgz-contactinfo"
                 >
                   {" "}
-                  <i className="fas fa-check"></i>
-                  Update
+                  <i className="fas fa-check"></i> Update
                 </a>
               </div>
             )}

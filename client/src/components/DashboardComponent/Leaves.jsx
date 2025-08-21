@@ -123,17 +123,32 @@ const Leaves = () => {
   const penalty = totalApplied > totalCredit ? totalApplied - totalCredit : 0;
 
   return (
-    <div className="container leave-page mt-4">
-      <ul className="nav nav-tabs mb-3">
-        <li className="nav-item">
-          <button onClick={() => setActiveTab("applyleave")}>
-            Apply Leave
-          </button>
-        </li>
-        <li className="nav-item">
-          <button onClick={() => setActiveTab("leave")}>Log</button>
-        </li>
-      </ul>
+  <div className="container leave-page mt-4">
+    <div className="row profile">
+     <div className="col-md-12">
+      <div className="card card-primary">
+        <div class="card-header">
+					<h3 class="card-title">Leaves</h3>
+				</div>
+        <div className="card-body">
+          <ul className="nav nav-tabs mb-3">
+            <li className="nav-item">
+              <button
+                className={` ${activeTab === "applyleave" ? "active" : ""}`}
+                onClick={() => setActiveTab("applyleave")}
+              >
+                Apply Leave
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={` ${activeTab === "leave" ? "active" : ""}`}
+                onClick={() => setActiveTab("leave")}
+              >
+                Log
+              </button>
+            </li>
+          </ul>
 
       {activeTab === "applyleave" && (
         <ApplyLeave
@@ -205,6 +220,11 @@ const Leaves = () => {
           </div>
         </div>
       )}
+
+       </div>
+      </div>
+      </div>
+     </div>
     </div>
   );
 };

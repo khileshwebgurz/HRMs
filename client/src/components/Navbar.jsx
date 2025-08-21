@@ -3,13 +3,14 @@ import "../assets/css/navbar.css";
 import { useState, useEffect } from "react";
 // import '../../public/css/admin-panel.css'
 import { Link } from "react-router-dom";
-import webgurzLogo from "/dist/img/webguruz-logo-blue.png";
+import webgurzLogo from "../../public/dist/img/webguruz-logo-white.png";
 import RightSidebar from "./RightSidebar";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import NotifyDropdown from "./Notification/NotifyDropdown";
 import { notificationdata } from "./Notification/notificationdata";
+
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -103,41 +104,24 @@ const Navbar = () => {
         <nav className="main-header navbar navbar-expand-md navbar-light navbar-dark dark-header">
           <div className="container">
             <Link to="/dashboard" className="brand-link wgz_main_logo">
-              <img
+               <img
                 src={webgurzLogo}
                 alt="AdminLTE Logo"
                 className="brand-image elevation-3"
               />
             </Link>
-            <ul className="navbar-nav ml-auto wgz_notification">
-              <li className="nav-item">
+            <ul className="navbar-time-notification">
+              {/* <li className="nav-item nav-icon">
                 <Link to="/dashboard" className="nav-link">
                   <i className="fas fa-home"></i>
                 </Link>
-              </li>
-
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link"
-                  data-toggle="dropdown"
-                  onClick={toggleDropdown}
-                  title="Notifications"
-                >
-                  {" "}
-                  <i className="far fa-bell"></i>{" "}
-                  <span className="badge badge-warning navbar-badge">
-                    {notification.length}
-                  </span>
-                </a>
-
-                {showDropdown && <NotifyDropdown notification={notification} />}
-              </li>
-
+              </li> */}
               <li className="nav-item dropdown">
                 <div className="clock-in-container">
                   <div id="clockInWrapper" className="no-gutters clockInUser">
-                    <div className="clockInAction d-flex flex-column align-items-center">
-                     
+                    <div className="clockInAction d-flex align-items-center">
+                      <div className="clockdatetime">
+                     <div className="clockInDate" id="clockInDate">
                       {new Date()
                         .toLocaleDateString("en-US", {
                           weekday: "short",
@@ -146,7 +130,8 @@ const Navbar = () => {
                           year: "numeric",
                         })
                         .replace(",", "")}
-
+                      </div>
+                    </div>
                       <button
                         id="clockInBtn"
                         data-clocked-in={isClockedIn.toString()}
@@ -156,6 +141,7 @@ const Navbar = () => {
                       >
                         {isClockedIn ? (
                           <span onClick={handleClockOut} className="outLabel">
+                            <i class="fa-regular fa-clock"></i>
                             CLOCK-OUT
                           </span>
                         ) : (
@@ -164,6 +150,7 @@ const Navbar = () => {
                             className="inLabel"
                             id="clock_in"
                           >
+                            <i class="fa-regular fa-clock"></i>
                             CLOCK-IN
                           </span>
                         )}
@@ -183,8 +170,10 @@ const Navbar = () => {
                   </div>
                 </div>
               </li>
+              </ul>
 
-              {/* {(user.user_role == 1 ||
+            <ul className="navbar-nav ml-auto wgz_notification">
+              {(user.user_role == 1 ||
                 user.user_role == 5 ||
                 user.user_role == 7) && (
                 <li className="nav-item">
@@ -218,7 +207,7 @@ const Navbar = () => {
                     ></div>
                   </div>
                 </li>
-              )} */}
+              )}
 
               <li className="nav-item dropdown">
                 <div className="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -230,37 +219,57 @@ const Navbar = () => {
                   </a>
                 </div>
               </li>
-
-              <span
-                className="user-name"
-                style={{
-                  color: "#bfc7cd",
-                  marginLeft: "16px",
-                  marginRight: "-5px",
-                }}
-              >
-                {user.name}
-              </span>
-              <a
-                className="nav-link user-profile"
-                style={{ fontSize: "20px" }}
-                onClick={handleLogout}
-                // href="{{ route('em-logout') }}"
-              >
+          {/* <div className="user-profile-div">
+              <span className="user-name">{user.name}</span>
+              <a className="nav-link user-profile" style={{ fontSize: "20px" }} onClick={handleLogout}>
                 &nbsp;
-                <i
-                  className="fas fa-power-off"
-                  style={{ verticalAlign: "text-top" }}
-                ></i>
+                <i className="fas fa-power-off" style={{ verticalAlign: "text-top" }} ></i>
               </a>
+            </div> */}
+
+              <li className="nav-item dropdown nav-notification">
+                <a
+                  className="nav-link"
+                  data-toggle="dropdown"
+                  onClick={toggleDropdown}
+                  title="Notifications"
+                >
+                  {" "}
+                  <i className="far fa-bell"></i>{" "}
+                  <span className="badge badge-warning navbar-badge">
+                    {notification.length}
+                  </span>
+                </a>
+
+                {showDropdown && <NotifyDropdown notification={notification} />}
+              </li>
+             <div className="dropdown text-end user-login ml-4">
+              <a href="#" className="d-flex text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://html.bdevs.net/manez.prev/assets/images/avatar/avatar.png" alt="profile" width="40" height="40" className="rounded-circle me-2"/>
+                <div className="text-start">
+                  <span className="user-name">{user.name}</span>
+                  <span className="text-success small">● online</span>
+                </div>
+                <i class="fa-solid fa-angle-down"></i>
+              </a>
+              <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
+                <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i> Profile</a></li>
+                <li><hr className="dropdown-divider" /></li>
+                <li><a className="log-out" onClick={handleLogout}><i className="bi bi-box-arrow-right me-2"></i> Log Out</a></li>
+              </ul>
+            </div>
+
+
               {/* <button >Logout</button> */}
             </ul>
 
             <button
-              className="hamburger"
+              className="hamburger-new ml-4"
               id="sidebar_except"
               onClick={toggleSidebar}
             >
+              <span></span>
+              <span></span>
               <span></span>
             </button>
 

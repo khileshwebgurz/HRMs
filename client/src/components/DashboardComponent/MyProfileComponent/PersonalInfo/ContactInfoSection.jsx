@@ -146,8 +146,10 @@ const ContactInfoSection = ({ employeedata }) => {
         <div className="card-body">
           <div className="row">
             {/* First Emergency Contact */}
+              <div className="col-12">
+                <h5>In case of emergency contacts</h5>
+              </div>
             <div className="col-sm-6 col-md-4">
-              <h5>In case of emergency contacts</h5>
               <div className="form-group">
                 <label htmlFor="emergency_name" className="col-form-label">Name</label>
                 {isEditing ? (
@@ -170,7 +172,6 @@ const ContactInfoSection = ({ employeedata }) => {
             </div>
 
             <div className="col-sm-6 col-md-4">
-              <h5>&nbsp;</h5>
               <div className="form-group">
                 <label htmlFor="emergency_relation" className="col-form-label">Relation</label>
                 {isEditing ? (
@@ -193,7 +194,6 @@ const ContactInfoSection = ({ employeedata }) => {
             </div>
 
             <div className="col-sm-6 col-md-4">
-              <h5>&nbsp;</h5>
               <div className="form-group">
                 <label htmlFor="emergency_contact" className="col-form-label">Contact No.</label>
                 {isEditing ? (

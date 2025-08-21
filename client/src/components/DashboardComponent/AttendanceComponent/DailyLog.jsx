@@ -54,11 +54,18 @@ const DailyLog = () => {
               </div>
             </div>
 
+            <div class="col-md-5">
+                <div class="user-details" id="user-details">
+                    
+
+                </div>
+            </div>
+
             <div className="col-md-7">
               <div className="logs-header-right">
                 <div className="date-picker-daily attendance-date">
-                  <label className="sub-heading">Date</label>
                   <div className="date-input">
+                    <label className="sub-heading">Date</label>
                     <span
                       className="previous-date-txt mr-3 change_date"
                       id="previous_date"
@@ -85,15 +92,14 @@ const DailyLog = () => {
                     >
                       <i className="fas fa-chevron-right"></i>
                     </span>
-
-                    <button
+                  </div>
+                  <button
                       type="button"
-                      className="btn btn-sm btn-outline-secondary ml-3"
+                      className="btn btn-sm btn-outline-secondary ml-3 clear-btn"
                       onClick={clearFilter}
                     >
                       Clear Filter
                     </button>
-                  </div>
                 </div>
               </div>
             </div>

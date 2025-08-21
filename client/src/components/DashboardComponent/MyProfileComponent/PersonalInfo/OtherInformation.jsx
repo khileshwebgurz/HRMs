@@ -137,7 +137,7 @@ const OtherInformation = ({ employeedata }) => {
               {questions?.map((question, index) => (
                 <tr className="wgz_field_table" key={question.id}>
                   <td>
-                    <strong>{question.question}</strong>
+                   {question.question}
                   </td>
                   <td>
                     {isEditing ? (

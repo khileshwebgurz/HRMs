@@ -16,7 +16,6 @@ const Logs = ({ attendance,currentPage,totalPages,getAttendance }) => {
         aria-labelledby="pills-logs-tab"
       >
         <h3>Attendance Log</h3>
-        <hr />
         <ul className="nav nav-tabs" id="myTab" role="tablist">
           <li className="nav-item waves-effect waves-light">
             <button
