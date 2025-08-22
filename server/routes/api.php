@@ -26,6 +26,7 @@ use App\Http\Controllers\InterviewController;
 
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\Employee\OnboardProcessController;
+use App\Http\Controllers\SalaryslipController;
 
 
         //  Public (Unauthenticated) Routes
@@ -244,6 +245,9 @@ use App\Http\Controllers\Employee\OnboardProcessController;
                 ->name('generateTest');
 
 
+            Route::get('/salary-slip', [SalaryslipController::class, 'salaryslip']);
+            Route::get('/salary-slip-detail/{id}', [SalaryslipController::class, 'salaryslipdetail']);
+            Route::post('/salary-slip-detail/insert', [SalaryslipController::class, 'salaryslipdetailinsert']);
         });
 
         Route::middleware('auth:api')->prefix('tracker')->group(function () {

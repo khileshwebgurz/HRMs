@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
+import BulkEmailModal from "../ManageCandidates/BulkEmailModal";
 
 function ActiveCandidatesList() {
   const navigate = useNavigate();
@@ -22,6 +23,9 @@ function ActiveCandidatesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [checkedEmails, setCheckedEmails] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showBulkEmail, setShowBulkEmail] = useState(false);
+  const [bulkEmailList, setBulkEmailList] = useState("");
 
   const fetchData = async (page = 1) => {
     try {
@@ -212,6 +216,20 @@ function ActiveCandidatesList() {
     );
   };
 
+
+  const handleBulkAction = (action) => {
+      if (checkedEmails.length === 0) {
+        alert("Please select at least one candidate");
+        return;
+      }
+
+      if (action === "send_email") {
+        setBulkEmailList(checkedEmails.join(", "));
+        setShowBulkEmail(true);
+      }
+    };
+
+
   const handleCheckAll = (e) => {
     const isChecked = e.target.checked;
     setSelectAll(isChecked);
@@ -257,7 +275,17 @@ function ActiveCandidatesList() {
   };
 
   return (
-    <div className="container-fluid">
+
+    <>
+     <BulkEmailModal
+        show={showBulkEmail}
+        onClose={() => setShowBulkEmail(false)}
+        emails={bulkEmailList}
+        refreshList={() => fetchData(currentPage)}  // use your candidate fetch function
+      />
+
+
+       <div className="container-fluid">
       <section className="content-header all-candidate-page">
         <div className="container-fluid">
           <div className="row mb-2">
@@ -299,14 +327,26 @@ function ActiveCandidatesList() {
                   ? "Export Selected (XLSX)"
                   : "Export All (XLSX)"}
               </button>
-               <select
+               {/* <select
                 name=""
                 className="btn btn-success btn-sm site-main-btn-2"
                 id="wgz_action"
               >
                 <option value="">Bulk Action</option>
                 <option value="send_email">Send Email</option>
+              </select> */}
+
+               <select
+                id="bulk-action"
+                className="btn btn-success btn-sm site-main-btn-2"
+                onChange={(e) => handleBulkAction(e.target.value)}
+                value=""
+                style={{ minWidth: "150px" }}
+              >
+                <option value="">Bulk Action</option>
+                <option value="send_email">Send Email</option>
               </select>
+
             </div>
             <div className="col-md-3 mt-2">
               <input
@@ -679,6 +719,8 @@ function ActiveCandidatesList() {
         </div>
       )}
     </div>
+    </>
+   
   );
 }
 
