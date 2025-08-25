@@ -60,6 +60,8 @@ import ViewInterviewInfo from "./components/ScheduleInterview/ViewInterview/View
 import JobApplication from "./components/ManageCandidates/JobApplication";
 import ReviewAptitudeTest from "./components/ManageCandidates/ReviewAptitudeTest";
 import AptitudeTestComplete from "./components/ManageCandidates/AptitudeTestComplete";
+import AttendanceReport from "./components/AdminDashboardComponent/attendanceReport";
+import Notifications from "./components/AdminDashboardComponent/notifications";
 function App() {
   return (
     <Router>
@@ -171,6 +173,8 @@ function App() {
            <Route path="/public/users/candidate-test/:testid" element={<AptitudeTestComplete/>}/>
 
            <Route path="/career" element={<JobApplication/>}/>
+           <Route path="/attendance-report" element={<AttendanceReport />} />
+           <Route path="/notifications" element={<Notifications />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

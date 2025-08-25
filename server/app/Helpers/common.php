@@ -90,8 +90,8 @@ function getReactLink($notification)
             break;
 
         case 'attendacne_approval_request':
-          //  $link = '/leaves'; 
-           $link = '/leaves/leave-logs';
+            //  $link = '/leaves'; 
+            $link = '/leaves/leave-logs';
             break;
 
         case 'leave_request':
@@ -148,31 +148,31 @@ function getWorkingHoursByDate($date, $user_id, $format = 'string')
     $totaltime = 0;
     foreach ($attData as $time) {
         $start_time = $time[0];
-         $current_time = (isset($time[1])) ? $time[1] : date('H:i:s');
-    
-          $start_t = new DateTime($start_time);
-          $current_t = new DateTime($current_time);
-          $difference = $start_t->diff($current_t);
-          $return_time = $difference->format('%H:%I:%s');
+        $current_time = (isset($time[1])) ? $time[1] : date('H:i:s');
 
-            // $diff = strtotime($to) - strtotime($from);
-            //if (isset($time[1])) {
-          $total_time[] = $return_time;
-                // Converting the time into seconds
-          $timeinsec = strtotime($return_time) - $sum;
+        $start_t = new DateTime($start_time);
+        $current_t = new DateTime($current_time);
+        $difference = $start_t->diff($current_t);
+        $return_time = $difference->format('%H:%I:%s');
 
-                // Sum the time with previous value
-          $totaltime = $totaltime + $timeinsec;
-    
-      
-       // }
+        // $diff = strtotime($to) - strtotime($from);
+        //if (isset($time[1])) {
+        $total_time[] = $return_time;
+        // Converting the time into seconds
+        $timeinsec = strtotime($return_time) - $sum;
+
+        // Sum the time with previous value
+        $totaltime = $totaltime + $timeinsec;
+
+
+        // }
     }
 
     // Hours is obtained by dividing
     // totaltime with 3600
-    $m = floor(($totaltime%3600)/60);
-    $h = floor(($totaltime%86400)/3600);
-    $s = $totaltime%60;
+    $m = floor(($totaltime % 3600) / 60);
+    $h = floor(($totaltime % 86400) / 3600);
+    $s = $totaltime % 60;
 
     // Remaining value is seconds
 
@@ -187,7 +187,7 @@ function getWorkingHoursByDate($date, $user_id, $format = 'string')
     // $hours = $attData;
     // return $total_time;
     if ($format == 'time') {
-        return date('H:i:s',strtotime('2021-01-01 '.$h . ":" . $m . ":" . $s));
+        return date('H:i:s', strtotime('2021-01-01 ' . $h . ":" . $m . ":" . $s));
     } else {
         return $h . " Hours " . $m . " Mins";
     }
@@ -209,9 +209,9 @@ function getBreakByDate($date, $user_id)
             ->count();
         if ($check->type == 1) {
             $totalclockOut = ($totalclockOut) - 1;
-        }else{
-            if($totalclockOut){
-                $totalclockOut=($totalclockOut) - 1;
+        } else {
+            if ($totalclockOut) {
+                $totalclockOut = ($totalclockOut) - 1;
             }
         }
     }
@@ -231,7 +231,7 @@ function getBreakHoursByDate($date, $user_id, $format = 'string')
     $attData = array_column($attData, 'clock_time');
     array_shift($attData);
 
-    
+
     $attData = array_chunk($attData, 2);
 
 
@@ -239,31 +239,29 @@ function getBreakHoursByDate($date, $user_id, $format = 'string')
     $total_time = array();
     $sum = strtotime('00:00:00');
 
-    $totaltime =0;
+    $totaltime = 0;
     foreach ($attData as $time) {
-        if(!empty($time[0]) && !empty($time[1])){
+        if (!empty($time[0]) && !empty($time[1])) {
             $secs = strtotime($time[1]) - strtotime($time[0]);
-
-
-        }else{
+        } else {
             $secs = 0;
         }
 
-       
-              
-            // Sum the time with previous value
-            $totaltime = $totaltime + $secs;
- 
-       // }
+
+
+        // Sum the time with previous value
+        $totaltime = $totaltime + $secs;
+
+        // }
     }
 
 
-    
+
     // Hours is obtained by dividing
     // totaltime with 3600
-    $m = floor(($totaltime%3600)/60);
-    $h = floor(($totaltime%86400)/3600);
-    $s = $totaltime%60;
+    $m = floor(($totaltime % 3600) / 60);
+    $h = floor(($totaltime % 86400) / 3600);
+    $s = $totaltime % 60;
 
     // Remaining value is seconds
 
@@ -278,7 +276,7 @@ function getBreakHoursByDate($date, $user_id, $format = 'string')
     // $hours = $attData;
     // return $total_time;
     if ($format == 'time') {
-        return date('H:i:s',strtotime('2021-01-01 '.$h . ":" . $m . ":" . $s));
+        return date('H:i:s', strtotime('2021-01-01 ' . $h . ":" . $m . ":" . $s));
     } else {
         return $h . " Hours " . $m . " Mins";
     }
@@ -315,13 +313,11 @@ function get_options($key = null)
 
 function loginUserRole()
 {
-    if(Auth::user()){
-          return Auth::user()->user_role;
-    }
-    else{
+    if (Auth::user()) {
+        return Auth::user()->user_role;
+    } else {
         return "";
     }
-  
 }
 
 function noofworkingdays()
@@ -329,64 +325,63 @@ function noofworkingdays()
     return '21';
 }
 
-function getWeeklyWorkDuration( $user_id, $format = 'string')
+function getWeeklyWorkDuration($user_id, $format = 'string')
 {
-   $startTime = strtotime(date( 'Y-m-d', strtotime( 'monday this week' ) ));
-$endTime = strtotime( date('Y-m-d') );
+    $startTime = strtotime(date('Y-m-d', strtotime('monday this week')));
+    $endTime = strtotime(date('Y-m-d'));
 
-// Loop between timestamps, 24 hours at a time
-$weekly_time=0;
-for ( $i = $startTime; $i <= $endTime; $i = $i + 86400 ) {
-   $thisDate = date( 'Y-m-d', $i ); // 2010-05-01, 2010-05-02, etc
+    // Loop between timestamps, 24 hours at a time
+    $weekly_time = 0;
+    for ($i = $startTime; $i <= $endTime; $i = $i + 86400) {
+        $thisDate = date('Y-m-d', $i); // 2010-05-01, 2010-05-02, etc
 
-     $attData = AttendanceLog::select('clock_time')->where('employee_id', $user_id)
-        ->where('clock_date', $thisDate)
-        ->orderBy('id', 'ASC')
-        ->get()
-        ->toArray();
+        $attData = AttendanceLog::select('clock_time')->where('employee_id', $user_id)
+            ->where('clock_date', $thisDate)
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->toArray();
 
 
-    $attData = array_column($attData, 'clock_time');
+        $attData = array_column($attData, 'clock_time');
 
-    $attData = array_chunk($attData, 2);
+        $attData = array_chunk($attData, 2);
 
-    $total_time = array();
-    $sum = strtotime('00:00:00');
+        $total_time = array();
+        $sum = strtotime('00:00:00');
 
-    $totaltime = 0;
-    foreach ($attData as $time) {
-        $start_time = $time[0];
-         $current_time = (isset($time[1])) ? $time[1] : date('H:i:s');
-if(empty($time[0]) || empty($time[1])){
-  $totaltime = $totaltime + 0;
-}else{
-         $start_t = new DateTime($start_time);
-        $current_t = new DateTime($current_time);
-        $difference = $start_t->diff($current_t);
-        $return_time = $difference->format('%H:%I:%s');
+        $totaltime = 0;
+        foreach ($attData as $time) {
+            $start_time = $time[0];
+            $current_time = (isset($time[1])) ? $time[1] : date('H:i:s');
+            if (empty($time[0]) || empty($time[1])) {
+                $totaltime = $totaltime + 0;
+            } else {
+                $start_t = new DateTime($start_time);
+                $current_t = new DateTime($current_time);
+                $difference = $start_t->diff($current_t);
+                $return_time = $difference->format('%H:%I:%s');
 
-        // $diff = strtotime($to) - strtotime($from);
-        //if (isset($time[1])) {
-            $total_time[] = $return_time;
-            // Converting the time into seconds
-            $timeinsec = strtotime($return_time) - $sum;
+                // $diff = strtotime($to) - strtotime($from);
+                //if (isset($time[1])) {
+                $total_time[] = $return_time;
+                // Converting the time into seconds
+                $timeinsec = strtotime($return_time) - $sum;
 
-            // Sum the time with previous value
-            $totaltime = $totaltime + $timeinsec;
-}
-   
-       // }
+                // Sum the time with previous value
+                $totaltime = $totaltime + $timeinsec;
+            }
+
+            // }
+        }
+        $weekly_time = $weekly_time + $totaltime;
     }
-$weekly_time=$weekly_time+$totaltime;
 
-}
-  
 
     // Hours is obtained by dividing
     // totaltime with 3600
-    $m = floor(($weekly_time%3600)/60);
-    $h = floor(($weekly_time%86400)/3600);
-    $s = $weekly_time%60;
+    $m = floor(($weekly_time % 3600) / 60);
+    $h = floor(($weekly_time % 86400) / 3600);
+    $s = $weekly_time % 60;
 
     // Remaining value is seconds
 
@@ -401,8 +396,14 @@ $weekly_time=$weekly_time+$totaltime;
     // $hours = $attData;
     // return $total_time;
     if ($format == 'time') {
-        return date('H:i:s',strtotime('2021-01-01 '.$h . ":" . $m . ":" . $s));
+        return date('H:i:s', strtotime('2021-01-01 ' . $h . ":" . $m . ":" . $s));
     } else {
         return $h . " Hours " . $m . " Mins";
     }
+}
+
+
+function noofleaves()
+{
+    return '12';
 }

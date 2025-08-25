@@ -43,14 +43,16 @@ use App\Http\Controllers\SalaryslipController;
 
 
         // Protected employee API (must be logged in + ready)
-        Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
-            Route::get('/dashboard', [DashboardController::class, 'dashboard']);
-        });
+        // Route::middleware(['auth:api', 'check.readiness:api'])->group(function () {
+        //     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+        // });
 
         //  Protected (Authenticated) Routes
         Route::middleware(['auth:api'])->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+            Route::get('/attendance-whole-report', [DashboardController::class, 'attendanceWholeReport']);
+            Route::post('/attendance-whole-report', [DashboardController::class, 'attendanceWholeReport']);
 
             Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
             Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
@@ -87,7 +89,7 @@ use App\Http\Controllers\SalaryslipController;
             Route::get('/candidate/profile/{profile_id}', [UserController::class, 'candidateProfileView']);
             Route::get('/candidates/{candidate_id}', [UserController::class, 'editCandidate']);
             Route::post('/candidates/update', [UserController::class, 'editCandidatePost']);
-
+            Route::get('/notifications', [DashboardController::class, 'notifications']);
 
             // Active Candidate
 
@@ -201,9 +203,28 @@ use App\Http\Controllers\SalaryslipController;
                 Route::get('/import-candidates', [ImportController::class,'importCandidates']);
 
                 // helpdesk search
-                Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
+                //Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
                 // Route::post('/import-candidates-post', [ImportController::class,'importCandidatesPost']);
                 // Route::get('/import-candidates', [ImportController::class,'importCandidates']);
+
+
+                Route::get('/helpdesk', [SettingController::class, 'helpdesk']);               
+                Route::post('/helpdesk', [SettingController::class, 'helpinsert']);            
+                Route::get('/helpdesk/{id}', [SettingController::class, 'helpedit']);        
+                Route::put('/helpdesk/{id}', [SettingController::class, 'helpupdate']);        
+                Route::delete('/helpdesk/{id}', [SettingController::class, 'helpdelete']);    
+
+                Route::get('/helpdesk/search', [SettingController::class, 'helpdesk_search']); 
+                Route::post('/helpdesk/query', [SettingController::class, 'helpdesk_search_query']); 
+                Route::get('/helpdesk/answer/{id}', [SettingController::class, 'helpdesk_search_answer']);
+
+
+                Route::get('/employee-team', [SettingController::class, 'employee_team']);               
+                Route::post('/employee-team', [SettingController::class, 'employee_team_insert']);         
+                Route::get('/employee-team/{id}', [SettingController::class, 'employee_team_edit']);       
+                Route::put('/employee-team/{id}', [SettingController::class, 'employee_team_update']);     
+                Route::delete('/employee-team/{id}', [SettingController::class, 'employee_team_delete']); 
+                Route::get('/employee-team/add', [SettingController::class, 'employee_team_add']);
             });
 
             //  Employee-only routes (for future)
@@ -212,7 +233,7 @@ use App\Http\Controllers\SalaryslipController;
 
             // IT support
             Route::middleware('role:3')->group(function () {
-                Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
+               // Route::get('/helpdesk-search', [SettingController::class, 'helpdesk_search'])->name('em-helpdesk-search');
             });
 
             Route::get('start-onboarding/{candidate_id}', [OnboardProcessController::class, 'startOnboarding'])->name('startOnboarding');
@@ -241,8 +262,8 @@ use App\Http\Controllers\SalaryslipController;
             Route::post('/notinterested', [LeadController::class, 'notinterestedPost'])->name('notinterested');
             Route::post('/follow-up-post', [LeadController::class, 'FollowUpPost'])->name('followUpPost');
 
-              Route::post('generate-test/{candidate_id}', [UserController::class, 'generateTest'])
-                ->name('generateTest');
+            Route::post('generate-test/{candidate_id}', [UserController::class, 'generateTest'])
+            ->name('generateTest');
 
 
             Route::get('/salary-slip', [SalaryslipController::class, 'salaryslip']);
