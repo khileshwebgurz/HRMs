@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CareerDataExport;
+use Illuminate\Support\Facades\Log;
 
 class LeadController extends Controller
 {
@@ -42,7 +43,7 @@ class LeadController extends Controller
         $filter = $request->input('status', '');
 
         $query = FormRequests::with('formData')->where('form_id', 4);
-
+       
         if ($search !== '') {
             $matchedFormIds = FormsData::select('form_request_id')
                 ->where('meta_value', 'like', '%' . $search . '%')
@@ -58,6 +59,9 @@ class LeadController extends Controller
 
         $perPage = $request->input('per_page', 10);
         $leads = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+         Log::info('my fucking query is >>',['leads'=> $leads]);
+
 
         // Transform each lead into a flat key-value array
         $transformedLeads = $leads->getCollection()->map(function ($lead) {
@@ -241,11 +245,14 @@ class LeadController extends Controller
     public function shortlistedPost(Request $request)
     {
         $id = $request->input('lead_id');
+        Log::info('my $id is >>',['id is >'=> $id]);
         if (!$id) {
             return response()->json(['error' => 'Missing formid'], 400);
         }
 
         $formRequest = FormRequests::find($id);
+
+        Log::info('my $form request data is >>',['formRequest is >'=> $formRequest]);
         if (!$formRequest) {
             return response()->json(['error' => 'Form request not found'], 404);
         }
@@ -255,7 +262,7 @@ class LeadController extends Controller
         $formdata_phone = FormsData::where('form_request_id', $id)->where('meta_key', 'mobile')->first();
         $formdata_position = FormsData::where('form_request_id', $id)->where('meta_key', 'position')->first();
 
-        $formRequest->job_application_status = '2'; // shortlisted code
+        $formRequest->job_application_status = '2'; 
 
         if ($formRequest->save()) {
             $to_name = $formdata_name->meta_value ?? 'Candidate';

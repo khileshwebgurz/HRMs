@@ -8,36 +8,60 @@ import { useUser } from "../../context/UserContext";
 const LeaveLogs = () => {
   const navigate = useNavigate();
   const [leaveData, setleaveData] = useState([]);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    per_page: 10,
+    last_page: 1,
+    total: 0,
+  });
+  const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const user = useUser();
 
-  useEffect(() => {
-    const fetchingLogs = async () => {
-      try {
-        const data = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/leave-logs`,
-          {
-            withCredentials: true,
-          }
-        );
-        setleaveData(data.data);
-      } catch (error) {
-        if (error.response?.status === 403) {
-          console.warn("Forbidden access — redirecting to 404");
-          navigate("/404");
-        } else {
-          console.error("Unexpected error:", error);
+  const fetchingLogs = async (page = 1, perPage = 10, searchValue = "") => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/leave-logs`,
+        {
+          params: {
+            page,
+            per_page: perPage,
+            search: searchValue,
+          },
+          withCredentials: true,
         }
+      );
+
+      console.log("my response of paginated data is >>> ", response.data);
+      setleaveData(response.data); // transformed logs
+      setPagination(response.data.pagination); // pagination info
+    } catch (error) {
+      if (error.response?.status === 403) {
+        console.warn("Forbidden access — redirecting to 404");
+        navigate("/404");
+      } else {
+        console.error("Unexpected error:", error);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchingLogs();
   }, []);
 
-  const handleGoBack = ()=> {
-    navigate('/leaves')
-  }
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchingLogs(1, 10, search);
+    }, 500);
 
+    return () => clearTimeout(delay);
+  }, [search]);
 
+  console.log("my all leave data are >>> ", leaveData);
+
+  const handleGoBack = () => {
+    navigate("/leaves");
+  };
 
   const handleDeclineClick = async (leave) => {
     const declineRequest = await axios.post(
@@ -86,6 +110,16 @@ const LeaveLogs = () => {
     setShowModal(!showModal);
   };
 
+  // need to fix this as it not increment the seria number when changing number of records per pagee.
+  const handleRecordsPerPage = (e) => {
+    const newPerPage = parseInt(e.target.value, 10);
+    setPagination((prev) => ({
+      ...prev,
+      per_page: newPerPage,
+      current_page: 1,
+    }));
+    fetchingLogs(1, newPerPage, search);
+  };
   return (
     <>
       <section className="content-header">
@@ -93,6 +127,33 @@ const LeaveLogs = () => {
           <div className="row mb-2">
             <div className="col-sm-6">
               <h1>All Leave Logs Empolyees </h1>
+              <div>
+                Show{" "}
+                <select
+                  value={pagination.per_page}
+                  onChange={handleRecordsPerPage}
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>{" "}
+                entries
+              </div>
+
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPagination((prev) => ({
+                    ...prev,
+                    current_page: 1, // reset to first page
+                  }));
+                }}
+                className="form-control my-3"
+              />
             </div>
           </div>
         </div>
@@ -128,7 +189,7 @@ const LeaveLogs = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {leaveData.data?.map((leave, index) => {
+                    {leaveData?.data?.map((leave, index) => {
                       const start = leave.start_date;
                       const end = leave.end_date;
 
@@ -144,7 +205,13 @@ const LeaveLogs = () => {
 
                       return (
                         <tr key={leave.id}>
-                          <td>{index + 1}</td>
+                          <td>
+                            {(pagination.current_page - 1) *
+                              pagination.per_page +
+                              index +
+                              1}
+                          </td>
+
                           <td>{leave.employee_name}</td>
                           <td style={{ display: "none" }}></td>
                           <td>
@@ -234,6 +301,42 @@ const LeaveLogs = () => {
                   </tbody>
                 </table>
               )}
+
+              {/* Pagination Controls */}
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <button
+                  className="btn btn-secondary"
+                  disabled={pagination.current_page === 1}
+                  onClick={() =>
+                    fetchingLogs(
+                      pagination.current_page - 1,
+                      pagination.per_page,
+                      search
+                    )
+                  }
+                >
+                  Prev
+                </button>
+
+                <span>
+                  Page {pagination.current_page} of {pagination.last_page} (
+                  {pagination.total} records)
+                </span>
+
+                <button
+                  className="btn btn-secondary"
+                  disabled={pagination.current_page === pagination.last_page}
+                  onClick={() =>
+                    fetchingLogs(
+                      pagination.current_page + 1,
+                      pagination.per_page,
+                      search
+                    )
+                  }
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -336,6 +439,5 @@ const LeaveLogs = () => {
     </>
   );
 };
-
 
 export default LeaveLogs;

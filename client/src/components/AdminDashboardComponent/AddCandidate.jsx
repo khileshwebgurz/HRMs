@@ -64,10 +64,11 @@ const AddCandidate = () => {
     }
 
     // LinkedIn (optional but validate format)
-    if (
-      form.linked_in &&
-      !/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(
-        form.linked_in
+    if (!form.linked_in.trim()) {
+      newErrors.linked_in = "This field is required";
+    } else if (
+      !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(
+        form.linked_in.trim()
       )
     ) {
       newErrors.linked_in = "Invalid LinkedIn URL";
@@ -265,9 +266,7 @@ const AddCandidate = () => {
             placeholder="Position"
           />
 
-          {errors.position && (
-            <p className="text-danger">{errors.position}</p>
-          )}
+          {errors.position && <p className="text-danger">{errors.position}</p>}
         </div>
 
         <div className="col-md-6 mb-3">
@@ -314,6 +313,9 @@ const AddCandidate = () => {
             className="form-control"
             onChange={handleChange}
           />
+          {errors.upload_cv && (
+            <p className="text-danger">{errors.upload_cv}</p>
+          )}
         </div>
 
         <div className="col-md-6 mb-3">
@@ -342,7 +344,6 @@ const AddCandidate = () => {
             onChange={handleChange}
             placeholder="LinkedIn URL"
           />
-
 
           {errors.linked_in && (
             <p className="text-danger">{errors.linked_in}</p>

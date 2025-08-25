@@ -33,10 +33,10 @@ class LeavesController extends Controller
     public function index()
     {
         $data = LeaveTypes::all();
-        $permission_role =Roles::where('id',Auth::user()->user_role)->first();
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
         Log::info('my permission is :', ['datas' => $permission_role]);
         Log::info('my permission role  are :', ['datas' => $permission_role->view]);
-       
+
         return response()->json(['status' => 200, 'data' => $data]);
     }
 
@@ -76,56 +76,148 @@ class LeavesController extends Controller
 
 
 
-        // leavelog function in same controller
+    // leavelog function in same controller
+    // public function logsOLD(Request $request)
+    // {
+
+    //     $user = auth('api')->user();
+    //     Log::info('my datas are :', ['datas' => $user]);
+    //     $role = Roles::find($user->user_role);
+
+    //     $data = collect();
+
+    //        Log::info('my lkkklk are :', ['datas' => $role]);
+    //     if ($role->view == '2') {
+    //         $data = EmployeeLeaveLogs::where('employee_id', $user->id)->orderBy('created_at', 'desc')->get();
+    //     } elseif ($role->view == '3') {
+    //         $employeeIds = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+    //         $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+    //     } elseif ($role->view == '4') {
+    //         $employeeIds = Employees::where('manager_id', $user->id)
+    //             ->orWhere('id', $user->id)
+    //             ->pluck('id')->toArray();
+    //         $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+    //     } elseif ($role->view == '5') {
+    //         $data = EmployeeLeaveLogs::orderBy('created_at', 'desc')->get();
+    //     }
+
+    //     // Filter by date range if provided
+    //     if (!empty($request->startdate) || !empty($request->enddate)) {
+    //         $data = $data->filter(function ($item) use ($request) {
+    //             return $item->created_at >= $request->startdate && $item->created_at <= $request->enddate;
+    //         });
+    //     }
+
+    //     // Transform data
+    //     $transformed = $data->map(function ($row) {
+    //         $leave = LeaveRules::find($row->leave_type);
+    //         $start_half = $row->start_half == 2 ? 'Second Half' : 'First Half';
+    //         $end_half = $row->end_half == 2 ? 'Second Half' : 'First Half';
+
+    //         if ($row->status == 2) {
+    //             $status_label = 'Approved';
+    //         } elseif ($row->status == 3) {
+    //             $status_label = 'Declined';
+    //         } elseif ($row->status == 4) {
+    //             $status_label = 'Deleted';
+    //         } else {
+    //             $status_label = 'Pending';
+    //         }
+
+    //         $actions = 'view'; 
+
+    //         return [
+    //             'id' => $row->id,
+    //             'employee_name' => $row->employee->name ?? '',
+    //             'leave_type' => $leave->rule_name ?? '',
+    //             'start_date' => [
+    //                 'date' => date('d-m-Y', strtotime($row->start_date)),
+    //                 'half' => $start_half
+    //             ],
+    //             'end_date' => [
+    //                 'date' => date('d-m-Y', strtotime($row->end_date)),
+    //                 'half' => $end_half
+    //             ],
+    //             'status' => $row->status,
+    //             'status_label' => $status_label,
+    //             'approve_status' => $row->approve_status,
+    //             'reason' => $row->reason,
+    //             'actions' => $actions
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'status' => 200,
+    //         'data' => $transformed
+    //     ]);
+    // }
+
     public function logs(Request $request)
     {
-        
         $user = auth('api')->user();
-        Log::info('my datas are :', ['datas' => $user]);
         $role = Roles::find($user->user_role);
-    
-        $data = collect();
-        
-           Log::info('my lkkklk are :', ['datas' => $role]);
+
+        // Start query
+        $query = EmployeeLeaveLogs::query();
+
+        // Role-based filtering
         if ($role->view == '2') {
-            $data = EmployeeLeaveLogs::where('employee_id', $user->id)->orderBy('created_at', 'desc')->get();
+            $query->where('employee_id', $user->id);
         } elseif ($role->view == '3') {
             $employeeIds = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
-            $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+            $query->whereIn('employee_id', $employeeIds);
         } elseif ($role->view == '4') {
             $employeeIds = Employees::where('manager_id', $user->id)
                 ->orWhere('id', $user->id)
                 ->pluck('id')->toArray();
-            $data = EmployeeLeaveLogs::whereIn('employee_id', $employeeIds)->orderBy('created_at', 'desc')->get();
+            $query->whereIn('employee_id', $employeeIds);
         } elseif ($role->view == '5') {
-            $data = EmployeeLeaveLogs::orderBy('created_at', 'desc')->get();
+            // no filter, fetch all
         }
-    
-        // Filter by date range if provided
-        if (!empty($request->startdate) || !empty($request->enddate)) {
-            $data = $data->filter(function ($item) use ($request) {
-                return $item->created_at >= $request->startdate && $item->created_at <= $request->enddate;
+
+        // Date range filter
+        if (!empty($request->startdate) && !empty($request->enddate)) {
+            $query->whereBetween('created_at', [$request->startdate, $request->enddate]);
+        }
+
+        // Search filter (by employee name, leave type, reason etc.)
+        if (!empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('employee', function ($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('leaveRule', function ($q3) use ($search) {
+                        $q3->where('rule_name', 'like', "%{$search}%");
+                    })
+                    ->orWhere('reason', 'like', "%{$search}%");
             });
         }
-    
+
+        // Pagination (default 10 per page)
+        $perPage = $request->input('per_page', 10);
+        $logs = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
         // Transform data
-        $transformed = $data->map(function ($row) {
-            $leave = LeaveRules::find($row->leave_type);
+        $transformed = $logs->map(function ($row) {
+            $leave = $row->leaveRule; // assuming relation: EmployeeLeaveLogs belongsTo LeaveRules
             $start_half = $row->start_half == 2 ? 'Second Half' : 'First Half';
             $end_half = $row->end_half == 2 ? 'Second Half' : 'First Half';
-    
-            if ($row->status == 2) {
-                $status_label = 'Approved';
-            } elseif ($row->status == 3) {
-                $status_label = 'Declined';
-            } elseif ($row->status == 4) {
-                $status_label = 'Deleted';
-            } else {
-                $status_label = 'Pending';
+
+            switch ($row->status) {
+                case 2:
+                    $status_label = 'Approved';
+                    break;
+                case 3:
+                    $status_label = 'Declined';
+                    break;
+                case 4:
+                    $status_label = 'Deleted';
+                    break;
+                default:
+                    $status_label = 'Pending';
             }
-    
-            $actions = 'view'; 
-    
+
             return [
                 'id' => $row->id,
                 'employee_name' => $row->employee->name ?? '',
@@ -142,15 +234,23 @@ class LeavesController extends Controller
                 'status_label' => $status_label,
                 'approve_status' => $row->approve_status,
                 'reason' => $row->reason,
-                'actions' => $actions
+                'actions' => 'view'
             ];
         });
-    
+
         return response()->json([
             'status' => 200,
-            'data' => $transformed
+            'data' => $transformed,
+            'pagination' => [
+                'total' => $logs->total(),
+                'per_page' => $logs->perPage(),
+                'current_page' => $logs->currentPage(),
+                'last_page' => $logs->lastPage(),
+            ]
         ]);
     }
+
+
 
 
 
@@ -225,7 +325,7 @@ class LeavesController extends Controller
         ];
     }
 
-     // account function
+    // account function
     public function leavesDetailAllEmp(Request $request)
     {
         $loginUser = Auth::user();
@@ -248,7 +348,7 @@ class LeavesController extends Controller
             ->get()
             ->pluck('total_leaves', 'month')
             ->toArray();
-        
+
 
 
         $approvedLeaves = EmployeeLeaveLogs::where('employee_id', $user->id)
@@ -276,7 +376,7 @@ class LeavesController extends Controller
         ]);
     }
 
-         // account function
+    // account function
     public function employeeLogs(Request $request)
     {
         $loginUser = Auth::user();
@@ -319,7 +419,7 @@ class LeavesController extends Controller
     }
 
 
-     // account function
+    // account function
     public function deleteLeave(Request $request)
     {
         $leave = EmployeeLeaveLogs::find($request->leave_id);
@@ -339,7 +439,7 @@ class LeavesController extends Controller
         return response()->json(['message' => 'Leave marked as deleted successfully']);
     }
 
-     // account function
+    // account function
     public function deleteLeavePost(Request $request)
     {
         $leave_id = $request->leave_id;
@@ -352,7 +452,7 @@ class LeavesController extends Controller
             ]);
         }
 
-        if ((int)$leave->status !== 1) { 
+        if ((int)$leave->status !== 1) {
             return response()->json([
                 'status' => 403,
                 'message' => 'Only pending leaves can be marked as deleted.'
@@ -415,7 +515,7 @@ class LeavesController extends Controller
         // print_r($tDate); die();
 
         $type = $request->get('leave_type');
-       
+
         $leave_rule = LeaveRules::where('id', $type)->first();
         Log::info('my leave rule  array:', $leave_rule->toArray());
         if ($leave_rule->show_time == '1') {
@@ -589,7 +689,7 @@ class LeavesController extends Controller
                     //sxdfsf
                     $arr = [];
                     $employee = Employees::where('id', $user->id)->first();
-                    
+
                     $manager = Employees::where('id', $user->manager_id)->first();
                     array_push($arr, $manager->email, 'hr@yopmail.in');
 
@@ -616,7 +716,7 @@ class LeavesController extends Controller
                     $to_emails = $arr;
 
                     $to_name = $manager->name;
-                    $to_emails =['hr@yopmail.in','jp@yopmail.in',$manager->email,'careers@yopmail.in'];
+                    $to_emails = ['hr@yopmail.in', 'jp@yopmail.in', $manager->email, 'careers@yopmail.in'];
                     $data = array(
                         'to_name' => $to_name,
                         'employee' => $employee->name,
@@ -644,13 +744,13 @@ class LeavesController extends Controller
                     $noti->page_id = $leaves->id;
                     $noti->notify_status = 1;
                     $noti->notify_from = Auth::user()->id;
-                    
+
                     $noti->notify_to = $user->manager_id;
-                   
+
                     $noti->notify_type = 2;
-                   
+
                     $noti->save();
-                   
+
 
                     return response()->json([
                         'status' => 200,
@@ -867,32 +967,32 @@ class LeavesController extends Controller
 
         foreach ($request->rows_ids as $row_id) {
             $empdb = EmployeeLeaveLogs::where('id', $row_id)->first();
-            $employee =Employees::where('id', $empdb->employee_id)->first();
+            $employee = Employees::where('id', $empdb->employee_id)->first();
             // $approved =Employees::where('id',$loginuser->id)->first();
             if ($empdb) {
                 $empdb->status = 2;
                 $empdb->approved_by = $loginuser->id;
                 if ($empdb->save()) {
                     //   $to_name = $employee->name;
-                        // $to_email =$employee->email;
-                        // $data = array(
-                        //     'to_name' =>$to_name,
-                        //     'employee' =>$approved->name,
-                        //     'leave_type' =>$empdb->leave_type,
-                        //     'start_date' =>$empdb->start_date,
-                        //     'end_date' =>$empdb->end_date,
-                        //     'reason'=>$empdb->reason,
-                        //     'total_applied_leaves' =>$empdb->total_applied_leaves
-                        // );
-                        // Mail::send('emails.leave-approved-mail', $data, function ($message) use ($to_name, $to_email) {
-                        //     $message->from('noreply@yopmail.in','noreply')
-                        //     ->to($to_email)
-                        //     ->subject('Leave application status');
-                        // });
+                    // $to_email =$employee->email;
+                    // $data = array(
+                    //     'to_name' =>$to_name,
+                    //     'employee' =>$approved->name,
+                    //     'leave_type' =>$empdb->leave_type,
+                    //     'start_date' =>$empdb->start_date,
+                    //     'end_date' =>$empdb->end_date,
+                    //     'reason'=>$empdb->reason,
+                    //     'total_applied_leaves' =>$empdb->total_applied_leaves
+                    // );
+                    // Mail::send('emails.leave-approved-mail', $data, function ($message) use ($to_name, $to_email) {
+                    //     $message->from('noreply@yopmail.in','noreply')
+                    //     ->to($to_email)
+                    //     ->subject('Leave application status');
+                    // });
                     // Notification for admin
                     $noti = new Notifications();
                     $noti->type_id = 'attendacne_approval_request';
-                    $noti->message =  $employee->name."'s leave has been approved" ;
+                    $noti->message =  $employee->name . "'s leave has been approved";
                     $noti->page_id = $empdb->id;
                     $noti->notify_to = $empdb->employee_id;
                     $noti->save();
@@ -1008,162 +1108,115 @@ class LeavesController extends Controller
 
     public function rejectLeaveRequest(Request $request, $leave_id)
     {
-      if (Auth::user()) {  
-              $loginuser = Auth::user()->id;
-              $employee =Employees::where('id',$loginuser)->first();
-              $manager =EmployeeLeaveLogs::where('id', $leave_id)->first();
-              $employee_id = Employees::where('id', $manager->employee_id)->first();
+        if (Auth::user()) {
+            $loginuser = Auth::user()->id;
+            $employee = Employees::where('id', $loginuser)->first();
+            $manager = EmployeeLeaveLogs::where('id', $leave_id)->first();
+            $employee_id = Employees::where('id', $manager->employee_id)->first();
 
-           
 
-              if($manager->manager_id == $loginuser || $employee->user_role == '1')
-              {
-                if($manager->status == '1')
-                {
-                             //notify to employee
+
+            if ($manager->manager_id == $loginuser || $employee->user_role == '1') {
+                if ($manager->status == '1') {
+                    //notify to employee
                     $noti = new Notifications();
                     $noti->type_id = 'leave_request';
-                    $noti->message = 'Your leave request has been rejected by '. $employee->name;
+                    $noti->message = 'Your leave request has been rejected by ' . $employee->name;
                     $noti->is_seen = 1;
                     $noti->page_id = $leave_id;
                     $noti->notify_status = 1;
                     $noti->notify_from = Auth::user()->id;
                     $noti->notify_to = $manager->employee_id;
-                    $noti->notify_type= 3;
+                    $noti->notify_type = 3;
                     $noti->save();
 
                     //notify to admin
                     $noti = new Notifications();
                     $noti->type_id = 'attendacne_approval_request';
-                    $noti->message = $employee_id->name ."'s leave request has been rejected by ".$employee->name;
+                    $noti->message = $employee_id->name . "'s leave request has been rejected by " . $employee->name;
                     $noti->is_seen = 1;
                     $noti->page_id = $leave_id;
                     $noti->notify_status = 1;
                     $noti->notify_from = Auth::user()->id;
                     $noti->notify_to = $manager->manager_id;
-                    $noti->notify_type= 2;
+                    $noti->notify_type = 2;
                     $noti->save();
 
                     $manager->status = '3';
                     $manager->approved_by = $loginuser;
-                    if($manager->save())
-                    {
+                    if ($manager->save()) {
 
                         $to_name = $employee_id->name;
-                        $to_email =$employee_id->email;
+                        $to_email = $employee_id->email;
                         $data = array(
-                            'to_name' =>$to_name,
-                            'employee' =>$employee->name,
-                            'leave_type' =>$manager->leave_type,
-                            'start_date' =>$manager->start_date,
-                            'end_date' =>$manager->end_date,
-                            'total_applied_leaves' =>$manager->total_applied_leaves,
+                            'to_name' => $to_name,
+                            'employee' => $employee->name,
+                            'leave_type' => $manager->leave_type,
+                            'start_date' => $manager->start_date,
+                            'end_date' => $manager->end_date,
+                            'total_applied_leaves' => $manager->total_applied_leaves,
                             'reason'  => $manager->manager_reason
                         );
                         Mail::send('emails.leave-rejected-mail', $data, function ($message) use ($to_name, $to_email) {
-                            $message->from('noreply@yopmail.in','noreply')
-                            ->to($to_email)
-                            ->subject('Leave application status');
+                            $message->from('noreply@yopmail.in', 'noreply')
+                                ->to($to_email)
+                                ->subject('Leave application status');
                         });
-                          if($employee->role_id == "1")
-                            {
-                                if($manager->manager_id == $loginuser)
-                                {
-                                    return redirect()->route('em-leaves')->with('success', "You have rejected the leave request.")->withInput(['tab' => 'teamleaves']);
-                                }
-                                else
-                                {
-                                    return redirect()->route('leavelogs')->with('success', "You have rejected the leave request."); 
-                                }
-                             
-                            }
-                            else
-                            {
+                        if ($employee->role_id == "1") {
+                            if ($manager->manager_id == $loginuser) {
                                 return redirect()->route('em-leaves')->with('success', "You have rejected the leave request.")->withInput(['tab' => 'teamleaves']);
+                            } else {
+                                return redirect()->route('leavelogs')->with('success', "You have rejected the leave request.");
                             }
-                    } 
-                }
-                elseif($manager->status == '2')
-                {
-                    if($employee->role_id == "1")
-                    {
-                        if($manager->manager_id == $loginuser)
-                        {
-                            return redirect()->route('em-leaves')->with('success', "Already Accepted")->withInput(['tab' => 'teamleaves']);
+                        } else {
+                            return redirect()->route('em-leaves')->with('success', "You have rejected the leave request.")->withInput(['tab' => 'teamleaves']);
                         }
-                        else
-                        {
-                            return redirect()->route('leavelogs')->with('success', "Already Accepted"); 
-                        }
-                     
                     }
-                    else
-                    {
+                } elseif ($manager->status == '2') {
+                    if ($employee->role_id == "1") {
+                        if ($manager->manager_id == $loginuser) {
+                            return redirect()->route('em-leaves')->with('success', "Already Accepted")->withInput(['tab' => 'teamleaves']);
+                        } else {
+                            return redirect()->route('leavelogs')->with('success', "Already Accepted");
+                        }
+                    } else {
                         return redirect()->route('em-leaves')->with('success', "Already Accepted")->withInput(['tab' => 'teamleaves']);
                     }
-                }
-                else
-                {
-                     if($employee->role_id == "1")
-                    {
-                        if($manager->manager_id == $loginuser)
-                        {
+                } else {
+                    if ($employee->role_id == "1") {
+                        if ($manager->manager_id == $loginuser) {
                             return redirect()->route('em-leaves')->with('success', "Already Rejected")->withInput(['tab' => 'teamleaves']);
+                        } else {
+                            return redirect()->route('leavelogs')->with('success', "Already Rejected");
                         }
-                        else
-                        {
-                            return redirect()->route('leavelogs')->with('success', "Already Rejected"); 
-                        }
-                     
-                    }
-                    else
-                    {
+                    } else {
                         return redirect()->route('em-leaves')->with('success', "Already Rejected")->withInput(['tab' => 'teamleaves']);
                     }
                 }
-
-                
-              }
-              else
-              {
+            } else {
                 return redirect()->back();
-              }
-                }
-                else
-              {
-                return redirect()->back();
-              } 
+            }
+        } else {
+            return redirect()->back();
+        }
     }
 
     public function viewLeaveRequest($leave_id)
     {
-        if (Auth::user())
-        {  
+        if (Auth::user()) {
             $loginuser = Auth::user()->id;
             $logged_id = Employees::where('id', $loginuser)->first();
-            $leave_logs =EmployeeLeaveLogs::where('id', $leave_id)->first();
-            $manager= Employees::where('id',$leave_logs->employee_id)->first();
-                if($logged_id->role_id == "1")
-                {
-                    if($manager->manager_id == $loginuser)
-                    {
-                        return redirect()->route('em-leaves')->withInput(['tab' => 'teamleaves']);
-                    }
-                    else
-                    {
-                        return redirect()->route('leavelogs'); 
-                    }
-                 
-                }
-                else
-                {
+            $leave_logs = EmployeeLeaveLogs::where('id', $leave_id)->first();
+            $manager = Employees::where('id', $leave_logs->employee_id)->first();
+            if ($logged_id->role_id == "1") {
+                if ($manager->manager_id == $loginuser) {
                     return redirect()->route('em-leaves')->withInput(['tab' => 'teamleaves']);
+                } else {
+                    return redirect()->route('leavelogs');
                 }
-               
+            } else {
+                return redirect()->route('em-leaves')->withInput(['tab' => 'teamleaves']);
             }
-
+        }
     }
-
-
-
 }

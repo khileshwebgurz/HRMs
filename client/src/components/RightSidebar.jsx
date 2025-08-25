@@ -153,7 +153,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                {user?.user_role === "1" && (
               <>
                   <li className="nav-item">
-                    <Link to="/manage-candidates" className="nav-link">
+                    <Link to="#" className="nav-link">
                       <i className="nav-icon fas fa-user-tie"></i>
                       Manage Candidates
                     </Link>

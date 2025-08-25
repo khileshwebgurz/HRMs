@@ -81,5 +81,8 @@ st3. pass in register function in app/Provider/appServiceProvider.php
 st4. run cmd
 php artisan schedule:run
 
+# For running cron job for import candidates after uploading csv files
+-> php artisan schedule:work
+
 =============---======
 

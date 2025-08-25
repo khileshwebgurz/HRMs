@@ -14,16 +14,24 @@ const CandidateList = () => {
 
   const navigate = useNavigate();
 
-  const fetchCandidates = async (page = currentPage, term = searchTerm, limit = itemsPerPage) => {
+  const fetchCandidates = async (
+    page = currentPage,
+    term = searchTerm,
+    limit = itemsPerPage
+  ) => {
     try {
       const response = await axios.get(
-       `${import.meta.env.VITE_API_BASE_URL}/candidates?page=${page}&limit=${limit}&search=${encodeURIComponent(term)}`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/candidates?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          term
+        )}`,
         { withCredentials: true }
       );
 
       setCandidates(response.data.data);
       setFilteredCandidates(response.data.data);
- 
+
       setTotalPages(response.data.last_page);
       setLoading(false);
     } catch (error) {
@@ -31,11 +39,9 @@ const CandidateList = () => {
     }
   };
 
-
-  console.log(candidates,'datatataa');
   useEffect(() => {
     fetchCandidates(currentPage);
-  }, [currentPage,itemsPerPage]);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -45,7 +51,6 @@ const CandidateList = () => {
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-
   const handleBrnClick = (url) => {
     navigate(`${url}`);
   };
@@ -54,27 +59,24 @@ const CandidateList = () => {
     navigate(`/users/${url}`);
   };
 
+  const handleSendProdileUpdateLink = async (candidateId) => {
+    const numericId = candidateId.replace("HRM", "");
+    console.log(candidateId, "candidateId");
+    console.log(numericId, "numericId");
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/send-email/${numericId}`,
+        { withCredentials: true }
+      );
 
-const handleSendProdileUpdateLink = async (candidateId) => {
-  const numericId = candidateId.replace("HRM", ""); 
-  console.log(candidateId, 'candidateId');
-  console.log(numericId, 'numericId');
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/send-email/${numericId}`, 
-      { withCredentials: true } 
-    );
-
-    console.log(response, 'response');
+      console.log(response, "response");
       alert("Send Update Profile Link to Candidate successfully!");
-    // fetchCandidates(currentPage);
-    
-  } catch (error) {
-    console.error("Error sending email:", error);
-    alert("Something went wrong while sending the email.");
-  }
-};
-
+      // fetchCandidates(currentPage);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("Something went wrong while sending the email.");
+    }
+  };
 
   const handleDeleteBtn = async (id) => {
     const numericId = id.replace("HRM", "");
@@ -89,6 +91,7 @@ const handleSendProdileUpdateLink = async (candidateId) => {
       );
 
       setCandidates(updatedCandidates);
+      fetchCandidates(currentPage);
     } catch (error) {
       console.error("cannot delete bcz of this issue ->", error);
     }
@@ -183,18 +186,18 @@ const handleSendProdileUpdateLink = async (candidateId) => {
                       <div className="btn-group">
                         <button
                           onClick={() => handleBrnClick(row.action?.view_url)}
-                           style={{color: '#707070'}} 
+                          style={{ color: "#707070" }}
                           className="btn btn-info site-icon eye-icon"
                         >
-                            <i className="fas fa-eye"></i>
+                          <i className="fas fa-eye"></i>
                         </button>
                         {row.action.edit_allowed && (
                           <button
                             onClick={() => handleEditClick(row.action.edit_url)}
                             className="btn btn-success site-icon pencil-icon"
-                             style={{color: '#707070'}} 
+                            style={{ color: "#707070" }}
                           >
-                           <i className="fas fa-pencil-alt"></i>
+                            <i className="fas fa-pencil-alt"></i>
                           </button>
                         )}
                         {row.action.delete_allowed && (
@@ -206,22 +209,19 @@ const handleSendProdileUpdateLink = async (candidateId) => {
                               }
                             }}
                             className="btn btn-danger delete-icon site-icon"
-                             style={{color: '#707070'}} 
+                            style={{ color: "#707070" }}
                           >
-                           <i className="fas fa-trash"></i>
+                            <i className="fas fa-trash"></i>
                           </button>
                         )}
 
-              
-                          <button
-                            onClick={() => handleSendProdileUpdateLink(row.id)}
-                            className="site-icon paper-plane-icon"
-                             style={{color: '#707070'}} 
-                          >
-                             <i className="fas fa-paper-plane"></i>
-                          </button>
-
-                      
+                        <button
+                          onClick={() => handleSendProdileUpdateLink(row.id)}
+                          className="site-icon paper-plane-icon"
+                          style={{ color: "#707070" }}
+                        >
+                          <i className="fas fa-paper-plane"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>

@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useUser } from "../../../../context/UserContext";
 import { Link } from "react-router-dom";
+
 const NewTicket = () => {
+  const user = useUser();
   const [employees, setEmployees] = useState([]);
+  const [form, setForm] = useState({
+    user_role: user.role_id,
+    issue: "",
+    level: "",
+    employee: "",
+    description: "",
+  });
   const fetchEmployees = async () => {
     const res = await axios.get(
       `${import.meta.env.VITE_API_BASE_URL}/all-employees?all=true`,
@@ -16,7 +26,37 @@ const NewTicket = () => {
     fetchEmployees();
   }, []);
 
-  console.log("got all employees >>>>", employees);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/addTicket`,
+        form,
+        { withCredentials: true }
+      );
+      if (response.data.status === 200) {
+        alert("Ticket submitted successfully!");
+        // Clear form
+        setForm({
+          user_role: user.role_id,
+          issue: "",
+          level: "",
+          employee: "",
+          description: "",
+        });
+      }else{
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error submitting ticket", error);
+      alert("Something went wrong while submitting ticket");
+    }
+  };
+
   return (
     <>
       {/* <LeftSideBar/> */}
@@ -51,138 +91,92 @@ const NewTicket = () => {
         </div>
 
         <div className="col-md-9">
-          <div className="card card-primary add-tickets">
-            <div className="main-header card-header">
-              <h3 className="card-title">New Ticket</h3>
+          <div className="card shadow-lg border-0">
+            <div className="card-header bg-primary text-white">
+              <h3 className="card-title mb-0">Create New Ticket</h3>
             </div>
-            <div className="card-body" id="message">
-              <div className="table-responsive mt-1">
-                <form encType="multipart/form-data" id="problem">
-                  <input
-                    type="hidden"
-                    name="user_role"
-                    value="<?php echo Auth::user()->user_role; ?>"
-                  />
-                  <div className="mb-3">
-                    <label className="form-label">Incident Type</label>
-                    <select
-                      className="browser-default custom-select"
-                      name="issue"
-                      id="incident"
-                    >
-                      <option value="select">Select</option>
-                      <option value="Hardware">Hardware</option>
-                      <option value="Software">Software</option>
-                      <option value="Server">Hosting Server</option>
-                      <option value="Internet">Internet & Network</option>
-                    </select>
-                    <span className="text-danger" id="incident_msg">
-                      Please select incident type.
-                    </span>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Issue Level</label>
-                    <select
-                      className="browser-default custom-select"
-                      name="level"
-                      id="issue"
-                    >
-                      <option value="select">Select</option>
-                      <option
-                        value="P1"
-                        id="p1"
-                        data-name="Your issue solve in 30 to 60 minutes."
-                      >
-                        P1- Service Unuseable in Production
-                      </option>
-                      <option
-                        value="P2"
-                        id="p2"
-                        data-name="Your issue solve upto 2 Hours."
-                      >
-                        P2- Service Partially not working
-                      </option>
-                      <option
-                        value="P3"
-                        id="p3"
-                        data-name="Your issue solve upto 8 Hours."
-                      >
-                        P3- Service Partially Impaired
-                      </option>
-                      <option
-                        value="P4"
-                        id="p4"
-                        data-name="Your issue solve upto 48 Hours."
-                      >
-                        P4- Service Useable
-                      </option>
-                    </select>
-                    <span className="text-danger" id="issue_msg">
-                      Please select issue level.
-                    </span>
-                    <span className="text-success" id="p1_msg"></span>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Employee</label>
-                    <select
-                      className="browser-default custom-select"
-                      name="employee"
-                      id="employee"
-                    >
-                      <option value="select">Select</option>
-
-                      {employees.map((emp) => (
-                        <option key={emp.id} value={emp.id}>
-                          {emp.name}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="text-danger" id="emp_msg">
-                      Please select employee.
-                    </span>
-                  </div>
-
-                  <div className="mb-3">
-                    <label htmlFor="name" className="form-label">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      className="form-control"
-                      cols="3"
-                      id="description"
-                      rows="3"
-                      placeholder="Describe Your Problem Here"
-                    ></textarea>
-                    <span className="text-danger" id="message_description">
-                      Please fill description
-                    </span>
-                  </div>
-
-                  <input
-                    type="submit"
-                    className="btn primary-site-main-btn text-uppercase border-radius-0"
-                    name="submit"
-                    id="submit"
-                    value="Submit"
-                  />
-                  {/* <button
-                    className="btn primary-site-main-btn text-uppercase border-radius-0"
-                    id="loader"
-                    type="button"
-                    disabled
+            <div className="card-body">
+              <form onSubmit={handleSubmit}>
+                {/* Incident Type */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Incident Type</label>
+                  <select
+                    className="form-select"
+                    name="issue"
+                    value={form.issue}
+                    onChange={handleChange}
+                    required
                   >
-                    <span
-                      className="spinner-border spinner-border-sm"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Loading...
-                  </button> */}
-                </form>
-              </div>
+                    <option value="">Select</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Software">Software</option>
+                    <option value="Server">Hosting Server</option>
+                    <option value="Internet">Internet & Network</option>
+                  </select>
+                </div>
+
+                {/* Issue Level */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Issue Level</label>
+                  <select
+                    className="form-select"
+                    name="level"
+                    value={form.level}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="P1">
+                      P1 - Service Unusable in Production
+                    </option>
+                    <option value="P2">
+                      P2 - Service Partially Not Working
+                    </option>
+                    <option value="P3">P3 - Service Partially Impaired</option>
+                    <option value="P4">P4 - Service Usable</option>
+                  </select>
+                </div>
+
+                {/* Employee */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Assign To</label>
+                  <select
+                    className="form-select"
+                    name="employee"
+                    value={form.employee}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Description */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Description</label>
+                  <textarea
+                    name="description"
+                    className="form-control"
+                    rows="4"
+                    placeholder="Describe your problem here..."
+                    value={form.description}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100 text-uppercase"
+                >
+                  Submit Ticket
+                </button>
+              </form>
             </div>
           </div>
         </div>

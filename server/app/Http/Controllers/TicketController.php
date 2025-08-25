@@ -119,10 +119,14 @@ class TicketController extends Controller
         $ticket = new Tickets;
 
         // Set employee_id
+        Log::info('my user_role is >>',['user_role'=> $request->user_role]);
+        Log::info('my filled employee is >>',['employee'=> $request->filled('employee')]);
         if ($request->user_role == '3' && $request->filled('employee')) {
             $ticket->employee_id = $request->employee;
+            Log::info('inside the employee');
         } else {
             $ticket->employee_id = $userId;
+            Log::info('inside it admin name');
         }
 
 

@@ -34,6 +34,8 @@ const JobApplication = () => {
         params,
         withCredentials: true,
       });
+
+     
       setLeads(response.data.data || []);
       setTotalRows(response.data.total || 0);
       setFormFields(response.data.form_fields || []);
@@ -93,6 +95,7 @@ const JobApplication = () => {
     }
   };
 
+  // it is not working as no modal is shown
   const handleViewLead = (lead) => {
     setSelectedLead(lead);
     setShowLeadModal(true);
@@ -106,22 +109,27 @@ const JobApplication = () => {
 
   const handleStatusUpdate = async (leadId, action) => {
     const endpoint = STATUS_ENDPOINTS[action];
+  
     if (!endpoint) return;
 
     try {
       setLoading(true);
+     
       await axios.post(
         endpoint,
         { lead_id: leadId },
         { withCredentials: true }
       );
+    
       fetchLeads(currentPage, searchTerm, statusFilter);
+   
     } catch (error) {
       console.error(`Error updating status for ${action}:`, error);
     } finally {
       setLoading(false);
     }
   };
+
   const columns = [
     "S.No.",
     "Action",
@@ -365,9 +373,59 @@ const JobApplication = () => {
                   </table>
 
                   {/* for model */}
-                
                 </div>
               </section>
+
+              {/* Modal */}
+              {showLeadModal && (
+                <div
+                  className=""
+                  id="wgz_bulk_import"
+                  aria-modal="true"
+                  role="dialog"
+                >
+                  <div className="">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h4 className="modal-title wgz_title">
+                          Job Application
+                        </h4>
+                        <button
+                          type="button"
+                          className="close"
+                          data-dismiss="modal"
+                          aria-label="Close"
+                        >
+                          <span onClick={()=>setShowLeadModal(false)}aria-hidden="true">×</span>
+                        </button>
+                      </div>
+
+                      <div className="modal-body">
+                        <div className="d-flex flex-column gap-2">
+                          {/* <div>
+                            <strong>Name:</strong> John Doe
+                          </div> */}
+                          <div>
+                            <strong>Email:</strong>{selectedLead.email}
+                          </div>
+                          <div>
+                            <strong>Mobile:</strong> {selectedLead.mobile}
+                          </div>
+                          <div>
+                            <strong>Position:</strong> {selectedLead.position}
+                          </div>
+                          <div>
+                            <strong>Experience:</strong> {selectedLead.experience}
+                          </div>
+                          <div>
+                            <strong>Resume:</strong> <a href={selectedLead.resume}>Download</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Pagination */}
               <div className="d-flex justify-content-between">

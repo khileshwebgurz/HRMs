@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
+import TicketReports from "./TicketReports";
 const AllTicketsIT = () => {
   const { name } = useParams();
 
@@ -221,7 +222,7 @@ const AllTicketsIT = () => {
           </div>
         )}
 
-        {name === "reports" && <h1>reports</h1>}
+        {name === "reports" && <TicketReports/>}
       </div>
     </>
   );
