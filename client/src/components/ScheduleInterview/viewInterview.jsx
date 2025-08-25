@@ -28,7 +28,7 @@ const viewInterview = () => {
     limit = itemsPerPage
   ) => {
     const res = await axios.get(
-      `http://localhost:8000/api/all-interviews?page=${page}&limit=${limit}&search=${encodeURIComponent(
+      `${import.meta.env.VITE_API_BASE_URL}/all-interviews?page=${page}&limit=${limit}&search=${encodeURIComponent(
         term
       )}`,
       {

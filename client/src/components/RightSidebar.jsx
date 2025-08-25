@@ -124,7 +124,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                 </Link>
               </li> */}
                 {/* @if(Auth::user()->is_manager == '1' || Auth::user()->user_role == '3') */}
-                {(user?.is_manager === "1" || user?.user_role === "3") && (
+                {(user?.user_role === "1" || user?.user_role === "3") && (
                   <>
                     <li className="nav-item">
                       <Link to="/resignation" className="nav-link">

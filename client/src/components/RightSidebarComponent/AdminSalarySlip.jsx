@@ -9,7 +9,7 @@ const AdminSalarySlip = () => {
   console.log(selectedSlip,'selectedSlip');
   const fetchallSalary = async () => {
     const response = await axios.get(
-      "http://localhost:8000/api/adminsalary-slip",
+      `${import.meta.env.VITE_API_BASE_URL}/adminsalary-slip`,
       { withCredentials: true }
     );
 

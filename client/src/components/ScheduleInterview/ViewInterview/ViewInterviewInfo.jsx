@@ -30,7 +30,7 @@ Thanks! Team Webguruz`
   };
   const fetchInterview = async () => {
     const res = await axios.get(
-      `http://localhost:8000/api/view-interview/${id}`,
+      `${import.meta.env.VITE_API_BASE_URL}/view-interview/${id}`,
       {
         withCredentials: true,
       }
@@ -65,7 +65,7 @@ Thanks! Team Webguruz`
 
   // try {
   //   const res = await axios.post(
-  //     "http://localhost:8000/api/schedule-interview",
+  //     "`${import.meta.env.VITE_API_BASE_URL}schedule-interview",
   //     formData,
   //     {
   //       headers: { "Content-Type": "multipart/form-data" },
@@ -99,7 +99,7 @@ Thanks! Team Webguruz`
 
   try {
     const res = await axios.post(
-      "http://localhost:8000/api/schedule-interview",
+      `${import.meta.env.VITE_API_BASE_URL}/schedule-interview`,
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },

@@ -14,9 +14,12 @@ const LeaveLogs = () => {
     last_page: 1,
     total: 0,
   });
+  const [selectedLeave, setSelectedLeave] = useState(null); 
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const user = useUser();
+
+  console.log('my leaves data is >>',leaveData)
 
   const fetchingLogs = async (page = 1, perPage = 10, searchValue = "") => {
     try {
@@ -33,7 +36,7 @@ const LeaveLogs = () => {
       );
 
       console.log("my response of paginated data is >>> ", response.data);
-      setleaveData(response.data); 
+      setleaveData(response.data);
       setPagination(response.data.pagination);
     } catch (error) {
       if (error.response?.status === 403) {
@@ -106,7 +109,8 @@ const LeaveLogs = () => {
     }
   };
 
-  const handleViewLeave = () => {
+  const handleViewLeave = (leave) => {
+     setSelectedLeave(leave);
     setShowModal(!showModal);
   };
 
@@ -342,7 +346,7 @@ const LeaveLogs = () => {
         </div>
       </div>
 
-      {showModal && (
+      {/* {showModal && (
         <div
           //   className="modal fade leave-modal"
           id="approvalModal"
@@ -411,31 +415,56 @@ const LeaveLogs = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-      <div
-        className="modal fade show"
-        id="wgz_bulk_import"
-        aria-modal="true"
-        role="dialog"
-      >
-        <div className="modal-dialog modal-md">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title wgz_title">Leave detail</h4>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
+     {showModal && selectedLeave && (
+        <div className="modal fade show d-block" role="dialog">
+          <div className="modal-dialog modal-md">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Leave Detail</h4>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="row mb-2">
+                  <div className="col-md-6">
+                    <p>
+                      <strong>Leave Type:</strong> {selectedLeave.leave_type}
+                    </p>
+                    <p>
+                      <strong>Start Date:</strong> {selectedLeave.start_date?.date}{" "}
+                      ({selectedLeave.start_date?.half})
+                    </p>
+                    <p>
+                      <strong>End Date:</strong> {selectedLeave.end_date?.date}{" "}
+                      ({selectedLeave.end_date?.half})
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <p>
+                      <strong>Reason:</strong> {selectedLeave.reason}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {selectedLeave.status_label}
+                    </p>
+                    <p>
+                      <strong>Approved By:</strong>{" "}
+                      {selectedLeave.manager_name ?? "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="modal-body"></div>
           </div>
         </div>
-      </div>
+     )}
+
     </>
   );
 };

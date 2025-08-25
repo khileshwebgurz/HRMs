@@ -19,7 +19,7 @@ const ReviewAptitudeTest = () => {
     limit = itemsPerPage
   ) => {
     const res = await axios.get(
-      `http://localhost:8000/api/all-candidate-test?page=${page}&limit=${limit}&search=${encodeURIComponent(
+      `${import.meta.env.VITE_API_BASE_URL}/all-candidate-test?page=${page}&limit=${limit}&search=${encodeURIComponent(
         term
       )}`,
       { withCredentials: true }

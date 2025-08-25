@@ -10,7 +10,7 @@ const AptitudeTestComplete = () => {
 
   const fetchuserTest = async () => {
     const res = await axios.get(
-      `http://localhost:8000/api/candidate-test/${testid}`,
+      `${import.meta.env.VITE_API_BASE_URL}/candidate-test/${testid}`,
       { withCredentials: true }
     );
     setUsertestData(res.data);
@@ -33,7 +33,7 @@ const AptitudeTestComplete = () => {
 
   try {
     const res = await axios.post(
-      "http://localhost:8000/api/send-message-candidate",
+      "`${import.meta.env.VITE_API_BASE_URL}send-message-candidate",
       {
         candidate_id: usertestData?.data?.candidate_id,
         message: message

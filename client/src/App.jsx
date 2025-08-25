@@ -62,7 +62,6 @@ import JobApplication from "./components/ManageCandidates/JobApplication";
 import ReviewAptitudeTest from "./components/ManageCandidates/ReviewAptitudeTest";
 import AptitudeTestComplete from "./components/ManageCandidates/AptitudeTestComplete";
 import AttendanceReport from "./components/AdminDashboardComponent/attendanceReport";
-import Notifications from "./components/AdminDashboardComponent/notifications";
 import AdminSalarySlip from "./components/RightSidebarComponent/AdminSalarySlip";
 
 function App() {
@@ -180,7 +179,7 @@ function App() {
 
            <Route path="/career" element={<JobApplication/>}/>
            <Route path="/attendance-report" element={<AttendanceReport />} />
-           <Route path="/notifications" element={<Notifications />} />
+          
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
