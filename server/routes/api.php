@@ -231,6 +231,7 @@ Route::middleware(['auth:api'])->group(function () {
         // Route::get('/employee-team/add', [SettingController::class, 'employee_team_add']);
         Route::get('/employee-team-add', [SettingController::class, 'employee_team_add']);
 
+        
     });
 
 

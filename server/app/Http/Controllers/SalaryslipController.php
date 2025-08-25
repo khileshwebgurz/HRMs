@@ -199,10 +199,11 @@ class SalaryslipController extends Controller
         ]);
     }
 
-    public function salaryslipdetailinsert(Request $request)
+    public function salaryslipdetailinsertold(Request $request)
     {
+        
         $slip_months = SalarySlip::where("relation_id", $request->relation)->pluck('id')->toArray();
-
+       
         foreach ($slip_months as $keys => $value) {
             $slip_detail = SalarySlip::find($value);
             $slip_detail->gross_salary = $request['gross_salary' . $keys];
@@ -252,9 +253,9 @@ class SalaryslipController extends Controller
             'name' => $to_name,
             'msg' => 'Your salary slip is approved.'
         ];
-        Mail::send('emails.salary-slip-gernate', $data, function ($message) use ($to_name, $to_email) {
-            $message->to($to_email, $to_name)->subject('Salary Slip');
-        });
+        // Mail::send('emails.salary-slip-gernate', $data, function ($message) use ($to_name, $to_email) {
+        //     $message->to($to_email, $to_name)->subject('Salary Slip');
+        // });
 
         if (Mail::failures()) {
             return response()->json([
@@ -268,4 +269,96 @@ class SalaryslipController extends Controller
             'message' => 'Salary Slip Gernated'
         ]);
     }
+
+
+    public function salaryslipdetailinsert(Request $request)
+    {
+        $slip_months = SalarySlip::where("relation_id", $request->relation)->pluck('id')->toArray();
+    
+        foreach ($slip_months as $keys => $value) {
+            $slip_detail = SalarySlip::find($value);
+            $slip_detail->gross_salary = $request['gross_salary' . $keys];
+            $slip_detail->deductions = $request['deduction' . $keys];
+            $slip_detail->fund = $request['fund' . $keys];
+            $slip_detail->bonus = $request['bonus' . $keys];
+            $slip_detail->cash_in_hand = $request['cash' . $keys];
+            $slip_detail->status = '1';
+            $slip_detail->update();
+
+            $data = SalarySlipsDetail::$emolument;
+            foreach ($data as $detail_key => $detail_value) {
+                $salary = new SalarySlipsDetail;
+                
+                // MANUAL ID GENERATION
+                $salary->id = SalarySlipsDetail::max('id') + 1;
+                
+                $salary->request_id = $value;
+                $salary->present_days = $request['working' . $keys];
+                $salary->key_name = $detail_value['label'];
+                $salary->amount = $request->fields['salary_' . $keys]['subfields'][$detail_key]['field1'] ?? 0;
+                $salary->deduction = $request->fields['salary_' . $keys]['subfields'][$detail_key]['field2'] ?? 0;
+                $salary->salary = $request->fields['salary_' . $keys]['subfields'][$detail_key]['field3'] ?? 0;
+                $salary->save();
+            }
+        }
+
+        // ADD NULL CHECK
+        $slip_request = Salary_Slip_Request::find($request->id);
+        if (!$slip_request) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Salary slip request not found'
+            ], 404);
+        }
+        $slip_request->status = '1';
+        $slip_request->save();
+
+        $find_emp = SalarySlip::where("relation_id", $request->relation)->first();
+            $emp = Employees::where('id', $find_emp->emp_id)->first();
+
+            $noti = new Notifications;
+            $noti->type_id = 'slip_gernated';
+            $noti->message = 'Your salary slip is gernated';
+            $noti->page_id = $request->id;
+            $noti->notify_to = $find_emp->emp_id;
+            $noti->notify_from = Auth::user()->id;
+            $noti->notify_type = $emp->is_manager == '1' ? '2' : '3';
+            if ($emp->is_manager != '1') {
+                $noti->notify_panel = '1';
+            }
+            $noti->save();
+
+            // $to_name = $emp->name;
+            // $to_email = $emp->email;
+            // $data = [
+            //     'name' => $to_name,
+            //     'msg' => 'Your salary slip is approved.'
+            // ];
+            // Mail::send('emails.salary-slip-gernate', $data, function ($message) use ($to_name, $to_email) {
+            //     $message->to($to_email, $to_name)->subject('Salary Slip');
+            // });
+
+            // if (Mail::failures()) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Email is incorrect',
+            //     ], 400);
+            // }
+
+            // Simple email without view
+            try {
+                Mail::raw('Hello ' . $emp->name . ', Your salary slip has been generated successfully. You can download it from your employee portal.', function ($message) use ($emp) {
+                    $message->to($emp->email)
+                            ->subject('Salary Slip Generated');
+                });
+            } catch (\Exception $e) {
+                Log::error('Email sending failed: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Salary Slip Gernated'
+            ]);
+    }
+    
 }

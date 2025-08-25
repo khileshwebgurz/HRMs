@@ -6,6 +6,7 @@ const AdminSalarySlip = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState(null);
 
+  console.log(selectedSlip,'selectedSlip');
   const fetchallSalary = async () => {
     const response = await axios.get(
       "http://localhost:8000/api/adminsalary-slip",
@@ -14,6 +15,28 @@ const AdminSalarySlip = () => {
 
     setSalaryData(response.data.data);
   };
+
+    const handleGenerateSlip = async () => {
+      try {
+      const response = await axios.post(
+          "http://localhost:8000/api/adminsalary-slip-detail/insert",
+          { slipData: selectedSlip }, // Adjust payload as needed
+          { withCredentials: true }
+        );
+        alert("Salary slip generated successfully!");
+
+        // Optionally, refresh the salary data
+        fetchallSalary();
+        setShowModal(false);
+
+
+      } catch (error) {
+        console.error("Error generating salary slip:", error);
+        alert("Failed to generate salary slip.");
+
+      }
+
+    };
 
   useEffect(() => {
     fetchallSalary();
@@ -299,7 +322,7 @@ const AdminSalarySlip = () => {
                 >
                   Close
                 </button>
-                <button className="btn btn-success">Submit</button>
+                <button className="btn btn-success" onClick={handleGenerateSlip}>Submit</button>
               </div>
             </div>
           </div>
