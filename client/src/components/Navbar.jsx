@@ -10,7 +10,7 @@ import axios from "axios";
 import NotifyDropdown from "./Notification/NotifyDropdown";
 import { notificationdata } from "./Notification/notificationdata";
 
-const Navbar = () => {
+const Navbar = ({myUser, isAdminMode, setIsAdminMode}) => {
   const navigate = useNavigate();
   const user = useUser();
   const [showSidebar, setShowSidebar] = useState(false);
@@ -18,7 +18,7 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [todayWorkingHour, setTodayWorkingHour] = useState("");
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  // const [isAdminMode, setIsAdminMode] = useState(true);
 
   const [timer, setTimer] = useState("00:00:00");
   const intervalRef = useRef(null);
@@ -38,6 +38,7 @@ const Navbar = () => {
   };
 
   const toggleDropdown = () => {
+    
     setShowDropdown((prev) => !prev);
   };
 
@@ -107,31 +108,31 @@ const Navbar = () => {
     fetchNotification();
   }, []);
 
-  useEffect(() => {
-    const fetchAttendance = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
-          { withCredentials: true }
-        );
+  // useEffect(() => {
+  //   const fetchAttendance = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `${import.meta.env.VITE_API_BASE_URL}/clockApi`,
+  //         { withCredentials: true }
+  //       );
 
-        console.log("the alreadyLogged in are >>>", res.data);
+  //       console.log("the alreadyLogged in are >>>", res.data);
 
-        if (res.data.a_final) {
-          setIsClockedIn(true);
+  //       if (res.data.a_final) {
+  //         setIsClockedIn(true);
 
-           startTimer(res.data.a_final);
-        } else {
-          setIsClockedIn(false);
-        }
-      } catch (err) {
-        console.error("Clock-In failed", err);
-      }
-    };
-    fetchAttendance();
+  //          startTimer(res.data.a_final);
+  //       } else {
+  //         setIsClockedIn(false);
+  //       }
+  //     } catch (err) {
+  //       console.error("Clock-In failed", err);
+  //     }
+  //   };
+  //   fetchAttendance();
 
-    return () => clearInterval(intervalRef.current);
-  }, []);
+  //   return () => clearInterval(intervalRef.current);
+  // }, []);
 
   const handleLogout = async () => {
     await axios.post(
@@ -149,6 +150,7 @@ const Navbar = () => {
   };
 
   const handleToggle = () => {
+    console.log('is admin mode >>> ',isAdminMode)
     setIsAdminMode((prev) => !prev);
   };
 

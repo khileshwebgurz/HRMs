@@ -1,13 +1,12 @@
-
 import moment from "moment";
 import { notificationdata } from "./notificationdata";
 import { useState, useEffect } from "react";
 // import bellIcon from "../assets/bell-icon.png";
 const AllNotification = () => {
-    const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const today = moment().format("YYYY-MM-DD");
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const data = await notificationdata(); // fetch the data
@@ -19,7 +18,6 @@ const AllNotification = () => {
 
     fetchNotifications();
   }, []);
-
 
   const handleDelete = (id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -63,7 +61,7 @@ const AllNotification = () => {
           </div>
           <button
             className="btn btn-link text-dark p-0"
-           onClick={() => handleDelete(note.id)}
+            onClick={() => handleDelete(note.id)}
             title="Delete"
           >
             ×

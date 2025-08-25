@@ -16,14 +16,55 @@ use App\Models\ObCandidates;
 use App\Models\SalarySlipsDetail;
 use App\Models\Salary_Slip_Request;
 use App\Models\Notifications;
+use Illuminate\Support\Facades\Log;
 
 class SalaryslipController extends Controller
 {
+    // public function salaryslip(Request $request)
+    // {
+    //     if ($request->ajax()) {
+    //         $data = Salary_Slip_Request::latest();
+
+    //         return DataTables::of($data)
+    //             ->addIndexColumn()
+    //             ->editColumn('name', function ($row) {
+    //                 $name = Employees::where('id', $row->employee_id)->first();
+    //                 return $name['name'] ?? '';
+    //             })
+    //             ->editColumn('month', function ($row) {
+    //                 $month = SalarySlip::where('relation_id', $row->slip_relation)->pluck('month')->toArray();
+    //                 $monthdata = "";
+    //                 foreach ($month as $key => $value) {
+    //                     $monthdata .= date('F, ', strtotime(date('Y' . '-' . $value)));
+    //                 }
+    //                 $remove = rtrim($monthdata, " ,");
+    //                 return $remove;
+    //             })
+    //             ->editColumn('status', function ($row) {
+    //                 return $row->status == '1' ? 'Approved' : 'Pending';
+    //             })
+    //             ->editColumn('action', function ($row) {
+    //                 return $row->status == '1'
+    //                     ? 'Approved'
+    //                     : 'Pending for Approval';
+    //             })
+    //             ->make(true);
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Salary slip requests fetched successfully',
+    //     ]);
+    // }
+
+
     public function salaryslip(Request $request)
     {
-        if ($request->ajax()) {
-            $data = Salary_Slip_Request::latest();
+        $data = Salary_Slip_Request::latest();
 
+        Log::info('the data of all salary slip request ', ['$data is >'=> $data]);
+
+        if ($request->ajax()) {
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('name', function ($row) {
@@ -50,11 +91,33 @@ class SalaryslipController extends Controller
                 ->make(true);
         }
 
+        // Non-AJAX request → return full JSON with data
+        $salarySlips = $data->get()->map(function ($row) {
+            $employee = Employees::where('id', $row->employee_id)->first();
+            $months = SalarySlip::where('relation_id', $row->slip_relation)->pluck('month')->toArray();
+
+            $monthdata = "";
+            foreach ($months as $key => $value) {
+                $monthdata .= date('F, ', strtotime(date('Y' . '-' . $value)));
+            }
+            $remove = rtrim($monthdata, " ,");
+
+            return [
+                'id' => $row->id,
+                'name' => $employee['name'] ?? '',
+                'month' => $remove,
+                'status' => $row->status == '1' ? 'Approved' : 'Pending',
+                'action' => $row->status == '1' ? 'Approved' : 'Pending for Approval',
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Salary slip requests fetched successfully',
+            'data' => $salarySlips
         ]);
     }
+
 
     public function salaryslipdetail($id)
     {
@@ -167,7 +230,7 @@ class SalaryslipController extends Controller
         $slip_request->status = '1';
         $slip_request->save();
 
-        
+
         $find_emp = SalarySlip::where("relation_id", $request->relation)->first();
         $emp = Employees::where('id', $find_emp->emp_id)->first();
 

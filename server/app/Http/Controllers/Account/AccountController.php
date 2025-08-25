@@ -26,6 +26,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Employee;
 use App\Mail\ReadinessResultMail;
+use App\Http\Controllers\SalaryslipController;
 
 
 
@@ -592,10 +593,13 @@ class AccountController extends Controller
 
     public function salaryslip(Request $request)
     {
+        Log::info('inside saalry slip');
         $loginuser = Auth::user();
 
+        Log::info('my loginuser data ',['$loginuser is '=> $loginuser]);
         $data = Salary_Slip_Request::where("employee_id", $loginuser->id)->latest()->get();
 
+        Log::info('my salary slip ',['$data is '=> $data]);
         $result = [];
 
         foreach ($data as $row) {

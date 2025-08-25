@@ -4,6 +4,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
+import { useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import 'bootstrap/dist/js/bootstrap.js';
@@ -62,7 +63,10 @@ import ReviewAptitudeTest from "./components/ManageCandidates/ReviewAptitudeTest
 import AptitudeTestComplete from "./components/ManageCandidates/AptitudeTestComplete";
 import AttendanceReport from "./components/AdminDashboardComponent/attendanceReport";
 import Notifications from "./components/AdminDashboardComponent/notifications";
+import AdminSalarySlip from "./components/RightSidebarComponent/AdminSalarySlip";
+
 function App() {
+  const [isAdminMode, setIsAdminMode] = useState(true);
   return (
     <Router>
       <Routes>
@@ -80,7 +84,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Layout />
+              <Layout  isAdminMode={isAdminMode} setIsAdminMode={setIsAdminMode}/>
             </ProtectedRoute>
           }
         >
@@ -141,6 +145,8 @@ function App() {
             path="/employee/account/salary-slip"
             element={<SalarySlip />}
           />
+
+          <Route path="/public/salary-slip" element={<AdminSalarySlip/>}/>
 
           <Route path="/company-policy" element={<CompanyPolicy />} />
           <Route path="/readiness-quiz" element={<ReadinessQuiz />} />

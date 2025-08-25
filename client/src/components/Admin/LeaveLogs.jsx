@@ -33,8 +33,8 @@ const LeaveLogs = () => {
       );
 
       console.log("my response of paginated data is >>> ", response.data);
-      setleaveData(response.data); // transformed logs
-      setPagination(response.data.pagination); // pagination info
+      setleaveData(response.data); 
+      setPagination(response.data.pagination);
     } catch (error) {
       if (error.response?.status === 403) {
         console.warn("Forbidden access — redirecting to 404");

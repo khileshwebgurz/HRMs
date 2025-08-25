@@ -1,26 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { admindashboard } from "../../../hooks/admindashboard";
 const AdminDashboard = () => {
   const [stats, setStats] = useState([]);
 
-
-   const adminDataLog = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/dashboard`,
-        { withCredentials: true }
-      );
-      setStats(response.data.data);
-    } catch (error) {
-      console.error("Error fetching leave logs:", error);
-    }
-  };
-
-
   useEffect(() => {
-    adminDataLog();
-    }, []);
+    const fetchData = async () => {
+      try {
+        const data = await admindashboard(); 
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching admin dashboard:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="content-header">
@@ -41,27 +36,27 @@ const AdminDashboard = () => {
             {[
               {
                 count: stats.total_candidates,
-                label: 'Total Candidates',
-                link: '/tracker/candidates',
-                icon: 'candidate',
+                label: "Total Candidates",
+                link: "/tracker/candidates",
+                icon: "candidate",
               },
               {
                 count: stats.total_active_candidates,
-                label: 'Active Candidates',
-                link: '/users/candidate/all-candidates',
-                icon: 'active',
+                label: "Active Candidates",
+                link: "/users/candidate/all-candidates",
+                icon: "active",
               },
               {
                 count: stats.total_questions,
-                label: 'Total Questions',
-                link: '/all-questions',
-                icon: 'conversation',
+                label: "Total Questions",
+                link: "/all-questions",
+                icon: "conversation",
               },
               {
                 count: stats.total_users,
-                label: 'Active Employees',
-                link: '/all-employees',
-                icon: 'people',
+                label: "Active Employees",
+                link: "/all-employees",
+                icon: "people",
               },
             ].map((box, idx) => (
               <div key={idx} className="col-12 col-sm-6 col-md-3">
