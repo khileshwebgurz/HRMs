@@ -96,6 +96,8 @@ class SalaryslipController extends Controller
             $employee = Employees::where('id', $row->employee_id)->first();
             $months = SalarySlip::where('relation_id', $row->slip_relation)->pluck('month')->toArray();
 
+            Log::info('my employee is >>',['employee is ..'=> $employee]);
+
             $monthdata = "";
             foreach ($months as $key => $value) {
                 $monthdata .= date('F, ', strtotime(date('Y' . '-' . $value)));
@@ -104,8 +106,10 @@ class SalaryslipController extends Controller
 
             return [
                 'id' => $row->id,
+                'emp_id' => $employee['id'] ?? null, 
                 'name' => $employee['name'] ?? '',
                 'month' => $remove,
+                // 'emp_id' => $employee['id'],
                 'status' => $row->status == '1' ? 'Approved' : 'Pending',
                 'action' => $row->status == '1' ? 'Approved' : 'Pending for Approval',
             ];
@@ -275,6 +279,7 @@ class SalaryslipController extends Controller
     {
         $slip_months = SalarySlip::where("relation_id", $request->relation)->pluck('id')->toArray();
     
+      
         foreach ($slip_months as $keys => $value) {
             $slip_detail = SalarySlip::find($value);
             $slip_detail->gross_salary = $request['gross_salary' . $keys];

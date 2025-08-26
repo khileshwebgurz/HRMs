@@ -64,7 +64,9 @@ import AptitudeTestComplete from "./components/ManageCandidates/AptitudeTestComp
 import AttendanceReport from "./components/AdminDashboardComponent/attendanceReport";
 import AdminSalarySlip from "./components/RightSidebarComponent/AdminSalarySlip";
 import CompanyProfileEdit from "./components/DashboardComponent/CompanyProfileEdit";
-
+import AdminHelpDesk from "./components/DashboardComponent/Helpdesk/AdminHelpDesk";
+import HelpDeskAdd from "./components/DashboardComponent/Helpdesk/HelpDeskAdd";
+import EditHelpDesk from "./components/DashboardComponent/Helpdesk/EditHelpDesk";
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
   return (
@@ -183,6 +185,10 @@ function App() {
            <Route path="/edit-company-profile" element={<CompanyProfileEdit />} />
           
           <Route path="*" element={<NotFound />} />
+          <Route path="/public/employee/helpdesk" element={<AdminHelpDesk/>}/>
+          <Route path="/public/employee/helpdesk-add" element={<HelpDeskAdd/>}/>
+          <Route path="/public/employee/helpdesk/:questionID" element={<EditHelpDesk/>}/>
+         
         </Route>
       </Routes>
     </Router>

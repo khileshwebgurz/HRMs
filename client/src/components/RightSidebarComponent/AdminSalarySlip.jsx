@@ -6,7 +6,25 @@ const AdminSalarySlip = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState(null);
 
-  console.log(selectedSlip,'selectedSlip');
+  const [formData, setFormData] = useState({
+    gross_salary: 0,
+    deduction: 0,
+    fund: 100,
+    bonus: 0,
+    cash: 0,
+    working: 0,
+    fields: {
+      salary_0: {
+        subfields: [
+          { field1: 0, field2: 0, field3: 0 }, // Basic
+          { field1: 0, field2: 0, field3: 0 }, // HRA
+          { field1: 0, field2: 0, field3: 0 }, // Conveyance
+          { field1: 0, field2: 0, field3: 0 }, // Incentives
+        ],
+      },
+    },
+  });
+
   const fetchallSalary = async () => {
     const response = await axios.get(
       `${import.meta.env.VITE_API_BASE_URL}/adminsalary-slip`,
@@ -16,27 +34,7 @@ const AdminSalarySlip = () => {
     setSalaryData(response.data.data);
   };
 
-    const handleGenerateSlip = async () => {
-      try {
-      const response = await axios.post(
-          "http://localhost:8000/api/adminsalary-slip-detail/insert",
-          { slipData: selectedSlip }, // Adjust payload as needed
-          { withCredentials: true }
-        );
-        alert("Salary slip generated successfully!");
 
-        // Optionally, refresh the salary data
-        fetchallSalary();
-        setShowModal(false);
-
-
-      } catch (error) {
-        console.error("Error generating salary slip:", error);
-        alert("Failed to generate salary slip.");
-
-      }
-
-    };
 
   useEffect(() => {
     fetchallSalary();
@@ -47,6 +45,47 @@ const AdminSalarySlip = () => {
     setShowModal(true);
   };
 
+  // update form data
+  const updateForm = (path, value) => {
+    setFormData((prev) => {
+      const newData = { ...prev };
+      if (path.startsWith("fields.")) {
+        // path like "fields.salary_0.subfields[0].field1"
+        const parts = path.split(".");
+        const indexMatch = parts[2].match(/\d+/); // extract subfield index
+        const index = indexMatch ? parseInt(indexMatch[0], 10) : 0;
+        const fieldKey = parts[3]; // e.g., "field1"
+        newData.fields.salary_0.subfields[index][fieldKey] = Number(value);
+      } else {
+        newData[path] = Number(value);
+      }
+      return newData;
+    });
+  };
+
+  // send payload to backend
+  const handleGenerateSlip = async () => {
+    try {
+      const payload = {
+        relation: selectedSlip.id, // backend requires relation id
+        id: selectedSlip.id, // slip request id
+        ...formData,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/adminsalary-slip-detail/insert`,
+        payload,
+        { withCredentials: true }
+      );
+
+      alert("Salary slip generated successfully!");
+      fetchallSalary();
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error generating salary slip:", error);
+      alert("Failed to generate salary slip.");
+    }
+  };
 
   return (
     <>
@@ -169,102 +208,52 @@ const AdminSalarySlip = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Basic</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>House Rent Allowance (HRA)</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Conveyance Allowance</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Other Incentives</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          className="form-control"
-                          defaultValue={0}
-                        />
-                      </td>
-                    </tr>
+                     {["Basic", "HRA", "Conveyance", "Incentives"].map(
+                      (label, i) => (
+                        <tr key={i}>
+                          <td>{label}</td>
+                          <td>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={formData.fields.salary_0.subfields[i].field1}
+                              onChange={(e) =>
+                                updateForm(
+                                  `fields.salary_0.subfields[${i}].field1`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={formData.fields.salary_0.subfields[i].field2}
+                              onChange={(e) =>
+                                updateForm(
+                                  `fields.salary_0.subfields[${i}].field2`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={formData.fields.salary_0.subfields[i].field3}
+                              onChange={(e) =>
+                                updateForm(
+                                  `fields.salary_0.subfields[${i}].field3`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
 
@@ -272,28 +261,35 @@ const AdminSalarySlip = () => {
                   <div className="col-md-6">
                     <p>
                       <strong>Gross Salary:</strong>{" "}
-                      <input
+                     <input
                         type="number"
                         className="form-control"
-                        defaultValue={0}
+                        value={formData.gross_salary0}
+                        onChange={(e) =>
+                          updateForm("gross_salary0", e.target.value)
+                        }
                       />
                     </p>
                     <p>
                       <strong>Deductions:</strong>{" "}
-                      <input
+                     <input
                         type="number"
                         className="form-control"
-                        defaultValue={0}
+                        value={formData.deduction0}
+                        onChange={(e) =>
+                          updateForm("deduction0", e.target.value)
+                        }
                       />
                     </p>
                   </div>
                   <div className="col-md-6">
                     <p>
                       <strong>Fund:</strong>{" "}
-                      <input
+                       <input
                         type="number"
                         className="form-control"
-                        defaultValue={100}
+                        value={formData.fund0}
+                        onChange={(e) => updateForm("fund0", e.target.value)}
                       />
                     </p>
                     <p>
@@ -301,15 +297,17 @@ const AdminSalarySlip = () => {
                       <input
                         type="number"
                         className="form-control"
-                        defaultValue={0}
+                        value={formData.bonus0}
+                        onChange={(e) => updateForm("bonus0", e.target.value)}
                       />
                     </p>
                     <p>
                       <strong>Cash in Hand:</strong>{" "}
-                      <input
+                       <input
                         type="number"
                         className="form-control"
-                        defaultValue={-100}
+                        value={formData.cash0}
+                        onChange={(e) => updateForm("cash0", e.target.value)}
                       />
                     </p>
                   </div>
@@ -322,7 +320,12 @@ const AdminSalarySlip = () => {
                 >
                   Close
                 </button>
-                <button className="btn btn-success" onClick={handleGenerateSlip}>Submit</button>
+                <button
+                  className="btn btn-success"
+                  onClick={handleGenerateSlip}
+                >
+                  Submit
+                </button>
               </div>
             </div>
           </div>

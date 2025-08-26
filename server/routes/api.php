@@ -151,6 +151,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 
 
+
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
 
@@ -189,7 +190,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
 
+     Route::get('/helpdesk/search', [SettingController::class, 'helpdesk_search']);
+        Route::post('/helpdesk/query', [SettingController::class, 'helpdesk_search_query']);
+        Route::get('/helpdesk/answer/{id}', [SettingController::class, 'helpdesk_search_answer']);
 
+        Route::get('/helpdeskadd',[SettingController::class,'helpdeskadd']);
     //  Admin-only routes
     Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
@@ -216,10 +221,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/helpdesk/{id}', [SettingController::class, 'helpupdate']);
         Route::delete('/helpdesk/{id}', [SettingController::class, 'helpdelete']);
 
-        Route::get('/helpdesk/search', [SettingController::class, 'helpdesk_search']);
-        Route::post('/helpdesk/query', [SettingController::class, 'helpdesk_search_query']);
-        Route::get('/helpdesk/answer/{id}', [SettingController::class, 'helpdesk_search_answer']);
-
+       
 
         // admin salary slip routes
         Route::get('/adminsalary-slip', [SalaryslipController::class, 'salaryslip']);

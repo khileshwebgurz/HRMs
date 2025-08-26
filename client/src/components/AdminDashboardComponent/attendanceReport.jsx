@@ -14,7 +14,7 @@ function AttendanceReport() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/attendance-whole-report", {
+      .get(`${import.meta.env.VITE_API_BASE_URL}/attendance-whole-report`, {
         params: {
           year: 2025,
           month: 8,

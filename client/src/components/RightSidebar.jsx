@@ -217,6 +217,16 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                         Schedule Interview
                       </Link>
                     </li>
+
+                     <li className="nav-item">
+                      <Link
+                        to="/public/employee/helpdesk"
+                        className="nav-link"
+                      >
+                        <i className="nav-icon fas fa-calendar-alt"></i>
+                        HelpDesk Questions
+                      </Link>
+                    </li>
                   </>
                 )}
 

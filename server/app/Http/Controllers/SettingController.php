@@ -15,10 +15,9 @@ use App\Models\HelpdeskCategory;
 use App\Models\Notifications;
 use Illuminate\Support\Facades\Log;
 
-
 class SettingController extends Controller
 {
- 
+
     public function editSettings()
     {
         $settings = Settings::all();
@@ -191,21 +190,37 @@ class SettingController extends Controller
         return response()->json(['status' => 200, 'data' => $data]);
     }
 
+    // public function helpdeskadd()
+    // {
+    //     $category = HelpdeskCategory::all();
+    //     return response()->json(['status' => 200, 'categories' => $category]);
+    // }
+
     public function helpdeskadd()
     {
         $category = HelpdeskCategory::all();
-        return response()->json(['status' => 200, 'categories' => $category]);
+        return response()->json([
+            'status' => 'success',
+            'data' => $category
+        ]);
     }
+
 
     public function helpinsert(Request $request)
     {
         $helpdesk = new Helpdesk();
+
+       
         $helpdesk->question = $request->question;
+        Log::info('question is ',['question'=> $helpdesk->question]);
         $helpdesk->answer = $request->answer;
         $helpdesk->category = $request->category;
         $helpdesk->created_by = Auth::id();
+       
+       
         $helpdesk->save();
 
+         Log::info('id is ',['id'=>  $helpdesk->id]);
         return response()->json(['status' => 200, 'message' => 'Helpdesk entry added successfully']);
     }
 
@@ -236,7 +251,7 @@ class SettingController extends Controller
 
     public function helpdesk_search()
     {
-        
+
         $categories = HelpdeskCategory::all();
         return response()->json(['status' => 200, 'categories' => $categories]);
     }
