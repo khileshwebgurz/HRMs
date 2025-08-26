@@ -63,6 +63,7 @@ import ReviewAptitudeTest from "./components/ManageCandidates/ReviewAptitudeTest
 import AptitudeTestComplete from "./components/ManageCandidates/AptitudeTestComplete";
 import AttendanceReport from "./components/AdminDashboardComponent/attendanceReport";
 import AdminSalarySlip from "./components/RightSidebarComponent/AdminSalarySlip";
+import CompanyProfileEdit from "./components/DashboardComponent/CompanyProfileEdit";
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
@@ -179,6 +180,7 @@ function App() {
 
            <Route path="/career" element={<JobApplication/>}/>
            <Route path="/attendance-report" element={<AttendanceReport />} />
+           <Route path="/edit-company-profile" element={<CompanyProfileEdit />} />
           
           <Route path="*" element={<NotFound />} />
         </Route>

@@ -57,6 +57,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
     Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
     Route::post('/employee/readiness-quiz-save', [AccountController::class, 'saveReadinessQuizResult']);
+
+    Route::get('edit-company-profile', [DashboardController::class, 'editCompanyProfile']);
+    Route::post('edit-company-profile-post', [DashboardController::class, 'editCompanyProfilePost']);
+    
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();
@@ -280,6 +284,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('generate-test/{candidate_id}', [UserController::class, 'generateTest'])
         ->name('generateTest');
 });
+
+
+
 
 Route::middleware('auth:api')->prefix('tracker')->group(function () {
     Route::get('/add-candidate', [TrackerController::class, 'addCandidate'])->name('trackercandidateadd');

@@ -26,41 +26,27 @@ use App\Models\StickyNotes;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 use App\Models\AttendanceRules;
-use Validator;
 use App\Models\Roles;
 use Carbon\Carbon;
 use Session;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
     /**
      * Require authentication.
      */
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-
+   
     public function dashboard()
     {
         $role = $this->loginUserRole();
         $loginUser = Auth::user();
-
-        // Log::info('My >>>>', ['loginUser' => $loginUser]);
-
         $total_candidates = Candidates::count();
 
-        // Log::info('My total_candidates >>>>', ['total_candidates' => $total_candidates]);
-
         $total_active_candidates = Candidates::whereIn('status', [2, 3, 4, 5, 7])->count();
-
-        //  Log::info('My total_active_candidates >>>>', ['total_active_candidates' => $total_active_candidates]);
         $total_questions = Questions::where('status', '1')->count();
-
-        //  Log::info('My total_questions >>>>', ['total_questions' => $total_questions]);
         $total_users = Employees::where('status', '1')->count();
-        //   Log::info('My total_users >>>>', ['total_users' => $total_users]);
-
+       
         return response()->json([
             'status' => 200,
             'data' => [
@@ -79,81 +65,7 @@ class DashboardController extends Controller
         return Auth::check() ? Auth::user()->user_role : '';
     }
 
-    // public function attendanceWholeReportOLD(Request $request)
-    // {
-    //     $currentURL = url()->current();
-    //     $urlsplit = explode('/', $currentURL);
-    //     $findurl = end($urlsplit);
-
-    //     $start = date('y-m-26');
-    //     $begin = date('Y-m-d', strtotime($start . ' - 1 month'));
-    //     $end   = date('y-m-25');
-
-    //     $year = $request->year ?? date('Y');
-    //     $month = $request->month ?? date('m');
-
-    //     if (Auth::user()->id == 1) {
-    //         $data = Employees::where('status', '1')->get();
-    //     } else {
-    //         if ($findurl == 'emp') {
-    //             $data = Employees::where('status', '1')
-    //                 ->where(function ($q) {
-    //                     $q->where('manager_id', Auth::user()->id)
-    //                     ->orWhere('id', Auth::user()->id);
-    //                 })->get();
-    //         } else {
-    //             $data = Employees::where('status', '1')->get();
-    //         }
-    //     }
-
-    //     // 🚀 Build same response as DataTables but in JSON
-    //     $response = $data->map(function ($row) use ($year, $month) {
-    //         $obCandidates = ObCandidates::where('office_employee_id', $row->id)->first();
-    //         $dateOfJoining = ObCandidates::where('email', $row->email)->first();
-
-    //         $from = date('Y-m-d', strtotime(date("{$year}-{$month}-26") . ' - 1 month'));
-    //         $to   = date("{$year}-{$month}-25");
-
-    //         $leave = EmployeeAttendance::where('employee_id', $row->id)->whereBetween('clock_date', [$from, $to])->where('status', 'L')->distinct('clock_date')->count();
-    //         $absent = EmployeeAttendance::where('employee_id', $row->id)->whereBetween('clock_date', [$from, $to])->where('status', 'A')->distinct('clock_date')->count();
-    //         $half_leave = EmployeeAttendance::where('employee_id', $row->id)->whereBetween('clock_date', [$from, $to])->where('status', 'HL')->distinct('clock_date')->count() / 2;
-    //         $short_leave = EmployeeAttendance::where('employee_id', $row->id)->whereBetween('clock_date', [$from, $to])->where('status', 'SL')->distinct('clock_date')->count() / 4;
-
-    //         $noOfDaysWorked = noofworkingdays() - ($leave + $absent + $half_leave + $short_leave);
-    //         $appliedLeaves = $leave + $half_leave + $short_leave;
-    //         $finalLeaveQuota = noofleaves() - ($leave + $half_leave + $short_leave);
-
-    //         // Generate daily statuses (26 → 25)
-    //         $daysData = [];
-    //         for ($d = 26; $d <= 31; $d++) {
-    //             $date = date('Y-m-d', strtotime(date("{$year}-{$month}-{$d}") . ' - 1 month'));
-    //             $status = EmployeeAttendance::where('employee_id', $row->id)->where('clock_date', $date)->value('status');
-    //             $daysData["date_{$d}"] = $status ?? '-';
-    //         }
-    //         for ($d = 1; $d <= 25; $d++) {
-    //             $date = date("{$year}-{$month}-" . str_pad($d, 2, '0', STR_PAD_LEFT));
-    //             $status = EmployeeAttendance::where('employee_id', $row->id)->where('clock_date', $date)->value('status');
-    //             $daysData["date_{$d}"] = $status ?? '-';
-    //         }
-
-    //         return array_merge([
-    //             'id' => $row->id,
-    //             'name' => $row->name,
-    //             'designation' => $obCandidates->job_title ?? '-',
-    //             'date_of_joining' => $dateOfJoining->date_of_joining ?? '-',
-    //             'total_working_days' => noofworkingdays(),
-    //             'no_of_days_worked' => $noOfDaysWorked,
-    //             'applied_leaves' => $appliedLeaves,
-    //             'final_leave_quota' => $finalLeaveQuota,
-    //         ], $daysData);
-    //     });
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $response,
-    //     ]);
-    // }
-
+  
     public function attendanceWholeReport(Request $request)
     {
         $year  = $request->year ?? date('Y');
@@ -165,13 +77,13 @@ class DashboardController extends Controller
         $from = date('Y-m-d', strtotime("{$year}-{$month}-26 -1 month"));
         $to   = date("{$year}-{$month}-25");
 
-        // ✅ Base query
+      
         $query = Employees::where('status', 1);
         Log::info('my attendance query is ',['attendance'=> $query]);
 
         Log::info('my search before is ',['searchBF'=> $search]);
 
-        // ✅ Search by name/email
+       
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -180,13 +92,13 @@ class DashboardController extends Controller
             Log::info('my query after  is ',['query'=> $query]);
         }
 
-        // ✅ Paginate employees
+        
         $employees = $query->orderBy('id', 'asc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         $employeeIds = $employees->pluck('id');
 
-        // ✅ Preload related data
+        
         $obCandidates = ObCandidates::whereIn('office_employee_id', $employeeIds)->get()->keyBy('office_employee_id');
         $joiningData  = ObCandidates::whereIn('email', $employees->pluck('email'))->get()->keyBy('email');
 
@@ -202,7 +114,7 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('employee_id');
 
-        // ✅ Build response
+        
         $responseData = $employees->map(function ($row) use ($year, $month, $attendanceRecords, $attendanceSummary, $obCandidates, $joiningData) {
             $obCandidate = $obCandidates[$row->id] ?? null;
             $joining     = $joiningData[$row->email] ?? null;
@@ -285,6 +197,94 @@ class DashboardController extends Controller
         return response()->json([
             'success' => true,
             'data' => $formatted
+        ]);
+    }
+
+    public function editCompanyProfile(Request $request)
+    {
+        $company = CompanyData::where('id', 1)->first();
+
+        if (!$company) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Company profile not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'data' => $company
+        ]);
+    }
+
+    
+
+    public function editCompanyProfilePost(Request $request)
+    {
+        $company = CompanyData::where('id', 1)->first();
+
+        if (!$company) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Company profile not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'company_name' => 'regex:/^[a-zA-Z\s]+$/',
+            'domain_name' => 'regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/|nullable',
+            'facebook' => 'url|regex:/http(?:s):\/\/(?:www\.)facebook\.com\/.+/i|nullable',
+            'instagram' => 'url|regex:/http(?:s):\/\/(?:www\.)instagram\.com\/.+/i|nullable',
+            'linked_in' => 'url|regex:/http(?:s):\/\/(?:www\.)linkedin\.com\/.+/i|nullable',
+            'twitter' => 'url|regex:/http(?:s):\/\/twitter\.com\/.+/i|nullable'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        // update fields
+        $company->company_name = $request->company_name;
+        $company->brand_name = $request->brand_name;
+        $company->website = $request->website;
+        $company->domain_name = $request->domain_name;
+        $company->linked_in = $request->linked_in;
+        $company->facebook = $request->facebook;
+        $company->twitter = $request->twitter;
+        $company->description = $request->description;
+        $company->registered_office_address = $request->registered_office_address;
+        $company->corporate_office = $request->corporate_office;
+        $company->phone_nos = $request->phone_nos;
+        $company->emails = $request->emails;
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $path = public_path('dist/img/');
+            $name = time() . '-' . $file->getClientOriginalName();
+
+            if ($file->move($path, $name)) {
+                if ($company->logo && file_exists($path . $company->logo)) {
+                    unlink($path . $company->logo);
+                }
+                $company->logo = $name;
+            }
+        }
+
+        if ($company->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => "Company Profile Updated",
+                'data' => $company
+            ]);
+        }
+
+        return response()->json([
+            'status' => 401,
+            'message' => 'Something Wrong. Try Again.'
         ]);
     }
 }

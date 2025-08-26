@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\Employees;
 use App\Models\HelpdeskCategory;
 use App\Models\Notifications;
+use Illuminate\Support\Facades\Log;
+
 
 class SettingController extends Controller
 {
@@ -80,12 +82,13 @@ class SettingController extends Controller
 
     public function employee_team_insert(Request $request)
     {
+
         $employee_team = new Employee_manager_team();
         $employee_team->team_name = $request->team_name;
         $employee_team->manager_name = $request->manager_name;
         $employee_team->created_by = Auth::id();
         $employee_team->save();
-
+ 
         return response()->json(['status' => 200, 'message' => 'Team created successfully']);
     }
 
@@ -129,13 +132,23 @@ class SettingController extends Controller
             $tl_name = $tl_name_email->name;
             $tl_email = $tl_name_email->email;
 
+            // $data = [
+            //     'messagedata' => 'You have been appointed new manager.',
+            //     'name' => $tl_name
+            // ];
+            // Mail::send('emails.employee_team_email', $data, function ($message) use ($tl_name, $tl_email) {
+            //     $message->to($tl_email, $tl_name)->subject('Welcome! A new manager has just been assigned.');
+            // });
+
             $data = [
                 'messagedata' => 'You have been appointed new manager.',
-                'name' => $tl_name
+                'name' => $tl_name,
+                'team_name' => $team_name 
             ];
             Mail::send('emails.employee_team_email', $data, function ($message) use ($tl_name, $tl_email) {
                 $message->to($tl_email, $tl_name)->subject('Welcome! A new manager has just been assigned.');
             });
+            
         }
 
         // Notify employees
@@ -228,6 +241,7 @@ class SettingController extends Controller
         return response()->json(['status' => 200, 'categories' => $categories]);
     }
 
+    // used this for searching
     public function helpdesk_search_query(Request $request)
     {
         $words = $request->search;
