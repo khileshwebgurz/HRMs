@@ -5,6 +5,7 @@ import "../../../src/assets/css/helpdesk.css";
 const HelpDesk = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -15,7 +16,7 @@ const HelpDesk = () => {
             withCredentials: true,
           }
         );
-        setResults(res.data || []);
+        setResults(res.data.data || []);
       } catch (error) {
         console.error("Search error:", error);
         setResults([]);
@@ -71,13 +72,8 @@ const HelpDesk = () => {
         </div>
       </section>
 
-      {/* Sidebar Menu */}
-      <div className="sidebar-navmenu" id="js-sidebar-navmenu">
-        <div className="close-sidebar-navmenu" id="js-close-sidebar-navmenu">
-          <i className="fas fa-times"></i>
-        </div>
-        {/* <EmLeftMenu /> */}
-      </div>
+     
+     
     </>
   );
 };

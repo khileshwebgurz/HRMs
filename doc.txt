@@ -103,3 +103,17 @@ ALTER COLUMN id SET DEFAULT nextval('employee_manager_team_id_seq');
 SELECT setval('employee_manager_team_id_seq', (SELECT MAX(id) FROM employee_manager_team));
 
 ======================
+
+
+To execute pgadmin commands inside VS Code terminal
+-> psql -U your_username -d your_database
+psql -U postgres -d hrm
+
+-> \d employee_manager_team; => this shows the employee_manager_team table data in terminal
+-> there might be case that id is not auto incrementing due to which you will be getting issues like 
+local.ERROR: SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column "id" of relation "employee_manager_team" violates not-null constraint
+
+Run this cmd -> hrm=# ALTER TABLE employee_manager_team → existing table ko modify kar raha hai.
+ALTER COLUMN id → specifically id column ko target kar raha hai.
+ADD GENERATED ALWAYS AS IDENTITY;→ batata hai ki ye column ab identity column hoga (auto generated number).
+

@@ -33,6 +33,7 @@ const MyProfile = ({path}) => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+  
 
 
   return (

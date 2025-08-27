@@ -62,6 +62,7 @@ class SettingController extends Controller
         return response()->json(['status' => 200, 'data' => $data]);
     }
 
+    
     public function employee_team_add()
     {
         $employee = Employees::where('status', '1')->where('is_manager', '1')->get();
@@ -70,8 +71,11 @@ class SettingController extends Controller
 
     public function employee_team_edit($id)
     {
-        $employee_team = Employee_manager_team::find($id);
+        
+         $employee_team = Employee_manager_team::with('manager')->find($id);
+      
         $employee = Employees::where('status', '1')->where('is_manager', '1')->get();
+       
         return response()->json([
             'status' => 200,
             'team' => $employee_team,
@@ -87,7 +91,7 @@ class SettingController extends Controller
         $employee_team->manager_name = $request->manager_name;
         $employee_team->created_by = Auth::id();
         $employee_team->save();
- 
+
         return response()->json(['status' => 200, 'message' => 'Team created successfully']);
     }
 
@@ -142,12 +146,11 @@ class SettingController extends Controller
             $data = [
                 'messagedata' => 'You have been appointed new manager.',
                 'name' => $tl_name,
-                'team_name' => $team_name 
+                'team_name' => $team_name
             ];
             Mail::send('emails.employee_team_email', $data, function ($message) use ($tl_name, $tl_email) {
                 $message->to($tl_email, $tl_name)->subject('Welcome! A new manager has just been assigned.');
             });
-            
         }
 
         // Notify employees
@@ -210,17 +213,17 @@ class SettingController extends Controller
     {
         $helpdesk = new Helpdesk();
 
-       
+
         $helpdesk->question = $request->question;
-        Log::info('question is ',['question'=> $helpdesk->question]);
+        Log::info('question is ', ['question' => $helpdesk->question]);
         $helpdesk->answer = $request->answer;
         $helpdesk->category = $request->category;
         $helpdesk->created_by = Auth::id();
-       
-       
+
+
         $helpdesk->save();
 
-         Log::info('id is ',['id'=>  $helpdesk->id]);
+        Log::info('id is ', ['id' =>  $helpdesk->id]);
         return response()->json(['status' => 200, 'message' => 'Helpdesk entry added successfully']);
     }
 

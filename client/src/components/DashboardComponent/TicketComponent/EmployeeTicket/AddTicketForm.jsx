@@ -46,7 +46,6 @@ const AddTicketForm = ({ userRole, currentUserId, refreshTickets }) => {
       if (refreshTickets) refreshTickets();
       if (response.data.status === 200) {
         alert("Ticket submitted successfully!");
-        // Clear form
         setFormData({
           user_role: userRole,
           issue: "",

@@ -222,6 +222,7 @@ class DashboardController extends Controller
     public function editCompanyProfilePost(Request $request)
     {
         $company = CompanyData::where('id', 1)->first();
+        Log::info('my company profile ',['company is '=> $company]);
 
         if (!$company) {
             return response()->json([

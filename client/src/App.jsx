@@ -67,6 +67,10 @@ import CompanyProfileEdit from "./components/DashboardComponent/CompanyProfileEd
 import AdminHelpDesk from "./components/DashboardComponent/Helpdesk/AdminHelpDesk";
 import HelpDeskAdd from "./components/DashboardComponent/Helpdesk/HelpDeskAdd";
 import EditHelpDesk from "./components/DashboardComponent/Helpdesk/EditHelpDesk";
+import EmployeeTeam from "./components/DashboardComponent/TeamManager/EmployeeTeam";
+import EditTeamManager from "./components/DashboardComponent/TeamManager/EditTeamManager";
+import AddEmployeeTeam from "./components/DashboardComponent/TeamManager/AddEmployeeTeam";
+import HelpDeskQuestion from "./components/DashboardComponent/Helpdesk/HelpDeskQuestion";
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
   return (
@@ -187,7 +191,14 @@ function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/public/employee/helpdesk" element={<AdminHelpDesk/>}/>
           <Route path="/public/employee/helpdesk-add" element={<HelpDeskAdd/>}/>
+          <Route path="helpdesk/:helpdeskID" element={<HelpDeskQuestion/>}/>
           <Route path="/public/employee/helpdesk/:questionID" element={<EditHelpDesk/>}/>
+
+          {/* Assign Team Manager */}
+          {/*  */}
+          <Route path="/employee/employee-team" element={<EmployeeTeam/>}/>
+          <Route path="/employee/employee-team-edit/:managerId" element={<EditTeamManager/>}/>
+          <Route path="/employee/employee-team-add" element={<AddEmployeeTeam/>}/>
          
         </Route>
       </Routes>

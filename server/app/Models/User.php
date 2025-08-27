@@ -20,7 +20,7 @@ class User extends Authenticatable
 
     const ROLE_HR = 3;
 
- 
+
     protected $fillable = [
         'name',
         'email',
@@ -87,10 +87,10 @@ class User extends Authenticatable
         ];
     }
 
-   
 
-        public function manager()
-        {
-            return $this->belongsTo(User::class, 'manager_id');
-        }
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
 }
