@@ -30,13 +30,14 @@ use App\Models\Roles;
 use Carbon\Carbon;
 use Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Response;
 
 class DashboardController extends Controller
 {
     /**
      * Require authentication.
      */
-   
+
     public function dashboard()
     {
         $role = $this->loginUserRole();
@@ -46,7 +47,7 @@ class DashboardController extends Controller
         $total_active_candidates = Candidates::whereIn('status', [2, 3, 4, 5, 7])->count();
         $total_questions = Questions::where('status', '1')->count();
         $total_users = Employees::where('status', '1')->count();
-       
+
         return response()->json([
             'status' => 200,
             'data' => [
@@ -65,40 +66,32 @@ class DashboardController extends Controller
         return Auth::check() ? Auth::user()->user_role : '';
     }
 
-  
+
     public function attendanceWholeReport(Request $request)
     {
         $year  = $request->year ?? date('Y');
         $month = $request->month ?? date('m');
-        $search = $request->search ?? null;
         $perPage = $request->per_page ?? 10;
         $page    = $request->page ?? 1;
+
 
         $from = date('Y-m-d', strtotime("{$year}-{$month}-26 -1 month"));
         $to   = date("{$year}-{$month}-25");
 
-      
+
         $query = Employees::where('status', 1);
-        Log::info('my attendance query is ',['attendance'=> $query]);
 
-        Log::info('my search before is ',['searchBF'=> $search]);
 
-       
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-            Log::info('my query after  is ',['query'=> $query]);
-        }
+  
 
-        
+
+
         $employees = $query->orderBy('id', 'asc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         $employeeIds = $employees->pluck('id');
 
-        
+
         $obCandidates = ObCandidates::whereIn('office_employee_id', $employeeIds)->get()->keyBy('office_employee_id');
         $joiningData  = ObCandidates::whereIn('email', $employees->pluck('email'))->get()->keyBy('email');
 
@@ -114,7 +107,7 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('employee_id');
 
-        
+
         $responseData = $employees->map(function ($row) use ($year, $month, $attendanceRecords, $attendanceSummary, $obCandidates, $joiningData) {
             $obCandidate = $obCandidates[$row->id] ?? null;
             $joining     = $joiningData[$row->email] ?? null;
@@ -165,6 +158,71 @@ class DashboardController extends Controller
             ]
         ]);
     }
+
+    public function downloadexcelattendance()
+    {
+        // print_r("hello");
+        return Excel::download(new SalaryCsvExport, 'current_month_salary.xlsx');
+    }
+
+
+public function attendanceReportExportCSV(Request $request)
+{
+    $year  = $request->year ?? date('Y');
+    $month = $request->month ?? date('m');
+
+    // Get all data (reuse your existing logic)
+    $request->merge(['per_page' => 1000000]); // fetch all employees
+    $dataResponse = $this->attendanceWholeReport($request);
+    $employees    = $dataResponse->getData(true)['data'];
+
+    // Prepare CSV headers
+    $headers = [
+        "DOJ", "Emp ID", "Employee Name", "Designation"
+    ];
+
+    for ($d = 26; $d <= 31; $d++) {
+        $headers[] = date('j M,Y', strtotime("{$year}-{$month}-{$d} -1 month"));
+    }
+    for ($d = 1; $d <= 25; $d++) {
+        $headers[] = date('j M,Y', strtotime("{$year}-{$month}-" . str_pad($d,2,'0',STR_PAD_LEFT)));
+    }
+
+    // Generate CSV content
+    $callback = function() use ($employees, $headers) {
+        $file = fopen('php://output', 'w');
+        fputcsv($file, $headers);
+
+        foreach ($employees as $emp) {
+            $row = [
+                $emp['date_of_joining'],
+                $emp['id'],
+                $emp['name'],
+                $emp['designation'],
+            ];
+
+            for ($d = 26; $d <= 31; $d++) {
+                $row[] = $emp["date_{$d}"] ?? '-';
+            }
+            for ($d = 1; $d <= 25; $d++) {
+                $row[] = $emp["date_{$d}"] ?? '-';
+            }
+
+            fputcsv($file, $row);
+        }
+
+        fclose($file);
+    };
+
+    $filename = "attendance-report-{$month}-{$year}.csv";
+
+    return Response::stream($callback, 200, [
+        "Content-Type"        => "text/csv",
+        "Content-Disposition" => "attachment; filename={$filename}",
+    ]);
+}
+
+
 
 
     public function notifications(Request $request)
@@ -217,12 +275,12 @@ class DashboardController extends Controller
         ]);
     }
 
-    
+
 
     public function editCompanyProfilePost(Request $request)
     {
         $company = CompanyData::where('id', 1)->first();
-        Log::info('my company profile ',['company is '=> $company]);
+        Log::info('my company profile ', ['company is ' => $company]);
 
         if (!$company) {
             return response()->json([

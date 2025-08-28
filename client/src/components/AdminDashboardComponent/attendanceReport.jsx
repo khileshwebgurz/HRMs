@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../../../utils/api";
 
 function AttendanceReport() {
   const [attendance, setAttendance] = useState([]);
@@ -8,12 +9,12 @@ function AttendanceReport() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch] = useState("");
+
 
   // Selected month/year state
   const [selectedMonthYear, setSelectedMonthYear] = useState(() => {
     const today = new Date();
-    return today.toISOString().slice(0, 7); // format "YYYY-MM"
+    return today.toISOString().slice(0, 7); 
   });
 
   // Extract month & year from selectedMonthYear
@@ -22,15 +23,15 @@ function AttendanceReport() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     axios
       .get(`${import.meta.env.VITE_API_BASE_URL}/attendance-whole-report`, {
         params: {
           year,
-          month: month + 1, 
+          month: month, 
           page,
           per_page: perPage,
-          search,
+         
         },
         withCredentials: true,
       })
@@ -43,11 +44,54 @@ function AttendanceReport() {
         console.error("Error fetching report:", err);
         setLoading(false);
       });
-  }, [search]);
+  }, [ year, month, page, perPage]);
 
   // this  dependency array has extra -> year, month, page, perPage, 
 
   if (loading) return <p className="text-center py-5">Loading...</p>;
+
+  console.log('the searched date is >>', attendance)
+const handleSalaryDownload = async () => {
+  try {
+    const response = await api.get('/attendance-report-export', {
+      responseType: 'blob', 
+    });
+
+    // Create a blob link
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'current_month_salary.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Download failed:', error);
+  }
+};
+
+const handleDownloadCSV = async () => {
+  try {
+    const response = await api.get(
+      "/attendance-report-exportCSV?year=2025&month=08",
+      {
+        responseType: "blob", // ⬅️ important for file downloads
+      }
+    );
+
+    // Create a blob URL and trigger download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "attendance-report.csv"); // file name
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+  } catch (error) {
+    console.error("CSV download failed:", error);
+  }
+};
+
 
   return (
     <>
@@ -65,10 +109,10 @@ function AttendanceReport() {
           onChange={(e) => setSelectedMonthYear(e.target.value)}
           className="border p-2"
         />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded shadow">
+        <button onClick={handleDownloadCSV} className="bg-blue-600 text-white px-4 py-2 rounded shadow">
           Download CSV
         </button>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded shadow">
+        <button onClick={handleSalaryDownload} className="bg-blue-600 text-white px-4 py-2 rounded shadow">
           Download Salary
         </button>
       </div>
@@ -91,6 +135,7 @@ function AttendanceReport() {
                   month: "long",
                   year: "numeric",
                 });
+             
                 return (
                   <th key={i} className="px-4 py-2 border">
                     {formattedDate}

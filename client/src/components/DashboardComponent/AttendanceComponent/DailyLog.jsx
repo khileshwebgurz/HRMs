@@ -54,8 +54,8 @@ const DailyLog = () => {
               </div>
             </div>
 
-            <div class="col-md-5">
-                <div class="user-details" id="user-details">
+            <div className="col-md-5">
+                <div className="user-details" id="user-details">
                     
 
                 </div>

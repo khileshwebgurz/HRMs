@@ -24,7 +24,7 @@ const SpiritClub = () => {
                   <div className='col-sm-12 col-md-6'>
                   <div className='records-per-page'>
                     Show{" "}
-                    <select class="custom-select custom-select-sm form-control form-control-sm">
+                    <select className="custom-select custom-select-sm form-control form-control-sm">
                       <option value={10}>10</option>
                       <option value={25}>25</option>
                       <option value={50}>50</option>
@@ -38,7 +38,7 @@ const SpiritClub = () => {
                   <div className="search-bar">
                     Search:{" "}
                     <input
-                    class="form-control form-control-sm"
+                    className="form-control form-control-sm"
                       type="text"
                       placeholder="Search employees..."
                     />

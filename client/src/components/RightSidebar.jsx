@@ -36,7 +36,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
         >
           <div className="card-body box-profile">
             <span className="close-sidebar-navmenu" onClick={toggleSidebar}>
-              <i class="fas fa-times"></i>
+              <i className="fas fa-times"></i>
             </span>
 
             <div className="text-center">

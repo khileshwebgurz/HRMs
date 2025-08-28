@@ -299,7 +299,7 @@ const Navbar = ({myUser, isAdminMode, setIsAdminMode}) => {
                     <span className="user-name">{user.name}</span>
                     <span className="text-success small">● online</span>
                   </div>
-                  <i class="fa-solid fa-angle-down"></i>
+                  <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul
                   className="dropdown-menu dropdown-menu-end shadow"

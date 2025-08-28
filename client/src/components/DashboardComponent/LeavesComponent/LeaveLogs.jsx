@@ -28,13 +28,13 @@ const LeaveLogs = ({
       <table className="table table-bordered table-striped leave-logs-table">
         <thead>
           <tr>
-            <th class="sorting">Leave Type </th>
-            <th class="sorting">Start Date </th>
-            <th class="sorting">End Date </th>
-            <th class="sorting">Total Applied </th>
-            <th class="sorting">Status </th>
-            <th class="sorting">Applied On </th>
-            <th class="sorting">Action </th>
+            <th className="sorting">Leave Type </th>
+            <th className="sorting">Start Date </th>
+            <th className="sorting">End Date </th>
+            <th className="sorting">Total Applied </th>
+            <th className="sorting">Status </th>
+            <th className="sorting">Applied On </th>
+            <th className="sorting">Action </th>
           </tr>
         </thead>
         <tbody>

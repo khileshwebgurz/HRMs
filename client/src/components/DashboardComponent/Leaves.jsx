@@ -127,8 +127,8 @@ const Leaves = () => {
     <div className="row profile">
      <div className="col-md-12">
       <div className="card card-primary">
-        <div class="card-header">
-					<h3 class="card-title">Leaves</h3>
+        <div className="card-header">
+					<h3 className="card-title">Leaves</h3>
 				</div>
         <div className="card-body">
           <ul className="nav nav-tabs mb-3">

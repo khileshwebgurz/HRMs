@@ -41,8 +41,8 @@ const MyProfile = ({path}) => {
       {/* Tab Navigation */}
     <div className="container">
       <div className="card card-primary card-sec">
-       <div class="card-header">
-				<h3 class="card-title">Personal Information</h3>
+       <div className="card-header">
+				<h3 className="card-title">Personal Information</h3>
 			</div>
       <div className="profile-top">
         <ProfilePic employeedata={employee}/>

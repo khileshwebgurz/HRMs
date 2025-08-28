@@ -22,7 +22,7 @@ class AttendanceController extends Controller
         // Permission check
 
         $permissions = Session::get('permission');
-       
+
 
         // if (!is_array($permissions) || !isset($permissions[0]) || !in_array('anomalies_requests', $permissions[0])) {
         //     Log::info('Inside');
@@ -146,4 +146,6 @@ class AttendanceController extends Controller
 
         return view('employees.account.attendance', compact('todayAttendance', 'totalAnomalies'));
     }
+
+
 }

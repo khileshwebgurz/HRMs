@@ -4,6 +4,7 @@ namespace App\Exports;
 use App\Models\Employees;
 use App\Models\EmployeeAttendance;
 use App\Models\ObCandidates;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -17,13 +18,15 @@ class SalaryCsvExport implements FromCollection, WithHeadings, WithMapping
 
     public function map($row): array
     {
+      
         $candidate = ObCandidates::where('office_employee_id', $row['id'])->first();
+        
         $type_code = 'PAB_VENDOR';
         $payment_mode = 'NEFT';
-        $debit_acc = $candidate['bank_account_number'];
+        $debit_acc = $candidate['bank_account_number'] ?? 0;
         $name = $row['name'];
-        $bank_acc_no = $candidate['bank_account_number'];
-        $ifsc = $candidate['bank_ifsc'];
+        $bank_acc_no = $candidate['bank_account_number'] ?? 0;
+        $ifsc = $candidate['bank_ifsc'] ?? 0;
 
         // $from = date('2021-07-26');
         // $to = date('2021-08-25');

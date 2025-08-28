@@ -86,7 +86,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <i class="fa-solid fa-clock-rotate-left"></i>
+                              <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -102,7 +102,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <i class="fa-solid fa-clock-rotate-left"></i>
+                              <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -163,7 +163,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <i class="fa-solid fa-clock-rotate-left"></i>
+                              <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -189,7 +189,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <i class="fa-solid fa-clock-rotate-left"></i>
+                              <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -215,7 +215,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                             <i class="fa-solid fa-clock-rotate-left"></i>
+                             <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>
@@ -241,7 +241,7 @@ const Rules = () => {
                               readOnly
                             />
                             <span className="input-group-addon">
-                              <i class="fa-solid fa-clock-rotate-left"></i>
+                              <i className="fa-solid fa-clock-rotate-left"></i>
                             </span>
                           </div>
                         </li>

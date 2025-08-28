@@ -108,7 +108,7 @@ const Directory = () => {
                   <div className='col-sm-12 col-md-6'>
                   <div className='records-per-page'>
                     Show{" "}
-                    <select value={recordsPerPage} onChange={handleRecordsPerPage} class="custom-select custom-select-sm form-control form-control-sm">
+                    <select value={recordsPerPage} onChange={handleRecordsPerPage} className="custom-select custom-select-sm form-control form-control-sm">
                       <option value={10}>10</option>
                       <option value={25}>25</option>
                       <option value={50}>50</option>
@@ -122,7 +122,7 @@ const Directory = () => {
                   <div className="search-bar">
                     Search:{" "}
                     <input
-                    class="form-control form-control-sm"
+                    className="form-control form-control-sm"
                       type="text"
                       value={searchTerm}
                       onChange={handleSearch}

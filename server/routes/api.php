@@ -27,7 +27,7 @@ use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\Employee\OnboardProcessController;
 use App\Http\Controllers\SalaryslipController;
-
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 //  Public (Unauthenticated) Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -53,6 +53,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
     Route::get('/attendance-whole-report', [DashboardController::class, 'attendanceWholeReport']);
     Route::post('/attendance-whole-report', [DashboardController::class, 'attendanceWholeReport']);
+
+    // just for downloading the attendance report of candidates
+    Route::get('/attendance-report-export', [DashboardController::class, 'downloadexcelattendance']);
+    Route::get('/attendance-report-exportCSV',[DashboardController::class,'attendanceReportExportCSV']);
 
     Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
     Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
