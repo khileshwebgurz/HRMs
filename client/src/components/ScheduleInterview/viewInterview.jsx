@@ -3,6 +3,9 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import { Link } from "react-router-dom";
+import * as XLSX from "xlsx";
+import DatePicker from "react-datepicker";
+
 const viewInterview = () => {
   const user = useUser();
   const [data, setData] = useState([]);
@@ -11,6 +14,13 @@ const viewInterview = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+
+  const [checked, setChecked] = useState([]);
+
+  // date filter
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
+  const [dateFilter, setDateFilter] = useState("");
 
   const statusMap = {
     round1: "1",
@@ -21,18 +31,19 @@ const viewInterview = () => {
     rejected: "6",
   };
 
-
   const fetchData = async (
     page = 1,
     term = searchTerm,
     limit = itemsPerPage
   ) => {
     const res = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/all-interviews?page=${page}&limit=${limit}&search=${encodeURIComponent(
-        term
-      )}`,
+      `${import.meta.env.VITE_API_BASE_URL}/all-interviews`,
       {
         params: {
+          page,
+          limit,
+          search: term,
+          datefilter: dateFilter,
           status: statusMap[statusFilter] || "",
         },
         withCredentials: true,
@@ -43,8 +54,24 @@ const viewInterview = () => {
   };
   useEffect(() => {
     fetchData(currentPage);
-  }, [currentPage, statusFilter, itemsPerPage]);
+  }, [currentPage, statusFilter, itemsPerPage, dateFilter]);
 
+  const handleCheckboxChange = (id) => {
+    setChecked((prev) =>
+      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+    );
+  };
+
+  // for selectall checkbox
+  const handleCheckAll = (e) => {
+    if (e.target.checked) {
+      const allIds = data.map((c) => c.id);
+
+      setChecked(allIds);
+    } else {
+      setChecked([]);
+    }
+  };
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchData(1, searchTerm);
@@ -58,6 +85,48 @@ const viewInterview = () => {
     setCurrentPage(1);
   };
 
+  // function to set filter for today
+  const handleTodayFilter = () => {
+    const today = new Date();
+    const formatted = today.toISOString().split("T")[0];
+
+    setDateRange([today, today]); // for UI in DatePicker
+    setDateFilter(`${formatted} - ${formatted}`); // for backend filter
+    fetchData(1, searchTerm);
+  };
+
+  const handleDateClear = () => {
+    setDateRange([null, null]); // clear datepicker UI
+    setDateFilter("");
+    fetchData(1, searchTerm);
+  };
+
+  const handlDownloadCSV = () => {
+    if (checked.length === 0) {
+      alert("Please select at least one candidate before downloading!");
+      return;
+    }
+
+    const selectedCandidates = data.filter((c) => checked.includes(c.id));
+
+    // map only the fields you want in Excel
+    const dataToExport = selectedCandidates.map((c) => ({
+      CandidateID: c.id,
+      Candidate_name: c.candidate_name,
+      Candidate_email: c.candidate_email,
+      Candidate_phone: c.candidate_phone,
+      Interview_status: c.interview_status,
+      Interview_time: c.interview_time,
+    }));
+
+    // convert JSON to sheet
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Candidates");
+
+    // export as file
+    XLSX.writeFile(workbook, "Selected_Candidates.xlsx");
+  };
   // console.log('the data is >>',data)
   return (
     <>
@@ -102,6 +171,7 @@ const viewInterview = () => {
                     </select>{" "}
                     entries
                   </div>
+                  <button onClick={handlDownloadCSV}>DOwnload CSV</button>
                   <input
                     type="text"
                     placeholder="Search by name or email..."
@@ -112,6 +182,42 @@ const viewInterview = () => {
                     }}
                     className="form-control my-3"
                   />
+
+                  {/* date range */}
+                  <DatePicker
+                    selectsRange={true}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onChange={(update) => {
+                      setDateRange(update);
+                      if (update[0] && update[1]) {
+                        setDateFilter(
+                          `${update[0].toISOString().split("T")[0]} - ${
+                            update[1].toISOString().split("T")[0]
+                          }`
+                        );
+                      }
+                    }}
+                    monthsShown={2}
+                    dateFormat="yyyy-MM-dd"
+                    className="form-control"
+                    placeholderText="YYYY-MM-DD - YYYY-MM-DD"
+                  />
+
+                  <div className="mt-2">
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={handleTodayFilter}
+                    >
+                      Today
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleDateClear}
+                    >
+                      Clear Date Filter
+                    </button>
+                  </div>
                 </div>
                 <select
                   id="changestatus"
@@ -144,6 +250,16 @@ const viewInterview = () => {
                 >
                   <thead>
                     <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          id="ckbCheckAll"
+                          checked={
+                            data.length > 0 && checked.length === data.length
+                          }
+                          onChange={handleCheckAll}
+                        />
+                      </th>
                       <th>#</th>
                       <th>Candidate Name</th>
                       <th>Candidate Email</th>
@@ -157,6 +273,15 @@ const viewInterview = () => {
                     {data?.length > 0 ? (
                       data.map((result, index) => (
                         <tr key={result.id}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              className="checkBoxClass"
+                              checked={checked.includes(result.id)}
+                              // checked="true"
+                              onChange={() => handleCheckboxChange(result.id)}
+                            />
+                          </td>
                           <td>{index + 1}</td>
                           <td>{result.candidate_name}</td>
                           <td>{result.candidate_email}</td>
@@ -193,8 +318,6 @@ const viewInterview = () => {
                     >
                       Prev
                     </button>
-
-               
 
                     <button
                       className="btn btn-outline-secondary"

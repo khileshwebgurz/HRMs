@@ -53,7 +53,7 @@ class InterviewController extends Controller
         }
 
         Log::info('My status >>>>', ['status code' => $request->status]);
-        
+
         // Search filter
         if (!empty($search)) {
             $query->whereHas('candidate', function ($q) use ($search) {
@@ -65,6 +65,17 @@ class InterviewController extends Controller
 
         if (!empty($request->status)) {
             $query->where("interview_status", $request->status);
+        }
+
+
+        // ✅ Date filter (based on created_at)
+        if ($request->has('datefilter') && !empty($request->datefilter)) {
+            $dates = explode(' - ', $request->datefilter);
+            if (count($dates) === 2) {
+                $startDate = \Carbon\Carbon::parse($dates[0])->startOfDay();
+                $endDate   = \Carbon\Carbon::parse($dates[1])->endOfDay();
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
         }
         // Paginate
         $paginated = $query->latest()->paginate($limit);
@@ -181,7 +192,7 @@ class InterviewController extends Controller
         }
 
         $interview = CandidateInterviews::find($request->interview_id);
-        Log::info('my interview id is ',['interview id'=>$request->interview_id ]);
+        Log::info('my interview id is ', ['interview id' => $request->interview_id]);
 
         if ($request->hasFile('cv')) {
             $file = $request->file('cv');
@@ -318,5 +329,4 @@ class InterviewController extends Controller
             'employee_email' => $employee->email
         ]);
     }
-
 }
