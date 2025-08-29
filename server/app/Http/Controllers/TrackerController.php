@@ -57,6 +57,18 @@ class TrackerController extends Controller
             });
         }
 
+        // date filter
+        $dateFilter = $request->query('datefilter');
+        if ($dateFilter) {
+            $dates = explode(' - ', $dateFilter);
+            if (count($dates) === 2) {
+                $startDate = \Carbon\Carbon::parse($dates[0])->startOfDay();
+                $endDate   = \Carbon\Carbon::parse($dates[1])->endOfDay();
+
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        }
+
         $perPage = $request->query('limit');
         $page = $request->query('page', 1);
 

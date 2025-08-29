@@ -158,7 +158,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                       </Link>
                     </li>
 
-                     <li className="nav-item">
+                    <li className="nav-item">
                       <Link to="/employee/employee-team" className="nav-link">
                         <i className="nav-icon fas fa-user-plus"></i>
                         Assign Team Manager
@@ -182,6 +182,57 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                         Job Applications
                       </Link>
                     </li>
+
+                    {/* Inventory Sidebars */}
+                    <li className="nav-item">
+                      <Link to="#" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Inventory
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/all-categories" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Category Management
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/all-vendors" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Vendor Management
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/all-rooms" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Cabin Management
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/all-inventories" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Inventory Management
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/inventory-request" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Inventory Request
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link to="/public/inventory/all-logs" className="nav-link">
+                        <i className="nav-icon fas fa-file-alt"></i>
+                        Inventory Logs
+                      </Link>
+                    </li>
+
                     <li className="nav-item">
                       <Link
                         to="/public/users/all-candidate-test"

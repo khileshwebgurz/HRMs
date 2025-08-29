@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
+import DatePicker from "react-datepicker";
 // tracker Controller
 const CandidateList = () => {
   const [candidates, setCandidates] = useState([]);
@@ -12,7 +14,16 @@ const CandidateList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemPerPage] = useState(10);
 
+  const [checked, setChecked] = useState([]);
+
+  // date filter
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
+  const [dateFilter, setDateFilter] = useState("");
+
   const navigate = useNavigate();
+
+  console.log("my checkdata is >>", checked);
 
   const fetchCandidates = async (
     page = currentPage,
@@ -21,12 +32,16 @@ const CandidateList = () => {
   ) => {
     try {
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/candidates?page=${page}&limit=${limit}&search=${encodeURIComponent(
-          term
-        )}`,
-        { withCredentials: true }
+        `${import.meta.env.VITE_API_BASE_URL}/candidates`,
+        {
+          params: {
+            page,
+            limit,
+            search: term,
+            datefilter: dateFilter,
+          },
+          withCredentials: true,
+        }
       );
 
       setCandidates(response.data.data);
@@ -39,9 +54,25 @@ const CandidateList = () => {
     }
   };
 
+  // toggle single checkbox
+  const handleCheckboxChange = (id) => {
+    setChecked((prev) =>
+      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+    );
+  };
+
+  // for selectall checkbox
+  const handleCheckAll = (e) => {
+    if (e.target.checked) {
+      const allIds = filteredCandidates.map((c) => c.id);
+      setChecked(allIds);
+    } else {
+      setChecked([]);
+    }
+  };
   useEffect(() => {
     fetchCandidates(currentPage);
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, dateFilter]);
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -102,6 +133,48 @@ const CandidateList = () => {
     setCurrentPage(1);
   };
 
+
+  // --- Add this function ---
+const handleDownload = () => {
+  if (checked.length === 0) {
+    alert("Please select at least one candidate before downloading!");
+    return;
+  }
+
+  // get selected candidates
+  const selectedCandidates = candidates.filter((c) =>
+    checked.includes(c.id)
+  );
+
+  // map only the fields you want in Excel
+  const dataToExport = selectedCandidates.map((c) => ({
+    CandidateID: c.id,
+    Name: c.full_name,
+    Email: c.email,
+    Phone: c.mobile_number,
+    LinkedIn: c.linked_in,
+    NoticePeriod: c.notice_period,
+    CurrentLocation: c.current_location,
+    DateApplied: c.created_at,
+  }));
+
+  // convert JSON to sheet
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Candidates");
+
+  // export as file
+  XLSX.writeFile(workbook, "Selected_Candidates.xlsx");
+};
+
+const handleDateClear = ()=>{
+   setDateRange([]);
+  setDateFilter("")
+  fetchCandidates(1, searchTerm);
+}
+
+
+console.log('mu datrange is >>',dateRange)
   return (
     <div className="container mt-4">
       <h1>All Candidates</h1>
@@ -115,6 +188,11 @@ const CandidateList = () => {
         </select>{" "}
         entries
       </div>
+      <button
+        className="btn btn-success btn-sm"
+        onClick={handleDownload}
+      >Download CSV</button>
+      <div></div>
       <input
         type="text"
         placeholder="Search by name or email..."
@@ -126,6 +204,31 @@ const CandidateList = () => {
         className="form-control my-3"
       />
 
+      {/* date range */}
+      <DatePicker
+        selectsRange={true}
+        startDate={startDate}
+        endDate={endDate}
+        onChange={(update) => {
+          setDateRange(update);
+          if (update[0] && update[1]) {
+            setDateFilter(
+              `${update[0].toISOString().split("T")[0]} - ${
+                update[1].toISOString().split("T")[0]
+              }`
+            );
+          }
+        }}
+        monthsShown={2}
+        // showTimeSelect
+        timeIntervals={30}
+        dateFormat="yyyy-MM-dd h:mm aa"
+        className="form-control"
+        todayButton="Today" 
+        placeholderText="YYYY-MM-DD - YYYY-MM-DD"
+      />
+
+<button onClick={handleDateClear}>Clear date filter</button>
       {loading ? (
         <p>Loading candidates...</p>
       ) : (
@@ -134,6 +237,17 @@ const CandidateList = () => {
             <table className="table table-bordered table-hover">
               <thead>
                 <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      id="ckbCheckAll"
+                      checked={
+                        filteredCandidates.length > 0 &&
+                        checked.length === filteredCandidates.length
+                      }
+                      onChange={handleCheckAll}
+                    />
+                  </th>
                   <th>#</th>
                   <th
                     // onClick={() => handleSort("full_name")}
@@ -164,6 +278,14 @@ const CandidateList = () => {
               <tbody>
                 {filteredCandidates.map((row, index) => (
                   <tr key={row.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="checkBoxClass"
+                        checked={checked.includes(row.id)}
+                        onChange={() => handleCheckboxChange(row.id)}
+                      />
+                    </td>
                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td>{row.full_name}</td>
                     <td>{row.id}</td>

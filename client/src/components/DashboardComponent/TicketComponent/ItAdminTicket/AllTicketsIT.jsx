@@ -23,6 +23,8 @@ const AllTicketsIT = () => {
     "In Progress": "3",
   };
 
+  // console.log('my startdate is',startDate, 'and my end date is', endDate);
+
   const fetchAllTickets = async (pageNumber = 1) => {
     try {
       const res = await axios.get(

@@ -71,6 +71,14 @@ import EmployeeTeam from "./components/DashboardComponent/TeamManager/EmployeeTe
 import EditTeamManager from "./components/DashboardComponent/TeamManager/EditTeamManager";
 import AddEmployeeTeam from "./components/DashboardComponent/TeamManager/AddEmployeeTeam";
 import HelpDeskQuestion from "./components/DashboardComponent/Helpdesk/HelpDeskQuestion";
+import CategoryManagement from "./components/InventoryManagement/CategoryManagement";
+import VendorManagement from "./components/InventoryManagement/VendorManagement";
+import CabinManagement from "./components/InventoryManagement/CabinManagement";
+import InventoryManagement from "./components/InventoryManagement/InventoryManagement";
+import InventoryRequest from "./components/InventoryManagement/InventoryRequest";
+import InventoryLogs from "./components/InventoryManagement/InventoryLogs";
+import EditCategory from "./components/InventoryManagement/EditCategory";
+import AddCategory from "./components/InventoryManagement/AddCategory";
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
   return (
@@ -199,6 +207,19 @@ function App() {
           <Route path="/employee/employee-team" element={<EmployeeTeam/>}/>
           <Route path="/employee/employee-team-edit/:managerId" element={<EditTeamManager/>}/>
           <Route path="/employee/employee-team-add" element={<AddEmployeeTeam/>}/>
+
+          {/* Inventory Management */}
+          <Route path= "/public/inventory/all-categories" element={<CategoryManagement/>}/>
+          <Route path="/public/inventory/all-vendors" element={<VendorManagement/>}/>
+          <Route path="/public/inventory/all-rooms" element={<CabinManagement/>}/>
+          <Route path="/public/inventory/all-inventories" element={<InventoryManagement/>}/>
+          <Route path="/public/inventory/inventory-request" element={<InventoryRequest/>}/>
+          <Route path="/public/inventory/all-logs" element={<InventoryLogs/>}/>
+          <Route path="/public/inventory/all-categories/edit-category/:categoryID" element={<EditCategory/>}/>
+          <Route path="/public/inventory/all-categories/add-category" element={<AddCategory/>}/>
+
+          {/* Vendor Management */}
+        
          
         </Route>
       </Routes>

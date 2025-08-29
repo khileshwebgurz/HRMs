@@ -23,6 +23,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\InventoryController;
 
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\Employee\OnboardProcessController;
@@ -56,7 +57,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     // just for downloading the attendance report of candidates
     Route::get('/attendance-report-export', [DashboardController::class, 'downloadexcelattendance']);
-    Route::get('/attendance-report-exportCSV',[DashboardController::class,'attendanceReportExportCSV']);
+    Route::get('/attendance-report-exportCSV', [DashboardController::class, 'attendanceReportExportCSV']);
 
     Route::get('/employee/company-policy', [AccountController::class, 'getCompanyPolicy']);
     Route::get('/employee/readiness-quiz', [AccountController::class, 'getReadinessQuiz']);
@@ -64,7 +65,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('edit-company-profile', [DashboardController::class, 'editCompanyProfile']);
     Route::post('edit-company-profile-post', [DashboardController::class, 'editCompanyProfilePost']);
-    
+
     // Get logged-in user
     Route::get('/employee/user', function (Request $request) {
         $user = $request->user();
@@ -194,11 +195,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/roles/{role_id}/field-permissions', [RoleController::class, 'getFieldPermissions']);
     Route::post('/roles/{role_id}/field-permissions/update', [RoleController::class, 'updateFieldPermission']);
 
-     Route::get('/helpdesk/search', [SettingController::class, 'helpdesk_search']);
-        Route::post('/helpdesk/query', [SettingController::class, 'helpdesk_search_query']);
-        Route::get('/helpdesk/answer/{id}', [SettingController::class, 'helpdesk_search_answer']);
+    Route::get('/helpdesk/search', [SettingController::class, 'helpdesk_search']);
+    Route::post('/helpdesk/query', [SettingController::class, 'helpdesk_search_query']);
+    Route::get('/helpdesk/answer/{id}', [SettingController::class, 'helpdesk_search_answer']);
 
-        Route::get('/helpdeskadd',[SettingController::class,'helpdeskadd']);
+    Route::get('/helpdeskadd', [SettingController::class, 'helpdeskadd']);
     //  Admin-only routes
     Route::middleware('role:1')->group(function () {
         Route::get('/employee/approve-leave-request/{leave_id}', [LeavesController::class, 'approveLeaveRequest'])->name('approveLeaveRequest');
@@ -225,7 +226,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/helpdesk/{id}', [SettingController::class, 'helpupdate']);
         Route::delete('/helpdesk/{id}', [SettingController::class, 'helpdelete']);
 
-       
+
 
         // admin salary slip routes
         Route::get('/adminsalary-slip', [SalaryslipController::class, 'salaryslip']);
@@ -240,8 +241,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('/employee-team/{id}', [SettingController::class, 'employee_team_delete']);
         // Route::get('/employee-team/add', [SettingController::class, 'employee_team_add']);
         Route::get('/employee-team-add', [SettingController::class, 'employee_team_add']);
-
-        
     });
 
 
@@ -311,6 +310,57 @@ Route::middleware('auth:api')->prefix('tracker')->group(function () {
 Route::middleware([])->prefix('tracker')->group(function () {
     Route::get('/candidate/profile/{profile_id}/view', [UserController::class, 'candidateProfileView']);
     Route::get('candidate/profile/{token}/edit', [UserController::class, 'candidateProfile']);
+});
+
+
+Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
+    Route::get('all-categories', [InventoryController::class,'allCategories']);
+    Route::get('/all-categories/add-category', [InventoryController::class,'addCategories'])->name('addcategories');
+    Route::post('add-category-post', [InventoryController::class,'addCategoriesPost'])->name('addcategoriesPost');
+    Route::get('/all-categories/edit-category/{cat_id}', [InventoryController::class,'editCategory'])->name('editcategory');
+    Route::post('edit-category-post', [InventoryController::class,'editCategoryPost'])->name('editcategorypost');
+    Route::delete('delete-category/{cat_id}', [InventoryController::class,'deleteCategory'])->name('deletecategory');
+    Route::get('all-vendors', 'InventoryController@allVendors')->name('allvendors');
+    Route::get('gst-post', 'InventoryController@getGst')->name('getGst');
+
+    Route::get('/all-vendors/add-vendor', 'InventoryController@addVendors')->name('addvendors');
+    Route::post('add-vendor-post', 'InventoryController@addVendorsPost')->name('addvendorsPost');
+    Route::get('/all-vendors/edit-vendor/{vendor_id}', 'InventoryController@editVendor')->name('editvendor');
+    Route::post('edit-vendor-post', 'InventoryController@editVendorPost')->name('editvendorpost');
+    Route::get('delete-vendor/{vendor_id}', 'InventoryController@deleteVendor')->name('deletevendor');
+    Route::get('all-inventories', 'InventoryController@allInventories')->name('allinventories');
+    Route::get('/all-inventories/add-inventory', 'InventoryController@addInventory')->name('addinventory');
+    Route::post('add-inventory-post', 'InventoryController@addInventoryPost')->name('addinventorypost');
+    Route::get('inventory-request', 'InventoryController@inventoryRequest')->name('inventoryrequests');
+    Route::post('get-inventory-approval-request', 'InventoryController@approveInventoryRequest')->name('inventory-approve-request');
+    Route::post('get-inventory-decline-request', 'InventoryController@declineInventoryRequest')->name('decline-inventory-request');
+    Route::get('/inventory-request/edit-inventory/{inventory_id}', 'InventoryController@editInventory')->name('editinventory');
+    Route::post('edit-inventory-post', 'InventoryController@editInventoryPost')->name('editinventorypost');
+    Route::get('delete-inventory/{inventory_id}', 'InventoryController@deleteInventory')->name('deleteinventory');
+    Route::get('delete-warrenty-card/{inventory_id}', 'InventoryController@deleteWarrentyCard')->name('deletewarrentycard');
+    Route::get('delete-bill-upload/{inventory_id}', 'InventoryController@deleteBillUpload');
+    Route::get('all-rooms', 'InventoryController@allRooms')->name('allrooms');
+    Route::get('/all-rooms/add-room', 'InventoryController@addRoom')->name('addroom');
+    Route::post('add-room-post', 'InventoryController@addRoomPost')->name('addroompost');
+    Route::get('/all-rooms/edit-room/{room_id}', 'InventoryController@editRoom')->name('editroom');
+    Route::post('edit-room-post', 'InventoryController@editRoomPost')->name('editroompost');
+    Route::get('delete-room/{room_id}', 'InventoryController@date(format)eleteRoom')->name('deleteroom');
+    Route::get('/all-categories/add-parent-category', 'InventoryController@addParentCategory')->name('add-parent-category');
+    Route::post('add-parent-category-post', 'InventoryController@addParentCategoryPost')->name('addparentcategorypost');
+    Route::get('/inventory-request/allocation/{inventory_id}', 'InventoryController@allocation')->name('allocation');
+    Route::post('add-allocation-post', 'InventoryController@allocationPost')->name('allocationpost');
+    Route::get('/deallocation/{inventory_id}', 'InventoryController@deallocation')->name('deallocation');
+    Route::get('decline-inventory/{inventory_id}', 'InventoryController@declineInventory')->name('declineinventory');
+    Route::post('get-states-by-country', 'InventoryController@getState')->name('getstate');
+    Route::post('get-cities-by-state', 'InventoryController@getCity')->name('getcity');
+    Route::get('/faulty/{inventory_id}', 'InventoryController@faulty')->name('faulty');
+    Route::get('/faultless/{inventory_id}', 'InventoryController@faultless')->name('faultless');
+    Route::get('all-logs', 'InventoryController@allLogs')->name('inventorylogs');
+    Route::get('export', 'InventoryController@export')->name('export');
+    Route::get('exportinventory', 'InventoryController@exportInventory')->name('exportinventory');
+    Route::get('/inventory-request/manage-stock/{inventory_id}', 'InventoryController@manageStock')->name('managestock');
+    Route::post('manage-stock-post', 'InventoryController@manageStockPost')->name('managestockPost');
+    Route::post('import', 'InventoryController@import')->name('import');
 });
 
 

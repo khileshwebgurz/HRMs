@@ -65,14 +65,14 @@ const AddCandidate = () => {
 
     // LinkedIn (optional but validate format)
     if (!form.linked_in.trim()) {
-      newErrors.linked_in = "This field is required";
-    } else if (
-      !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(
-        form.linked_in.trim()
-      )
-    ) {
-      newErrors.linked_in = "Invalid LinkedIn URL";
-    }
+      newErrors.linked_in = "This field is required";}
+    // } else if (
+    //   !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(
+    //     form.linked_in.trim()
+    //   )
+    // ) {
+    //   newErrors.linked_in = "Invalid LinkedIn URL";
+    // }
 
     // Assign To (if role requires it)
     if (!form.created_by && !rolePermission) {

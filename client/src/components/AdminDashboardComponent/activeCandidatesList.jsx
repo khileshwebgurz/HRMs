@@ -23,7 +23,6 @@ function ActiveCandidatesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [checkedEmails, setCheckedEmails] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]);
   const [showBulkEmail, setShowBulkEmail] = useState(false);
   const [bulkEmailList, setBulkEmailList] = useState("");
 
