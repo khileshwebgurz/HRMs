@@ -1,0 +1,25 @@
+{
+    "assessment_title": "Aptitude Test Score",
+    "assessment_by": "Consequuntur eos re",
+    "weight_age": "1",
+    "score": "8"
+},
+{
+    "assessment_title": "Technical Test (Theoretical)",
+    "assessment_by": "Eveniet fugiat atq",
+    "weight_age": "3",
+    "score": "2"
+},
+{
+    "assessment_title": "Technical Test (Practical)",
+    "assessment_by": "Impedit consequatur",
+    "weight_age": "3",
+    "score": "9"
+},
+{
+    "assessment_title": "HR Round",
+    "assessment_by": "Natus ab anim enim c",
+    "weight_age": "2",
+    "score": "2"
+}
+]

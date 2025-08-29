@@ -8,8 +8,8 @@ const AddCandidate = () => {
     full_name: "",
     email: "",
     mobile_number: "",
-    total_experience: "",
-    notice_period: "",
+    total_experience: 0,
+    notice_period: 0,
     current_location: "",
     position: "",
     date: "",
@@ -29,57 +29,73 @@ const AddCandidate = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Name
+    // Full Name (required, only letters + spaces)
     if (!form.full_name.trim()) {
       newErrors.full_name = "Name is required";
     } else if (!/^[a-zA-Z\s]+$/.test(form.full_name)) {
       newErrors.full_name = "Name must contain only letters and spaces";
     }
 
-    // Email
+    // Email (required, valid format)
     if (!form.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = "Invalid email format";
     }
 
-    // Mobile Number
+    // Mobile Number (required, digits only, length check)
     if (!form.mobile_number.trim()) {
       newErrors.mobile_number = "Mobile number is required";
+    } else if (!/^[0-9]{10}$/.test(form.mobile_number)) {
+      newErrors.mobile_number = "Mobile number must be 10 digits";
     }
 
-    // Position
+    // Total Experience (optional but must be number if entered)
+    if (
+      form.total_experience &&
+      !/^\d+(\.\d{1,2})?$/.test(form.total_experience)
+    ) {
+      newErrors.total_experience = "Experience must be a valid number";
+    }
+
+    // Notice Period (optional but must be number if entered)
+    if (form.notice_period && !/^\d+$/.test(form.notice_period)) {
+      newErrors.notice_period = "Notice period must be a number";
+    }
+
+    // Position (required)
     if (!form.position.trim()) {
       newErrors.position = "Position is required";
     }
 
-    // Date
+    // Date (required, valid date)
     if (!form.date.trim()) {
       newErrors.date = "Interview date is required";
+    } else if (isNaN(Date.parse(form.date))) {
+      newErrors.date = "Invalid date format";
     }
 
-    // Gender
+    // Gender (required)
     if (!form.gender) {
       newErrors.gender = "Please select gender";
     }
 
-    // LinkedIn (optional but validate format)
+    // LinkedIn (required + format)
     if (!form.linked_in.trim()) {
-      newErrors.linked_in = "This field is required";}
-    // } else if (
-    //   !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(
-    //     form.linked_in.trim()
-    //   )
-    // ) {
-    //   newErrors.linked_in = "Invalid LinkedIn URL";
-    // }
+      newErrors.linked_in = "LinkedIn profile is required";
+    } else if (
+      !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/i.test(form.linked_in.trim()
+      )
+    ) {
+      newErrors.linked_in = "Invalid LinkedIn URL";
+    }
 
-    // Assign To (if role requires it)
+    // Created By (required if no rolePermission)
     if (!form.created_by && !rolePermission) {
       newErrors.created_by = "Please select an assignee";
     }
 
-    // CV upload
+    // CV Upload (required, type & size check)
     if (!form.upload_cv) {
       newErrors.upload_cv = "Please upload your CV";
     } else {
@@ -227,6 +243,7 @@ const AddCandidate = () => {
           <label>Total Experience</label>
           <input
             name="total_experience"
+            type="number"
             className="form-control"
             value={form.total_experience}
             onChange={handleChange}
@@ -238,6 +255,7 @@ const AddCandidate = () => {
           <label>Notice Period (days)</label>
           <input
             name="notice_period"
+            type="number"
             className="form-control"
             value={form.notice_period}
             onChange={handleChange}

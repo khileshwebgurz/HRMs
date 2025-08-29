@@ -2101,8 +2101,8 @@ class UserController extends Controller
                 $asssecids = [];
 
                 foreach ($candidate_assessment_sections as $accessment_type => $section) {
-                    Log::info('My title >>>> ' . $section['title']);
-                    $accessment_type = $section['title'] ?? null;
+                    Log::info('My title >>>> ' . $section['assessment_type']);
+                    $accessment_type = $section['assessment_type'] ?? null;
                     Log::info('My assessment by >>>> ' . $section['assessment_by']);
                     $accessment_by = $section['assessment_by'] ?? null;
                     Log::info('My weight age by >>>> ' . $section['weight_age']);

@@ -1,10 +1,17 @@
-
 const AssessmentSection = ({
   assessmentSectionData,
   setAssessmentSectionData,
 }) => {
   const handleChange = (index, field, value) => {
     const updated = [...assessmentSectionData];
+    if (!updated[index]) {
+      updated[index] = {
+        assessment_type: staticTitles[index].id, // store number instead of label
+        accessment_by: "",
+        weight_age: "",
+        score: "",
+      };
+    }
     updated[index][field] = value;
     setAssessmentSectionData(updated);
   };
@@ -17,11 +24,13 @@ const AssessmentSection = ({
 
   // Static titles (these will always show in the UI)
   const staticTitles = [
-    "Aptitude Test Score",
-    "Technical Test (Theoretical)",
-    "Technical Test (Practical)",
-    "HR Round",
+    { id: 1, label: "Aptitude Test Score" },
+    { id: 2, label: "Technical Test (Theoretical)" },
+    { id: 3, label: "Technical Test (Practical)" },
+    { id: 4, label: "HR Round" },
   ];
+
+  console.log("my assessment section data is >>> ", assessmentSectionData);
 
   return (
     <div className="card">
@@ -39,14 +48,14 @@ const AssessmentSection = ({
           <tbody>
             {staticTitles.map((title, index) => (
               <tr key={index}>
-                <td>{title}</td>
+                <td>{title.label}</td>
                 <td>
                   <input
                     className="form-control"
                     type="text"
-                    value={assessmentSectionData[index]?.assessment_by || ""}
+                    value={assessmentSectionData[index]?.accessment_by || ""}
                     onChange={(e) =>
-                      handleChange(index, "assessment_by", e.target.value)
+                      handleChange(index, "accessment_by", e.target.value)
                     }
                   />
                 </td>
@@ -87,6 +96,5 @@ const AssessmentSection = ({
     </div>
   );
 };
-
 
 export default AssessmentSection;

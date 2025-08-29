@@ -90,23 +90,21 @@ const CandidateList = () => {
     navigate(`/users/${url}`);
   };
 
-
   // function to set filter for today
-const handleTodayFilter = () => {
-  const today = new Date();
-  const formatted = today.toISOString().split("T")[0];
+  const handleTodayFilter = () => {
+    const today = new Date();
+    const formatted = today.toISOString().split("T")[0];
 
-  setDateRange([today, today]); // for UI in DatePicker
-  setDateFilter(`${formatted} - ${formatted}`); // for backend filter
-  fetchCandidates(1, searchTerm);
-};
+    setDateRange([today, today]); // for UI in DatePicker
+    setDateFilter(`${formatted} - ${formatted}`); // for backend filter
+    fetchCandidates(1, searchTerm);
+  };
 
-const handleDateClear = () => {
-  setDateRange([null, null]);  // clear datepicker UI
-  setDateFilter("");
-  fetchCandidates(1, searchTerm);
-};
-
+  const handleDateClear = () => {
+    setDateRange([null, null]); // clear datepicker UI
+    setDateFilter("");
+    fetchCandidates(1, searchTerm);
+  };
 
   const handleSendProdileUpdateLink = async (candidateId) => {
     const numericId = candidateId.replace("HRM", "");
@@ -151,48 +149,44 @@ const handleDateClear = () => {
     setCurrentPage(1);
   };
 
-
   // --- Add this function ---
-const handleDownload = () => {
-  if (checked.length === 0) {
-    alert("Please select at least one candidate before downloading!");
-    return;
-  }
+  const handleDownload = () => {
+    if (checked.length === 0) {
+      alert("Please select at least one candidate before downloading!");
+      return;
+    }
 
-  // get selected candidates
-  const selectedCandidates = candidates.filter((c) =>
-    checked.includes(c.id)
-  );
+    // get selected candidates
+    const selectedCandidates = candidates.filter((c) => checked.includes(c.id));
 
-  // map only the fields you want in Excel
-  const dataToExport = selectedCandidates.map((c) => ({
-    CandidateID: c.id,
-    Name: c.full_name,
-    Email: c.email,
-    Phone: c.mobile_number,
-    LinkedIn: c.linked_in,
-    NoticePeriod: c.notice_period,
-    CurrentLocation: c.current_location,
-    DateApplied: c.created_at,
-  }));
+    // map only the fields you want in Excel
+    const dataToExport = selectedCandidates.map((c) => ({
+      CandidateID: c.id,
+      Name: c.full_name,
+      Email: c.email,
+      Phone: c.mobile_number,
+      LinkedIn: c.linked_in,
+      NoticePeriod: c.notice_period,
+      CurrentLocation: c.current_location,
+      DateApplied: c.created_at,
+    }));
 
-  // convert JSON to sheet
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Candidates");
+    // convert JSON to sheet
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Candidates");
 
-  // export as file
-  XLSX.writeFile(workbook, "Selected_Candidates.xlsx");
-};
+    // export as file
+    XLSX.writeFile(workbook, "Selected_Candidates.xlsx");
+  };
 
-// const handleDateClear = ()=>{
-//    setDateRange([]);
-//   setDateFilter("")
-//   fetchCandidates(1, searchTerm);
-// }
+  // const handleDateClear = ()=>{
+  //    setDateRange([]);
+  //   setDateFilter("")
+  //   fetchCandidates(1, searchTerm);
+  // }
 
-
-console.log('mu datrange is >>',dateRange)
+  console.log("mu datrange is >>", dateRange);
   return (
     <div className="container mt-4">
       <h1>All Candidates</h1>
@@ -206,10 +200,9 @@ console.log('mu datrange is >>',dateRange)
         </select>{" "}
         entries
       </div>
-      <button
-        className="btn btn-success btn-sm"
-        onClick={handleDownload}
-      >Download CSV</button>
+      <button className="btn btn-success btn-sm" onClick={handleDownload}>
+        Download CSV
+      </button>
       <div></div>
       <input
         type="text"
@@ -223,38 +216,39 @@ console.log('mu datrange is >>',dateRange)
       />
 
       {/* date range */}
-    {/* date range */}
-<DatePicker
-  selectsRange={true}
-  startDate={startDate}
-  endDate={endDate}
-  onChange={(update) => {
-    setDateRange(update);
-    if (update[0] && update[1]) {
-      setDateFilter(
-        `${update[0].toISOString().split("T")[0]} - ${update[1]
-          .toISOString()
-          .split("T")[0]}`
-      );
-    }
-  }}
-  monthsShown={2}
-  dateFormat="yyyy-MM-dd"
-  className="form-control"
-  placeholderText="YYYY-MM-DD - YYYY-MM-DD"
-/>
+      <DatePicker
+        selectsRange={true}
+        startDate={startDate}
+        endDate={endDate}
+        onChange={(update) => {
+          setDateRange(update);
+          if (update[0] && update[1]) {
+            setDateFilter(
+              `${update[0].toISOString().split("T")[0]} - ${
+                update[1].toISOString().split("T")[0]
+              }`
+            );
+          }
+        }}
+        monthsShown={2}
+        dateFormat="yyyy-MM-dd"
+        className="form-control"
+        placeholderText="YYYY-MM-DD - YYYY-MM-DD"
+      />
 
-<div className="mt-2">
-  <button className="btn btn-primary btn-sm me-2" onClick={handleTodayFilter}>
-    Today
-  </button>
-  <button className="btn btn-secondary btn-sm" onClick={handleDateClear}>
-    Clear Date Filter
-  </button>
-</div>
+      <div className="mt-2">
+        <button
+          className="btn btn-primary btn-sm me-2"
+          onClick={handleTodayFilter}
+        >
+          Today
+        </button>
+        <button className="btn btn-secondary btn-sm" onClick={handleDateClear}>
+          Clear Date Filter
+        </button>
+      </div>
 
-
-{/* <button onClick={handleDateClear}>Clear date filter</button> */}
+      {/* <button onClick={handleDateClear}>Clear date filter</button> */}
       {loading ? (
         <p>Loading candidates...</p>
       ) : (

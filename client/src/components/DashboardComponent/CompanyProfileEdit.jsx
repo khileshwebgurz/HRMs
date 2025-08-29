@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import { useUser } from "../../context/UserContext";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";

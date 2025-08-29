@@ -1,5 +1,3 @@
-import React from "react";
-
 const OtherInfo = ({ otherInfo, setOtherInfo }) => {
   const handleStatusChange = (index, value) => {
     const updated = [...otherInfo];
@@ -13,7 +11,7 @@ const OtherInfo = ({ otherInfo, setOtherInfo }) => {
     setOtherInfo(updated);
   };
 
-  console.log('my other info is >>',otherInfo)
+
   return (
     <>
       <div className="card">

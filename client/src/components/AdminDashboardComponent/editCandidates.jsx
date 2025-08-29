@@ -115,24 +115,7 @@ const CandidateEditForm = () => {
 
   const [otherInfo, setOtherInfo] = useState([]);
 
-  const [assessmentSectionData, setAssessmentSectionData] = useState([
-    {
-      assessment_by: "",
-      weight_age: "",
-      score: "",
-    },
-    {
-      assessment_by: "",
-      weight_age: "",
-      score: "",
-    },
-    {
-      assessment_by: "",
-      weight_age: "",
-      score: "",
-    },
-    { assessment_by: "", weight_age: "", score: "" },
-  ]);
+  const [assessmentSectionData, setAssessmentSectionData] = useState([]);
 
   const [recommendation, setRecommendation] = useState({
     status: "",
@@ -258,6 +241,8 @@ const CandidateEditForm = () => {
     fetchCandidate();
   }, [candidate_id]);
 
+  console.log('the other info', otherInfo)
+
   const handleCandidateProfileChange = (field, value) => {
     setCandidateProfile((prev) => ({
       ...prev,
@@ -373,6 +358,8 @@ const CandidateEditForm = () => {
       alert("Failed to update candidate.");
     }
   };
+
+  console.log('parent me assessment section', assessmentSectionData)
 
   return (
     <>
