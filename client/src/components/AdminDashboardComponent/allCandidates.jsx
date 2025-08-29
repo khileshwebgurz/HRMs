@@ -90,6 +90,24 @@ const CandidateList = () => {
     navigate(`/users/${url}`);
   };
 
+
+  // function to set filter for today
+const handleTodayFilter = () => {
+  const today = new Date();
+  const formatted = today.toISOString().split("T")[0];
+
+  setDateRange([today, today]); // for UI in DatePicker
+  setDateFilter(`${formatted} - ${formatted}`); // for backend filter
+  fetchCandidates(1, searchTerm);
+};
+
+const handleDateClear = () => {
+  setDateRange([null, null]);  // clear datepicker UI
+  setDateFilter("");
+  fetchCandidates(1, searchTerm);
+};
+
+
   const handleSendProdileUpdateLink = async (candidateId) => {
     const numericId = candidateId.replace("HRM", "");
     console.log(candidateId, "candidateId");
@@ -167,11 +185,11 @@ const handleDownload = () => {
   XLSX.writeFile(workbook, "Selected_Candidates.xlsx");
 };
 
-const handleDateClear = ()=>{
-   setDateRange([]);
-  setDateFilter("")
-  fetchCandidates(1, searchTerm);
-}
+// const handleDateClear = ()=>{
+//    setDateRange([]);
+//   setDateFilter("")
+//   fetchCandidates(1, searchTerm);
+// }
 
 
 console.log('mu datrange is >>',dateRange)
@@ -205,30 +223,38 @@ console.log('mu datrange is >>',dateRange)
       />
 
       {/* date range */}
-      <DatePicker
-        selectsRange={true}
-        startDate={startDate}
-        endDate={endDate}
-        onChange={(update) => {
-          setDateRange(update);
-          if (update[0] && update[1]) {
-            setDateFilter(
-              `${update[0].toISOString().split("T")[0]} - ${
-                update[1].toISOString().split("T")[0]
-              }`
-            );
-          }
-        }}
-        monthsShown={2}
-        // showTimeSelect
-        timeIntervals={30}
-        dateFormat="yyyy-MM-dd h:mm aa"
-        className="form-control"
-        todayButton="Today" 
-        placeholderText="YYYY-MM-DD - YYYY-MM-DD"
-      />
+    {/* date range */}
+<DatePicker
+  selectsRange={true}
+  startDate={startDate}
+  endDate={endDate}
+  onChange={(update) => {
+    setDateRange(update);
+    if (update[0] && update[1]) {
+      setDateFilter(
+        `${update[0].toISOString().split("T")[0]} - ${update[1]
+          .toISOString()
+          .split("T")[0]}`
+      );
+    }
+  }}
+  monthsShown={2}
+  dateFormat="yyyy-MM-dd"
+  className="form-control"
+  placeholderText="YYYY-MM-DD - YYYY-MM-DD"
+/>
 
-<button onClick={handleDateClear}>Clear date filter</button>
+<div className="mt-2">
+  <button className="btn btn-primary btn-sm me-2" onClick={handleTodayFilter}>
+    Today
+  </button>
+  <button className="btn btn-secondary btn-sm" onClick={handleDateClear}>
+    Clear Date Filter
+  </button>
+</div>
+
+
+{/* <button onClick={handleDateClear}>Clear date filter</button> */}
       {loading ? (
         <p>Loading candidates...</p>
       ) : (
