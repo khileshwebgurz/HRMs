@@ -578,77 +578,82 @@ class InventoryController extends Controller
         return view('inventory.vendor.all-vendors');
     }
 
-public function allVendors(Request $request)
-{
-    $user = Auth::user();
-    $permission_role = Roles::where('id', $user->user_role)->first();
+    public function allVendors(Request $request)
+    {
+        $user = Auth::user();
+        $permission_role = Roles::where('id', $user->user_role)->first();
 
-    // Vendors query based on role "view" permissions
-    if ($permission_role->view == '2') {
-        $vendor = InventoryVendor::where('created_by', $user->id)
-            ->where('is_deleted', '0')->latest()->get();
-    } elseif ($permission_role->view == '3') {
-        $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
-        $vendor = InventoryVendor::whereIn('created_by', $employees)
-            ->where('is_deleted', '0')->latest()->get();
-    } elseif ($permission_role->view == '4') {
-        $employees = Employees::where('manager_id', $user->id)
-            ->orWhere('id', $user->id)
-            ->pluck('id')->toArray();
-        $vendor = InventoryVendor::whereIn('created_by', $employees)
-            ->where('is_deleted', '0')->latest()->get();
-    } elseif ($permission_role->view == '5') {
-        $vendor = InventoryVendor::where('is_deleted', '0')->latest()->get();
-    } else {
-        $vendor = collect(); // empty collection if no access
+        // Vendors query based on role "view" permissions
+        if ($permission_role->view == '2') {
+            $vendor = InventoryVendor::where('created_by', $user->id)
+                ->where('is_deleted', '0')->latest()->get();
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+            $vendor = InventoryVendor::whereIn('created_by', $employees)
+                ->where('is_deleted', '0')->latest()->get();
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', $user->id)
+                ->orWhere('id', $user->id)
+                ->pluck('id')->toArray();
+            $vendor = InventoryVendor::whereIn('created_by', $employees)
+                ->where('is_deleted', '0')->latest()->get();
+        } elseif ($permission_role->view == '5') {
+            $vendor = InventoryVendor::where('is_deleted', '0')->latest()->get();
+        } else {
+            $vendor = collect(); // empty collection if no access
+        }
+
+        // Transform vendors and attach permissions for frontend
+        $vendorsData = $vendor->map(function ($row) use ($user, $permission_role) {
+            $created_by = $row->created_by;
+            $manager = Employees::find($created_by);
+
+            $canEdit = false;
+            $canDelete = false;
+
+            // edit permissions
+            if ($permission_role->edit == '2' && $user->id == $created_by) {
+                $canEdit = true;
+            } elseif ($permission_role->edit == '3' && $user->id == ($manager->manager_id ?? null)) {
+                $canEdit = true;
+            } elseif ($permission_role->edit == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
+                $canEdit = true;
+            } elseif ($permission_role->edit == '5') {
+                $canEdit = true;
+            }
+
+            // delete permissions
+            if ($permission_role->delete == '2' && $user->id == $created_by) {
+                $canDelete = true;
+            } elseif ($permission_role->delete == '3' && $user->id == ($manager->manager_id ?? null)) {
+                $canDelete = true;
+            } elseif ($permission_role->delete == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
+                $canDelete = true;
+            } elseif ($permission_role->delete == '5') {
+                $canDelete = true;
+            }
+
+            Log::info('the rows are ', ['rows' => $row]);
+
+            return [
+                'id'           => $row->id,
+                'name'         => $row->name,
+                'created_by'   => $row->created_by,
+                'company_name' => $row->company_name,
+                'email' => $row->email,
+                'phone' => $row->phone,
+                'is_deleted'   => $row->is_deleted,
+                'can_edit'     => $canEdit,
+                'can_delete'   => $canDelete,
+                'created_at'   => $row->created_at,
+                'updated_at'   => $row->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'vendors' => $vendorsData,
+        ]);
     }
-
-    // Transform vendors and attach permissions for frontend
-    $vendorsData = $vendor->map(function ($row) use ($user, $permission_role) {
-        $created_by = $row->created_by;
-        $manager = Employees::find($created_by);
-
-        $canEdit = false;
-        $canDelete = false;
-
-        // edit permissions
-        if ($permission_role->edit == '2' && $user->id == $created_by) {
-            $canEdit = true;
-        } elseif ($permission_role->edit == '3' && $user->id == ($manager->manager_id ?? null)) {
-            $canEdit = true;
-        } elseif ($permission_role->edit == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
-            $canEdit = true;
-        } elseif ($permission_role->edit == '5') {
-            $canEdit = true;
-        }
-
-        // delete permissions
-        if ($permission_role->delete == '2' && $user->id == $created_by) {
-            $canDelete = true;
-        } elseif ($permission_role->delete == '3' && $user->id == ($manager->manager_id ?? null)) {
-            $canDelete = true;
-        } elseif ($permission_role->delete == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
-            $canDelete = true;
-        } elseif ($permission_role->delete == '5') {
-            $canDelete = true;
-        }
-
-        return [
-            'id'           => $row->id,
-            'name'         => $row->name,
-            'created_by'   => $row->created_by,
-            'is_deleted'   => $row->is_deleted,
-            'can_edit'     => $canEdit,
-            'can_delete'   => $canDelete,
-            'created_at'   => $row->created_at,
-            'updated_at'   => $row->updated_at,
-        ];
-    });
-
-    return response()->json([
-        'vendors' => $vendorsData,
-    ]);
-}
 
 
 
@@ -659,7 +664,7 @@ public function allVendors(Request $request)
         return view('inventory.vendor.add-vendor', $data);
     }
 
-    public function addVendorsPost(Request $request)
+    public function addVendorsPostOLD(Request $request)
     {
         $vendor = new InventoryVendor();
 
@@ -783,22 +788,168 @@ public function allVendors(Request $request)
         }
     }
 
+    public function addVendorsPost(Request $request)
+    {
+
+        Log::info('sdjd');
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|unique:inventory_vendors|max:50|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'required|unique:inventory_vendors|regex:/(.+)@(.+)\.(.+)/i',
+                'phone' => 'digits:10|unique:inventory_vendors|numeric',
+                'gst_no' => 'required|regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/',
+                'zip' => 'nullable|regex:/^[0-9]{3,7}$/',
+
+                // 🔹 Fix: use *_id instead of plain country/state/city
+                'country_id' => 'required|exists:countries,id',
+                // 'state_id'   => 'required|exists:states,id',
+                // 'city_id'    => 'required|exists:cities,id',
+            ],
+            [
+                'name.required' => 'Please enter the Name',
+                'email.required' => 'Please enter an email',
+                'phone.digits' => 'Please enter 10 digit number',
+                'country_id.required' => 'Please select the Country',
+                // 'state_id.required'   => 'Please select the State',
+                // 'city_id.required'    => 'Please select the City',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        // Permission check
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+        $created_by = $permission_role->add == '2'
+            ? Auth::user()->id
+            : ($request->created_by ?? null);
+
+        if (!$created_by) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Please select to whom you would assign to'
+            ]);
+        }
+
+
+        // need to uncomment later 
+
+        // GST validation
+        // $gst = $request->gst_no;
+        // $apiResponse = file_get_contents("http://sheet.gstincheck.ml/check/5cd36e6878834d58d3d175a88775c545/" . $gst);
+        // $gstData = json_decode($apiResponse);
+        // if (!$gstData || $gstData->flag != '1') {
+        //     return response()->json([
+        //         'status' => 401,
+        //         'message' => 'GST Number is invalid'
+        //     ]);
+        // }
+
+        // // GST state code match
+        // $sub = substr($gst, 0, 2);
+        // $state = State::find($request->state_id);
+        // if ($state && $sub != $state->gst_state_code) {
+        //     return response()->json([
+        //         'status' => 401,
+        //         'message' => 'GST State Code does not match'
+        //     ]);
+        // }
+
+
+
+
+        // Save vendor
+        $vendor = new InventoryVendor();
+        Log::info('the name is ', ['name' => $request->name]);
+
+        $vendor->fill([
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'phone'       => $request->phone,
+            'company_name' => $request->company_name,
+            'gst_no'      => '07AAXXX1234A1Z5', //gst number passed static pass -> $gst
+            'zip'         => $request->zip,
+            'address'     => $request->address,
+            'country_id'  => $request->country_id,
+            'state_id'    => $request->state_id,
+            'city_id'     => $request->city_id,
+            'created_by'  => $created_by,
+        ]);
+
+
+        if ($vendor->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Vendor added successfully'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 401,
+            'message' => 'Something went wrong. Try again.'
+        ]);
+    }
+
+    // public function editVendorOLD(Request $request, $vendor_id)
+    // {
+    //     $vendor = InventoryVendor::where('id', $vendor_id)->first();
+    //     $country_id = $vendor->country_id;
+    //     $state_id = $vendor->state_id;
+    //     $city_id = $vendor->city_id;
+    //     $states = State::where('country_id', $country_id)->get();
+    //     $cities = City::where('state_id', $state_id)->get();
+    //     $data['countries'] = Country::get(["name", "id"]);
+
+    //     return view('inventory.vendor.edit-vendor', $data, compact('vendor', 'country_id', 'state_id', 'city_id', 'states', 'cities'));
+    // }
+
     public function editVendor(Request $request, $vendor_id)
     {
         $vendor = InventoryVendor::where('id', $vendor_id)->first();
-        $country_id = $vendor->country_id;
-        $state_id = $vendor->state_id;
-        $city_id = $vendor->city_id;
-        $states = State::where('country_id', $country_id)->get();
-        $cities = City::where('state_id', $state_id)->get();
-        $data['countries'] = Country::get(["name", "id"]);
+        if (!$vendor) {
+            return response()->json(['message' => 'Vendor not found'], 404);
+        }
 
-        return view('inventory.vendor.edit-vendor', $data, compact('vendor', 'country_id', 'state_id', 'city_id', 'states', 'cities'));
+
+        $country_id = $vendor->country_id;
+        $current_country = Country::where('id', $country_id)->get(['id', 'name']);
+        $state_id = $vendor->state_id;
+        $current_state = State::where('id', $state_id)->get(['id', 'name']);
+        $city_id = $vendor->city_id;
+        $current_city = City::where('id', $city_id)->get(['id', 'name']);
+
+        $states = State::where('country_id', $country_id)->get(["id", "name"]);
+        $cities = City::where('state_id', $state_id)->get(["id", "name"]);
+        $countries = Country::get(["id", "name"]);
+
+
+        Log::info('my states is ', ['states is' => $current_country]);
+
+        return response()->json([
+            "vendor" => $vendor,
+            "country_id" => $country_id,
+            "current_country" => $current_country,
+            "current_state" => $current_state,
+            "current_city" => $current_city,
+            "state_id" => $state_id,
+            "city_id" => $city_id,
+            "states" => $states,
+            "cities" => $cities,
+            "countries" => $countries,
+        ]);
     }
-    public function editVendorPost(Request $request)
+
+
+    public function editVendorPostOLD(Request $request)
     {
         $vendorid = $request->vendor_id;
         $vendor = InventoryVendor::where('id', $vendorid)->first();
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -927,15 +1078,98 @@ public function allVendors(Request $request)
         }
     }
 
+
+    public function editVendorPost(Request $request)
+    {
+        $vendorid = $request->id;
+        $vendor = InventoryVendor::where('id', $vendorid)->first();
+        Log::info('my request is >>', ['request' => $request->all()]);
+        if (!$vendor) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Vendor not found'
+            ]);
+        }
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|max:50|regex:/^[a-zA-Z\s]+$/',
+                'email' => 'required|regex:/(.+)@(.+)\.(.+)/i',
+                'phone' => 'digits:10|numeric',
+                'zip' => 'nullable|regex:/^[0-9]{3,7}$/',
+                'country_id' => 'required',
+                // 'state_id' => 'required'
+            ],
+            [
+                'name.required' => 'Please enter the Name',
+                'name.regex' => 'Please enter valid name',
+                'email.required' => 'Please enter an email',
+                'email.regex' => 'Please enter valid email',
+                'phone.digits' => 'Please enter 10 digit number',
+                'country_id.required' => 'Please select the Country',
+                // 'state_id.required' => 'Please select the State'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        // update vendor
+        $vendor->name = $request->name;
+        $vendor->email = $request->email;
+        $vendor->phone = $request->phone;
+        $vendor->company_name = $request->company_name;
+        $vendor->gst_no = $request->gst_no;
+        $vendor->zip = $request->zip;
+        $vendor->address = $request->address;
+        $vendor->country_id = $request->country_id;
+        $vendor->state_id = $request->state_id;
+        $vendor->city_id = $request->city_id;
+
+        if ($vendor->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => "Vendor Updated"
+            ]);
+        } else {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try Again.'
+            ]);
+        }
+    }
+
+
+
+
+    // public function deleteVendorOLD($vendor_id)
+    // {
+    //     $vendor = InventoryVendor::findOrFail($vendor_id);
+    //     if ($vendor) {
+    //         $vendor->is_deleted = "1";
+    //         if ($vendor->save()) {
+    //             return redirect()->route('allvendors')->with('success', 'Vendor deleted.');
+    //         } else {
+    //             return redirect()->route('allvendors')->with('error', 'Something wrong. Try again.');
+    //         }
+    //     }
+    // }
+
     public function deleteVendor($vendor_id)
     {
         $vendor = InventoryVendor::findOrFail($vendor_id);
+
         if ($vendor) {
             $vendor->is_deleted = "1";
             if ($vendor->save()) {
-                return redirect()->route('allvendors')->with('success', 'Vendor deleted.');
+                return response()->json(['status' => 200, 'message' => 'Vendor deleted successfully.']);
             } else {
-                return redirect()->route('allvendors')->with('error', 'Something wrong. Try again.');
+                return response()->json(['status' => 500, 'message' => 'Something went wrong. Try again.']);
             }
         }
     }

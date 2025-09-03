@@ -24,6 +24,7 @@ use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LocationController;
 
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\Employee\OnboardProcessController;
@@ -321,15 +322,23 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
     Route::get('/all-categories/edit-category/{cat_id}', [InventoryController::class,'editCategory'])->name('editcategory');
     Route::post('edit-category-post', [InventoryController::class,'editCategoryPost'])->name('editcategorypost');
     Route::delete('delete-category/{cat_id}', [InventoryController::class,'deleteCategory'])->name('deletecategory');
-  //  Route::get('all-vendors', 'InventoryController@allVendors')->name('allvendors');
+   
     Route::get('gst-post', 'InventoryController@getGst')->name('getGst');
+
+    // Country, state and city routes
+    Route::get('all-vendors', [InventoryController::class,'allVendors'])->name('allvendors');
+    Route::get('/countries', [LocationController::class, 'getCountries']);
+    Route::get('/countries/{countryId}',[LocationController::class,'getCountry']);
+    Route::get('/states/{countryId}', [LocationController::class, 'getStates']);
+    Route::get('/cities/{stateId}', [LocationController::class, 'getCities']);
+
    
 
-    // Route::get('/all-vendors/add-vendor', 'InventoryController@addVendors')->name('addvendors');
-    // Route::post('add-vendor-post', 'InventoryController@addVendorsPost')->name('addvendorsPost');
-    Route::get('/all-vendors/edit-vendor/{vendor_id}', 'InventoryController@editVendor')->name('editvendor');
-    Route::post('edit-vendor-post', 'InventoryController@editVendorPost')->name('editvendorpost');
-    Route::get('delete-vendor/{vendor_id}', 'InventoryController@deleteVendor')->name('deletevendor');
+    Route::get('/all-vendors/add-vendor', [InventoryController::class,'addVendors'])->name('addvendors');
+    Route::post('add-vendor-post', [InventoryController::class,'addVendorsPost']);
+    Route::get('/all-vendors/edit-vendor/{vendor_id}', [InventoryController::class,'editVendor'])->name('editvendor');
+    Route::post('edit-vendor-post', [InventoryController::class,'editVendorPost'])->name('editvendorpost');
+    Route::get('delete-vendor/{vendor_id}', [InventoryController::class,'deleteVendor'])->name('deletevendor');
     Route::get('all-inventories', 'InventoryController@allInventories')->name('allinventories');
     Route::get('/all-inventories/add-inventory', 'InventoryController@addInventory')->name('addinventory');
     Route::post('add-inventory-post', 'InventoryController@addInventoryPost')->name('addinventorypost');
@@ -367,7 +376,7 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
     // 1-sept-25
     Route::get('/all-vendors', [InventoryController::class, 'allVendors']);
     Route::get('/all-vendors/add-vendor', [InventoryController::class, 'addVendors']);
-    Route::post('/all-vendors/add-vendor-post', [InventoryController::class, 'addVendorsPost']);
+    //Route::post('/all-vendors/add-vendor-post', [InventoryController::class, 'addVendorsPost']);
 
    
    

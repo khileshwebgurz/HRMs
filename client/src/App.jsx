@@ -81,6 +81,8 @@ import EditCategory from "./components/InventoryManagement/EditCategory";
 import AddCategory from "./components/InventoryManagement/AddCategory";
 import OnboardCandidates from "./components/onboardCandidatesComponent/OnboardCandidates";
 import OnboardCandidatesView from "./components/onboardCandidatesComponent/onboardCandidatesView";
+import AddVendor from "./components/VendorManagement/AddVendor";
+import EditVendor from "./components/VendorManagement/EditVendor";
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
@@ -228,6 +230,8 @@ function App() {
             <Route path="/onboard-candidatesView/:id" element={<OnboardCandidatesView />} />
             
           {/* Vendor Management */}
+          <Route path="/public/inventory/all-vendors/add-vendor" element={<AddVendor/>}/>
+          <Route path="/public/inventory/all-vendors/edit-vendor/:id" element={<EditVendor/>}/>
         
          
         </Route>
