@@ -265,6 +265,24 @@ Route::middleware(['auth:api'])->group(function () {
    // Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
     Route::get('employee/onboard-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
     Route::get('candidate/{candidate_id}', [OnboardProcessController::class, 'onboardCandidatesView']);
+
+   // Route::prefix('onboarding')->group(function () {
+       // Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates']);
+      //  Route::get('candidate/{candidate_id}', [OnboardProcessController::class, 'onboardCandidatesView']);
+        Route::post('send-joining-invite', [OnboardProcessController::class, 'onboardingSendJoiningForm']);
+        Route::post('save-onboarding-form', [OnboardProcessController::class, 'onboardingSaveFormData']);
+        Route::post('get-email-template', [OnboardProcessController::class, 'onboardingEmailTemp']);
+        Route::post('send-email', [OnboardProcessController::class, 'onboardingSendEmails']);
+        Route::post('save-onboarding-photograph', [OnboardProcessController::class, 'onboardingSaveFormPhotographData']);
+        Route::post('save-onboarding-aadhar', [OnboardProcessController::class, 'onboardingSaveFormAadharData']);
+        Route::post('generate-onboarding-document', [OnboardProcessController::class, 'onboardingGenerateDoc']);
+        Route::get('download-onboarding-data/{folder}/{file}', [OnboardProcessController::class, 'onboardingDownload']);
+        Route::post('delete-onboarding-data', [OnboardProcessController::class, 'onboardingDeleteData']);
+        Route::get('download-file-directory', [OnboardProcessController::class, 'fileDirectory']);
+        Route::get('unfreeze-induction-request', [OnboardProcessController::class, 'unfreezeInductionsRequest']);
+        Route::get('approve-induction-request', [OnboardProcessController::class, 'approveInductionRequest']);
+        Route::get('freeze-induction', [OnboardProcessController::class, 'freezeInduction']);
+    //});
   
     // job applications
     Route::get('/career', [LeadController::class, 'warmLeads']);

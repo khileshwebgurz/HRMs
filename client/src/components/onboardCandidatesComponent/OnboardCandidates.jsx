@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // ⬅️ import navigate hook
+import { useNavigate } from 'react-router-dom';
+import "../../assets/css/OnboardCandidates.css";
 
 const OnboardCandidates = () => {
   const [candidates, setCandidates] = useState([]);
@@ -32,44 +33,45 @@ const OnboardCandidates = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h2>Onboard Candidates</h2>
-      {freezeStatus === '0' ? (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Job Title</th>
-              <th>Department</th>
-              <th>Joining Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {candidates.map((cand, index) => (
-              <tr key={cand.id}>
-                <td>{index + 1}</td>
-                <td>{cand.name}</td>
-                <td>{cand.job_title}</td>
-                <td>{cand.department}</td>
-                <td>{cand.date_of_joining}</td>
-                <td>
-                  <button
-                    className="btn btn-success btn-sm"
-                    onClick={() => handleEdit(cand.id)}
-                  >
-                    <i className="fas fa-pencil-alt"></i> Edit
-                  </button>
-                </td>
+   <div className="onboard-candidates-container">
+        <h2>Onboard Candidates</h2>
+        {freezeStatus === '0' ? (
+          <table className="onboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Job Title</th>
+                <th>Department</th>
+                <th>Joining Date</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>You cannot view onboarding data due to your freeze status.</p>
-      )}
-    </div>
+            </thead>
+            <tbody>
+              {candidates.map((cand, index) => (
+                <tr key={cand.id}>
+                  <td>{index + 1}</td>
+                  <td>{cand.name}</td>
+                  <td>{cand.job_title}</td>
+                  <td>{cand.department}</td>
+                  <td>{cand.date_of_joining}</td>
+                  <td>
+                    <button
+                      className="action-btn green"
+                      onClick={() => handleEdit(cand.id)}
+                    >
+                      <i className="fas fa-pencil-alt"></i> Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>You cannot view onboarding data due to your freeze status.</p>
+        )}
+      </div>
+
   );
 };
 

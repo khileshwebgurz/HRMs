@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\ObCandidates;
 use Illuminate\Support\Facades\File;
 use PDF;
+
 use Crypt;
 use App\Models\Employees;
 use Yajra\DataTables\Facades\DataTables;
@@ -149,557 +150,6 @@ class OnboardProcessController extends Controller
             return Redirect::route('allcandidates')->with('error', 'Something went wrong. Try again.');
         }
     }
-
-    // public function joinigFormSubmitOLD(Request $request)
-
-    //     {
-
-    //         // Log::info('kjsjhsbjfbsd',['jsdbjhbsd'=> $request]);
-    //         if ($request->has('name')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'name' => 'required|max:25|regex:/^[a-zA-Z\s]+$/'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('date_of_joining')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'date_of_joining' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('job_title')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'job_title' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-
-
-    //         if ($request->has('dob')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'dob' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-    //          if ($request->has('department')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'department' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('location')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'location' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('email')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'email' => 'required|regex:/(.+)@(.+)\.(.+)/i'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('current_address')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'current_address' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('permanent_address')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'permanent_address' => 'required'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('current_phone')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'current_phone' => 'required|digits:10'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('permanent_phone')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'permanent_phone' => 'required|digits:10'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => $validator->errors()
-    //                         ->first()
-    //                 ]);
-    //             }
-    //         }
-    //          if ($request->has('reference_0_contact')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'reference_0_contact' => 'digits:10'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Reference no. 0: Contact no. shoud be 10 digit no'
-    //                 ]);
-    //             }
-    //         }
-    //         if ($request->has('reference_1_contact')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'reference_1_contact' => 'digits:10'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Reference no. 1: Contact no. shoud be 10 digit no'
-    //                 ]);
-    //             }
-    //         }
-
-    //          if ($request->has('facebook')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'facebook' => 'url|regex:/http(?:s):\/\/(?:www\.)facebook\.com\/.+/i|nullable'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Facebook link is not valid'
-    //                 ]);
-    //             }
-    //         }
-
-
-    //          if ($request->has('instagram')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'instagram' => 'url|regex:/http(?:s):\/\/(?:www\.)instagram\.com\/.+/i|nullable'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Instagram link is not valid'
-    //                 ]);
-    //             }
-    //         }
-
-    //          if ($request->has('linkedin')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'linkedin' => 'url|regex:/http(?:s):\/\/(?:www\.)linkedin\.com\/.+/i|nullable'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'linkedin link is not valid'
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('twitter')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'twitter' => 'url|regex:/http(?:s):\/\/twitter\.com\/.+/i|nullable'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Twitter link is not valid'
-    //                 ]);
-    //             }
-    //         }
-
-    //         if ($request->has('reference_2_contact')) {
-    //             $validator = Validator::make($request->all(), [
-    //                 'reference_2_contact' => 'digits:10'
-    //             ]);
-
-    //             if ($validator->fails()) {
-    //                 return response()->json([
-    //                     'status' => 401,
-    //                     'message' => 'Reference no. 2: Contact no. shoud be 10 digit no'
-    //                 ]);
-    //             }
-    //         }
-
-    //         $id = $request->on_candidate_id;
-    //         $ob_candidate_id = $id;
-    //         Log::info('ob candidate id is ',['obcandidate '=> $ob_candidate_id]);
-    //         if (in_array($request->updated_by, array(
-    //             'hr',
-    //             'hr-emp'
-    //         ))) {
-    //             $ob_candidate_id = $request->on_candidate_id;
-    //         }
-
-    //         $candidate_questions = CandidateQuestions::all();
-    //         $candidate = ObCandidates::where('candidate_id', $ob_candidate_id)->first();
-    //          Log::info('my candidate id is ',['obcandidate '=> $candidate]);
-    //         $employee_id = Employees::where('id', $candidate->office_employee_id)->first();
-    //         if($employee_id)
-    //         {
-    //             if ($request->has('gender')) {
-    //                     $employee_id->gender = $request->gender;
-    //                     $employee_id->save();
-    //                 }
-    //         }
-    //         if ($candidate) {
-    //             if ($candidate->joining_form_status == 1) {
-
-    //                 // $candidate->joining_form_status = 2;
-    //                 if ($request->has('name')) {
-    //                     $candidate->name = $request->name;
-    //                 }
-    //                 if ($request->has('date_of_joining')) {
-    //                     $candidate->date_of_joining = ($request->date_of_joining) ? date('Y-m-d H:i:s', strtotime($request->date_of_joining)) : null;
-    //                 }
-    //                 if ($request->has('job_title')) {
-    //                     $candidate->job_title = $request->job_title;
-    //                 }
-    //                 if ($request->has('grade')) {
-    //                     $candidate->grade = $request->grade;
-    //                 }
-    //                 if ($request->has('department')) {
-    //                     $candidate->department = $request->department;
-    //                 }
-    //                 if ($request->has('blood_group')) {
-    //                     $candidate->blood_group = $request->blood_group;
-    //                 }
-    //                 if ($request->has('location')) {
-    //                     $candidate->location = $request->location;
-    //                 }
-    //                 if ($request->has('dob')) {
-    //                     $candidate->dob = $request->dob;
-    //                 }
-    //                 if ($request->has('nationality')) {
-    //                     $candidate->nationality = $request->nationality;
-    //                 }
-    //                 if ($request->has('email')) {
-    //                     $candidate->email = $request->email;
-    //                 }
-    //                 if ($request->has('referred_by')) {
-    //                     $candidate->referred_by = $request->referred_by;
-    //                 }
-    //                 if ($request->has('company_relatives_status')) {
-    //                     $candidate->company_relatives_status = 1; // $request->company_relatives_status;
-    //                 }
-    //                 if ($request->has('current_address')) {
-    //                     $candidate->current_address = $request->current_address;
-    //                 }
-    //                 if ($request->has('permanent_address')) {
-    //                     $candidate->permanent_address = $request->permanent_address;
-    //                 }
-    //                 if ($request->has('current_phone')) {
-    //                     $candidate->current_phone = $request->current_phone;
-    //                 }
-    //                 if ($request->has('permanent_phone')) {
-    //                     $candidate->permanent_phone = $request->permanent_phone;
-    //                 }
-    //                 if ($request->has('emergency_name')) {
-    //                     $candidate->emergency_name = $request->emergency_name;
-    //                 }
-    //                 if ($request->has('emergency_relation')) {
-    //                     $candidate->emergency_relation = $request->emergency_relation;
-    //                 }
-    //                 if ($request->has('emergency_contact')) {
-    //                     $candidate->emergency_contact = $request->emergency_contact;
-    //                 }
-    //                 if ($request->has('emergency_name_2')) {
-    //                     $candidate->emergency_name_2 = $request->emergency_name_2;
-    //                 }
-    //                 if ($request->has('emergency_relation_2')) {
-    //                     $candidate->emergency_relation_2 = $request->emergency_relation_2;
-    //                 }
-    //                 if ($request->has('emergency_contact_2')) {
-    //                     $candidate->emergency_contact_2 = $request->emergency_contact_2;
-    //                 }
-    //                 if ($request->has('date_of_marriage_anniversary')) {
-    //                     $candidate->date_of_marriage_anniversary = $request->date_of_marriage_anniversary;
-    //                 }
-    //                 if ($request->has('marital_status')) {
-    //                     $candidate->marital_status = $request->marital_status;
-    //                 }
-    //                 if ($request->has('spouse_name_profession')) {
-    //                     $candidate->spouse_name_profession = $request->spouse_name_profession;
-    //                 }
-    //                 if ($request->has('no_of_children')) {
-    //                     $candidate->no_of_children = $request->no_of_children;
-    //                 }
-    //                 if ($request->has('father_name')) {
-    //                     $candidate->father_name = $request->father_name;
-    //                 }
-    //                 if ($request->has('father_profession')) {
-    //                     $candidate->father_profession = $request->father_profession;
-    //                 }
-    //                 if ($request->has('father_age')) {
-    //                     $candidate->father_age = $request->father_age;
-    //                 }
-    //                 if ($request->has('mother_name')) {
-    //                     $candidate->mother_name = $request->mother_name;
-    //                 }
-    //                 if ($request->has('mother_profession')) {
-    //                     $candidate->mother_profession = $request->mother_profession;
-    //                 }
-    //                 if ($request->has('mother_age')) {
-    //                     $candidate->mother_age = $request->mother_age;
-    //                 }
-    //                 if ($request->has('id_proof')) {
-    //                     $candidate->id_proof = 1; // $request->id_proof;
-    //                 }
-    //                 if ($request->has('id_number')) {
-    //                     $candidate->id_number = $request->id_number;
-    //                 }
-    //                 if ($request->has('id_type')) {
-    //                     $candidate->id_type = $request->id_type;
-    //                 }
-
-    //                 if ($request->has('office_joining_date')) {
-    //                     $candidate->office_joining_date = $request->office_joining_date;
-    //                 }
-
-    //                 if ($request->has('date_of_reliveing')) {
-    //                     $candidate->date_of_reliveing = $request->date_of_reliveing;
-    //                 }
-
-    //                 if ($request->has('joining_salary')) {
-    //                     $candidate->id_type = $request->joining_salary;
-    //                 }
-
-    //                 if ($request->has('current_salary')) {
-    //                     $candidate->current_salary = $request->current_salary;
-    //                 }
-
-    //                 if ($request->has('company_relatives')) {
-    //                     if (empty($request->company_relatives)) {
-    //                         $request->company_relatives = [];
-    //                     }
-    //                     $candidate->company_relatives = json_encode(array_values($request->company_relatives)); // array
-    //                 }
-
-    //                 if ($request->has('employment_history')) {
-    //                     if (empty($request->employment_history)) {
-    //                         $request->employment_history = [];
-    //                     }
-    //                     $candidate->employment_history = json_encode(array_values($request->employment_history)); // array
-    //                 }
-
-    //                 if ($request->has('education')) {
-    //                     if (empty($request->education)) {
-    //                         $request->education = [];
-    //                     }
-    //                     $candidate->education = json_encode(array_values($request->education)); // array
-    //                 }
-
-    //                 if ($request->has('training')) {
-    //                     if (empty($request->training)) {
-    //                         $request->training = [];
-    //                     }
-    //                     $candidate->training = json_encode(array_values($request->training)); // array
-    //                 }
-
-    //                 if ($request->has('certifications')) {
-    //                     if (empty($request->certifications)) {
-    //                         $request->certifications = [];
-    //                     }
-    //                     $candidate->certifications = json_encode(array_values($request->certifications)); // array
-    //                 }
-
-    //                 if ($request->has('references')) {
-    //                     if (empty($request->references)) {
-    //                         $request->references = [];
-    //                     }
-    //                     $candidate->references = json_encode(array_values($request->references)); // array
-    //                 }
-
-    //                 if ($request->has('other_informations')) {
-    //                     if (empty($request->other_informations)) {
-    //                         $request->other_informations = [];
-    //                     }
-    //                     $candidate->other_informations = json_encode($request->other_informations); // array
-    //                 }
-
-    //                 if ($request->has('skype_id')) {
-    //                     $candidate->skype_id = $request->skype_id;
-    //                 }
-
-    //                 if ($request->has('basecamp_id')) {
-    //                     $candidate->basecamp_id = $request->basecamp_id;
-    //                 }
-
-    //                 if ($request->has('bank_account_holder_name')) {
-    //                     $candidate->bank_account_holder_name = $request->bank_account_holder_name;
-    //                 }
-
-    //                 if ($request->has('bank_name')) {
-    //                     $candidate->bank_name = $request->bank_name;
-    //                 }
-
-    //                 if ($request->has('bank_account_number')) {
-    //                     $candidate->bank_account_number = $request->bank_account_number;
-    //                 }
-
-    //                 if ($request->has('bank_branch_name')) {
-    //                     $candidate->bank_branch_name = $request->bank_branch_name;
-    //                 }
-
-    //                 if ($request->has('bank_city')) {
-    //                     $candidate->bank_city = $request->bank_city;
-    //                 }
-
-    //                 if ($request->has('bank_ifsc')) {
-    //                     $candidate->bank_ifsc = $request->bank_ifsc;
-    //                 }
-    //                 if ($request->has('facebook')) {
-    //                     $candidate->facebook = $request->facebook;
-    //                 }
-    //                 if ($request->has('linkedin')) {
-    //                     $candidate->linkedin = $request->linkedin;
-    //                 }
-    //                 if ($request->has('twitter')) {
-    //                     $candidate->twitter = $request->twitter;
-    //                 }
-    //                 if ($request->has('instagram')) {
-    //                     $candidate->instagram = $request->instagram;
-    //                 }
-
-    //                 if ($candidate->save()) {
-
-
-    //                     $candidateData = Candidates::where('id', $candidate->candidate_id)->first();
-    //                     // if ($request->updated_by != 'hr-emp') {
-    //                     $data = [
-    //                         'heading' => 'Employee Joining Form',
-    //                         'candidate' => $candidate,
-    //                         'candidate_questions' => $candidate_questions,
-    //                         'token' => $request->on_candidate_id,
-    //                         'candidateData' => $candidateData
-    //                     ];
-
-    //                   $filePath = public_path() . '/uploads/wgz-employees/HRM' . $candidate->id; 
-    //                     if (!file_exists($filePath)) {
-    //                           File::makeDirectory($filePath, 755, true);
-    //                      }
-    //                     $pdf = PDF::loadView('pdf.generate-joiningform', $data);
-
-    //                     $pdfName = 'joining-form-' . time() . '.pdf';
-    //                     $pdf->save($filePath . '/' . $pdfName);
-
-    //                     $fieldData = ObTabFieldData::where('ob_candidate_id', $candidate->id)->where('field_id', 71)->first();
-    //                     if (! $fieldData) {
-    //                         $fieldData = new ObTabFieldData();
-    //                     }
-    //                     $fieldData->field_id = 71;
-    //                     $fieldData->value = $pdfName;
-    //                     $fieldData->ob_candidate_id = $candidate->id;
-    //                     $fieldData->save();
-
-    //                     // }
-
-    //                     $message = '';
-    //                     if ($request->updated_by == 'hr') {
-    //                         $message = "Joining Details Added.";
-    //                     } else if ($request->updated_by == 'hr-emp') {
-    //                         $message = $request->updated_form;
-    //                     } else {
-    //                         $message = "Thank you for submit your details.";
-    //                     }
-
-    //                     return response()->json([
-    //                         'status' => 200,
-    //                         'message' => $message
-    //                     ]);
-    //                 } else {
-    //                     return response()->json([
-    //                         'status' => 401,
-    //                         'message' => 'Something Wrong. Try Again.'
-    //                     ]);
-    //                 }
-    //             }
-    //         } else {
-    //             return response()->json([
-    //                 'status' => 401,
-    //                 'message' => 'Something Wrong. Try Again.'
-    //             ]);
-    //         }
-    //     }
 
 
     public function joinigFormSubmit(Request $request)
@@ -1064,4 +514,545 @@ class OnboardProcessController extends Controller
             'candidate_questions' => $candidate_questions
         ]);
     }
+
+    public function onboardingDownload($folder, $file)
+    {
+        $file_path = public_path() . '/uploads/wgz-employees/' . $folder . '/' . $file;
+        return response()->download($file_path);
+    }
+
+      public function onboardingSaveFormPhotographData(Request $request)
+    {
+        $on_candidate_id = $request->on_candidate_id;
+
+        // Create folder for files
+        $filePath = public_path() . '/uploads/wgz-employees/HRM' . $on_candidate_id;
+
+        if (! File::exists($filePath)) {
+            File::makeDirectory($filePath, 0777, true, true);
+        }
+
+        $data = $request->image;
+        $image_array_1 = explode(";", $data);
+        $image_array_2 = explode(",", $image_array_1[1]);
+        $data = base64_decode($image_array_2[1]);
+        $image_name = 'photo-' . time() . '.png';
+
+        $file = $filePath . '/' . $image_name;
+
+        $fileDataMove = file_put_contents($file, $data);
+
+        if ($fileDataMove) {
+            $fieldData = ObTabFieldData::where('ob_candidate_id', $on_candidate_id)->where('field_id', 2)->first();
+
+            if (! $fieldData) {
+                $fieldData = new ObTabFieldData();
+                $value = [];
+            } else {
+                $value = json_decode($fieldData->value);
+            }
+
+            $value[] = $image_name;
+
+            $fieldData->field_id = 2;
+            $fieldData->value = json_encode($value);
+            $fieldData->ob_candidate_id = $on_candidate_id;
+            $fieldData->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => "Photograph Saved."
+            ]);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
+    }
+
+      public function onboardingEmailTemp(Request $request)
+    {
+        $fieldData = ObTabFieldData::where('ob_candidate_id', $request->on_candidate_id)->where('field_id', $request->field_id)->first();
+        if (! $fieldData) {
+            $fieldData = new ObTabFieldData();
+        }
+        $field_id = $request->field_id;
+        $candidate_id = $request->on_candidate_id;
+        $fieldData->ob_candidate_id = $request->on_candidate_id;
+        $fieldData->field_id = $field_id;
+
+        $filePath = public_path() . '/uploads/wgz-employees/HRM' . $request->on_candidate_id;
+
+        $candidate = ObCandidates::where('id', $candidate_id)->first();
+        $candidateData = $candidate;
+
+        $contentS = '';
+        if ($field_id == 65) {
+
+            $fieldDataContent = ObTabFieldData::where('ob_candidate_id', $request->on_candidate_id)->where('field_id', 25)->first();
+            if ($fieldDataContent) {
+                $contentS = $fieldDataContent->value;
+            }
+
+            $contentS = $request->textcontent;
+        }
+
+        $email_to = "";
+        if ($field_id == 70) {
+            $email_to = get_options('ca_email_email');
+            $fieldDataContent = ObTabFieldData::where('ob_candidate_id', $request->on_candidate_id)->where('field_id', 60)->first();
+            if (! $fieldDataContent) {
+                $fieldDataContent = new ObTabFieldData();
+            }
+            $fieldDataContent->ob_candidate_id = $candidate_id;
+            $fieldDataContent->field_id = 60;
+            $fieldDataContent->value = 1;
+            $fieldDataContent->updated_at = date('Y-m-d H:i:s');
+            $fieldDataContent->save();
+        }
+
+        $fieldData->value = 1;
+        $fieldData->updated_at = date('Y-m-d H:i:s');
+        $fieldData->save();
+
+        $data = $this->shortcodes($candidate, $candidateData, $contentS, $field_id);
+
+        $heading = $data['subject'];
+        $content = $data['content'];
+
+        return view('modals.onboarding-emails', compact('email_to', 'heading', 'content'));
+        // return view('modals.' . $request->emailtemp, compact('heading','content'));
+    }
+
+      /*
+     * Delete form data
+     *
+     */
+    public function onboardingDeleteData(Request $request)
+    {
+        $on_candidate_id = $request->on_candidate_id;
+        $field_id = $request->field_id;
+        $type = $request->type;
+        $filename = $request->filename;
+
+        $fieldData = ObTabFieldData::where('ob_candidate_id', $on_candidate_id)->where('field_id', $field_id)->first();
+        if ($fieldData) {
+
+            if ($type == 'multiple') {
+                $value = json_decode($fieldData->value);
+                $key = array_search($filename, $value);
+                unset($value[$key]);
+                $value = json_encode(array_values($value));
+                $fieldData->value = $value;
+                if ($fieldData->save()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => "File remove successfully."
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 401,
+                        'message' => 'Something Wrong. Try Again.'
+                    ]);
+                }
+            } else {
+
+                if ($fieldData->delete()) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => "File remove successfully."
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 401,
+                        'message' => 'Something Wrong. Try Again.'
+                    ]);
+                }
+            }
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
+    }
+
+    public function shortcodes($candidate, $candidateData, $contentS, $field_id)
+    {
+        $joiningDateTime = date('M d, Y H:i A', strtotime($candidate->date_of_joining));
+
+        $departmentShort = Candidates::$departmentsShort[$candidate->department];
+        $departmentFull = Candidates::$departments[$candidate->department];
+
+        $emp_id = $candidate->office_employee_id;
+
+        $fullname = $candidate->name;
+        $firstname = explode(' ', $fullname);
+        $firstname = $firstname[0];
+
+        $CurrentDateFjSY = date('F, jS Y');
+        $CurrentDatedmy = date('d-m-Y');
+        $RefNo = 'WGT/' . $emp_id . '/' . $departmentShort;
+        $EmployeeID = 'WGT-' . $emp_id;
+        $Position = $candidate->job_title;
+        $SalaryAnnual = $candidate->joining_salary;
+        $SalaryMonthly = round($SalaryAnnual / 12);
+        $Address = $candidate->permanent_address;
+
+        $TotalExp = $candidate->total_experience;
+        $UndertakingBond = 'Two years';
+        if (($TotalExp > 0 && $TotalExp < 3)) {
+            $UndertakingBond = 'One and half year';
+        }
+
+        $Department = $departmentFull;
+        $DateofJoining = $joiningDateTime;
+
+        $documentSample = array(
+            8 => 'appointment_letter',
+            10 => 'letter_of_undertaking',
+            12 => 'job_agreement',
+            14 => 'nda',
+            65 => 'login_credentials',
+            66 => 'important_details',
+            67 => 'introductions',
+            69 => 'warm_welcome',
+            70 => "ca_email"
+        );
+
+        $documentSample = $documentSample[$field_id];
+
+        // Generate letter
+        $content = get_options($documentSample . '_content');
+        $contentSubject = get_options($documentSample . '_heading');
+
+        $code = [
+            '{FirstName}',
+            '{FullName}',
+            '{CurrentDateFjSY}',
+            '{CurrentDatedmy}',
+            '{RefNo}',
+            '{EmployeeID}',
+            '{Position}',
+            '{SalaryMonthly}',
+            '{SalaryAnnual}',
+            '{Address}',
+            '{UndertakingBond}',
+            '{Content}',
+            '{Department}',
+            '{DateofJoining}'
+        ];
+        $codevals = [
+            $firstname,
+            $fullname,
+            $CurrentDateFjSY,
+            $CurrentDatedmy,
+            $RefNo,
+            $EmployeeID,
+            $Position,
+            $SalaryAnnual,
+            $SalaryMonthly,
+            $Address,
+            $UndertakingBond,
+            $contentS,
+            $Department,
+            $DateofJoining
+        ];
+
+        $updateContent = str_replace($code, $codevals, $content);
+
+        $updateSubject = str_replace($code, $codevals, $contentSubject);
+
+        $data = [
+            'title' => get_options($documentSample . '_heading'),
+            'heading' => get_options($documentSample . '_heading'),
+            'content' => $updateContent,
+            'documentSample' => $documentSample,
+            'subject' => $updateSubject
+        ];
+        return $data;
+    }
+
+
+      public function onboardingGenerateDoc(Request $request)
+    {
+        $fieldData = ObTabFieldData::where('ob_candidate_id', $request->on_candidate_id)->where('field_id', $request->field_id)->first();
+        if (! $fieldData) {
+            $fieldData = new ObTabFieldData();
+        }
+        $field_id = $request->field_id;
+        $candidate_id = $request->on_candidate_id;
+        $fieldData->ob_candidate_id = $request->on_candidate_id;
+        $fieldData->field_id = $field_id;
+
+        $filePath = public_path() . '/uploads/wgz-employees/HRM' . $request->on_candidate_id;
+
+        $candidate = ObCandidates::where('id', $candidate_id)->first();
+        $candidateData = $candidate->candidate;
+        $contentS = '';
+        $data = $this->shortcodes($candidate, $candidateData, $contentS, $field_id);
+
+        $pdf = PDF::loadView('pdf.generate-document', $data);
+
+        $pdfn = str_replace("_", "-", $data['documentSample']);
+
+        $pdfName = $pdfn . '-' . time() . '.pdf';
+        $pdf->save($filePath . '/' . $pdfName);
+
+        $fieldData->value = $pdfName;
+
+        $fieldData->updated_at = date('Y-m-d H:i:s');
+        if ($fieldData->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => "Document generated."
+            ]);
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
+    }
+
+
+       /*
+     * Send Employee joing form invite
+     *
+     */
+    public function onboardingSendJoiningForm(Request $request)
+    {
+        $fieldData = ObTabFieldData::where('ob_candidate_id', $request->on_candidate_id)->where('field_id', $request->field_id)->first();
+        if (! $fieldData) {
+            $fieldData = new ObTabFieldData();
+        }
+        $fieldData->ob_candidate_id = $request->on_candidate_id;
+        $fieldData->field_id = $request->field_id;
+        $fieldData->value = 1;
+        $fieldData->updated_at = date('Y-m-d H:i:s');
+
+        if ($fieldData->save()) {
+
+            $candidate = ObCandidates::where('id', $request->on_candidate_id)->first();
+            $candidate->joining_form_status = 1;
+            $candidate->save();
+
+            $to_name = $candidate->name;
+            $to_email = $candidate->email;
+
+            $id = $request->on_candidate_id;
+            $randomKey = Str::random(25);
+
+            $token = base64_encode($randomKey . $id);
+
+            $data = array(
+                'name' => $to_name,
+                'url' => route('joinigForm', $token)
+            );
+
+            Mail::send('emails.joining-form', $data, function ($message) use ($to_name, $to_email) {
+                $message->to($to_email, $to_name)->subject('HRM Joining Form');
+            });
+
+            if (! Mail::failures()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => "Joining form sent to candidate email."
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Something Wrong. Try Again.'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Something Wrong. Try Again.'
+            ]);
+        }
+    }
+
+
+    /*
+     * Save Onboarding Form data
+     *
+     */
+    public function onboardingSaveFormData(Request $request)
+    { 
+
+        $valArr = [];
+        $valArrMsg = [];
+
+        if ($request->file('wgz_field_2')) {
+            $valArr['wgz_field_2'] = 'mimes:jpeg,jpg,png';
+            $valArrMsg['wgz_field_2.mimes'] = 'Photograph field allowed jpeg, jpg, png images format';
+        }
+
+        if ($request->file('wgz_field_3')) {
+            $valArr['wgz_field_3.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_3.*.mimes'] = 'Academic Record field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_4')) {
+            $valArr['wgz_field_4.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_4.*.mimes'] = 'Pan Card field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_5')) {
+            $valArr['wgz_field_5.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_5.*.mimes'] = 'Relieving Letter field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_6')) {
+            $valArr['wgz_field_6.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_6.*.mimes'] = 'Experience Letter field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_7')) {
+            $valArr['wgz_field_7.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_7.*.mimes'] = 'Salary Slips field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_9')) {
+            $valArr['wgz_field_9.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_9.*.mimes'] = 'Appointment Letter field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_11')) {
+            $valArr['wgz_field_11.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_11.*.mimes'] = 'Letter of Undertaking field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_13')) {
+            $valArr['wgz_field_13.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_13.*.mimes'] = 'Job Agreement field allowed pdf, jpeg, jpg, png format';
+        }
+
+        if ($request->file('wgz_field_15')) {
+            $valArr['wgz_field_15.*'] = 'mimes:pdf,jpeg,jpg,png';
+            $valArrMsg['wgz_field_15.*.mimes'] = 'NDA field allowed pdf, jpeg, jpg, png format';
+        }
+        if ($request->file('wgz_field_73')) {
+            $valArr['wgz_field_73'] = 'required';
+            $valArrMsg['wgz_field_73.required'] = 'Please Add Aadhar Card photo';
+        }
+
+        $validator = Validator::make($request->all(), $valArr, $valArrMsg);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()
+                    ->first()
+            ]);
+        }
+
+
+        // echo '<pre>';
+        // print_r($request->all());
+        // echo '</pre>';exit;
+
+        $fields = ObTabFieldOptions::get();
+        $on_candidate_id = $request->on_candidate_id;
+
+        // Create folder for files
+        $filePath = public_path() . '/uploads/wgz-employees/HRM' . $on_candidate_id;
+
+        if (! File::exists($filePath)) {
+            File::makeDirectory($filePath, 0777, true, true);
+        }
+
+        // exit();
+        $tabfieldHtml = '';
+        $isset = [];
+        foreach ($fields as $field) {
+            $value = '';
+            $field_id = $field->id;
+            $field_type = $field->type;
+
+            $fieldData = ObTabFieldData::where('ob_candidate_id', $on_candidate_id)->where('field_id', $field_id)->first();
+            if (! $fieldData) {
+                $fieldData = new ObTabFieldData();
+            }
+            $postdata = $request->all();
+            if (isset($postdata['wgz_field_' . $field_id])) {
+                $isset[] = 'wgz_field_' . $field_id;
+                switch ($field_type) {
+                    case "1":
+                        $value = $request->get('wgz_field_' . $field_id);
+                        break;
+                    case "2":
+                        $value = $request->get('wgz_field_' . $field_id);
+                        break;
+                    case "3":
+                        $value = $request->get('wgz_field_' . $field_id);
+                        break;
+                    case "4":
+                        $value = $request->get('wgz_field_' . $field_id);
+                        break;
+                    case "5":
+                       if ($request->hasFile('wgz_field_' . $field_id)) {
+                            if (! $fieldData) {
+                                $value = [];
+                            } else {
+                                $value = json_decode($fieldData->value);
+                            }
+                            $files = $request->file('wgz_field_' . $field_id);
+                            foreach ($files as $file) {
+                                $name = time() . '-' . $file->getClientOriginalName();
+                                if ($file->move($filePath, $name)) {
+                                    $value[] = $name;
+                                }
+                            }
+                            $value = json_encode($value);
+                        }
+
+
+                        break;
+                    case "6":
+                        $value = $request->get('wgz_field_' . $field_id);
+                        break;
+                    case "7":
+
+                        if ($request->hasFile('wgz_field_' . $field_id)) {
+                            if (! $fieldData) {
+                                $value = [];
+                            } else {
+                                $value = json_decode($fieldData->value);
+                            }
+                            $files = $request->file('wgz_field_' . $field_id);
+                            foreach ($files as $file) {
+                                $name = time() . '-' . $file->getClientOriginalName();
+                                if ($file->move($filePath, $name)) {
+                                    $value[] = $name;
+                                }
+                            }
+                            $value = json_encode($value);
+                        }
+
+                        break;
+                    default:
+                        $value = $request->get('wgz_field_' . $field_id);
+                }
+            }
+
+            if (! empty($value) || in_array($field_type, array(
+                3
+            ))) {
+                $fieldData->field_id = $field_id;
+                $fieldData->value = $value;
+                $fieldData->ob_candidate_id = $on_candidate_id;
+                $fieldData->save();
+            }
+        }
+
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Data successfully saved."
+        ]);
+    }
+
 }

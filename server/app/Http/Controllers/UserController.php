@@ -3787,4 +3787,6 @@ class UserController extends Controller
             return view('modals.open-exit-popup-from-admin', compact('exit', 'id'));
         }
     }
+
+    
 }
