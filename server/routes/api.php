@@ -320,10 +320,10 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
     Route::get('/all-categories/edit-category/{cat_id}', [InventoryController::class,'editCategory'])->name('editcategory');
     Route::post('edit-category-post', [InventoryController::class,'editCategoryPost'])->name('editcategorypost');
     Route::delete('delete-category/{cat_id}', [InventoryController::class,'deleteCategory'])->name('deletecategory');
-    Route::get('all-vendors', 'InventoryController@allVendors')->name('allvendors');
+    Route::get('all-vendors', [InventoryController::class,'allVendors'])->name('allvendors');
     Route::get('gst-post', 'InventoryController@getGst')->name('getGst');
 
-    Route::get('/all-vendors/add-vendor', 'InventoryController@addVendors')->name('addvendors');
+    Route::get('/all-vendors/add-vendor', [InventoryController::class, '@addVendors'])->name('addvendors');
     Route::post('add-vendor-post', 'InventoryController@addVendorsPost')->name('addvendorsPost');
     Route::get('/all-vendors/edit-vendor/{vendor_id}', 'InventoryController@editVendor')->name('editvendor');
     Route::post('edit-vendor-post', 'InventoryController@editVendorPost')->name('editvendorpost');

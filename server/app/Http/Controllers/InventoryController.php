@@ -473,7 +473,7 @@ class InventoryController extends Controller
         }
     }
 
-    public function allVendors(Request $request)
+    public function allVendorsOLD(Request $request)
     {
         // if(!in_array('vendor_management', Session::get('permission')[0])){
         //     abort(404);
@@ -577,6 +577,80 @@ class InventoryController extends Controller
         }
         return view('inventory.vendor.all-vendors');
     }
+
+public function allVendors(Request $request)
+{
+    $user = Auth::user();
+    $permission_role = Roles::where('id', $user->user_role)->first();
+
+    // Vendors query based on role "view" permissions
+    if ($permission_role->view == '2') {
+        $vendor = InventoryVendor::where('created_by', $user->id)
+            ->where('is_deleted', '0')->latest()->get();
+    } elseif ($permission_role->view == '3') {
+        $employees = Employees::where('manager_id', $user->id)->pluck('id')->toArray();
+        $vendor = InventoryVendor::whereIn('created_by', $employees)
+            ->where('is_deleted', '0')->latest()->get();
+    } elseif ($permission_role->view == '4') {
+        $employees = Employees::where('manager_id', $user->id)
+            ->orWhere('id', $user->id)
+            ->pluck('id')->toArray();
+        $vendor = InventoryVendor::whereIn('created_by', $employees)
+            ->where('is_deleted', '0')->latest()->get();
+    } elseif ($permission_role->view == '5') {
+        $vendor = InventoryVendor::where('is_deleted', '0')->latest()->get();
+    } else {
+        $vendor = collect(); // empty collection if no access
+    }
+
+    // Transform vendors and attach permissions for frontend
+    $vendorsData = $vendor->map(function ($row) use ($user, $permission_role) {
+        $created_by = $row->created_by;
+        $manager = Employees::find($created_by);
+
+        $canEdit = false;
+        $canDelete = false;
+
+        // edit permissions
+        if ($permission_role->edit == '2' && $user->id == $created_by) {
+            $canEdit = true;
+        } elseif ($permission_role->edit == '3' && $user->id == ($manager->manager_id ?? null)) {
+            $canEdit = true;
+        } elseif ($permission_role->edit == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
+            $canEdit = true;
+        } elseif ($permission_role->edit == '5') {
+            $canEdit = true;
+        }
+
+        // delete permissions
+        if ($permission_role->delete == '2' && $user->id == $created_by) {
+            $canDelete = true;
+        } elseif ($permission_role->delete == '3' && $user->id == ($manager->manager_id ?? null)) {
+            $canDelete = true;
+        } elseif ($permission_role->delete == '4' && ($user->id == $manager->manager_id || $user->id == $created_by)) {
+            $canDelete = true;
+        } elseif ($permission_role->delete == '5') {
+            $canDelete = true;
+        }
+
+        return [
+            'id'           => $row->id,
+            'name'         => $row->name,
+            'created_by'   => $row->created_by,
+            'is_deleted'   => $row->is_deleted,
+            'can_edit'     => $canEdit,
+            'can_delete'   => $canDelete,
+            'created_at'   => $row->created_at,
+            'updated_at'   => $row->updated_at,
+        ];
+    });
+
+    return response()->json([
+        'vendors' => $vendorsData,
+    ]);
+}
+
+
 
     public function addVendors(Request $request)
     {

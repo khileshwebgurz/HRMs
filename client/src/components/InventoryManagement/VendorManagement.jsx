@@ -1,6 +1,19 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../../../utils/api";
 const VendorManagement = () => {
+  const [vendors, setVendors] = useState([]);
+
+  const fetchAllVendors = async()=>{
+    const res = await api.get('/inventory/all-vendors');
+    setVendors(res.data);
+  }
+
+  useEffect(()=>{
+    fetchAllVendors();
+  },[])
+
+  console.log('the vendors are >>>',vendors)
   return (
     <>
       <section className="content-header">
@@ -10,14 +23,10 @@ const VendorManagement = () => {
               <h1>All Vendors</h1>
             </div>
             <div className="col-sm-6 text-right custom-btn-grp">
-              <Link
-                to=""
-                className="btn btn-success btn-sm site-main-btn-2"
-              >
+              <Link to="" className="btn btn-success btn-sm site-main-btn-2">
                 <i className="fas fa-plus"></i> Add New Vendor
               </Link>
             </div>
-           
           </div>
         </div>
       </section>

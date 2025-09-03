@@ -218,7 +218,7 @@ function App() {
           <Route path="/public/inventory/all-categories/edit-category/:categoryID" element={<EditCategory/>}/>
           <Route path="/public/inventory/all-categories/add-category" element={<AddCategory/>}/>
 
-          {/* Vendor Management */}
+         
         
          
         </Route>
