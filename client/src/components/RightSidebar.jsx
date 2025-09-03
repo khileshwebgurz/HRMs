@@ -247,13 +247,13 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </ul>
                   </li>
 
-                                    <li className={`nav-item ${openMenu === "users" ? "menu-open" : ""}`}>
+              <li className={`nav-item ${openMenu === "empolyee" ? "menu-open" : ""}`}>
                     <a
                       href="#"
-                      className={`nav-link ${openMenu === "users" ? "active" : ""}`}
+                      className={`nav-link ${openMenu === "empolyee" ? "active" : ""}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        toggleMenu("users");
+                        toggleMenu("empolyee");
                       }}
                     >
                       <i className="nav-icon fas fa-user-tie"></i>
@@ -264,7 +264,7 @@ const RightSidebar = ({ isOpen, user, toggleSidebar }) => {
                     </a>
                     <ul
                       className="nav nav-treeview"
-                      style={{ display: openMenu === "users" ? "block" : "none" }}
+                      style={{ display: openMenu === "empolyee" ? "block" : "none" }}
                     >
                       <li className="nav-item">
                         <Link to="/onboarding/all-candidates" className="nav-link">
