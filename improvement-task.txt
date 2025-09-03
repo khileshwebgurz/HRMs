@@ -1,0 +1,15 @@
+1. add download csv and execl on "new candidates" (tracker candidate) using calendar on with date range and Today calender  with select checkbox.
+2.  add download csv and execl on "interview list" (all-interviews) using calendar on with date range and Today calender  with select checkbox.
+3. Event mail not working correctly.  
+4. exist employee show in system why?
+5. Assign  HR / Admin dynamically - will  add new 
+6. event - if no event this month do not trigger mail to team
+
+
+Quries
+
+1. OnBoarding process by HR 
+
+2. How to new employee in old system
+
+3.

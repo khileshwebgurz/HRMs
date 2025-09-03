@@ -79,6 +79,9 @@ import InventoryRequest from "./components/InventoryManagement/InventoryRequest"
 import InventoryLogs from "./components/InventoryManagement/InventoryLogs";
 import EditCategory from "./components/InventoryManagement/EditCategory";
 import AddCategory from "./components/InventoryManagement/AddCategory";
+import OnboardCandidates from "./components/onboardCandidatesComponent/OnboardCandidates";
+import OnboardCandidatesView from "./components/onboardCandidatesComponent/onboardCandidatesView";
+
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(true);
   return (
@@ -93,6 +96,8 @@ function App() {
            <Route path="/tracker/candidate/profile/:profile_id/view" element={<ViewCandidateProfile/>}/>
            <Route path="/test/:test_id" element={<Test />} />
            <Route path="/test-completed" element={<TestComplete />} />
+        
+           
 
         <Route
           path="/"
@@ -219,6 +224,10 @@ function App() {
           <Route path="/public/inventory/all-categories/add-category" element={<AddCategory/>}/>
 
          
+           <Route path="/onboarding/all-candidates" element={<OnboardCandidates />} />
+            <Route path="/onboard-candidatesView/:id" element={<OnboardCandidatesView />} />
+            
+          {/* Vendor Management */}
         
          
         </Route>

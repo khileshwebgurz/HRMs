@@ -261,9 +261,10 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     Route::get('start-onboarding/{candidate_id}', [OnboardProcessController::class, 'startOnboarding'])->name('startOnboarding');
-    Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
-
-
+   // Route::get('all-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
+    Route::get('employee/onboard-candidates', [OnboardProcessController::class, 'onboardCandidates'])->name('onboardCandidates');
+    Route::get('candidate/{candidate_id}', [OnboardProcessController::class, 'onboardCandidatesView']);
+  
     // job applications
     Route::get('/career', [LeadController::class, 'warmLeads']);
     Route::get('/export-career', [LeadController::class, 'exportCareer'])->name('exportcareer');
@@ -320,11 +321,12 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
     Route::get('/all-categories/edit-category/{cat_id}', [InventoryController::class,'editCategory'])->name('editcategory');
     Route::post('edit-category-post', [InventoryController::class,'editCategoryPost'])->name('editcategorypost');
     Route::delete('delete-category/{cat_id}', [InventoryController::class,'deleteCategory'])->name('deletecategory');
-    Route::get('all-vendors', [InventoryController::class,'allVendors'])->name('allvendors');
+  //  Route::get('all-vendors', 'InventoryController@allVendors')->name('allvendors');
     Route::get('gst-post', 'InventoryController@getGst')->name('getGst');
+   
 
-    Route::get('/all-vendors/add-vendor', [InventoryController::class, '@addVendors'])->name('addvendors');
-    Route::post('add-vendor-post', 'InventoryController@addVendorsPost')->name('addvendorsPost');
+    // Route::get('/all-vendors/add-vendor', 'InventoryController@addVendors')->name('addvendors');
+    // Route::post('add-vendor-post', 'InventoryController@addVendorsPost')->name('addvendorsPost');
     Route::get('/all-vendors/edit-vendor/{vendor_id}', 'InventoryController@editVendor')->name('editvendor');
     Route::post('edit-vendor-post', 'InventoryController@editVendorPost')->name('editvendorpost');
     Route::get('delete-vendor/{vendor_id}', 'InventoryController@deleteVendor')->name('deletevendor');
@@ -361,6 +363,15 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
     Route::get('/inventory-request/manage-stock/{inventory_id}', 'InventoryController@manageStock')->name('managestock');
     Route::post('manage-stock-post', 'InventoryController@manageStockPost')->name('managestockPost');
     Route::post('import', 'InventoryController@import')->name('import');
+
+    // 1-sept-25
+    Route::get('/all-vendors', [InventoryController::class, 'allVendors']);
+    Route::get('/all-vendors/add-vendor', [InventoryController::class, 'addVendors']);
+    Route::post('/all-vendors/add-vendor-post', [InventoryController::class, 'addVendorsPost']);
+
+   
+   
+
 });
 
 

@@ -1,0 +1,25 @@
+
+=================================
+
+Add Candidate and OnBoarding candidate process steps
+==============================================
+
+1. Add Candidate 
+a. Save & email
+b. save
+
+2. tracker Candidate -> send profile complete url through mail for candidate
+
+(Show candidate here after complete profile)
+3.
+ a) All candidate -> send test link
+ b) If candidate status is offered for OnBoarding start icon - in All candidate list
+
+ 4. After add data ob_candidates show  onboarding/all-candidates (Onboard Users ) page [ https://prnt.sc/JzT5ZrvDoJhM ]
+
+
+ 5. Edit OnBoarding user to add into employee table click on "Send HRM invite"
+
+6. add new candidate into employee table.
+
+

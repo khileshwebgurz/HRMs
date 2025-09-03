@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // ⬅️ import navigate hook
 
 const OnboardCandidates = () => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [freezeStatus, setFreezeStatus] = useState(null);
+  const [freezeStatus, setFreezeStatus] = useState('0');
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate(); // ⬅️ initialize navigate
 
   useEffect(() => {
     axios
-      .get(`${API_BASE}/employee/onboard-candidates`, { withCredentials: true }) // cookie-based auth
+      .get(`${API_BASE}/employee/onboard-candidates`, { withCredentials: true })
       .then((res) => {
+        console.log('API Response:', res);
         setCandidates(res.data.data);
         setFreezeStatus(res.data.permissions.freeze_status);
       })
@@ -21,6 +24,10 @@ const OnboardCandidates = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleEdit = (id) => {
+    navigate(`/onboard-candidatesView/${id}`); // ⬅️ redirect to view page
+  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -36,6 +43,7 @@ const OnboardCandidates = () => {
               <th>Job Title</th>
               <th>Department</th>
               <th>Joining Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -46,6 +54,14 @@ const OnboardCandidates = () => {
                 <td>{cand.job_title}</td>
                 <td>{cand.department}</td>
                 <td>{cand.date_of_joining}</td>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleEdit(cand.id)}
+                  >
+                    <i className="fas fa-pencil-alt"></i> Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

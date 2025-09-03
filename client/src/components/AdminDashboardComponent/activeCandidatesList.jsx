@@ -193,21 +193,42 @@ function ActiveCandidatesList() {
     navigate(`/users/edit-candidate/${numericId}`);
   };
 
+  // const handleStartOnboarding = async (candidateId) => {
+  //   if (confirm("Are you sure You want to start Onboarding?")) {
+  //     const numericId = candidateId.replace("HRM", "");
+  //     try {
+  //       await axios.get(
+  //         `${import.meta.env.VITE_API_BASE_URL}/start-onboarding/${numericId}`,
+  //         { withCredentials: true }
+  //       );
+  //       alert("Candidate successfully onboarded!");
+  //     } catch (error) {
+  //       console.error("Error starting onboarding:", error);
+  //       alert("Something went wrong during onboarding.");
+  //     }
+  //   }
+  // };
+
   const handleStartOnboarding = async (candidateId) => {
     if (confirm("Are you sure You want to start Onboarding?")) {
       const numericId = candidateId.replace("HRM", "");
       try {
-        await axios.get(
+        const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/start-onboarding/${numericId}`,
           { withCredentials: true }
         );
-        alert("Candidate successfully onboarded!");
+
+        if (response.status === 200) {
+          alert("Candidate successfully onboarded!");
+          navigate("/onboarding/all-candidates");  
+        }
       } catch (error) {
         console.error("Error starting onboarding:", error);
         alert("Something went wrong during onboarding.");
       }
     }
   };
+
 
   const handleCheckboxChange = (email) => {
     setCheckedEmails((prev) =>

@@ -81,14 +81,14 @@ const AddCandidate = () => {
     }
 
     // LinkedIn (required + format)
-    if (!form.linked_in.trim()) {
-      newErrors.linked_in = "LinkedIn profile is required";
-    } else if (
-      !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/i.test(form.linked_in.trim()
-      )
-    ) {
-      newErrors.linked_in = "Invalid LinkedIn URL";
-    }
+    // if (!form.linked_in.trim()) {
+    //   newErrors.linked_in = "LinkedIn profile is required";
+    // } else if (
+    //   !/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/i.test(form.linked_in.trim()
+    //   )
+    // ) {
+    //   newErrors.linked_in = "Invalid LinkedIn URL";
+    // }
 
     // Created By (required if no rolePermission)
     if (!form.created_by && !rolePermission) {

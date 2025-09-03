@@ -663,7 +663,7 @@ class UserController extends Controller
     }
 
 
-    public function editEmployee($user_id)
+    public function editEmployeeold($user_id)
     {
         $user_roles = User::$role;
         $genders = User::$gender;
@@ -709,7 +709,45 @@ class UserController extends Controller
         ]);
     }
 
+    public function editEmployee($user_id)
+    {
+        $loginuser = Auth::user();
+        $rooms = InventoryRooms::where('is_deleted', '0')->get();
+        $user = Employees::where('id', $user_id)->first();
+        $rules = AttendanceRules::get();
+        $leaverules = LeaveRules::where('for_all', '!=', '1')->get();
+        $obcandidates = ObCandidates::where('office_employee_id', $user_id)->first();
+        $employees = Employees::where('id', $user_id)->first();
 
+        if ($obcandidates) {
+            $attendance_rule = AttendanceRules::where('id', $obcandidates->attendance_rule_id)->first();
+        }
+
+        $employeeleave = EmployeeLeaveRules::where('employee_id', $user_id)->pluck('leave_rule_id')->toArray();
+
+        $team_name = Employee_manager_team::all();
+
+        // ✅ fetch roles dynamically from roles table
+        $roles = Roles::select('id', 'role_name')->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'user' => $user,
+                'loginuser' => $loginuser,
+                'roles' => $roles,   // <-- send roles dynamically
+                'genders' => User::$gender,
+                'rules' => $rules,
+                'leaverules' => $leaverules,
+                'employeeleave' => $employeeleave,
+                'obcandidates' => $obcandidates,
+                'attendance_rule' => $attendance_rule ?? null,
+                'rooms' => $rooms,
+                'employees' => $employees,
+                'team_name' => $team_name,
+            ]
+        ]);
+    }
 
     /**
      * Show edit employee page.
@@ -843,7 +881,8 @@ class UserController extends Controller
 
         $user->room_id = $request->room_name;
         $user->is_manager = $request->is_manager;
-        $user->role_id = $request->role_id;
+        // $user->role_id = $request->role_id;
+        $user->user_role = $request->role_id; 
         $user->manager_id = $request->manager_id;
         $user->team_id = $request->team_id;
 
@@ -1214,7 +1253,7 @@ class UserController extends Controller
 
             // Update candidate status
             $candidate = $can_test->candidate;
-            $candidateStatus = $totalPercentage >= 90 ? 3 : 8; // 3=Passed, 8=Failed
+            $candidateStatus = $totalPercentage  >= 10 ? 3 : 8; // 3=Passed, 8=Failed
             $candidate->status = $candidateStatus;
             $candidate->save();
 
@@ -1226,7 +1265,7 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => 'completed',
-                'message' => $totalPercentage >= 90
+                'message' => $totalPercentage  >= 10
                     ? 'Congratulations, you are shortlisted for next round.'
                     : 'Better luck next time. Please connect with HR.',
                 'result' => [
@@ -1388,7 +1427,7 @@ class UserController extends Controller
 
             // Update candidate status
             $candidate = $can_test->candidate;
-            $candidateStatus = $totalPercentage >= 90 ? 3 : 8; // 3=Passed, 8=Failed
+            $candidateStatus = $totalPercentage  >= 10 ? 3 : 8; // 3=Passed, 8=Failed
             $candidate->status = $candidateStatus;
             $candidate->save();
 
@@ -1421,7 +1460,7 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => 'completed',
-                'message' => $totalPercentage >= 90
+                'message' => $totalPercentage  >= 10
                     ? 'Congratulations, you are shortlisted for next round.'
                     : 'Better luck next time. Please connect with HR.',
                 'result' => [
@@ -1464,14 +1503,14 @@ class UserController extends Controller
         });
 
         // Email to candidate
-        $statusMessage = $percentage >= 90
+        $statusMessage = $percentage  >= 10
             ? 'Congratulations, you are shortlisted for next round.'
             : 'Better luck next time. Please connect with HR.';
 
         Mail::send('emails.send-test-result', [
             'name' => $can_test->candidate->full_name,
             'msg' => $statusMessage,
-            'status' => $percentage >= 90 ? 1 : 2,
+            'status' => $percentage  >= 10 ? 1 : 2,
             'test_url' => route('showTest', $can_test->token)
         ], function ($message) use ($can_test) {
             $message->to($can_test->candidate->email)
@@ -1495,8 +1534,8 @@ class UserController extends Controller
             'candidate_id' => $can_test->candidate_id
         ]);
 
-        $interStatus = $percentage >= 90 ? 2 : 3; // 2=Passed, 3=Failed
-        $message = $percentage >= 90
+        $interStatus = $percentage  >= 10 ? 2 : 3; // 2=Passed, 3=Failed
+        $message = $percentage  >= 10
             ? 'Congratulations, you are shortlisted for next round.'
             : 'Better luck next time. Please connect HR';
 

@@ -5,6 +5,8 @@ import { useParams, useNavigate } from "react-router-dom";
 const EditEmployeeForm = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const [roles, setRoles] = useState([]);
+
 
   const [form, setForm] = useState({
     name: "",
@@ -82,6 +84,7 @@ const EditEmployeeForm = () => {
 
       setRooms(data.rooms || []);
       setTeams(data.team_name || []);
+      setRoles(data.roles || []);
     } catch (err) {
       console.error("Fetch Error:", err);
     }
@@ -185,7 +188,7 @@ const EditEmployeeForm = () => {
           />
         </div>
 
-        <div className="col-md-6">
+        {/* <div className="col-md-6">
           <div className="col-md-6">
             <label>Role</label>
             <select
@@ -196,7 +199,23 @@ const EditEmployeeForm = () => {
               <option value="2">Recruiter</option>
             </select>
           </div>
+        </div> */}
+        <div className="col-md-6">
+          <label>Role</label>
+          <select
+            value={form.role_id}
+            onChange={(e) => setForm({ ...form, role_id: e.target.value })}
+            className="form-control"
+          >
+            <option value="">Select Role</option>
+            {roles.map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.role_name}
+              </option>
+            ))}
+          </select>
         </div>
+
 
         <div className="col-md-6">
           <label>Gender</label>

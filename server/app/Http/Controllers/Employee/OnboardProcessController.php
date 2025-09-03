@@ -13,7 +13,6 @@ use App\Models\ObTabFieldRelations;
 use App\Models\Notifications;
 use App\Models\ObTabFieldData;
 use Illuminate\Support\Facades\Validator;
-
 use App\Models\ObCandidates;
 use Illuminate\Support\Facades\File;
 use PDF;
@@ -30,6 +29,7 @@ use Illuminate\Support\Facades\Session;
 use App\Models\Roles;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -40,17 +40,29 @@ class OnboardProcessController extends Controller
     public function onboardCandidates(Request $request)
     {
 
-        $permissions = Session::get('permission');
-        Log::info('My permissions >>>>', ['total permissions are >', $permissions]);
-        if (!is_array($permissions) || !isset($permissions[0]) || !in_array('onboarding_list', $permissions[0])) {
+        // $permissions = Session::get('permission');
+        // Log::info('My permissions >>>>', ['total permissions are >', $permissions]);
+        // if (!is_array($permissions) || !isset($permissions[0]) || !in_array('onboarding_list', $permissions[0])) {
+        //     return response()->json(['message' => 'Forbidden'], 403);
+        // }
+
+        $permissions = DB::table('permissions')
+            ->pluck('permission_name') // only get permission names
+            ->toArray();
+
+        if (!in_array('Onboarding List', $permissions)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
+
 
         $requests = OnboardRequests::pluck('candidate_name')->toArray();
         $candidate = ObCandidates::pluck('name')->toArray();
         $result = array_diff($candidate, $requests);
 
         $permission_role = Roles::find(Auth::user()->user_role);
+      
+        Log::info('My permission_role >>>>', [' permission_role are >', $permission_role]);
+        
         $viewLevel = $permission_role?->view;
         $data = [];
 
@@ -72,6 +84,9 @@ class OnboardProcessController extends Controller
                 $data = ObCandidates::latest()->get();
                 break;
         }
+
+
+            Log::info('My viewLevel >>>>', [' viewLevel are >', $viewLevel]);
 
         // Optional: Transform department names
         $departments = [
@@ -134,18 +149,6 @@ class OnboardProcessController extends Controller
             return Redirect::route('allcandidates')->with('error', 'Something went wrong. Try again.');
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     // public function joinigFormSubmitOLD(Request $request)
 
@@ -1016,6 +1019,49 @@ class OnboardProcessController extends Controller
         return response()->json([
             'status' => 401,
             'message' => 'Something went wrong. Try again.'
+        ]);
+    }
+
+
+    public function onboardCandidatesView($candidate_id)
+    {
+        // Ensure folder exists
+        $filePath = public_path() . '/uploads/wgz-employees/HRM' . $candidate_id;
+
+        if (!File::exists($filePath)) {
+            File::makeDirectory($filePath, 0777, true, true);
+        }
+
+        // Candidate data
+        $candidate = ObCandidates::where('id', $candidate_id)->first();
+
+        if (!$candidate) {
+            return response()->json(['error' => 'Candidate not found'], 404);
+        }
+
+        $candidateData = Candidates::where('id', $candidate->candidate_id)->first();
+        $candidate_questions = CandidateQuestions::all();
+
+        // Tabs + fields + field data
+        $tabs = ObTabs::where('status', 1)
+            ->with([
+                'fields' => function ($q) {
+                    $q->orderBy('sort', 'asc');
+                },
+                'fields.field',
+                'fields.field.fielddata' => function ($query) use ($candidate_id) {
+                    $query->where('ob_candidate_id', $candidate_id);
+                }
+            ])
+            ->orderBy('sort', 'ASC')
+            ->get();
+
+        return response()->json([
+            'candidate_id' => $candidate_id,
+            'candidate' => $candidate,
+            'candidateData' => $candidateData,
+            'tabs' => $tabs,
+            'candidate_questions' => $candidate_questions
         ]);
     }
 }
