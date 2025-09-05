@@ -158,6 +158,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 
 
+
     // Event notification 
     // Route::get('/birthday', [EventController::class ,'birthdayMail'])->name('birthdayMail');
 
@@ -352,44 +353,80 @@ Route::middleware(['auth:api'])->prefix('inventory')->group(function () {
 
    
 
-    Route::get('/all-vendors/add-vendor', [InventoryController::class,'addVendors'])->name('addvendors');
+    Route::get('/all-vendors/add-vendor', [InventoryController::class,'addVendors']);
     Route::post('add-vendor-post', [InventoryController::class,'addVendorsPost']);
-    Route::get('/all-vendors/edit-vendor/{vendor_id}', [InventoryController::class,'editVendor'])->name('editvendor');
-    Route::post('edit-vendor-post', [InventoryController::class,'editVendorPost'])->name('editvendorpost');
-    Route::get('delete-vendor/{vendor_id}', [InventoryController::class,'deleteVendor'])->name('deletevendor');
-    Route::get('all-inventories', 'InventoryController@allInventories')->name('allinventories');
-    Route::get('/all-inventories/add-inventory', 'InventoryController@addInventory')->name('addinventory');
-    Route::post('add-inventory-post', 'InventoryController@addInventoryPost')->name('addinventorypost');
-    Route::get('inventory-request', 'InventoryController@inventoryRequest')->name('inventoryrequests');
-    Route::post('get-inventory-approval-request', 'InventoryController@approveInventoryRequest')->name('inventory-approve-request');
-    Route::post('get-inventory-decline-request', 'InventoryController@declineInventoryRequest')->name('decline-inventory-request');
-    Route::get('/inventory-request/edit-inventory/{inventory_id}', 'InventoryController@editInventory')->name('editinventory');
-    Route::post('edit-inventory-post', 'InventoryController@editInventoryPost')->name('editinventorypost');
-    Route::get('delete-inventory/{inventory_id}', 'InventoryController@deleteInventory')->name('deleteinventory');
-    Route::get('delete-warrenty-card/{inventory_id}', 'InventoryController@deleteWarrentyCard')->name('deletewarrentycard');
-    Route::get('delete-bill-upload/{inventory_id}', 'InventoryController@deleteBillUpload');
-    Route::get('all-rooms', 'InventoryController@allRooms')->name('allrooms');
-    Route::get('/all-rooms/add-room', 'InventoryController@addRoom')->name('addroom');
-    Route::post('add-room-post', 'InventoryController@addRoomPost')->name('addroompost');
-    Route::get('/all-rooms/edit-room/{room_id}', 'InventoryController@editRoom')->name('editroom');
-    Route::post('edit-room-post', 'InventoryController@editRoomPost')->name('editroompost');
-    Route::get('delete-room/{room_id}', 'InventoryController@date(format)eleteRoom')->name('deleteroom');
-    Route::get('/all-categories/add-parent-category', 'InventoryController@addParentCategory')->name('add-parent-category');
-    Route::post('add-parent-category-post', 'InventoryController@addParentCategoryPost')->name('addparentcategorypost');
-    Route::get('/inventory-request/allocation/{inventory_id}', 'InventoryController@allocation')->name('allocation');
-    Route::post('add-allocation-post', 'InventoryController@allocationPost')->name('allocationpost');
-    Route::get('/deallocation/{inventory_id}', 'InventoryController@deallocation')->name('deallocation');
-    Route::get('decline-inventory/{inventory_id}', 'InventoryController@declineInventory')->name('declineinventory');
-    Route::post('get-states-by-country', 'InventoryController@getState')->name('getstate');
-    Route::post('get-cities-by-state', 'InventoryController@getCity')->name('getcity');
-    Route::get('/faulty/{inventory_id}', 'InventoryController@faulty')->name('faulty');
-    Route::get('/faultless/{inventory_id}', 'InventoryController@faultless')->name('faultless');
-    Route::get('all-logs', 'InventoryController@allLogs')->name('inventorylogs');
-    Route::get('export', 'InventoryController@export')->name('export');
-    Route::get('exportinventory', 'InventoryController@exportInventory')->name('exportinventory');
-    Route::get('/inventory-request/manage-stock/{inventory_id}', 'InventoryController@manageStock')->name('managestock');
-    Route::post('manage-stock-post', 'InventoryController@manageStockPost')->name('managestockPost');
-    Route::post('import', 'InventoryController@import')->name('import');
+    Route::get('/all-vendors/edit-vendor/{vendor_id}', [InventoryController::class,'editVendor']);
+    Route::post('edit-vendor-post', [InventoryController::class,'editVendorPost']);
+    Route::get('delete-vendor/{vendor_id}', [InventoryController::class,'deleteVendor']);
+
+    Route::get('all-rooms', [InventoryController::class, 'allRooms']);
+    Route::get('/all-rooms/add-room', [InventoryController::class, 'addRoom']);
+    Route::post('/add-room-post', [InventoryController::class, 'addRoomPost']);
+    Route::get('/all-rooms/edit-room/{room_id}', [InventoryController::class, 'editRoom']);
+    Route::post('/edit-room-post', [InventoryController::class, 'editRoomPost']);
+    Route::delete('delete-room/{room_id}', [InventoryController::class, 'deleteRoom']);
+    Route::get('all-inventories', [InventoryController::class, 'allInventories']);
+
+    Route::get('/all-inventories/add-inventory', [InventoryController::class, 'addInventory']);
+    Route::get('/add-inventory-ajax/{id}', [InventoryController::class, 'addAjaxInventory']);
+    Route::post('/add-inventory-post', [InventoryController::class, 'addInventoryPost']);
+    Route::get('/requests', [InventoryController::class, 'inventoryRequest']);
+    Route::post('/decline-request', [InventoryController::class, 'declineInventoryRequest']);
+    Route::post('get-inventory-approval-request', [InventoryController::class, 'approveInventoryRequest']);
+    Route::get('/inventory-request/edit-inventory/{inventory_id}', [InventoryController::class, 'editInventory']);
+    Route::post('/inventory-request/edit-inventory-post', [InventoryController::class, 'editInventoryPost']);
+    Route::delete('/delete/{inventory_id}', [InventoryController::class, 'deleteInventory']);
+    Route::delete('/delete-warrenty-card/{inventory_id}', [InventoryController::class, 'deleteWarrentyCard']);
+    Route::delete('/delete-bill-upload/{inventory_id}', [InventoryController::class, 'deleteBillUpload']);
+    Route::get('/add-parent-category', [InventoryController::class, 'addParentCategory']);
+    Route::post('/add-parent-category', [InventoryController::class, 'addParentCategoryPost']);
+    Route::get('/allocation/{inventory_id}', [InventoryController::class, 'allocation']);
+    Route::post('/allocation', [InventoryController::class, 'allocationPost']);
+    Route::get('/deallocation/{inventory_id}', [InventoryController::class, 'deallocation']);
+    Route::get('/decline/{inventory_id}', [InventoryController::class, 'declineInventory']);
+    Route::post('/faulty/{inventory_id}', [InventoryController::class, 'faulty']);
+    Route::post('/faultless/{inventory_id}', [InventoryController::class, 'faultless']);
+    Route::get('/logs', [InventoryController::class, 'allLogs']);
+    Route::get('export', [InventoryController::class, 'export']);
+    Route::get('export-inventory', [InventoryController::class, 'exportInventory']);
+    Route::get('/manage-stock/{inventory_id}', [InventoryController::class, 'manageStock']);
+    Route::post('/manage-stock', [InventoryController::class, 'manageStockPost']);
+
+
+
+    // Route::get('all-inventories', 'InventoryController@allInventories')->name('allinventories');
+    // Route::get('/all-inventories/add-inventory', 'InventoryController@addInventory')->name('addinventory');
+    // Route::post('add-inventory-post', 'InventoryController@addInventoryPost')->name('addinventorypost');
+    // Route::get('inventory-request', 'InventoryController@inventoryRequest')->name('inventoryrequests');
+    // Route::post('get-inventory-approval-request', 'InventoryController@approveInventoryRequest')->name('inventory-approve-request');
+    // Route::post('get-inventory-decline-request', 'InventoryController@declineInventoryRequest')->name('decline-inventory-request');
+    // Route::get('/inventory-request/edit-inventory/{inventory_id}', 'InventoryController@editInventory')->name('editinventory');
+    // Route::post('edit-inventory-post', 'InventoryController@editInventoryPost')->name('editinventorypost');
+    // Route::get('delete-inventory/{inventory_id}', 'InventoryController@deleteInventory')->name('deleteinventory');
+    // Route::get('delete-warrenty-card/{inventory_id}', 'InventoryController@deleteWarrentyCard')->name('deletewarrentycard');
+    // Route::get('delete-bill-upload/{inventory_id}', 'InventoryController@deleteBillUpload');
+    // Route::get('all-rooms', 'InventoryController@allRooms')->name('allrooms');
+    // Route::get('/all-rooms/add-room', 'InventoryController@addRoom')->name('addroom');
+    // Route::post('add-room-post', 'InventoryController@addRoomPost')->name('addroompost');
+    // Route::get('/all-rooms/edit-room/{room_id}', 'InventoryController@editRoom')->name('editroom');
+    // Route::post('edit-room-post', 'InventoryController@editRoomPost')->name('editroompost');
+    // Route::get('delete-room/{room_id}', 'InventoryController@date(format)eleteRoom')->name('deleteroom');
+    // Route::get('/all-categories/add-parent-category', 'InventoryController@addParentCategory')->name('add-parent-category');
+    // Route::post('add-parent-category-post', 'InventoryController@addParentCategoryPost')->name('addparentcategorypost');
+    // Route::get('/inventory-request/allocation/{inventory_id}', 'InventoryController@allocation')->name('allocation');
+    // Route::post('add-allocation-post', 'InventoryController@allocationPost')->name('allocationpost');
+    // Route::get('/deallocation/{inventory_id}', 'InventoryController@deallocation')->name('deallocation');
+    // Route::get('decline-inventory/{inventory_id}', 'InventoryController@declineInventory')->name('declineinventory');
+    // Route::post('get-states-by-country', 'InventoryController@getState')->name('getstate');
+    // Route::post('get-cities-by-state', 'InventoryController@getCity')->name('getcity');
+    // Route::get('/faulty/{inventory_id}', 'InventoryController@faulty')->name('faulty');
+    // Route::get('/faultless/{inventory_id}', 'InventoryController@faultless')->name('faultless');
+    // Route::get('all-logs', 'InventoryController@allLogs')->name('inventorylogs');
+    // Route::get('export', 'InventoryController@export')->name('export');
+    // Route::get('exportinventory', 'InventoryController@exportInventory')->name('exportinventory');
+    // Route::get('/inventory-request/manage-stock/{inventory_id}', 'InventoryController@manageStock')->name('managestock');
+    // Route::post('manage-stock-post', 'InventoryController@manageStockPost')->name('managestockPost');
+    // Route::post('import', 'InventoryController@import')->name('import');
 
     // 1-sept-25
     Route::get('/all-vendors', [InventoryController::class, 'allVendors']);

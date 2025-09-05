@@ -1174,7 +1174,7 @@ class InventoryController extends Controller
         }
     }
 
-    public function allInventories(Request $request)
+    public function allInventoriesOLD(Request $request)
     {
         if (!in_array('inventory_management', Session::get('permission')[0])) {
             abort(404);
@@ -1251,13 +1251,90 @@ class InventoryController extends Controller
         return view('inventory.all-inventory');
     }
 
-    public function addInventory(Request $request)
+
+    public function allInventories(Request $request)
+    {
+        try {
+            // Permission check
+            // if (!in_array('inventory_management', Session::get('permission')[0])) {
+            //     return response()->json([
+            //         'status' => 403,
+            //         'message' => 'Forbidden: You do not have access to inventory management'
+            //     ], 403);
+            // }
+
+            // Get role
+            $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+
+            // Query builder based on role view
+            if ($permission_role->view == '2') {
+                $data = InventoryItems::with('category', 'subcategory', 'vendor')
+                    ->where('created_by', Auth::user()->id)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '3') {
+                $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+                $data = InventoryItems::with('category', 'subcategory', 'vendor')
+                    ->whereIn('created_by', $employees)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '4') {
+                $employees = Employees::where('manager_id', Auth::user()->id)
+                    ->orWhere('id', Auth::user()->id)
+                    ->pluck('id')
+                    ->toArray();
+                $data = InventoryItems::with('category', 'subcategory', 'vendor')
+                    ->whereIn('created_by', $employees)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '5') {
+                $data = InventoryItems::with('category', 'subcategory', 'vendor')
+                    ->where('is_deleted', '0');
+            } else {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Forbidden: Invalid role permission'
+                ], 403);
+            }
+
+            // Filter + fetch records
+            $data = $data->whereIn('status', [1, 2, 3])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Transform response (like your editColumn logic)
+            $response = $data->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'category' => $row->category?->category_name ?? '-',
+                    'subcategory' => $row->subcategory?->category_name ?? '-',
+                    'vendor' => $row->vendor?->name ?? '-',
+                    'status' => $row->status == 2
+                        ? 'Approved'
+                        : ($row->status == 1 ? 'Pending' : 'Declined'),
+                    'created_by' => $row->created_by,
+                    'created_at' => $row->created_at,
+                ];
+            });
+
+            return response()->json([
+                'status' => 200,
+                'count' => $response->count(),
+                'data' => $response
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
+    public function addInventoryOLD(Request $request)
     {
         $s = InventoryCategory::all()->where('parent_category_id', '=', '0')->where('is_deleted', '0');
         $vendors = InventoryVendor::orderBy('name', 'ASC')->get();
         return view('inventory.add-inventory', compact('s', 'vendors'));
     }
-    public function  addAjaxInventory(Request $request, $id)
+    public function  addAjaxInventoryOLD(Request $request, $id)
     {
         $cat_id = $request->id;
         $subcategories = InventoryCategory::where('parent_category_id', '=', $cat_id)->get();
@@ -1266,7 +1343,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function addInventoryPost(Request $request)
+    public function addInventoryPostOLD(Request $request)
     {
         $loginuser = Auth::user();
         $inventory = new InventoryItems();
@@ -1383,7 +1460,234 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function inventoryRequest(Request $request)
+
+
+    public function addInventory(Request $request)
+    {
+        try {
+            $categories = InventoryCategory::where('parent_category_id', 0)
+                ->where('is_deleted', '0')
+                ->get();
+
+            $vendors = InventoryVendor::orderBy('name', 'ASC')->get();
+
+            return response()->json([
+                'status' => 200,
+                'categories' => $categories,
+                'vendors' => $vendors,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function addAjaxInventory(Request $request, $id)
+    {
+        try {
+            $subcategories = InventoryCategory::where('parent_category_id', $id)->get();
+
+            return response()->json([
+                'status' => 200,
+                'category' => $subcategories,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function addInventoryPost11(Request $request)
+    {
+        try {
+            $loginuser = Auth::user();
+
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required|unique:inventory_items',
+                    'category' => 'required',
+                    'subcategory' => 'required',
+                    'vendor' => 'nullable',
+                    'category_type' => 'required',
+                    'quantity' => 'required|numeric|min:1',
+                    'upload_warrenty_card' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+                    'bill_upload' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+                ],
+                [
+                    'name.required' => 'Please enter an Item name',
+                    'category.required' => 'Please select Category',
+                    'subcategory.required' => 'Go to category management and add the corresponding subcategory first',
+                    'category_type.required' => 'Please select item type',
+                    'quantity.required' => 'Please add some quantity',
+                    'upload_warrenty_card.max' => 'Warrenty Card size should not exceed upto 2mb',
+                    'bill_upload.max' => 'Bill Size should not exceed upto 2mb',
+                    'bill_upload.mimes' => 'Bill extension not allowed',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()->first(),
+                ], 401);
+            }
+
+            $permission_role = Roles::where('id', $loginuser->user_role)->first();
+            if ($permission_role->add == '2') {
+                $created_by = $loginuser->id;
+            } else {
+                if (empty($request->created_by)) {
+                    return response()->json([
+                        'status' => 401,
+                        'message' => 'Please select to whom you would assign to',
+                    ], 401);
+                }
+                $created_by = $request->created_by;
+            }
+
+            $inventory = new InventoryItems();
+            $inventory->name = $request->name;
+            $inventory->category_id = $request->category;
+            $inventory->subcategory_id = $request->subcategory;
+            $inventory->hardware_type = $request->hardwaretype;
+            $inventory->notes = $request->notes;
+            $inventory->vendor_id = $request->vendor;
+            $inventory->room_id = 0;
+            $inventory->employee_id = 0;
+            $inventory->category_type = $request->category_type;
+            $inventory->quantity = $request->quantity;
+            $inventory->in_stock = $request->quantity;
+            $inventory->created_by = $created_by;
+
+            // ✅ File upload
+            if ($file = $request->file('upload_warrenty_card')) {
+                $name = time() . '-' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/warrenty/'), $name);
+                $inventory->upload_warrenty_card = $name;
+            }
+
+            if ($file = $request->file('bill_upload')) {
+                $name = time() . '-' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/bills/'), $name);
+                $inventory->bill_upload = $name;
+            }
+
+            if ($inventory->save()) {
+                // ✅ Track changes
+                $getchange = $inventory->toArray();
+                $after = implode("\n", array_map(
+                    fn ($v, $k) => $k . ':' . $v,
+                    $getchange,
+                    array_keys($getchange)
+                ));
+
+                // ✅ Notification
+                $noti = new Notifications();
+                $noti->type_id = 'inventory_approval_request';
+                $noti->message = 'Inventory request';
+                $noti->page_id = '2';
+                $noti->notify_to = $loginuser->id;
+                $noti->save();
+
+                // ✅ Logs
+                $logs = new InventoryLogs();
+                $logs->user_id = $loginuser->id;
+                $logs->item_id = $inventory->id;
+                $logs->message = 'Item ' . $inventory->name . ' is added by ' . $loginuser->name;
+                $logs->log_type = '2';
+                $logs->before = "-";
+                $logs->after = $after;
+                $logs->ip_address = request()->ip();
+                $logs->port_number = request()->getPort();
+                $logs->device_name = gethostname();
+                $logs->browser_detail = $request->header('User-Agent');
+                $logs->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory added successfully',
+                    'data' => $inventory,
+                ]);
+            }
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try again.',
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function addInventoryPost(Request $request)
+    {
+        try {
+            // ✅ Validation
+            $validator = Validator::make($request->all(), [
+                'name'          => 'required|string|max:255',
+                'category'      => 'required|integer',
+                'subcategory'   => 'required|integer',
+                'vendor'        => 'required|integer',
+                'category_type' => 'required|string',
+                'hardware_type' => 'required|string|max:255', // 👈 Important
+                'quantity'      => 'required|integer|min:1',
+                'notes'         => 'nullable|string',
+                'created_by'    => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => $validator->errors()->first()
+                ], 401);
+            }
+
+            // ✅ Create inventory item
+            $inventory = new InventoryItems();
+            $inventory->name          = $request->name;
+            $inventory->category_id   = $request->category;
+            $inventory->subcategory_id= $request->subcategory;
+            $inventory->vendor_id     = $request->vendor;
+            $inventory->category_type = $request->category_type;
+            $inventory->hardware_type = $request->hardware_type; // 👈 Now stored correctly
+            $inventory->quantity      = $request->quantity;
+            $inventory->in_stock      = $request->quantity;
+            $inventory->notes         = $request->notes ?? null;
+            $inventory->room_id       = $request->room_id ?? 0;
+            $inventory->employee_id   = $request->employee_id ?? 0;
+            $inventory->created_by    = $request->created_by;
+            $inventory->is_deleted    = 0;
+
+            if ($inventory->save()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'Inventory item added successfully',
+                    'data'    => $inventory
+                ], 200);
+            } else {
+                return response()->json([
+                    'status'  => 500,
+                    'message' => 'Failed to add inventory item'
+                ], 500);
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function inventoryRequestold(Request $request)
     {
         // if(!in_array('inventory_requests', Session::get('permission')[0])){
         //     abort(404);
@@ -1602,7 +1906,81 @@ class InventoryController extends Controller
         }
         return view('inventory.inventory-requests');
     }
-    public function declineInventoryRequest(Request $request)
+
+    public function inventoryRequest(Request $request)
+    {
+        try {
+            $loginuser = Auth::user();
+            $permission_role = Roles::where('id', $loginuser->user_role)->first();
+
+            // ✅ Apply role-based visibility
+            if ($permission_role->view == '2') {
+                $data = InventoryItems::with(['category', 'subcategory', 'vendor', 'employee', 'room'])
+                    ->where('created_by', $loginuser->id)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '3') {
+                $employees = Employees::where('manager_id', $loginuser->id)->pluck('id')->toArray();
+                $data = InventoryItems::with(['category', 'subcategory', 'vendor', 'employee', 'room'])
+                    ->whereIn('created_by', $employees)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '4') {
+                $employees = Employees::where('manager_id', $loginuser->id)
+                    ->orWhere('id', $loginuser->id)
+                    ->pluck('id')->toArray();
+                $data = InventoryItems::with(['category', 'subcategory', 'vendor', 'employee', 'room'])
+                    ->whereIn('created_by', $employees)
+                    ->where('is_deleted', '0');
+            } elseif ($permission_role->view == '5') {
+                $data = InventoryItems::with(['category', 'subcategory', 'vendor', 'employee', 'room'])
+                    ->where('is_deleted', '0');
+            } else {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'You do not have permission to view inventory requests'
+                ], 403);
+            }
+
+            // ✅ Date filter
+            if (!empty($request->startdate) && !empty($request->enddate)) {
+                $data->whereBetween('created_at', [$request->startdate . ' 00:00:00', $request->enddate . ' 23:59:59']);
+            }
+
+            // ✅ Only approved/pending items
+            $data = $data->whereIn('status', [1, 2])->get();
+
+            // ✅ Transform response (same logic as editColumn in Blade)
+            $response = $data->map(function ($row) use ($loginuser, $permission_role) {
+                return [
+                    'id' => $row->id,
+                    'name' => $row->name,
+                    'category' => $row->category?->category_name ?? '-',
+                    'subcategory' => $row->subcategory?->category_name ?? '-',
+                    'vendor' => $row->vendor?->name ?? '-',
+                    'employee' => $row->employee_id == 0 ? '-' : $row->employee?->name,
+                    'room' => $row->room_id == 0 ? '-' : $row->room?->room_name,
+                    'stock_status' => $row->stock == 1 ? ($row->in_stock == 0 ? 'Out of Stock' : 'In Stock') : 'Out of Stock',
+                    'faulty' => $row->faulty == 1 ? 'Yes' : 'No',
+                    'category_type' => $row->category_type == 0 ? 'Non-Consumable' : 'Consumables',
+                    'created_at' => $row->created_at?->format('Y-m-d'),
+                    'status' => $row->status == 2 ? 'Approved' : ($row->status == 3 ? 'Declined' : 'Pending'),
+                ];
+            });
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Inventory requests fetched successfully',
+                'data' => $response
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function declineInventoryRequestold(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'notes' => 'required'
@@ -1655,7 +2033,72 @@ class InventoryController extends Controller
         }
     }
 
-    public function approveInventoryRequest(Request $request)
+    public function declineInventoryRequest(Request $request)
+    {
+        try {
+            // ✅ Validation
+            $validator = Validator::make($request->all(), [
+                'get_approval_id' => 'required|integer|exists:inventory_items,id',
+                'notes' => 'required|string'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()->first()
+                ], 401);
+            }
+
+            $inventory = InventoryItems::where('id', $request->get_approval_id)->first();
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory item not found.'
+                ], 404);
+            }
+
+            // ✅ Update only status (no reason column in DB)
+            $inventory->status = 3; // Declined
+            $ss = 'Declined';
+
+            if ($inventory->save()) {
+                // ✅ Notification
+                $noti = new Notifications();
+                $noti->type_id = 'inventory_approval_request';
+                $noti->message = 'Your Inventory request has been Declined.';
+                $noti->page_id = '2';
+                $noti->notify_to = $inventory->created_by;
+                $noti->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory request declined successfully.',
+                    'data' => [
+                        'id' => $inventory->id,
+                        'name' => $inventory->name,
+                        'status' => $ss,
+                        'reason' => $request->notes // only in response, not DB
+                    ]
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try again.'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    public function approveInventoryRequestold(Request $request)
     {
         $loginuser = Auth::user();
         foreach ($request->rows_ids as $row_id) {
@@ -1690,7 +2133,86 @@ class InventoryController extends Controller
             'message' => "Successfully updated."
         ]);
     }
-    public function editInventory(Request $request, $inventory_id)
+
+
+    public function approveInventoryRequest(Request $request)
+    {
+        try {
+            // ✅ Validation
+            $validator = Validator::make($request->all(), [
+                'rows_ids' => 'required|array|min:1',
+                'rows_ids.*' => 'integer|exists:inventory_items,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => $validator->errors()->first()
+                ], 401);
+            }
+
+            $loginuser = Auth::user();
+            $updatedItems = [];
+
+            foreach ($request->rows_ids as $row_id) {
+                $empdb = InventoryItems::where('id', $row_id)->first();
+
+                if ($empdb) {
+                    // ✅ Log "before" status
+                    $beforeStatus = $empdb->status;
+
+                    // ✅ Update inventory
+                    $empdb->status = 2; // Approved
+                    if ($empdb->save()) {
+
+                        // ✅ Notification for creator
+                        $noti = new Notifications();
+                        $noti->type_id = 'inventory_approval_request';
+                        $noti->message = 'Your inventory request has been approved.';
+                        $noti->page_id = '2';
+                        $noti->notify_to = $empdb->created_by ?? $loginuser->id;
+                        $noti->save();
+
+                        // ✅ Log action
+                        $logs = new InventoryLogs();
+                        $logs->user_id       = $loginuser->id;
+                        $logs->item_id       = $empdb->id;
+                        $logs->message       = 'Item ' . $empdb->name . ' is approved by ' . $loginuser->name;
+                        $logs->log_type      = '3';
+                        $logs->before        = $beforeStatus;    // Previous status
+                        $logs->after         = $empdb->status;   // New status
+                        $logs->ip_address    = request()->ip();
+                        $logs->port_number   = request()->getPort();
+                        $logs->device_name   = gethostname();
+                        $logs->browser_detail = request()->header('User-Agent');
+                        $logs->save();
+
+                        $updatedItems[] = [
+                            'id'     => $empdb->id,
+                            'name'   => $empdb->name,
+                            'status' => 'Approved'
+                        ];
+                    }
+                }
+            }
+
+            return response()->json([
+                'status'  => 200,
+                'message' => "Successfully updated.",
+                'data'    => $updatedItems
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    public function editInventoryold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::with('category', 'subcategory', 'vendor')->where('id', $inventory_id)->first();
         $allitems = InventoryCategory::where('parent_category_id', '0')->get();
@@ -1699,7 +2221,7 @@ class InventoryController extends Controller
         return view('inventory.edit-inventory', compact('inventory', 'vendors', 'allitems', 'rooms'));
     }
 
-    public function  editAjaxInventory(Request $request, $id)
+    public function  editAjaxInventoryold(Request $request, $id)
     {
         $cat_id = $request->id;
         $subcategories = InventoryCategory::where('parent_category_id', '=', $cat_id)->get();
@@ -1708,7 +2230,7 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function editInventoryPost(Request $request)
+    public function editInventoryPostold(Request $request)
     {
         $loginuser = Auth::user();
         $inventoryid = $request->inventory_id;
@@ -1827,7 +2349,193 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function deleteInventory($inventory_id)
+
+
+    
+
+    public function editInventory(Request $request, $inventory_id)
+    {
+        try {
+            $inventory = InventoryItems::with('category', 'subcategory', 'vendor')
+                ->where('id', $inventory_id)
+                ->first();
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory item not found'
+                ], 404);
+            }
+
+            $allitems = InventoryCategory::where('parent_category_id', '0')->get();
+            $vendors = InventoryVendor::orderBy('name', 'ASC')->get();
+            $rooms = InventoryRooms::orderBy('room_name', 'ASC')->get();
+
+            return response()->json([
+                'status'   => 200,
+                'inventory' => $inventory,
+                'categories' => $allitems,
+                'vendors'    => $vendors,
+                'rooms'      => $rooms
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function editAjaxInventory(Request $request, $id)
+    {
+        try {
+            $subcategories = InventoryCategory::where('parent_category_id', $id)->get();
+
+            return response()->json([
+                'status' => 200,
+                'category' => $subcategories
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function editInventoryPost(Request $request)
+    {
+        try {
+            $loginuser = Auth::user();
+            $inventoryid = $request->inventory_id;
+
+            // ✅ Fetch inventory
+            $inventory = InventoryItems::where('id', $inventoryid)->first();
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found'
+                ], 404);
+            }
+
+            $quantity = $inventory->quantity;
+            $stock = $inventory->in_stock;
+            $original = $inventory->getOriginal();
+
+            // ✅ Validation
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'category' => 'required',
+                    'subcategory' => 'required',
+                    'vendor' => 'nullable',
+                    'hardwaretype' => 'nullable',
+                    'category_type' => 'nullable',
+                    'quantity' => 'nullable|integer',
+                    'room_id' => 'nullable',
+                    'upload_warrenty_card' => 'nullable|max:2048|mimes:jpeg,png,jpg',
+                    'bill_upload' => 'nullable|max:2048|mimes:jpeg,png,jpg',
+                ],
+                [
+                    'name.required' => 'Please enter an Item name',
+                    'category.required' => 'Please select Category',
+                    'subcategory.required' => 'Go to Category Management and add the corresponding Subcategory first',
+                    'upload_warrenty_card.uploaded' => 'Warrenty Card size should not exceed 2MB',
+                    'bill_upload.max' => 'Bill Size should not exceed 2MB',
+                    'bill_upload.mimes' => 'Bill extension not allowed',
+                    'bill_upload.uploaded' => 'Bill size should not exceed 2MB',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => $validator->errors()->first()
+                ], 401);
+            }
+
+            // ✅ Update inventory fields (use existing values if request is missing)
+            $inventory->name = $request->name ?? $inventory->name;
+            $inventory->category_id = $request->category ?? $inventory->category_id;
+            $inventory->subcategory_id = $request->subcategory ?? $inventory->subcategory_id;
+            $inventory->hardware_type = $request->hardwaretype ?? $inventory->hardware_type ?? 'N/A';
+            $inventory->notes = $request->notes ?? $inventory->notes;
+            $inventory->vendor_id = $request->vendor ?? $inventory->vendor_id;
+            $inventory->category_type = $request->category_type ?? $inventory->category_type ?? 0;
+            $inventory->quantity = isset($request->quantity) ? $quantity + $request->quantity : $inventory->quantity;
+            $inventory->in_stock = isset($request->quantity) ? $stock + $request->quantity : $inventory->in_stock;
+            $inventory->room_id = $request->room_id ?? $inventory->room_id;
+
+            // ✅ File Uploads
+            if ($file = $request->file('upload_warrenty_card')) {
+                $path = public_path('uploads/warrenty/');
+                $name = time() . '-' . $file->getClientOriginalName();
+                $file->move($path, $name);
+
+                if (!empty($inventory->upload_warrenty_card) && file_exists($path . $inventory->upload_warrenty_card)) {
+                    unlink($path . $inventory->upload_warrenty_card);
+                }
+
+                $inventory->upload_warrenty_card = $name;
+            }
+
+            if ($file = $request->file('bill_upload')) {
+                $path = public_path('uploads/bills/');
+                $name = time() . '-' . $file->getClientOriginalName();
+                $file->move($path, $name);
+
+                if (!empty($inventory->bill_upload) && file_exists($path . $inventory->bill_upload)) {
+                    unlink($path . $inventory->bill_upload);
+                }
+
+                $inventory->bill_upload = $name;
+            }
+
+            // ✅ Save inventory
+            if ($inventory->save()) {
+
+                // ✅ Track Changes
+                $getchange = $inventory->getChanges();
+                $after = implode("\n", array_map(fn($v, $k) => $k . ':' . $v, $getchange, array_keys($getchange)));
+                $result = array_intersect_key($original, $getchange);
+                $before = implode("\n", array_map(fn($v, $k) => $k . ':' . $v, $result, array_keys($result)));
+
+                // ✅ Log Action
+                $logs = new InventoryLogs();
+                $logs->user_id = $loginuser->id;
+                $logs->item_id = $inventory->id;
+                $logs->message = 'Item ' . $inventory->name . ' is Updated by ' . $loginuser->name;
+                $logs->log_type = '3';
+                $logs->after = $after;
+                $logs->before = $before;
+                $logs->ip_address = request()->ip();
+                $logs->port_number = request()->getPort();
+                $logs->device_name = gethostname();
+                $logs->browser_detail = request()->header('User-Agent');
+                $logs->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => "Inventory Updated",
+                    'data' => $inventory
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Something went wrong. Try again.'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function deleteInventoryold($inventory_id)
     {
         $loginuser = Auth::user()->id;
         $loginusername = Auth::user()->name;
@@ -1853,7 +2561,62 @@ class InventoryController extends Controller
             return redirect()->route('inventoryrequests')->with('error', 'Something wrong. Try again.');
         }
     }
-    public function deleteWarrentyCard(Request $request, $inventory_id)
+
+    public function deleteInventory($inventory_id)
+    {
+        try {
+            $loginuser = Auth::user()->id;
+            $loginusername = Auth::user()->name;
+
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $name = $inventory->name;
+
+            // Soft delete
+            $inventory->is_deleted = "1";
+            $inventory->save();
+
+            // Log action
+            $logs = new InventoryLogs();
+            $logs->user_id = $loginuser;
+            $logs->item_id = $inventory_id;
+            $logs->message = 'Item ' . $name . ' is deleted by ' . $loginusername;
+            $logs->log_type = '1';
+            $logs->ip_address = request()->ip();
+            $logs->port_number = request()->getPort();
+            $logs->device_name = gethostname();
+            $logs->browser_detail = request()->header('User-Agent');
+
+            // Add default values to NOT NULL columns
+            $logs->before = 'Deleted Inventory: ' . $name;
+            $logs->after = 'N/A';
+
+            $logs->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Inventory deleted successfully.',
+                'data' => $inventory
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    public function deleteWarrentyCardold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         $path = public_path() . '/uploads/warrenty/';
@@ -1862,7 +2625,8 @@ class InventoryController extends Controller
         $inventory->save();
         return Redirect::back();
     }
-    public function deleteBillUpload(Request $request, $inventory_id)
+
+    public function deleteBillUploadold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         $path = public_path() . '/uploads/bills/';
@@ -1872,7 +2636,82 @@ class InventoryController extends Controller
         return Redirect::back();
     }
 
-    public function allRooms(Request $request)
+    public function deleteWarrentyCard(Request $request, $inventory_id)
+    {
+        try {
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $path = public_path('uploads/warrenty/');
+
+            // Delete file if exists
+            if ($inventory->upload_warrenty_card && file_exists($path . $inventory->upload_warrenty_card)) {
+                unlink($path . $inventory->upload_warrenty_card);
+            }
+
+            // Update DB
+            $inventory->upload_warrenty_card = null;
+            $inventory->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Warrenty card deleted successfully.',
+                'data' => $inventory
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteBillUpload(Request $request, $inventory_id)
+    {
+        try {
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $path = public_path('uploads/bills/');
+
+            // Delete file if exists
+            if ($inventory->bill_upload && file_exists($path . $inventory->bill_upload)) {
+                unlink($path . $inventory->bill_upload);
+            }
+
+            // Update DB
+            $inventory->bill_upload = null;
+            $inventory->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Bill upload deleted successfully.',
+                'data' => $inventory
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function allRoomsOLD(Request $request)
     {
         // if(!in_array('cabin_management', Session::get('permission')[0])){
         //         abort(404);
@@ -1970,11 +2809,96 @@ class InventoryController extends Controller
         }
         return view('inventory.rooms.all-rooms');
     }
-    public function addRoom(Request $request)
+
+
+    public function allRooms(Request $request)
+    {
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+
+        // Role-based room visibility
+        if ($permission_role->view == '2') {
+            $rooms = InventoryRooms::where('created_by', Auth::user()->id)
+                ->where('is_deleted', '0')
+                ->orderBy('created_at', 'desc');
+        } elseif ($permission_role->view == '3') {
+            $employees = Employees::where('manager_id', Auth::user()->id)
+                ->pluck('id')
+                ->toArray();
+            $rooms = InventoryRooms::whereIn('created_by', $employees)
+                ->where('is_deleted', '0')
+                ->orderBy('created_at', 'desc');
+        } elseif ($permission_role->view == '4') {
+            $employees = Employees::where('manager_id', Auth::user()->id)
+                ->orWhere('id', Auth::user()->id)
+                ->pluck('id')
+                ->toArray();
+            $rooms = InventoryRooms::whereIn('created_by', $employees)
+                ->where('is_deleted', '0')
+                ->orderBy('created_at', 'desc');
+        } elseif ($permission_role->view == '5') {
+            $rooms = InventoryRooms::where('is_deleted', '0')
+                ->orderBy('created_at', 'desc');
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Permission denied'
+            ], 403);
+        }
+
+        $rooms = $rooms->get();
+
+        // Format data with action buttons logic
+        $roomsData = $rooms->map(function ($row) use ($permission_role) {
+            $loginuser = Auth::user();
+            $id = $loginuser->id;
+            $created_by = $row->created_by;
+            $manager = Employees::where('id', $created_by)->first();
+
+            $actions = [];
+
+            // --- Edit Permission ---
+            if ($permission_role->edit == '2' && $id == $created_by) {
+                $actions[] = "Edit Allowed (Owner)";
+            } elseif ($permission_role->edit == '3' && $id == optional($manager)->manager_id) {
+                $actions[] = "Edit Allowed (Manager)";
+            } elseif ($permission_role->edit == '4' && ($id == optional($manager)->manager_id || $id == $created_by)) {
+                $actions[] = "Edit Allowed (Owner/Manager)";
+            } elseif ($permission_role->edit == '5') {
+                $actions[] = "Edit Allowed (All)";
+            }
+
+            // --- Delete Permission ---
+            if ($permission_role->delete == '2' && $id == $created_by) {
+                $actions[] = "Delete Allowed (Owner)";
+            } elseif ($permission_role->delete == '3' && $id == optional($manager)->manager_id) {
+                $actions[] = "Delete Allowed (Manager)";
+            } elseif ($permission_role->delete == '4' && ($id == optional($manager)->manager_id || $id == $created_by)) {
+                $actions[] = "Delete Allowed (Owner/Manager)";
+            } elseif ($permission_role->delete == '5') {
+                $actions[] = "Delete Allowed (All)";
+            }
+
+            return [
+                'id' => $row->id,
+                'room_name' => $row->room_name ?? null,
+                'created_by' => $row->created_by,
+                'created_at' => $row->created_at,
+                'permissions' => $actions
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'count' => $roomsData->count(),
+            'data' => $roomsData
+        ], 200);
+    }
+
+    public function addRoomOLD(Request $request)
     {
         return view('inventory.rooms.add-room');
     }
-    public function addRoomPost(Request $request)
+    public function addRoomPostOLD(Request $request)
     {
         // $loginuser = Auth::user();
         $room = new InventoryRooms();
@@ -2023,12 +2947,85 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function editRoom(Request $request, $room_id)
+
+
+     public function addRoom(Request $request)
+    {
+        return response()->json([
+            'status' => 200,
+            'message' => 'Use POST /api/all-rooms/add-room to create a new room',
+            'fields_required' => ['room_name', 'created_by (optional depending on role)']
+        ]);
+    }
+
+    /**
+     * Store a new room
+     */
+    public function addRoomPost(Request $request)
+    {
+        // Validate request
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'room_name' => 'required|unique:inventory_rooms|max:50'
+            ],
+            [
+                'room_name.required' => 'Please enter Cabin Name'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+
+        if ($permission_role->add == '2') {
+            // user can only assign to themselves
+            $created_by = Auth::user()->id;
+        } else {
+            // role allows assigning to others
+            if (empty($request->created_by)) {
+                return response()->json([
+                    'status' => 422,
+                    'message' => 'Please select to whom you would assign to'
+                ], 422);
+            }
+            $created_by = $request->created_by;
+        }
+
+        $room = new InventoryRooms();
+        $room->room_name = $request->room_name;
+        $room->created_by = $created_by;
+
+        if ($room->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Cabin added successfully',
+                'data' => [
+                    'id' => $room->id,
+                    'room_name' => $room->room_name,
+                    'created_by' => $room->created_by,
+                    'created_at' => $room->created_at
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try again.'
+            ], 500);
+        }
+    }
+
+    public function editRoomOLD(Request $request, $room_id)
     {
         $room = InventoryRooms::where('id', $room_id)->first();
         return view('inventory.rooms.edit-room', compact('room'));
     }
-    public function editRoomPost(Request $request)
+    public function editRoomPostOLD(Request $request)
     {
         $roomid = $request->room_id;
         $room = InventoryRooms::where('id', $roomid)->first();
@@ -2066,7 +3063,79 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function deleteRoom($room_id)
+
+     public function editRoom(Request $request, $room_id)
+    {
+        $room = InventoryRooms::where('id', $room_id)->first();
+
+        if (!$room) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Room not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Room fetched successfully',
+            'data' => $room
+        ], 200);
+    }
+
+    /**
+     * Update a room
+     */
+    public function editRoomPost(Request $request)
+    {
+        $roomid = $request->room_id;
+        $room = InventoryRooms::where('id', $roomid)->first();
+
+        if (!$room) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Room not found'
+            ], 404);
+        }
+
+        // Validation (unique except this ID)
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'room_name' => 'required|unique:inventory_rooms,room_name,' . $roomid
+            ],
+            [
+                'room_name.required' => 'Please enter Cabin Name'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $room->room_name = $request->room_name;
+
+        if ($room->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => "Cabin name updated",
+                'data' => [
+                    'id' => $room->id,
+                    'room_name' => $room->room_name,
+                    'updated_at' => $room->updated_at
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try Again.'
+            ], 500);
+        }
+    }
+
+    public function deleteRoomOLD($room_id)
     {
 
         $inventory = InventoryRooms::findOrFail($room_id);
@@ -2079,12 +3148,43 @@ class InventoryController extends Controller
             }
         }
     }
-    public function addParentCategory(Request $request)
+
+
+
+    public function deleteRoom($room_id)
+    {
+        try {
+            $inventory = InventoryRooms::findOrFail($room_id);
+
+            // Mark as deleted instead of hard delete
+            $inventory->is_deleted = "1";
+
+            if ($inventory->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Cabin deleted successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Something went wrong. Try again.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function addParentCategoryold(Request $request)
     {
 
         return view('inventory.category.add-parent-category');
     }
-    public function addParentCategoryPost(Request $request)
+
+    public function addParentCategoryPostold(Request $request)
     {
         $category = new InventoryCategory();
         $validator = Validator::make($request->all(), [
@@ -2113,14 +3213,64 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function allocation(Request $request, $inventory_id)
+
+
+    public function addParentCategory(Request $request)
+    {
+        return response()->json([
+            'status' => 200,
+            'message' => 'API is ready. Use POST to add a new parent category.'
+        ], 200);
+    }
+
+    public function addParentCategoryPost(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'category_name' => 'required|unique:inventory_categories,category_name'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 422,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $category = new InventoryCategory();
+            $category->category_name = $request->category_name;
+            $category->parent_category_id = 0;
+
+            if ($category->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Parent Category added successfully.',
+                    'data' => $category
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Something went wrong. Try again.'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function allocationold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         $rooms = InventoryRooms::where('is_deleted', '0')->get();
         $employees = Employees::get();
         return view('inventory.allocate-inventory', compact('inventory', 'rooms', 'employees'));
     }
-    public function allocationPost(Request $request)
+
+    public function allocationPostold(Request $request)
     {
         $id = $request->inventory_id;
         $inventory = InventoryItems::where('id', $id)->first();
@@ -2157,7 +3307,101 @@ class InventoryController extends Controller
             ]);
         }
     }
-    public function deallocation(Request $request, $inventory_id)
+
+
+
+    public function allocation(Request $request, $inventory_id)
+    {
+        try {
+            $inventory = InventoryItems::where('id', $inventory_id)->first();
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $rooms = InventoryRooms::where('is_deleted', '0')->get();
+            $employees = Employees::all();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Allocation data fetched successfully.',
+                'data' => [
+                    'inventory' => $inventory,
+                    'rooms' => $rooms,
+                    'employees' => $employees
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+     public function allocationPost(Request $request)
+    {
+        try {
+            $id = $request->inventory_id;
+            $inventory = InventoryItems::where('id', $id)->first();
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            // ✅ Validation
+            $validator = Validator::make($request->all(), [
+                'room_id' => 'required',
+            ], [
+                'room_id.required' => 'Room name is required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 422,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            // ✅ Update inventory allocation
+            $inventory->room_id = $request->room_id;
+            $inventory->employee_id = $request->employee_id;
+
+            if ($inventory->category_type == '0') {
+                $inventory->stock = "0";
+            } else {
+                $inventory->stock = "1";
+            }
+
+            if ($inventory->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory allocated successfully.',
+                    'data' => $inventory
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Something went wrong. Try again.'
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deallocationold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         if ($inventory) {
@@ -2171,7 +3415,8 @@ class InventoryController extends Controller
             }
         }
     }
-    public function declineInventory(Request $request, $inventory_id)
+
+    public function declineInventoryold(Request $request, $inventory_id)
     {
         $loginuser = Auth::user();
         $inventory = InventoryItems::findOrFail($inventory_id);
@@ -2194,12 +3439,106 @@ class InventoryController extends Controller
             }
         }
     }
+
+    public function deallocation(Request $request, $inventory_id)
+    {
+        try {
+            $inventory = InventoryItems::where('id', $inventory_id)->first();
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $inventory->room_id = "0";
+            $inventory->employee_id = "0";
+            $inventory->stock = "1";
+
+            if ($inventory->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory deallocated successfully.',
+                    'data' => $inventory
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Something went wrong. Try again.'
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+   
+    public function declineInventory(Request $request, $inventory_id)
+    {
+        try {
+            $loginuser = Auth::user();
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            // Keep track of old status before update
+            $beforeStatus = $inventory->status;
+
+            $inventory->status = "3"; // Declined
+
+            if ($inventory->save()) {
+                // ✅ Log action with before/after
+                $logs = new InventoryLogs();
+                $logs->user_id = $loginuser->id ?? null;
+                $logs->item_id = $inventory->id;
+                $logs->message = 'Item ' . $inventory->name . ' is Declined by ' . ($loginuser->name ?? 'System');
+                $logs->log_type = '3';
+                $logs->before = $beforeStatus ?? '';  // <-- FIX: set before
+                $logs->after = $inventory->status;    // <-- FIX: set after
+                $logs->ip_address = request()->ip();
+                $logs->port_number = $request->server('SERVER_PORT');
+                $logs->device_name = gethostname();
+                $logs->browser_detail = $request->server('HTTP_USER_AGENT');
+                $logs->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory declined successfully.',
+                    'data' => $inventory
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Something went wrong. Try again.'
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function getState(Request $request)
     {
         $data['states'] = State::where("country_id", $request->country_id)
             ->get(["name", "id"]);
         return response()->json($data);
     }
+
     public function getCity(Request $request)
     {
         $data['cities'] = City::where("state_id", $request->state_id)
@@ -2207,7 +3546,7 @@ class InventoryController extends Controller
         return response()->json($data);
     }
 
-    public function faulty(Request $request, $inventory_id)
+    public function faultyold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         if ($inventory) {
@@ -2220,7 +3559,8 @@ class InventoryController extends Controller
             }
         }
     }
-    public function faultless(Request $request, $inventory_id)
+
+    public function faultlessold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
         if ($inventory) {
@@ -2233,7 +3573,115 @@ class InventoryController extends Controller
             }
         }
     }
-    public function allLogs(Request $request)
+
+    public function faulty(Request $request, $inventory_id)
+    {
+        try {
+            $loginuser = Auth::user();
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $beforeStatus = $inventory->faulty;
+
+            $inventory->faulty = "1";  // Mark as faulty
+            $inventory->room_id = "3";
+
+            if ($inventory->save()) {
+                // ✅ Log the change
+                $logs = new InventoryLogs();
+                $logs->user_id = $loginuser->id ?? null;
+                $logs->item_id = $inventory->id;
+                $logs->message = 'Item ' . $inventory->name . ' marked as Faulty by ' . ($loginuser->name ?? 'System');
+                $logs->log_type = '4'; // custom type for faulty
+                $logs->before = $beforeStatus ?? '';
+                $logs->after = $inventory->faulty;
+                $logs->ip_address = $request->ip();
+                $logs->port_number = $request->server('SERVER_PORT');
+                $logs->device_name = gethostname();
+                $logs->browser_detail = $request->server('HTTP_USER_AGENT');
+                $logs->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory marked as faulty.',
+                    'data' => $inventory
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try again.'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function faultless(Request $request, $inventory_id)
+    {
+        try {
+            $loginuser = Auth::user();
+            $inventory = InventoryItems::find($inventory_id);
+
+            if (!$inventory) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Inventory not found.'
+                ], 404);
+            }
+
+            $beforeStatus = $inventory->faulty;
+
+            $inventory->faulty = "0";  // Mark as faultless
+            $inventory->room_id = "3";
+
+            if ($inventory->save()) {
+                // ✅ Log the change
+                $logs = new InventoryLogs();
+                $logs->user_id = $loginuser->id ?? null;
+                $logs->item_id = $inventory->id;
+                $logs->message = 'Item ' . $inventory->name . ' marked as Faultless by ' . ($loginuser->name ?? 'System');
+                $logs->log_type = '5'; // custom type for faultless
+                $logs->before = $beforeStatus ?? '';
+                $logs->after = $inventory->faulty;
+                $logs->ip_address = $request->ip();
+                $logs->port_number = $request->server('SERVER_PORT');
+                $logs->device_name = gethostname();
+                $logs->browser_detail = $request->server('HTTP_USER_AGENT');
+                $logs->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Inventory marked as faultless.',
+                    'data' => $inventory
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong. Try again.'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function allLogsold(Request $request)
     {
         // if(!in_array('inventory_logs', Session::get('permission')[0])){
         //     abort(404);
@@ -2296,6 +3744,68 @@ class InventoryController extends Controller
         return view('inventory.all-inventory-logs');
     }
 
+
+
+    public function allLogs(Request $request)
+    {
+        try {
+            $permission_role = Roles::where('id', Auth::user()->user_role)->first();
+
+            if (!$permission_role) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Permission role not found'
+                ], 403);
+            }
+
+            if ($permission_role->view == '2') {
+                $logs = InventoryLogs::where('user_id', Auth::user()->id)->latest()->get();
+            } elseif ($permission_role->view == '3') {
+                $employees = Employees::where('manager_id', Auth::user()->id)->pluck('id')->toArray();
+                $logs = InventoryLogs::whereIn('user_id', $employees)->latest()->get();
+            } elseif ($permission_role->view == '4') {
+                $employees = Employees::where('manager_id', Auth::user()->id)
+                    ->orWhere('id', Auth::user()->id)
+                    ->pluck('id')->toArray();
+                $logs = InventoryLogs::whereIn('user_id', $employees)->latest()->get();
+            } elseif ($permission_role->view == '5') {
+                $logs = InventoryLogs::latest()->get();
+            } else {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Unauthorized to view logs'
+                ], 403);
+            }
+
+            // Transform logs like DataTables formatting
+            $formattedLogs = $logs->map(function ($row, $index) {
+                return [
+                    'index'      => $index + 1,
+                    'item_name'  => $row->item->name ?? '-',
+                    'user_name'  => $row->logs->name ?? '-',
+                    'before'     => $row->before ? urldecode($row->before) : '-',
+                    'after'      => $row->after ? urldecode($row->after) : '-',
+                    'log_type'   => $row->log_type == '1' ? 'Delete' : ($row->log_type == '2' ? 'Add' : 'Update'),
+                    'created_at' => $row->created_at ? $row->created_at->format('d M, Y') : null,
+                ];
+            });
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Inventory logs retrieved successfully',
+                'data' => $formattedLogs
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
     public function  addAjaxEmployee(Request $request, $id)
     {
         $room_id = $request->id;
@@ -2304,6 +3814,7 @@ class InventoryController extends Controller
             'employee' => $employee
         ]);
     }
+
     public function export(Request $request)
     {
         return Excel::download(new FormsDataExport, 'formsdata.xlsx');
@@ -2314,13 +3825,13 @@ class InventoryController extends Controller
         return Excel::download(new InventoryItemExport, 'inventory.xlsx');
     }
 
-    public function manageStock(Request $request, $inventory_id)
+    public function manageStockold(Request $request, $inventory_id)
     {
         $inventory = InventoryItems::where('id', $inventory_id)->first();
 
         return view('inventory.manage-stock', compact('inventory'));
     }
-    public function manageStockPost(Request $request)
+    public function manageStockPostold(Request $request)
     {
         $id = $request->inventory_id;
         $inventory = InventoryItems::where('id', $id)->first();
@@ -2359,6 +3870,80 @@ class InventoryController extends Controller
             ]);
         }
     }
+
+
+    public function manageStock($inventory_id)
+    {
+         
+        $inventory = InventoryItems::find($inventory_id);
+
+        if (!$inventory) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Inventory item not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Inventory item fetched successfully',
+            'data' => $inventory
+        ]);
+    }
+
+    
+    public function manageStockPost(Request $request)
+    {
+
+        log::info("Manage stock called for inventory ID: ");
+        $id = $request->inventory_id;
+        $inventory = InventoryItems::find($id);
+
+        if (!$inventory) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Inventory item not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'inuse'   => 'required|integer|min:0',
+            'instock' => 'required|integer|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 401,
+                'message' => $validator->errors()->first()
+            ], 401);
+        }
+
+        if ($request->inuse > $inventory->in_stock) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Oops! Stock reached the limit'
+            ], 401);
+        }
+
+        // Update values
+        $inventory->in_use   = $inventory->in_use + $request->inuse;
+        $inventory->in_stock = $request->instock - $request->inuse;
+
+        if ($inventory->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Stock added successfully',
+                'data' => $inventory
+            ]);
+        }
+
+        return response()->json([
+            'status' => 500,
+            'message' => 'Something went wrong. Try again.'
+        ], 500);
+    }
+
+
     public function import()
     {
         Excel::import(new InventoryImport, request()->file('file'));
@@ -2368,6 +3953,8 @@ class InventoryController extends Controller
 
     public function getGst(Request $request)
     {
+
+         log::info("Manage stock called for inventory ID: ");
         $name = $_GET['gst_no'];
         $an = file_get_contents("http://sheet.gstincheck.ml/check/5cd36e6878834d58d3d175a88775c545/" . $name);
         $obj = json_decode($an);
